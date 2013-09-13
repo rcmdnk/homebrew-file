@@ -358,8 +358,8 @@ if [ $cleanup -eq 1 ];then
   if [ $dryrun -eq 1 ];then
     echo "*****************************************"
     echo "This is dry run."
-    echo "If you want to enforce cleanup, use '-e':"
-    echo "    $ $0 -c -e"
+    echo "If you want to enforce cleanup, use '-r':"
+    echo "    $ $0 -c -r"
     echo "*****************************************"
   fi
 
