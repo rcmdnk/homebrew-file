@@ -110,23 +110,26 @@ function ask_yn {
 
 # Helper for tap configuration file
 function get_tap {
-  local tap_pac=$1
-  tap_user=`dirname $tap_pac`
-  tap_repo=`basename $tap_pac`
+  local tap_pack=$1
+  tap_user=`dirname $tap_pack`
+  tap_repo=`basename $tap_pack`
   tap_inst=($(basename `ls ${tap_dir}/${tap_user}-${tap_repo}/*rb 2>/dev/null` 2>/dev/null|sed s/.rb//g))
   if [ ${#tap_inst[@]} -eq 0 ];then
-    echo "WARNING: $tap_pac (${user}-${repo}) is not in $tap_dir, you might have already untap $tap_pac"
-    tap_inst=""
+    echo "WARNING: $tap_inst (${user}-${repo}) is not in $tap_dir, you might have already untap $tap_inst"
+    tap_inst=()
+    return 1
   elif [ ${#tap_inst[@]} -gt 2 ];then
     echo ""
-    echo "WARNING: There are more than 1 ruby file in $tap_pac ($tap_dir/${tap_user}-${tap_repo})."
+    echo "WARNING: There are more than 1 ruby file in $tap_inst ($tap_dir/${tap_user}-${tap_repo})."
     echo "WARNING: Sorry, it can't be removed by this script."
-    echo "WARNING: Please remove $tap_pac by hand:"
+    echo "WARNING: Please remove $tap_inst by hand:"
     echo "WARNING:    $ brew uninstall ${tap_inst[0]} # (or ${tap_inst[1]} or ...)"
-    echo "WARNING:    $ brew untap $tap_pac"
+    echo "WARNING:    $ brew untap $tap_inst"
     echo ""
-    tap_inst=""
+    tap_inst=()
+    return 1
   fi
+  return 0
 }
 
 # Helper for package check
@@ -175,17 +178,22 @@ function initialize {
   get_list
 
   # Check list
+  tap_inst=()
+  for p in ${tap_list[@]};do
+    if [ `get_tap $p` -ne 0 ];then
+      continue
+    fi
+    brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${tap_inst} / /g"`)
+    echo "tap '$p'" |tee -a $input
+  done
+  for p in ${cask_list[@]};do
+    echo "cask '$p'" |tee -a $input
+  done
   for p in ${brew_list[@]};do
     if [ "$p" != "${cask_pack}" ];then
       opt=`brew info $p|grep "Built from source with"|cut -d: -f2`
       echo "brew '${p}${opt}'" |tee -a $input
     fi
-  done
-  for p in ${tap_list[@]};do
-    echo "tap '$p'" |tee -a $input
-  done
-  for p in ${cask_list[@]};do
-    echo "cask '$p'" |tee -a $input
   done
   echo ""
   exit 0
@@ -286,7 +294,9 @@ if [ $cleanup -eq 1 ];then
       brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${cask_pack} / /g"`)
       continue
     fi
-    get_tap $p
+    if [ `get_tap $p` -ne 0 ];then
+      continue
+    fi
     if [ `check_packages $p ${tap_input[@]}` -eq 0 ];then
       echo brew uninstall $tap_inst
       brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${tap_inst} / /g"`)
@@ -376,7 +386,9 @@ while read line;do
     if [ `check_packages $p ${tap_list[@]}` -eq 0 ];then
       echo brew tap $p
       brew tap $p
-      get_tap $p
+      if [ `get_tap $p` -ne 0 ];then
+        continue
+      fi
       echo brew install $tap_inst
       brew install $tap_inst
       brew_list=(${brew_list[@]} $tap_inst)
@@ -391,7 +403,9 @@ while read line;do
         brew tap ${cask_repo}
         tap_list=(${tap_list[@]} ${cask_repo})
         echo "tap '${cask_repo}'" >> $input
-        get_tap ${cask_repo}
+        if [ `get_tap ${cask_repo}` -ne 0 ];then
+          continue
+        fi
         echo brew install $tap_inst
         brew install $tap_inst
         brew_list=(${brew_list[@]} $tap_inst)
