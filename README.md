@@ -95,3 +95,6 @@ Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile
           -i         Initialize Brewfile with insalled packages.
           -e         Edit input file
           -h         Print Help (this message) and exit
+
+## Information
+More information could be found in [my blog (Japanese)](http://octopress.dev/blog/2013/09/13/computer-mac-install-homebrew/).
