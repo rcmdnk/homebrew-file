@@ -178,9 +178,10 @@ function initialize {
   get_list
 
   # Check list
-  tap_inst=()
   for p in ${tap_list[@]};do
-    if [ `get_tap $p` -ne 0 ];then
+    get_tap $p
+    ret=$?
+    if [ $ret -ne 0 ];then
       continue
     fi
     brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${tap_inst} / /g"`)
@@ -240,6 +241,7 @@ if [ $cleanup -eq 1 ];then
   # Check packages in the input file
   cask_input=()
   tap_input=()
+  tap_input_pack=()
   brew_input=()
   while read line;do
     # Skip empty line/comment line
@@ -260,6 +262,12 @@ if [ $cleanup -eq 1 ];then
       brew_input=(${brew_input[@]} $p)
     elif [ "$cmd" = "tap" ];then
       tap_input=(${tap_input[@]} $p)
+      get_tap $p
+      ret=$?
+      if [ $ret -ne 0 ];then
+        continue
+      fi
+      tap_input_pack=(${tap_input_pack[@]} $tap_inst)
     elif [ "$cmd" = "cask" ];then
       cask_input=(${cask_input[@]} $p)
     else
@@ -282,6 +290,11 @@ if [ $cleanup -eq 1 ];then
       cask_list=(`echo " ${cask_list[@]} "|sed "s/ ${p} / /g"`)
     fi
   done
+  # Skip cask at tap/brew if any cask packages exist
+  if [ ${#cask_list[@]} -ne 0 ];then
+    tap_list=(`echo " ${tap_list[@]} "|sed "s/ ${cask_repo} / /g"`)
+    brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${cask_pack} / /g"`)
+  fi
 
   echo ""
   echo "********************"
@@ -289,12 +302,9 @@ if [ $cleanup -eq 1 ];then
   echo "********************"
   echo ""
   for p in ${tap_list[@]};do
-    # Skip cask if any cask packages exist
-    if [ "$p" = "${cask_repo}" ] && [ ${#cask_list[@]} -ne 0 ];then
-      brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${cask_pack} / /g"`)
-      continue
-    fi
-    if [ `get_tap $p` -ne 0 ];then
+    get_tap $p
+    ret=$?
+    if [ $ret -ne 0 ];then
       continue
     fi
     if [ `check_packages $p ${tap_input[@]}` -eq 0 ];then
@@ -316,7 +326,7 @@ if [ $cleanup -eq 1 ];then
   echo "*********************"
   echo ""
   for p in ${brew_list[@]};do
-    if [ `check_packages $p ${brew_input[@]}` -eq 0 ];then
+    if [ `check_packages $p ${brew_input[@]} ${tap_input_pack[@]}` -eq 0 ];then
       echo brew uninstall $p
       if [ $dryrun -ne 1 ];then
         brew uninstall $p
@@ -386,7 +396,9 @@ while read line;do
     if [ `check_packages $p ${tap_list[@]}` -eq 0 ];then
       echo brew tap $p
       brew tap $p
-      if [ `get_tap $p` -ne 0 ];then
+      get_tap $p
+      ret=$?
+      if [ $ret -ne 0 ];then
         continue
       fi
       echo brew install $tap_inst
@@ -403,7 +415,9 @@ while read line;do
         brew tap ${cask_repo}
         tap_list=(${tap_list[@]} ${cask_repo})
         echo "tap '${cask_repo}'" >> $input
-        if [ `get_tap ${cask_repo}` -ne 0 ];then
+        get_tap $p
+        ret=$?
+        if [ $ret -ne 0 ];then
           continue
         fi
         echo brew install $tap_inst
