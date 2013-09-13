@@ -245,17 +245,12 @@ if [ $cleanup -eq 1 ];then
   brew_input=()
   while read line;do
     # Skip empty line/comment line
-    if expr "$line" : " *$" >/dev/null;then
-      continue
-    fi
-    if expr "$line" : "^#" >/dev/null;then
-      continue
-    fi
-    if expr "$line" : " *#" >/dev/null;then
+    line=${line%#*}
+    if [ "$line" = "" ];then
       continue
     fi
     # Get arguments
-    args=(${line%#*})
+    args=(${line})
     cmd=${args[0]}
     p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
     if [ "$cmd" = "brew" ];then
@@ -369,18 +364,13 @@ fi
 # Install
 while read line;do
   # Skip empty line/comment line
-  if expr "$line" : " *$" >/dev/null;then
-    continue
-  fi
-  if expr "$line" : "^#" >/dev/null;then
-    continue
-  fi
-  if expr "$line" : " *#" >/dev/null;then
+  line=${line%#*}
+  if [ "$line" = "" ];then
     continue
   fi
 
   # Get arguments
-  args=(${line%#*})
+  args=(${line})
   cmd=${args[0]}
   p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
   opt=`echo ${args[@]: 2}|sed s/\'//g|sed s/\"//g`
