@@ -1,10 +1,10 @@
 require 'formula'
 
 class Brewall < Formula
-  homepage 'https://github.com/rcmdnk/brewall/'
-  url 'https://github.com/rcmdnk/brewall.git'
+  homepage 'https://github.com/rcmdnk/homebrew-brewall/'
+  url 'https://github.com/rcmdnk/homebrew-brewall.git'
 
-  head 'https://github.com/rcmdnk/brewall.git', :branch => 'master'
+  head 'https://github.com/rcmdnk/homebrew-brewall.git', :branch => 'master'
 
   skip_clean 'bin'
 
