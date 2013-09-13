@@ -60,7 +60,7 @@ Arguments:
                    Untap packages not in the list.
                    Cleanup cache (brew cleanup)
                  By drault, cleanup runs as dry-run.
-                 If you want to enforce cleanup, use '-e' option.
+                 If you want to enforce cleanup, use '-r' option.
       -r         Run cleanup in non dry-run mode.
       -i         Initialize Brewfile with insalled packages.
       -e         Edit input file

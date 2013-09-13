@@ -1,7 +1,7 @@
 Brewall
 =======
 
-Manager for packages of Homebrew, inspired by [brewdler](https://github.com/andrew/brewdler).
+Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
 
 ## Requirements
 
@@ -13,15 +13,15 @@ By Homebrew:
 
     $ brew tap rcmdnk/brewall
 
-Or download `bin/brewall` and put it in anywhere you want (e.g. `~/usr/bin/`)
+Or download `bin/brewall` and put it in anywhere under `PATH` (e.g. `~/usr/bin/`)
 
 ## Usage
 Brewall manages pakcages installed by Homebrew.
 It also supports [brew-tap](https://github.com/mxcl/homebrew/wiki/brew-tap)
 and [brew-cask](https://github.com/phinze/homebrew-cask).
 
-It uses input file. By default, it is `/usr/local/Library/Brewfile`.
-You can reuse `Brewfile` for brewdler, too.
+It uses input file. By default, the file is `/usr/local/Library/Brewfile`.
+You can reuse `Brewfile` for Brewdler, too.
 
 If you want to specify input file, use `-f` option.
 
@@ -34,11 +34,11 @@ If there is no Brewfile, Brewall ask you if you want to initialize Brewfile
 with installed packages.
 You can also make it with `-i` option.
 
-If no argument is given, Brewall trys to install packages listed in Brewfile.
-If any packages managed with brew-cask, brew-cask is also installed automatically.
+If no argument is given, Brewall tries to install packages listed in Brewfile.
+If any packages managed with brew-cask are listed, brew-cask is also installed automatically.
 
-Brewfile convention is almost same as brewdler.
-You don't need to modify anything on brewdler's Brewfile for Brewall.
+Brewfile convention is similar as Brewdler.
+Normally, you don't need to modify anything on Brewdler's Brewfile for Brewall.
 
 Example:
 
@@ -47,31 +47,31 @@ Example:
     tap 'phinze/cask'
     cask 'firefox'
 
-First colmn is command: `brew`/`tap`/`cask`.
-Second to last columns are package name and options.
-They are used as an argument for such `brew install`,
+First column is command: `brew`/`tap`/`cask`.
+Second to the last columns are package name and options.
+They are used as arguments for such `brew install`,
 therefore any options of Homebrew can be used.
 
 For example, if you want to build macvim with lua, you can write as above.
 
 If you use `tap`, Brewall do `tap` and `brew install`, too.
 You don't need to `brew install` by hand.
-As written above, `tap 'phinze/cask` is can be dropped
+As written above, `tap 'phinze/cask'` is can be dropped
 because `cask 'firefox'` triggers it.
 
 Some packages such macvim has Application (MacVim.app).
 If you want to install them to Applications area,
 please use `-l` (for `~/Applications/`) or `-g` (for `/Applications/`).
 
-With `-c` option, Brewall runs clean up.
-By default, it just does dry run.
+With `-c` option, Brewall runs cleanup.
+By default, it just does dry run (no actual cleanup).
 To run cleanup in non dry-run mode, use `-r`.
 
 If you want edit Brewfile, use `-e` option.
 
-:warning: If you do `brewall -e` at first time and save,
-you may make empty Brewfile.
-I recommend you to do `brewall -i` first if you don't have Brewfile.
+:warning: If you do `brewall -e` before installing Brewfile and save w/o any modification,
+you may make empty Brewfile (Be careful, `brew -c -r` remove all packages :scream:).
+Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile.
 
     Usage: brewall [-cerieh][-f <input file>]
 
@@ -90,7 +90,7 @@ I recommend you to do `brewall -i` first if you don't have Brewfile.
                        Untap packages not in the list.
                        Cleanup cache (brew cleanup)
                      By drault, cleanup runs as dry-run.
-                     If you want to enforce cleanup, use '-e' option.
+                     If you want to enforce cleanup, use '-r' option.
           -r         Run cleanup in non dry-run mode.
           -i         Initialize Brewfile with insalled packages.
           -e         Edit input file
