@@ -106,6 +106,7 @@ Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile
           -r         Run cleanup in non dry-run mode.
           -i         Initialize Brewfile with insalled packages.
           -e         Edit input file
+          -v         Show version
           -h         Print Help (this message) and exit
 
 ## Information
