@@ -42,19 +42,27 @@ Normally, you don't need to modify anything on Brewdler's Brewfile for Brewall.
 
 Example:
 
+    # Tap repositories and their packages
+    tap 'phinze/cask'
+    brew 'brew-cask'
+    
+    # Cask packages
+    cask 'firefox'
+    
+    # Other Homebrew packages
     brew 'mercurial'
     brew 'macvim --with-lua'
-    tap 'phinze/cask'
-    cask 'firefox'
 
-First column is command: `brew`/`tap`/`cask`.
+First column is command: `brew`/`tap`/`tapall`/`cask`.
 Second to the last columns are package name and options.
 They are used as arguments for such `brew install`,
 therefore any options of Homebrew can be used.
 
 For example, if you want to build macvim with lua, you can write as above.
 
-If you use `tap`, Brewall do `tap` and `brew install`, too.
+If you use `tapall`, Brewall does `brew install` for all Formulae in the repository
+inaddition to `tap` the repository.
+
 You don't need to `brew install` by hand.
 As written above, `tap 'phinze/cask'` is can be dropped
 because `cask 'firefox'` triggers it.

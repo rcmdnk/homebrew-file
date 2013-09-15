@@ -1,7 +1,12 @@
 #!/bin/sh
 
-#
-#The MIT License (MIT)
+#############################################
+# Brewall: Manager for packages of Homebrew
+# version 0.0.1
+# https://github.com/rcmdnk/homebrew-brewall
+#############################################
+
+#The MIT License (MIT) {{{
 #
 #Copyright (c) 2013 rcmdnk
 #
@@ -21,9 +26,9 @@
 #COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 #IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 #CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
+# }}}
 
-# Variables
+# Variables {{{
 def_input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
 input="$def_input"
 link=0
@@ -32,17 +37,19 @@ cleanup=0
 dryrun=1
 init=0
 edit=0
-tap_dir="/usr/local/Library/Taps/"
+tap_dir="/usr/local/Library/Taps"
 if [ -d ~/Library/Caches/Homebrew ];then
-  cache_dir=${HOMEBREW_CACHE:-"~/Library/Caches/Homebrew/"}
+  cache_dir=${HOMEBREW_CACHE:-"~/Library/Caches/Homebrew"}
 else
-  cache_dir=${HOMEBREW_CACHE:-"/Library/Caches/Homebrew/"}
+  cache_dir=${HOMEBREW_CACHE:-"/Library/Caches/Homebrew"}
 fi
-tmp_dir=${TMPDIR:-"./"}
 cask_pack="brew-cask"
 cask_repo="phinze/cask"
+my_editor=${EDITOR:-"vim"}
 
-# Help
+# }}}
+
+# Help {{{
 HELP="Usage: $0 [-cerieh][-f <input file>]
 
 Arguments:
@@ -66,8 +73,9 @@ Arguments:
       -e         Edit input file
       -h         Print Help (this message) and exit
 "
+# }}}
 
-# Check arguments
+# Check arguments {{{
 OPTNUM=0
 while getopts f:lgcrieh OPT;do
   OPTNUM=`expr $OPTNUM + 1`
@@ -84,10 +92,13 @@ while getopts f:lgcrieh OPT;do
   esac
 done
 shift $(($OPTIND - 1))
+# }}}
 
-# Helper for yes/no
+# Function {{{
+
+# Helper for yes/no {{{
 function ask_yn {
-  local question="$1"
+  question="$1"
   printf "$1 [y/n]: "
   read yn
   while [ 1 ];do
@@ -105,57 +116,34 @@ function ask_yn {
         ;;
     esac
   done
-}
+} # }}}
 
-
-# Helper for tap configuration file
+# Helper for tap configuration file {{{
 function get_tap {
-  local tap_pack=$1
-  tap_user=`dirname $tap_pack`
-  tap_repo=`basename $tap_pack`
-  tap_inst=($(basename `ls ${tap_dir}/${tap_user}-${tap_repo}/*rb 2>/dev/null` 2>/dev/null|sed s/.rb//g))
-  if [ ${#tap_inst[@]} -eq 0 ];then
-    echo "WARNING: $tap_inst (${user}-${repo}) is not in $tap_dir, you might have already untap $tap_inst"
-    tap_inst=()
-    return 1
-  elif [ ${#tap_inst[@]} -gt 2 ];then
+  tap_user=`dirname $1`
+  tap_repo=`basename $1`
+  formulae=`ls ${tap_dir}/${tap_user}-${tap_repo}/*rb 2>/dev/null`
+  tap_packs=()
+  for f in ${formulae[@]};do
+    tap_packs=(${tap_packs[@]} $(basename ${f%.rb}))
+  done
+  if [ ${#tap_packs[@]} -eq 0 ];then
     echo ""
-    echo "WARNING: There are more than 1 ruby file in $tap_inst ($tap_dir/${tap_user}-${tap_repo})."
-    echo "WARNING: Sorry, it can't be removed by this script."
-    echo "WARNING: Please remove $tap_inst by hand:"
-    echo "WARNING:    $ brew uninstall ${tap_inst[0]} # (or ${tap_inst[1]} or ...)"
-    echo "WARNING:    $ brew untap $tap_inst"
+    echo "WARNING: No formula is found in $tap_dir/${user}-${repo}, you might have already untap $1"
+    echo "WARNING: or $1 doesn't have any formula."
     echo ""
-    tap_inst=()
-    return 1
   fi
   return 0
-}
+} # }}}
 
-# Helper for package check
-function check_packages {
-  local p_check=$1
-  local packages_list=$*
-  local packages_list=${packages_list[@]: 1}
-  for p_list in ${packages_list[@]};do
-    installed=0
-    if [ "$p_list" = "$p_check" ];then
-      installed=1
-      echo 1
-      return
-    fi
-  done
-  echo 0
-}
-
-# Get list
+# Get list {{{
 function get_list {
   brew_list=(`brew list`)
   tap_list=(`brew tap`)
   cask_list=(`brew cask list 2>/dev/null`)
-}
+} # }}}
 
-# Initialize Brewfile
+# Initialize Brewfile {{{
 function initialize {
   if [ -f $input ];then
     echo "$input is already there."
@@ -165,7 +153,7 @@ function initialize {
       mv ${input} ${input}.bak
       echo "ok, old $input was moved to ${input}.bak"
     else
-      exit 0
+      return 1
     fi
   fi
   echo ""
@@ -174,62 +162,73 @@ function initialize {
   echo "***********************************************"
   echo ""
 
-  # Get list
+  # Get installed package list
   get_list
 
   # Check list
+  echo "# Tap repositories and their packages" |tee -a $input
   for p in ${tap_list[@]};do
     get_tap $p
     ret=$?
     if [ $ret -ne 0 ];then
       continue
     fi
-    brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${tap_inst} / /g"`)
     echo "tap '$p'" |tee -a $input
+    for tp in ${tap_packs[@]};do
+      if echo " ${brew_list[@]} "|grep -q " $tp ";then
+        opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
+        echo "brew '${tp}${opt}'" |tee -a $input
+        brew_list=(`echo " ${brew_list[@]} "|sed "s/ $tp / /g"`)
+      fi
+    done
+    echo "" |tee -a $input
   done
+
+  echo "" |tee -a $input
+  echo "# Cask packages" |tee -a $input
   for p in ${cask_list[@]};do
     echo "cask '$p'" |tee -a $input
   done
+  echo "" |tee -a $input
+  echo "# Other Homebrew packages" |tee -a $input
   for p in ${brew_list[@]};do
-    if [ "$p" != "${cask_pack}" ];then
-      opt=`brew info $p|grep "Built from source with"|cut -d: -f2`
-      echo "brew '${p}${opt}'" |tee -a $input
-    fi
+    opt=`brew info $p|grep "Built from source with"|cut -d: -f2`
+    echo "brew '${p}${opt}'" |tee -a $input
   done
   echo ""
-  exit 0
-}
+  echo "***********************************************"
+  echo "You can edit $input by:"
+  echo "    $0 -e"
+  echo "***********************************************"
+  return 0
+} # }}}
 
-if [ $init -eq 1 ];then
-  initialize
-fi
-
-# Check input file
-if [ ! -f $input ];then
-  echo "WARNING: Input file $input is not found."
-  ask_yn "WARNING: Do you want to initialize from installed packages?"
-  ret=$?
-  if [ $ret -eq 0 ];then
-    initialize
-  else
-    echo "WARNING: OK, you can initialize $input by:"
-    echo "WARNING:     $0 -i"
-    exit 0
+# Check input file {{{
+function check_input_file {
+  if [ ! -f $input ];then
+    echo "WARNING: Input file $input is not found."
+    ask_yn "WARNING: Do you want to initialize from installed packages?"
+    ret=$?
+    if [ $ret -eq 0 ];then
+      initialize
+      return $?
+    else
+      echo ""
+      echo "WARNING: OK, please prepare Brewfile"
+      echo "WARNING: or you can initialize $input by:"
+      echo "WARNING:     $0 -i"
+      return 1
+    fi
   fi
-fi
+} # }}}
 
-# Edit file
-if [ $edit -eq 1 ];then
-  my_editor=${EDITOR:-"vim"}
-  $EDITOR $input
-  exit 0
-fi
+# Edit file {{{
+function edit_brewfile {
+  $my_editor $input
+} # }}}
 
-# Get list
-get_list
-
-# Cleanup
-if [ $cleanup -eq 1 ];then
+# Cleanup {{{
+function cleanup {
   if [ $dryrun -eq 1 ];then
     echo ""
     echo "*******"
@@ -241,7 +240,6 @@ if [ $cleanup -eq 1 ];then
   # Check packages in the input file
   cask_input=()
   tap_input=()
-  tap_input_pack=()
   brew_input=()
   while read line;do
     # Skip empty line/comment line
@@ -257,12 +255,14 @@ if [ $cleanup -eq 1 ];then
       brew_input=(${brew_input[@]} $p)
     elif [ "$cmd" = "tap" ];then
       tap_input=(${tap_input[@]} $p)
+    elif [ "$cmd" = "tapall" ];then
+      tap_input=(${tap_input[@]} $p)
       get_tap $p
       ret=$?
       if [ $ret -ne 0 ];then
         continue
       fi
-      tap_input_pack=(${tap_input_pack[@]} $tap_inst)
+      brew_input=(${brew_input[@]} $tap_packs)
     elif [ "$cmd" = "cask" ];then
       cask_input=(${cask_input[@]} $p)
     else
@@ -277,7 +277,7 @@ if [ $cleanup -eq 1 ];then
   echo "*********************"
   echo ""
   for p in ${cask_list[@]};do
-    if [ `check_packages $p ${cask_input[@]}` -eq 0 ];then
+    if ! echo " ${cask_input[@]} "|grep -q " $p ";then
       echo brew cask uninstall $p
       if [ $dryrun -ne 1 ];then
         brew cask uninstall $p
@@ -297,16 +297,18 @@ if [ $cleanup -eq 1 ];then
   echo "********************"
   echo ""
   for p in ${tap_list[@]};do
-    get_tap $p
-    ret=$?
-    if [ $ret -ne 0 ];then
-      continue
-    fi
-    if [ `check_packages $p ${tap_input[@]}` -eq 0 ];then
-      echo brew uninstall $tap_inst
-      brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${tap_inst} / /g"`)
-      if [ $dryrun -ne 1 ];then
-        brew uninstall $tap_inst
+    if ! echo " ${tap_input[@]} "|grep -q " $p ";then
+      get_tap $p
+      untapflag=1
+      for tp in ${tap_packs[@]};do
+        if echo " ${brew_input[@]} "|grep -q " $tp ";then
+          # keep tap as related package is remained
+          untapflag=0
+          break
+        fi
+      done
+      if [ $untapflag -eq 0 ];then
+        continue
       fi
       echo brew untap $p
       if [ $dryrun -ne 1 ];then
@@ -321,7 +323,7 @@ if [ $cleanup -eq 1 ];then
   echo "*********************"
   echo ""
   for p in ${brew_list[@]};do
-    if [ `check_packages $p ${brew_input[@]} ${tap_input_pack[@]}` -eq 0 ];then
+    if ! echo " ${brew_input[@]} "|grep -q " $p ";then
       echo brew uninstall $p
       if [ $dryrun -ne 1 ];then
         brew uninstall $p
@@ -358,80 +360,126 @@ if [ $cleanup -eq 1 ];then
     echo "*****************************************"
   fi
 
-  exit 0
-fi
+  return 0
+} # }}}
 
-# Install
-while read line;do
-  # Skip empty line/comment line
-  line=${line%#*}
-  if [ "$line" = "" ];then
-    continue
-  fi
-
-  # Get arguments
-  args=(${line})
-  cmd=${args[0]}
-  p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
-  opt=`echo ${args[@]: 2}|sed s/\'//g|sed s/\"//g`
-
-  if [ "$cmd" = "brew" ];then
-    # Install brew package
-    if [ `check_packages $p ${brew_list[@]}` -eq 0 ];then
-      echo brew install $p $opt
-      brew install $p $opt
+# Install {{{
+function install {
+  while read line;do
+    # Skip empty line/comment line
+    line=${line%#*}
+    if [ "$line" = "" ];then
+      continue
     fi
-  elif [ "$cmd" = "tap" ];then
-    # Install tap package
-    if [ `check_packages $p ${tap_list[@]}` -eq 0 ];then
-      echo brew tap $p
-      brew tap $p
-      get_tap $p
-      ret=$?
-      if [ $ret -ne 0 ];then
-        continue
+
+    # Get arguments
+    args=(${line})
+    cmd=${args[0]}
+    p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
+    opt=`echo ${args[@]: 2}|sed s/\'//g|sed s/\"//g`
+
+    if [ "$cmd" = "brew" ];then
+      # Install brew package
+      if ! echo " ${brew_list[@]} "|grep -q " $p ";then
+        echo brew install $p $opt
+        brew install $p $opt
       fi
-      echo brew install $tap_inst
-      brew install $tap_inst
-      brew_list=(${brew_list[@]} $tap_inst)
-      echo "brew '${tap_inst}'" >> $input
-    fi
-  elif [ "$cmd" = "cask" ];then
-    # Install cask package
-    if [ `check_packages $p ${cask_list[@]}` -eq 0 ];then
-      if ! brew list|grep -q "${cask_pack}";then
-        echo "cask has not been installed, install now."
-        echo brew tap ${cask_repo}
-        brew tap ${cask_repo}
-        tap_list=(${tap_list[@]} ${cask_repo})
-        echo "tap '${cask_repo}'" >> $input
+    elif [ "$cmd" = "tap" ];then
+      # Install tap package
+      if ! echo " ${tap_list[@]} "|grep -q " $p ";then
+        echo brew tap $p
+        brew tap $p
+      fi
+    elif [ "$cmd" = "tapall" ];then
+      # Install tap package
+      if ! echo " ${tap_list[@]} "|grep -q " $p ";then
+        echo brew tap $p
+        brew tap $p
         get_tap $p
         ret=$?
         if [ $ret -ne 0 ];then
           continue
         fi
-        echo brew install $tap_inst
-        brew install $tap_inst
-        brew_list=(${brew_list[@]} $tap_inst)
-        echo "brew '${tap_inst}'" >> $input
+        echo brew install $tap_packs
+        brew install $tap_packs
+        brew_list=(${brew_list[@]} $tap_packs)
+      fi
+    elif [ "$cmd" = "cask" ];then
+      # Install cask package
+      if ! echo " ${cask_list[@]} "|grep -q " $p ";then
+        if ! brew list|grep -q "${cask_pack}";then
+          echo "cask has not been installed, install now."
+          echo brew tap ${cask_repo}
+          brew tap ${cask_repo}
+          tap_list=(${tap_list[@]} ${cask_repo})
+          echo "tap '${cask_repo}'" >> $input
+          get_tap $p
+          ret=$?
+          if [ $ret -ne 0 ];then
+            continue
+          fi
+          echo brew install $tap_packs
+          brew install $tap_packs
+          brew_list=(${brew_list[@]} $tap_packs)
+          echo "brew '${tap_packs}'" >> $input
 
-        if [ $glink -eq 1 ];then
-          linkcmd=`brew info $p|grep "ln -s"`
-          if [ "$linkcmd" != "" ];then
-            sudo $linkcmd
+          if [ $glink -eq 1 ];then
+            linkcmd=`brew info $p|grep "ln -s"`
+            if [ "$linkcmd" != "" ];then
+              sudo $linkcmd
+            fi
           fi
         fi
+        echo brew cask install $p
+        brew cask install $p
       fi
-      echo brew cask install $p
-      brew cask install $p
+    else
+      echo "WARNING: $cmd is unknown, prease check $input."
+      continue
     fi
-  else
-    echo "WARNING: $cmd is unknown, prease check $input."
-    continue
-  fi
-  if [ $glink -eq 0 ] && [ $link -eq 1 ];then
-    echo brew linkapps
-    brew linkapps
-  fi
-done < $input
-exit 0
+    if [ $glink -eq 0 ] && [ $link -eq 1 ];then
+      echo brew linkapps
+      brew linkapps
+    fi
+  done < $input
+  return 0
+} # }}}
+
+# }}}
+
+# Main {{{
+
+# Initialize
+if [ $init -eq 1 ];then
+  initialize
+  exit $?
+fi
+
+# Check input file
+# If the file doesn't exist, initialize it.
+check_input_file
+ret=$?
+if [ $edit -ne 1 ] && [ $ret -ne 0 ];then
+  exit $ret
+fi
+
+# Edit
+if [ $edit -eq 1 ];then
+  edit_brewfile
+  exit 0
+fi
+
+# Get list for cleanup/install
+get_list
+
+# Cleanup
+if [ $cleanup -eq 1 ];then
+  cleanup
+  exit $?
+fi
+
+# Install
+install
+exit $?
+
+# }}}
