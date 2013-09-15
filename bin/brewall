@@ -2,8 +2,8 @@
 
 #############################################
 # Brewall: Manager for packages of Homebrew
-# version 0.0.1
 # https://github.com/rcmdnk/homebrew-brewall
+version=0.0.2
 #############################################
 
 #The MIT License (MIT) {{{
@@ -71,13 +71,14 @@ Arguments:
       -r         Run cleanup in non dry-run mode.
       -i         Initialize Brewfile with insalled packages.
       -e         Edit input file
+      -v         Show version
       -h         Print Help (this message) and exit
 "
 # }}}
 
 # Check arguments {{{
 OPTNUM=0
-while getopts f:lgcrieh OPT;do
+while getopts f:lgcrievh OPT;do
   OPTNUM=`expr $OPTNUM + 1`
   case $OPT in
     "f" ) input="$OPTARG" ;;
@@ -87,11 +88,16 @@ while getopts f:lgcrieh OPT;do
     "r" ) dryrun=0 ;;
     "i" ) init=1 ;;
     "e" ) edit=1 ;;
-    "h" ) echo "$HELP" 1>&2; exit ;;
-    * ) echo "$HELP" 1>&2; exit ;;
+    "v" ) echo "brewall v$version";exit 0;;
+    "h" ) echo "$HELP" 1>&2; exit 0;;
+    * ) echo "$HELP" 1>&2; exit 1;;
   esac
 done
 shift $(($OPTIND - 1))
+if [ "$#" -ne  0 ];then
+  echo "$0: illegal arguments: $*"
+  exit 1
+fi
 # }}}
 
 # Function {{{
