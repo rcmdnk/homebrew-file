@@ -149,6 +149,46 @@ function get_list {
   cask_list=(`brew cask list 2>/dev/null`)
 } # }}}
 
+# Read input file {{{
+function read_input {
+  # Check packages in the input file
+  cask_input=()
+  tap_input=()
+  brew_input=()
+  brew_input_opt=()
+  while read line;do
+    # Skip empty line/comment line
+    line=${line%%#*}
+    if [ "$line" = "" ];then
+      continue
+    fi
+    # Get arguments
+    args=(${line})
+    cmd=${args[0]}
+    p=`echo ${args[1]}|sed s:\'::g|sed s:\"::g`
+    opt=`echo ${args[@]: 2}|sed s:\'::g|sed s:\"::g`
+    if [ "$cmd" = "brew" ];then
+      brew_input=(${brew_input[@]} $p)
+      brew_input_opt=("${brew_input_opt[@]}" "$p $opt")
+    elif [ "$cmd" = "tap" ];then
+      tap_input=(${tap_input[@]} $p)
+    elif [ "$cmd" = "tapall" ];then
+      tap_input=(${tap_input[@]} $p)
+      get_tap $p
+      ret=$?
+      if [ $ret -ne 0 ];then
+        continue
+      fi
+      brew_input=(${brew_input[@]} $tap_packs)
+    elif [ "$cmd" = "cask" ];then
+      cask_input=(${cask_input[@]} $p)
+    else
+      echo "WARNING: $cmd is unknown, prease check $input."
+      continue
+    fi
+  done < $input
+} # }}}
+
 # Initialize Brewfile {{{
 function initialize {
   if [ -f $input ];then
@@ -184,7 +224,7 @@ function initialize {
       if echo " ${brew_list[@]} "|grep -q " $tp ";then
         opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
         echo "brew '${tp}${opt}'" |tee -a $input
-        brew_list=(`echo " ${brew_list[@]} "|sed "s/ $tp / /g"`)
+        brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
       fi
     done
     echo "" |tee -a $input
@@ -244,38 +284,7 @@ function cleanup {
   fi
 
   # Check packages in the input file
-  cask_input=()
-  tap_input=()
-  brew_input=()
-  while read line;do
-    # Skip empty line/comment line
-    line=${line%#*}
-    if [ "$line" = "" ];then
-      continue
-    fi
-    # Get arguments
-    args=(${line})
-    cmd=${args[0]}
-    p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
-    if [ "$cmd" = "brew" ];then
-      brew_input=(${brew_input[@]} $p)
-    elif [ "$cmd" = "tap" ];then
-      tap_input=(${tap_input[@]} $p)
-    elif [ "$cmd" = "tapall" ];then
-      tap_input=(${tap_input[@]} $p)
-      get_tap $p
-      ret=$?
-      if [ $ret -ne 0 ];then
-        continue
-      fi
-      brew_input=(${brew_input[@]} $tap_packs)
-    elif [ "$cmd" = "cask" ];then
-      cask_input=(${cask_input[@]} $p)
-    else
-      echo "WARNING: $cmd is unknown, prease check $input."
-      continue
-    fi
-  done < $input
+  read_input
 
   echo ""
   echo "*********************"
@@ -288,13 +297,13 @@ function cleanup {
       if [ $dryrun -ne 1 ];then
         brew cask uninstall $p
       fi
-      cask_list=(`echo " ${cask_list[@]} "|sed "s/ ${p} / /g"`)
+      cask_list=(`echo " ${cask_list[@]} "|sed "s: ${p} : :g"`)
     fi
   done
   # Skip cask at tap/brew if any cask packages exist
   if [ ${#cask_list[@]} -ne 0 ];then
-    tap_list=(`echo " ${tap_list[@]} "|sed "s/ ${cask_repo} / /g"`)
-    brew_list=(`echo " ${brew_list[@]} "|sed "s/ ${cask_pack} / /g"`)
+    tap_list=(`echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"`)
+    brew_list=(`echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"`)
   fi
 
   echo ""
@@ -371,83 +380,68 @@ function cleanup {
 
 # Install {{{
 function install {
-  while read line;do
-    # Skip empty line/comment line
-    line=${line%#*}
-    if [ "$line" = "" ];then
-      continue
+  # Check packages in the input file
+  read_input
+
+  # Flag for cask
+  if brew list|grep -q "${cask_pack}";then
+    cask_installed=1
+  else
+    cask_installed=0
+  fi
+
+  # Tap
+  for p in ${tap_input[@]};do
+    if ! echo " ${tap_list[@]} "|grep -q " $p ";then
+      echo brew tap $p
+      brew tap $p
     fi
+  done
 
-    # Get arguments
-    args=(${line})
-    cmd=${args[0]}
-    p=`echo ${args[1]}|sed s/\'//g|sed s/\"//g`
-    opt=`echo ${args[@]: 2}|sed s/\'//g|sed s/\"//g`
-
-    if [ "$cmd" = "brew" ];then
-      # Install brew package
-      if ! echo " ${brew_list[@]} "|grep -q " $p ";then
-        echo brew install $p $opt
-        brew install $p $opt
-      fi
-    elif [ "$cmd" = "tap" ];then
-      # Install tap package
-      if ! echo " ${tap_list[@]} "|grep -q " $p ";then
-        echo brew tap $p
-        brew tap $p
-      fi
-    elif [ "$cmd" = "tapall" ];then
-      # Install tap package
-      if ! echo " ${tap_list[@]} "|grep -q " $p ";then
-        echo brew tap $p
-        brew tap $p
-        get_tap $p
-        ret=$?
-        if [ $ret -ne 0 ];then
+  # Cask
+  for p in ${cask_input[@]};do
+    if ! echo " ${cask_list[@]} "|grep -q " $p ";then
+      if [ $cask_installed -eq 0 ];then
+        echo "cask has not been installed, install now."
+        echo brew tap ${cask_repo}
+        brew tap ${cask_repo}
+        tap_list=(${tap_list[@]} ${cask_repo})
+        get_tap ${cask_repo}
+        if ! echo " ${tap_packs[@]} "|grep -q " ${cask_pack} ";then
+          echo "WARNING: ${cask_pack} was not in ${cask_repo}."
+          echo "WARNING: Maybe you need to modify cask_repo."
           continue
         fi
-        echo brew install $tap_packs
-        brew install $tap_packs
-        brew_list=(${brew_list[@]} $tap_packs)
+        echo brew install ${cask_pack}
+        brew install ${cask_pack}
+        brew_list=(${brew_list[@]} ${cask_pack})
+        cask_installed=1
       fi
-    elif [ "$cmd" = "cask" ];then
-      # Install cask package
-      if ! echo " ${cask_list[@]} "|grep -q " $p ";then
-        if ! brew list|grep -q "${cask_pack}";then
-          echo "cask has not been installed, install now."
-          echo brew tap ${cask_repo}
-          brew tap ${cask_repo}
-          tap_list=(${tap_list[@]} ${cask_repo})
-          echo "tap '${cask_repo}'" >> $input
-          get_tap $p
-          ret=$?
-          if [ $ret -ne 0 ];then
-            continue
-          fi
-          echo brew install $tap_packs
-          brew install $tap_packs
-          brew_list=(${brew_list[@]} $tap_packs)
-          echo "brew '${tap_packs}'" >> $input
+      echo brew cask install $p
+      brew cask install $p
+    fi
+  done
 
-          if [ $glink -eq 1 ];then
-            linkcmd=`brew info $p|grep "ln -s"`
-            if [ "$linkcmd" != "" ];then
-              sudo $linkcmd
-            fi
-          fi
+  # Brew
+  for p in "${brew_input_opt[@]}";do
+    if ! echo " ${brew_list[@]} "|grep -q " ${p% *} ";then
+      echo brew install $p
+      brew install $p
+      if [ $glink -eq 1 ];then
+        linkcmd=`brew info ${p% *}|grep "ln -s"`
+        if [ "$linkcmd" != "" ];then
+          sudo $linkcmd
         fi
-        echo brew cask install $p
-        brew cask install $p
       fi
-    else
-      echo "WARNING: $cmd is unknown, prease check $input."
-      continue
     fi
-    if [ $glink -eq 0 ] && [ $link -eq 1 ];then
-      echo brew linkapps
-      brew linkapps
-    fi
-  done < $input
+  done
+
+  # Make links
+  if [ $glink -eq 0 ] && [ $link -eq 1 ];then
+    echo brew linkapps
+    brew linkapps
+  fi
+
   return 0
 } # }}}
 
