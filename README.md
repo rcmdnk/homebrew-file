@@ -46,6 +46,8 @@ Example:
     tap 'phinze/cask'
     brew 'brew-cask'
     
+    tapall 'rcmdnk/brewall' # This will trigger `brew 'brewall'`, too
+    
     # Cask packages
     cask 'firefox'
     
@@ -60,8 +62,10 @@ therefore any options of Homebrew can be used.
 
 For example, if you want to build macvim with lua, you can write as above.
 
+If you use `tap`, Brewall only does `tap` the repository.
+
 If you use `tapall`, Brewall does `brew install` for all Formulae in the repository
-inaddition to `tap` the repository.
+inaddition to do `tap` the repository.
 
 You don't need to `brew install` by hand.
 As written above, `tap 'phinze/cask'` is can be dropped
