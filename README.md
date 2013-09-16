@@ -111,3 +111,7 @@ Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile
 
 ## Information
 More information could be found in [my blog (Japanese)](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/).
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rcmdnk/homebrew-brewall/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
