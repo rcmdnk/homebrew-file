@@ -31,7 +31,7 @@ version=0.0.4
 # Variables {{{
 def_input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
 input="$def_input"
-link=0
+link=1
 cleanup=0
 dryrun=1
 init=0
@@ -56,7 +56,7 @@ Arguments:
                  You can set input file by environmental variable,
                  HOMEBREW_BREWFILE, like:
                       export HOMEBREW_BREWFILE=~/.brewfile
-      -l         Make links to apps (for applications not installed automatically).
+      -n         Don't make links for Apps
       -c         Cleanup:
                    Uninstall packages not in the list.
                    Untap packages not in the list.
@@ -77,7 +77,7 @@ while getopts f:lgcrievh OPT;do
   OPTNUM=`expr $OPTNUM + 1`
   case $OPT in
     "f" ) input="$OPTARG" ;;
-    "l" ) link=1 ;;
+    "n" ) link=0 ;;
     "c" ) cleanup=1 ;;
     "r" ) dryrun=0 ;;
     "i" ) init=1 ;;
