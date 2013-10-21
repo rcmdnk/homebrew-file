@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.0.3
+version=0.0.4
 #############################################
 
 #The MIT License (MIT) {{{
@@ -32,7 +32,6 @@ version=0.0.3
 def_input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
 input="$def_input"
 link=0
-glink=0
 cleanup=0
 dryrun=1
 init=0
@@ -57,11 +56,7 @@ Arguments:
                  You can set input file by environmental variable,
                  HOMEBREW_BREWFILE, like:
                       export HOMEBREW_BREWFILE=~/.brewfile
-      -l         Make links to apps (for such MacVim)
-                 The default place is user's directory: ~/Applications/
-                 If you want to install in global directory: /Applications/,
-                 use '-g'
-      -g         Make apps' links in /Applications/
+      -l         Make links to apps (for applications not installed automatically).
       -c         Cleanup:
                    Uninstall packages not in the list.
                    Untap packages not in the list.
@@ -83,7 +78,6 @@ while getopts f:lgcrievh OPT;do
   case $OPT in
     "f" ) input="$OPTARG" ;;
     "l" ) link=1 ;;
-    "g" ) glink=1 ;;
     "c" ) cleanup=1 ;;
     "r" ) dryrun=0 ;;
     "i" ) init=1 ;;
@@ -341,7 +335,7 @@ function cleanup {
     if ! echo " ${brew_input[@]} "|grep -q " $p ";then
       echo brew uninstall $p
       if [ $dryrun -ne 1 ];then
-        app=$(basename $(brew info macvim|grep "ln -s"|awk '{print $3}'))
+        app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}'))
         if [ "$app" != "" ];then
           rm -f /Applications/$app
           rm -f ~/Applications/$app
@@ -432,17 +426,11 @@ function install {
     if ! echo " ${brew_list[@]} "|grep -q " ${p% *} ";then
       echo brew install $p
       brew install $p
-      if [ $glink -eq 1 ];then
-        linkcmd=`brew info ${p% *}|grep "ln -s"`
-        if [ "$linkcmd" != "" ];then
-          $linkcmd
-        fi
-      fi
     fi
   done
 
   # Make links
-  if [ $glink -eq 0 ] && [ $link -eq 1 ];then
+  if [ $link -eq 1 ];then
     echo brew linkapps
     brew linkapps
   fi
