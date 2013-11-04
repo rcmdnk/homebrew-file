@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.0.4
+version=0.0.5
 #############################################
 
 #The MIT License (MIT) {{{
@@ -335,7 +335,7 @@ function cleanup {
     if ! echo " ${brew_input[@]} "|grep -q " $p ";then
       echo brew uninstall $p
       if [ $dryrun -ne 1 ];then
-        app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}'))
+        app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}') 2>/dev/null)
         if [ "$app" != "" ];then
           rm -f /Applications/$app
           rm -f ~/Applications/$app
