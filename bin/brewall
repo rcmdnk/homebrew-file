@@ -31,6 +31,7 @@ version=0.0.6
 # Variables {{{
 def_input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
 input="$def_input"
+brewall_inst=0
 brew=0
 link=1
 cleanup=0
@@ -83,6 +84,9 @@ while [ $# != 0 ] ; do
   case $1 in
     -f )
       input=$2; shift;
+      ;;
+    install)
+      brewall_inst=1; : $((ncommands++));
       ;;
     brew)
       brew=1; shift; brew_args="$@"; : $((ncommands++)); break;
@@ -453,15 +457,16 @@ function install {
   for p in "${brew_input_opt[@]}";do
     if ! echo " ${brew_list[@]} "|grep -q " ${p% *} ";then
       echo brew install $p
-      brew install $p
+      brew install $p | tee .brewall_install_log
+      link=`grep "ln -s" .brewall_install_log`
+      if [ "$link" != "" ];then
+        if [ $link -eq 1 ];then
+          $link
+        fi
+      fi
+      rm -f .brewall_install_log
     fi
   done
-
-  # Make links
-  if [ $link -eq 1 ];then
-    echo brew linkapps
-    brew linkapps
-  fi
 
   return 0
 } # }}}
@@ -535,7 +540,9 @@ if [ $cleanup -eq 1 ];then
 fi
 
 # Install
-install
-exit $?
+if [ $brewall_inst -eq 1 ];then
+  install
+  exit $?
+fi
 
 # }}}
