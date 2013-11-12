@@ -458,10 +458,10 @@ function install {
     if ! echo " ${brew_list[@]} "|grep -q " ${p% *} ";then
       echo brew install $p
       brew install $p | tee .brewall_install_log
-      link=`grep "ln -s" .brewall_install_log`
-      if [ "$link" != "" ];then
-        if [ $link -eq 1 ];then
-          $link
+      linkcmd=`grep "ln -s" .brewall_install_log`
+      if [ "$linkcmd" != "" ];then
+        if [ "$link" -eq 1 ];then
+          $linkcmd
         fi
       fi
       rm -f .brewall_install_log
