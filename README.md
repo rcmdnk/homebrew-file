@@ -11,7 +11,7 @@ Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andr
 
 By install script:
 
-    $ curl https://raw.github.com/rcmdnk/brewall/install |sh
+    $ curl -fsSL https://raw.github.com/rcmdnk/brewall/install |sh
 
 By Homebrew:
 
