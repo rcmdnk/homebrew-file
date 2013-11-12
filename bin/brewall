@@ -479,14 +479,28 @@ if ! which brew >& /dev/null;then
   ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
   brew doctor
   if [ $? -ne 0 ];then
-    echo Check brew environment try again!
-    exit 1
+    echo
+    echo "#################################"
+    echo "#################################"
+    echo "Check brew environment:"
+    echo "    $ brew doctor"
+    echo
+    echo "Check later, anyway, let's continue..."
+    echo "#################################"
+    echo "#################################"
+    echo
+    echo
   fi
 fi
 
 # brew command
 if [ $brew -eq 1 ];then
+  echo brew $brew_args
   brew $brew_args
+  ret=$?
+  if [ $ret -ne 0 ];then
+    exit $ret
+  fi
   initialize 0
   exit $?
 fi
