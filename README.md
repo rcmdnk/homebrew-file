@@ -9,9 +9,14 @@ Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andr
 
 ## Installation
 
+By install script:
+
+    $ curl https://raw.github.com/rcmdnk/homebrew-brewall/install.sh |sh
+
 By Homebrew:
 
     $ brew tap rcmdnk/brewall
+    $ brew install brewall
 
 Or download `bin/brewall` and put it in anywhere under `PATH` (e.g. `~/usr/bin/`)
 
