@@ -13,6 +13,8 @@ By install script:
 
     $ curl -fsSL https://raw.github.com/rcmdnk/brewall/install |sh
 
+This installs Homebrew if it has not been installed, too.
+
 By Homebrew:
 
     $ brew tap rcmdnk/brewall
