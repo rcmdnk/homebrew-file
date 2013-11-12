@@ -228,6 +228,7 @@ function initialize {
       return 1
     fi
   fi
+  rm -f ${input}
   echo ""
   echo "***********************************************"
   echo "Initialize $input"
