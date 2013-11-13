@@ -101,7 +101,7 @@ while [ $# != 0 ] ; do
       cleanup=1; : $((ncommands++));
       ;;
     -r)
-      dryrun=1;
+      dryrun=0;
       ;;
     -e|edit)
       edit=1; : $((ncommands++));
