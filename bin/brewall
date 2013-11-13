@@ -56,16 +56,16 @@ HELP="Usage: $0 [-increvh][-f <input file>] command ...
 Commands:
   brewall install            : Install packages in BREWFILE.
   brewall brew [command ...] : Execute brew command, and update BREWFILE.
-  brewall init (or -i)       : Initialize/Update BREWFILE with installed packages.
-  brewall clean (or -c )     : Clenup
+  brewall init    (or -i)    : Initialize/Update BREWFILE with installed packages.
+  brewall clean   (or -c)    : Clenup
                                Uninstall packages not in the list.
                                Untap packages not in the list.
                                Cleanup cache (brew cleanup)
                                By drault, cleanup runs as dry-run.
                                If you want to enforce cleanup, use '-r' option.
-  brewall edit (or -e)       : Edit input file.
+  brewall edit    (or -e)    : Edit input file.
   brewall version (or -v)    : Show version.
-  brewall help (or -h)       : Print Help (this message) and exit.
+  brewall help    (or -h)    : Print Help (this message) and exit.
 
 Options:
       -f  <file> Set input file (current default: ${def_input})
