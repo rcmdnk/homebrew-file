@@ -100,11 +100,11 @@ Then, set the repository by:
     $ brewall set_repo -r <repository>
 
 It will clone the repository.
-If it has a file named "Brewfile", it will be used instead of 
+If the repository has a file named "Brewfile", the file will be used instead of 
 `/usr/local/Library/Brewfile`.
 (then `/usr/local/Library/Brewfile` will have this repository informatoin.)
 
-If the repository doesn't have it, `brewall init` initialize the file.
+If the repository doesn't have "Brewfile", `brewall init` initialize the file.
 Then, you can push it by `brewall push`.
 
 With this procedure, you can synchronize all your Mac easily :thumbsup:
