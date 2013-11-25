@@ -109,11 +109,24 @@ Then, you can push it by `brewall push`.
 
 With this procedure, you can synchronize all your Mac easily :thumbsup:
 
+To install new package, use
+
+    $ brewall brew intall <package>
+
+instead of `brew install <package>`, because above command
+automatically update Brewfile.
+
+This is useful especially if you are using the repository for the Brewfile,
+and want to use `brewall update`.
+
+Otherwise, please be careful to use `brewall update`,
+because it deletes what you installed, but you have not registered in Brewfile.
+
 
     Usage: brewall [-increvh][-f <input file>] command ...
-    
+
     Commands:
-      brewall install            : Install packages in BREWFILE.
+      brewall install            : Install packages in BREWFILE (do 'brew update', too).
       brewall brew [command ...] : Execute brew command, and update BREWFILE.
       brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
       brewall set_repo (or -s)   : Set BREWFILE repository.
@@ -125,6 +138,9 @@ With this procedure, you can synchronize all your Mac easily :thumbsup:
                                    Cleanup cache (brew cleanup)
                                    By drault, cleanup runs as dry-run.
                                    If you want to enforce cleanup, use '-C' option.
+      brewall update   (or -u)   : Do pull, install, brew upgrade, push and clean -C.
+                                   pull, push and clean are done only if
+                                   the repository is assigned.
       brewall edit     (or -e)   : Edit input file.
       brewall version  (or -v)   : Show version.
       brewall help     (or -h)   : Print Help (this message) and exit.
@@ -139,9 +155,9 @@ With this procedure, you can synchronize all your Mac easily :thumbsup:
           -r  <repo> Set repository name. Use with set_repo (-s).
     
     If you want to use repository's BREWFILE,
-    please prepare a repository which has a file named \"Brewfile\".
-    If you assign the repository which doesn't have \"Brewfile\",
-    then brewall will try to make \"Brewfile\" in the repository.
+    please prepare a repository which has a file named 'Brewfile'.
+    If you assign the repository which doesn't have 'Brewfile',
+    then brewall will try to make 'Brewfile' in the repository.
     For GitHub repository, you can shorten the address like user_name/repo_name.
 
 ## Information
