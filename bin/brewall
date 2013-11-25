@@ -130,6 +130,9 @@ while [ $# != 0 ] ; do
     -c|clean)
       cleanup=1; : $((ncommands++));
       ;;
+    -u|update)
+      update=1; : $((ncommands++));
+      ;;
     -C)
       dryrun=0;
       ;;
@@ -212,6 +215,37 @@ function check_repo {
       echo "    $ $0 set_repo"
       exit 1
     fi
+  fi
+} # }}}
+
+# Helper repository management {{{
+function repomgr {
+  local l_pull=$pull
+  local l_push=$push
+  if [ "$1" = "pull" ];then
+    l_pull=1
+    l_push=0
+  elif [ "$1" = "push" ];then
+    l_pull=0
+    l_push=1
+  fi
+  if [ "$repo" = "" ];then
+    echo "Please set the repository, or reset by"
+    echo "    $ $0 set_repo"
+    return 1
+  fi
+  if [ ! -d $(dirname $brewfile) ];then
+    git clone $repo $(dirname $brewfile)
+  fi
+  cd $(dirname $brewfile)
+  if [ $l_pull -eq 1 ];then
+    git pull
+    return 0
+  elif [ $l_push -eq 1 ];then
+    git add Brewfile
+    git commit -m "Updated the Package List"
+    git push
+    return 0
   fi
 } # }}}
 
@@ -508,23 +542,12 @@ function cleanup {
   echo "Cleanup cache        "
   echo "*********************"
   echo ""
-  echo brew cleanup
+  echo brew cleanup --force
+  echo rm -rf $cache_dir
   if [ $dryrun -ne 1 ];then
-    brew cleanup
-  fi
-
-  echo ""
-  echo "*********************************************************"
-  echo "Some caches in $cache_dir may be remaind."
-  echo "(caches of cask can't be cleaned up.)"
-  echo "You may want to do:"
-  echo "    $ brew cealnup --force"
-  echo "or event just do:"
-  echo "    $ rm -rf $cache_dir"
-  echo "*********************************************************"
-  echo ""
-
-  if [ $dryrun -eq 1 ];then
+    brew cleanup --force
+    rm -rf $cache_dir
+  else
     echo "*****************************************"
     echo "This is dry run."
     echo "If you want to enforce cleanup, use '-C':"
@@ -638,25 +661,7 @@ check_repo
 
 # Do pull/push for the repository.
 if [ $pull -eq 1 ] || [ $push -eq 1 ];then
-  if [ "$repo" = "" ];then
-    echo "Please set the repository, or reset by"
-    echo "    $ $0 set_repo"
-    exit 1
-  fi
-  if [ ! -d $(dirname $brewfile) ];then
-    git clone $repo $(dirname $brewfile)
-  fi
-  cd $(dirname $brewfile)
-  if [ $pull -eq 1 ];then
-    git pull
-    exit 0
-  fi
-  if [ $push -eq 1 ];then
-    git add Brewfile
-    git commit -m "Updated the Package List"
-    git push
-    exit 0
-  fi
+  repomgr
 fi
 
 # brew command
@@ -706,4 +711,18 @@ if [ $brewall_inst -eq 1 ];then
   exit $?
 fi
 
+# Update
+if [ $update -eq 1 ];then
+  if [ "$repo" != "" ];then
+    repomgr pull
+  fi
+  install
+  brew upgrade
+  if [ "$repo" != "" ];then
+    repomgr push
+    dryrun=0
+    cleanup
+  fi
+  exit 0
+fi
 # }}}
