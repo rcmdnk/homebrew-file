@@ -29,8 +29,9 @@ version=0.0.6
 # }}}
 
 # Variables {{{
-def_input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
-input="$def_input"
+input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
+brewfile="$input"
+repo=""
 brewall_inst=0
 brew=0
 link=1
@@ -38,6 +39,9 @@ cleanup=0
 dryrun=1
 init=0
 edit=0
+set_repo=0
+pull=0
+push=0
 tap_dir="/usr/local/Library/Taps"
 if [ -d ~/Library/Caches/Homebrew ];then
   cache_dir=${HOMEBREW_CACHE:-"~/Library/Caches/Homebrew"}
@@ -56,24 +60,34 @@ HELP="Usage: $0 [-increvh][-f <input file>] command ...
 Commands:
   brewall install            : Install packages in BREWFILE.
   brewall brew [command ...] : Execute brew command, and update BREWFILE.
-  brewall init    (or -i)    : Initialize/Update BREWFILE with installed packages.
-  brewall clean   (or -c)    : Clenup
+  brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
+  brewall set_repo (or -s)   : Set BREWFILE repository.
+  brewall pull               : Update BREWFILE from the repository.
+  brewall push               : Push your BREWFILE to the repository.
+  brewall clean    (or -c)   : Clenup
                                Uninstall packages not in the list.
                                Untap packages not in the list.
                                Cleanup cache (brew cleanup)
                                By drault, cleanup runs as dry-run.
-                               If you want to enforce cleanup, use '-r' option.
-  brewall edit    (or -e)    : Edit input file.
-  brewall version (or -v)    : Show version.
-  brewall help    (or -h)    : Print Help (this message) and exit.
+                               If you want to enforce cleanup, use '-C' option.
+  brewall edit     (or -e)   : Edit input file.
+  brewall version  (or -v)   : Show version.
+  brewall help     (or -h)   : Print Help (this message) and exit.
 
 Options:
-      -f  <file> Set input file (current default: ${def_input})
+      -f  <file> Set input file (current default: ${input})
                  You can set input file by environmental variable,
                  HOMEBREW_BREWFILE, like:
                       export HOMEBREW_BREWFILE=~/.brewfile
       -n         Don't make links for Apps
-      -r         Run cleanup in non dry-run mode.
+      -C         Run cleanup in non dry-run mode.
+      -r  <repo> Set repository name. Use with set_repo (-s).
+
+If you want to use repository's BREWFILE,
+please prepare a repository which has a file named \"Brewfile\".
+If you assign the repository which doesn't have \"Brewfile\",
+then brewall will try to make \"Brewfile\" in the repository.
+For GitHub repository, you can shorten the address like user_name/repo_name.
 
 "
 # }}}
@@ -94,13 +108,25 @@ while [ $# != 0 ] ; do
     -i|init)
       init=1; : $((ncommands++));
       ;;
+    -s|set_repo)
+      set_repo=1; : $((ncommands++));
+      ;;
+    -r )
+      repo=$2; shift;
+      ;;
+    pull)
+      pull=1; : $((ncommands++));
+      ;;
+    push)
+      push=1; : $((ncommands++));
+      ;;
     -n)
       link=0;
       ;;
     -c|clean)
       cleanup=1; : $((ncommands++));
       ;;
-    -r)
+    -C)
       dryrun=0;
       ;;
     -e|edit)
@@ -149,6 +175,42 @@ function ask_yn {
     esac
   done
 } # }}}
+
+# Helper to build brewfile path for the repository {{{
+function repo_file {
+  repo_name=$(basename ${repo%.git})
+  user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
+  inputdir=$(dirname $input)
+  echo $inputdir/${user_name}_${repo_name}/Brewfile
+} # }}}
+
+# Helper check repository file {{{
+function check_repo {
+  if [ ! -f $input ];then
+    return 0
+  fi
+  if ! grep -q "^ *git" $input;then
+    return 0
+  fi
+  repo=$(grep "^ *git" $input |awk '{print $2}')
+  if [ "$repo" = "" ];then
+    return 0
+  fi
+  if [[ ! $repo =~ ^git@ &&  ! $repo =~ ^http ]];then
+    repo=git@github.com:$repo
+  fi
+  brewfile=$(repo_file)
+  if [ ! -d $(dirname $brewfile) ];then
+    git clone $repo $(dirname $brewfile)
+    if [ $? -ne 0 ];then
+      echo "Can't clone $repo."
+      echo "Please check the repository, or reset by"
+      echo "    $ $0 set_repo"
+      exit 1
+    fi
+  fi
+} # }}}
+
 
 # Helper for tap configuration file {{{
 function get_tap {
@@ -209,16 +271,24 @@ function read_input {
     elif [ "$cmd" = "cask" ];then
       cask_input=(${cask_input[@]} $p)
     else
-      echo "WARNING: $cmd is unknown, prease check $input."
+      echo "WARNING: $cmd is unknown, prease check $brewfile"
       continue
     fi
-  done < $input
+  done < $brewfile
 } # }}}
 
-# Initialize Brewfile {{{
-function initialize {
-  if [ -f $input ] && [ "$1" != "0" ];then
+# Set Brewfile Repository {{{
+function set_brewfile_repo {
+
+  # Check input file
+  if [ -f $input ];then
+    if grep -q "^ *git" $input;then
+      prev_repo=$(grep "^ *git" $input |awk '{print $2}')
+    fi
     echo "$input is already there."
+    if [ "$prev_repo" != "" ];then
+      echo "Git repository for Brewfile is already set as $prev_repo."
+    fi
     ask_yn "Do you want to overwrite it?"
     ret=$?
     if [ $ret -eq 0 ];then
@@ -229,9 +299,60 @@ function initialize {
     fi
   fi
   rm -f ${input}
+
+  # Get repository
+  if [ "$repo" = "" ];then
+    echo 'Set repository, "non" to use local Brewfile'
+    echo -n ': '
+    read repo
+    while [ "$repo" = "" ];do
+      echo -n "Repository can't be empty."
+      echo 'Set repository, "non" to use local Brewfile'
+      echo -n ': '
+      read repo
+    done
+  fi
   echo ""
   echo "***********************************************"
-  echo "Initialize $input"
+  echo "Set Brewfile Repository as $repo"
+  echo "***********************************************"
+  echo ""
+
+  # Reset to no repository type Brewfile
+  if [ "$repo" = "non" ];then
+    initialize 0
+    return $?
+  fi
+
+  # Set repository to input file
+  echo "git $repo" > $input
+  check_repo
+  return $?
+} # }}}
+
+# Initialize Brewfile {{{
+function initialize {
+  if [ -f $input ] && [ "$1" != "0" ];then
+    if [ "$repo" != "" ];then
+      echo "You are using Brewfile of $repo."
+    else
+      echo "$input is already there."
+    fi
+    ask_yn "Do you want to overwrite it?"
+    ret=$?
+    if [ $ret -eq 0 ];then
+      if [ "$repo" = "" ];then
+        mv ${input} ${input}.bak
+        echo "ok, old $input was moved to ${input}.bak"
+      fi
+    else
+      return 1
+    fi
+  fi
+  rm -f ${brewfile}
+  echo ""
+  echo "***********************************************"
+  echo "Initialize $brewfile"
   echo "***********************************************"
   echo ""
 
@@ -239,38 +360,38 @@ function initialize {
   get_list
 
   # Check list
-  echo "# Tap repositories and their packages" |tee -a $input
+  echo "# Tap repositories and their packages" |tee -a $brewfile
   for p in ${tap_list[@]};do
     get_tap $p
     ret=$?
     if [ $ret -ne 0 ];then
       continue
     fi
-    echo "tap '$p'" |tee -a $input
+    echo "tap '$p'" |tee -a $brewfile
     for tp in ${tap_packs[@]};do
       if echo " ${brew_list[@]} "|grep -q " $tp ";then
         opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-        echo "brew '${tp}${opt}'" |tee -a $input
+        echo "brew '${tp}${opt}'" |tee -a $brewfile
         brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
       fi
     done
-    echo "" |tee -a $input
+    echo "" |tee -a $brewfile
   done
 
-  echo "" |tee -a $input
-  echo "# Cask packages" |tee -a $input
+  echo "" |tee -a $brewfile
+  echo "# Cask packages" |tee -a $brewfile
   for p in ${cask_list[@]};do
-    echo "cask '$p'" |tee -a $input
+    echo "cask '$p'" |tee -a $brewfile
   done
-  echo "" |tee -a $input
-  echo "# Other Homebrew packages" |tee -a $input
+  echo "" |tee -a $brewfile
+  echo "# Other Homebrew packages" |tee -a $brewfile
   for p in ${brew_list[@]};do
     opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-    echo "brew '${p}${opt}'" |tee -a $input
+    echo "brew '${p}${opt}'" |tee -a $brewfile
   done
   echo ""
   echo "***********************************************"
-  echo "You can edit $input with:"
+  echo "You can edit $brewfile with:"
   echo "    $0 edit"
   echo "***********************************************"
   return 0
@@ -278,8 +399,8 @@ function initialize {
 
 # Check input file {{{
 function check_input_file {
-  if [ ! -f $input ];then
-    echo "WARNING: Input file $input is not found."
+  if [ ! -f $brewfile ];then
+    echo "WARNING: Input file $brewfile is not found."
     ask_yn "WARNING: Do you want to initialize from installed packages?"
     ret=$?
     if [ $ret -eq 0 ];then
@@ -288,8 +409,8 @@ function check_input_file {
     else
       echo ""
       echo "WARNING: OK, please prepare Brewfile"
-      echo "WARNING: or you can initialize $input with:"
-      echo "WARNING:     $0 init"
+      echo "WARNING: or you can initialize $brewfile with:"
+      echo "WARNING:     $ $0 init"
       return 1
     fi
   fi
@@ -297,7 +418,7 @@ function check_input_file {
 
 # Edit file {{{
 function edit_brewfile {
-  $my_editor $input
+  $my_editor $brewfile
 } # }}}
 
 # Cleanup {{{
@@ -402,8 +523,8 @@ function cleanup {
   if [ $dryrun -eq 1 ];then
     echo "*****************************************"
     echo "This is dry run."
-    echo "If you want to enforce cleanup, use '-r':"
-    echo "    $ $0 -c -r"
+    echo "If you want to enforce cleanup, use '-C':"
+    echo "    $ $0 clean -C"
     echo "*****************************************"
   fi
 
@@ -496,6 +617,38 @@ if ! which brew >& /dev/null;then
     echo "#################################"
     echo
     echo
+  fi
+fi
+
+# Set BREWFILE repository
+if [ $set_repo -eq 1 ];then
+  set_brewfile_repo
+  exit $?
+fi
+
+# Change brewfile if it is repository's one.
+check_repo
+
+# Do pull/push for the repository.
+if [ $pull -eq 1 ] || [ $push -eq 1 ];then
+  if [ "$repo" = "" ];then
+    echo "Please set the repository, or reset by"
+    echo "    $ $0 set_repo"
+    exit 1
+  fi
+  if [ ! -d $(dirname $brewfile) ];then
+    git clone $repo $(dirname $brewfile)
+  fi
+  cd $(dirname $brewfile)
+  if [ $pull -eq 1 ];then
+    git pull
+    exit 0
+  fi
+  if [ $push -eq 1 ];then
+    git add Brewfile
+    git commit -m "Updated the Package List"
+    git push
+    exit 0
   fi
 fi
 

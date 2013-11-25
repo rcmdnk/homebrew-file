@@ -82,42 +82,52 @@ Some packages such macvim has Application (MacVim.app).
 If you want to install them to Applications area,
 please use `-l` (for `~/Applications/`) or `-g` (for `/Applications/`).
 
-With `-c` option, Brewall runs cleanup.
+With `clean` option, Brewall runs cleanup.
 By default, it just does dry run (no actual cleanup).
-To run cleanup in non dry-run mode, use `-r`.
+To run cleanup in non dry-run mode, use `-C`.
 
-If you want edit Brewfile, use `-e` option.
+If you want edit Brewfile, use `edit` option.
 
-:warning: If you do `brewall -e` before installing Brewfile and save w/o any modification,
-you may make empty Brewfile (Be careful, `brew -c -r` remove all packages :scream:).
+:warning: If you do `brewall edit` before installing Brewfile and save w/o any modification,
+you may make empty Brewfile (Be careful, `brew -c -C` remove all packages :scream:).
 Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile.
 
-    Usage: brewall [-cerieh][-f <input file>]
-
-    Arguments:
-          -f  <file> Set input file (current default: /usr/local/Library/Brewfile)
+    Usage: brewall [-increvh][-f <input file>] command ...
+    
+    Commands:
+      brewall install            : Install packages in BREWFILE.
+      brewall brew [command ...] : Execute brew command, and update BREWFILE.
+      brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
+      brewall set_repo (or -s)   : Set BREWFILE repository.
+      brewall pull               : Update BREWFILE from the repository.
+      brewall push               : Push your BREWFILE to the repository.
+      brewall clean    (or -c)   : Clenup
+                                   Uninstall packages not in the list.
+                                   Untap packages not in the list.
+                                   Cleanup cache (brew cleanup)
+                                   By drault, cleanup runs as dry-run.
+                                   If you want to enforce cleanup, use '-C' option.
+      brewall edit     (or -e)   : Edit input file.
+      brewall version  (or -v)   : Show version.
+      brewall help     (or -h)   : Print Help (this message) and exit.
+    
+    Options:
+          -f  <file> Set input file (current default: ${input})
                      You can set input file by environmental variable,
                      HOMEBREW_BREWFILE, like:
                           export HOMEBREW_BREWFILE=~/.brewfile
-          -l         Make links to apps (for such MacVim)
-                     The default place is user's directory: ~/Applications/
-                     If you want to install in global directory: /Applications/,
-                     use '-g'
-          -g         Make apps' links in /Applications/ (need root password)
-          -c         Cleanup:
-                       Uninstall packages not in the list.
-                       Untap packages not in the list.
-                       Cleanup cache (brew cleanup)
-                     By drault, cleanup runs as dry-run.
-                     If you want to enforce cleanup, use '-r' option.
-          -r         Run cleanup in non dry-run mode.
-          -i         Initialize Brewfile with insalled packages.
-          -e         Edit input file
-          -v         Show version
-          -h         Print Help (this message) and exit
+          -n         Don't make links for Apps
+          -C         Run cleanup in non dry-run mode.
+          -r  <repo> Set repository name. Use with set_repo (-s).
+    
+    If you want to use repository's BREWFILE,
+    please prepare a repository which has a file named \"Brewfile\".
+    If you assign the repository which doesn't have \"Brewfile\",
+    then brewall will try to make \"Brewfile\" in the repository.
+    For GitHub repository, you can shorten the address like user_name/repo_name.
 
 ## Information
-More information could be found in [my blog (Japanese)](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/).
+More information could be found in [my blog](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/).
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/rcmdnk/homebrew-brewall/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
