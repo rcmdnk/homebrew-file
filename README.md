@@ -92,6 +92,24 @@ If you want edit Brewfile, use `edit` option.
 you may make empty Brewfile (Be careful, `brew -c -C` remove all packages :scream:).
 Therefore I recommend you to do `brewall -i` at first if you don't have Brewfile.
 
+You can maintain your Brewfile at the git repository.
+First, make new repository at GitHub (or other git server).
+
+Then, set the repository by:
+
+    $ brewall set_repo -r <repository>
+
+It will clone the repository.
+If it has a file named "Brewfile", it will be used instead of 
+`/usr/local/Library/Brewfile`.
+(then `/usr/local/Library/Brewfile` will have this repository informatoin.)
+
+If the repository doesn't have it, `brewall init` initialize the file.
+Then, you can push it by `brewall push`.
+
+With this procedure, you can synchronize all your Mac easily :thumbsup:
+
+
     Usage: brewall [-increvh][-f <input file>] command ...
     
     Commands:
