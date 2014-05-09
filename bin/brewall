@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.0.7
+version=0.0.8
 #############################################
 
 #The MIT License (MIT) {{{
@@ -254,8 +254,15 @@ function repomgr {
 function get_tap {
   tap_user=`dirname $1`
   tap_repo=`basename $1`
-  formulae=`ls ${tap_dir}/${tap_user}-${tap_repo}/*rb 2>/dev/null`
+  formulae=`ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/*rb 2>/dev/null`
+  if [ "$formulae" = "" ];then
+    formulae=`ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/*rb 2>/dev/null`
+  fi
   tap_packs=()
+  echo \$1=$1
+  echo tap_user=$tap_user
+  echo tap_repo=$tap_repo
+  echo formulae=$formulae
   for f in ${formulae[@]};do
     tap_packs=(${tap_packs[@]} $(basename ${f%.rb}))
   done
@@ -278,6 +285,7 @@ function get_list {
 # Read input file {{{
 function read_input {
   # Check packages in the input file
+  cmd_input=()
   cask_input=()
   tap_input=()
   brew_input=()
@@ -293,7 +301,7 @@ function read_input {
     cmd=${args[0]}
     p=`echo ${args[1]}|sed s:\'::g|sed s:\"::g`
     opt=`echo ${args[@]: 2}|sed s:\'::g|sed s:\"::g`
-    if [ "$cmd" = "brew" ];then
+    if [ "$cmd" = "brew" -o "$cmd" = "install" ];then
       brew_input=(${brew_input[@]} $p)
       brew_input_opt=("${brew_input_opt[@]}" "$p $opt")
     elif [ "$cmd" = "tap" ];then
@@ -307,10 +315,14 @@ function read_input {
       fi
       brew_input=(${brew_input[@]} $tap_packs)
     elif [ "$cmd" = "cask" ];then
+      if [ "$p" = "install" ];then
+        p="$opt"
+      fi
       cask_input=(${cask_input[@]} $p)
     else
-      echo "WARNING: $cmd is unknown, prease check $brewfile"
-      continue
+      #echo "WARNING: $cmd is unknown, please check $brewfile"
+      #continue
+      brew_cmd=(${cmd_input[@]} $p)
     fi
   done < $brewfile
 } # }}}
@@ -405,11 +417,11 @@ function initialize {
     if [ $ret -ne 0 ];then
       continue
     fi
-    echo "tap '$p'" |tee -a $brewfile
+    echo "tap $p" |tee -a $brewfile
     for tp in ${tap_packs[@]};do
       if echo " ${brew_list[@]} "|grep -q " $tp ";then
         opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-        echo "brew '${tp}${opt}'" |tee -a $brewfile
+        echo "brew ${tp}${opt}" |tee -a $brewfile
         brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
       fi
     done
@@ -419,13 +431,13 @@ function initialize {
   echo "" |tee -a $brewfile
   echo "# Cask packages" |tee -a $brewfile
   for p in ${cask_list[@]};do
-    echo "cask '$p'" |tee -a $brewfile
+    echo "cask install $p" |tee -a $brewfile
   done
   echo "" |tee -a $brewfile
   echo "# Other Homebrew packages" |tee -a $brewfile
   for p in ${brew_list[@]};do
     opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-    echo "brew '${p}${opt}'" |tee -a $brewfile
+    echo "install ${p}${opt}" |tee -a $brewfile
   done
   echo ""
   echo "***********************************************"
@@ -619,6 +631,14 @@ function install {
       rm -f .brewall_install_log
     fi
   done
+
+  echo "brewall install does automatically 'brew update'"
+  if [ ${#cmd_input[@]} -ne 0 ];then
+    echo "Following commands have not been executed."
+    for c in "${#cmd_input[@]}";do
+      echo "$c"
+    done
+  fi
 
   return 0
 } # }}}
