@@ -435,15 +435,15 @@ function initialize {
   done
 
   echo "" |tee -a $brewfile
-  echo "# Cask packages" |tee -a $brewfile
-  for p in ${cask_list[@]};do
-    echo "cask install $p" |tee -a $brewfile
-  done
-  echo "" |tee -a $brewfile
-  echo "# Other Homebrew packages" |tee -a $brewfile
+  echo "# Homebrew packages" |tee -a $brewfile
   for p in ${brew_list[@]};do
     opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
     echo "install ${p}${opt}" |tee -a $brewfile
+  done
+  echo "" |tee -a $brewfile
+  echo "# Cask Applications" |tee -a $brewfile
+  for p in ${cask_list[@]};do
+    echo "cask install $p" |tee -a $brewfile
   done
   echo ""
   echo "***********************************************"
