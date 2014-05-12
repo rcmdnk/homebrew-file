@@ -50,19 +50,19 @@ Normally, you don't need to modify anything on Brewdler's Brewfile for Brewall.
 Example:
 
     # Tap repositories and their packages
-    tap 'phinze/cask'
-    brew 'brew-cask'
+    tap 'caskroom/cask'
+    install 'brew-cask'
     
     tapall 'rcmdnk/brewall' # This will trigger `brew 'brewall'`, too
     
     # Cask packages
-    cask 'firefox'
+    cask install 'firefox'
     
     # Other Homebrew packages
-    brew 'mercurial'
-    brew 'macvim --with-lua'
+    install 'mercurial'
+    install 'macvim --with-lua'
 
-First column is command: `brew`/`tap`/`tapall`/`cask`.
+First column is command: `brew`(or `install`)/`tap`/`tapall`/`cask`(or `cask install`.
 Second to the last columns are package name and options.
 They are used as arguments for such `brew install`,
 therefore any options of Homebrew can be used.
@@ -75,7 +75,7 @@ If you use `tapall`, Brewall does `brew install` for all Formulae in the reposit
 inaddition to do `tap` the repository.
 
 You don't need to `brew install` by hand.
-As written above, `tap 'phinze/cask'` is can be dropped
+As written above, `tap 'caskroom/cask'` is can be dropped
 because `cask 'firefox'` triggers it.
 
 Some packages such macvim has Application (MacVim.app).
@@ -122,6 +122,53 @@ and want to use `brewall update`.
 Otherwise, please be careful to use `brewall update`,
 because it deletes what you installed, but you have not registered in Brewfile.
 
+If you want to check your Apps in `/Applications` or `~/Applications/`
+for Cask, use:
+
+    $ brewall casklist
+
+This command makes `Caskfile.txt`, which is like:
+
+    ### Cask applications
+    ### Please copy these lines to your Brewfile and use with `brew bundle`.
+    
+    ### tap and install Cask (remove comment if necessary).
+    #tap caskroom/cask
+    #install brew-cask
+    
+    ### Apps installed by Cask in /Applications
+    cask install adobe-reader # /Applications/Adobe Reader.app
+    cask install xtrafinder # /Applications/XtraFinder.app
+    
+    ### Apps installed by Cask in ~/Applications.
+    cask install bettertouchtool.rb # ~/Applications/BetterTouchTool.app
+    
+    #############################
+    
+    ### Apps not installed by Cask, but installed in /Applications.
+    ### If you want to install them with Cask, remove comments.
+    #cask install keyremap4macbook # /Applications/KeyRemap4MacBook.app
+    
+    ### Apps not installed by Cask, but installed in ~/Applications.
+    ### If you want to install them with Cask, remove comments.
+    #cask install copy.rb # ~/Applications/Copy.app
+    
+    
+    #############################
+    
+    ### Apps not registered in Cask, but installed in /Applications.
+    # /Applications/App Store.app
+    # /Applications/Calendar.app
+    ...
+    
+    ### Apps not registered in Cask, but installed in ~/Applications.
+
+You can find applications which were installed manually,
+but can be managed by Cask under "Apps not installed by Cask, but installed in...".
+
+If you want to manage them with Brewfile, just copy above lines w/o "#" for these Apps.
+
+# HELP
 
     Usage: brewall [-increvh][-f <input file>] command ...
 
@@ -142,6 +189,7 @@ because it deletes what you installed, but you have not registered in Brewfile.
                                    pull, push and clean are done only if
                                    the repository is assigned.
       brewall edit     (or -e)   : Edit input file.
+      brewall casklist           : Check applications for Cask
       brewall version  (or -v)   : Show version.
       brewall help     (or -h)   : Print Help (this message) and exit.
     
