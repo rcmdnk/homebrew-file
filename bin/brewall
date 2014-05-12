@@ -548,6 +548,7 @@ function cleanup {
         app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}') 2>/dev/null)
         if [ "$app" != "" ];then
           rm -f /Applications/$app
+          rm -f /Applications/Utilities/$app
           rm -f ~/Applications/$app
         fi
         brew uninstall $p
@@ -704,6 +705,7 @@ function check_cask {
   orig_ifs=$IFS
   IFS=$'\n'
   apps_root=($(ls -d /Applications/*app))
+  apps_utils=($(ls -d /Applications/Utilities/*app))
   apps_home=($(ls -d ~/Applications/*app))
   IFS=$orig_ifs
 
@@ -727,6 +729,30 @@ function check_cask {
         echo "Not installed by Cask: $file, $a"
         apps_root_cask_notinstalled=("${apps_root_cask_notinstalled[@]}" "$a")
         apps_root_cask_notinstalled_caskname=("${apps_root_cask_notinstalled_caskname[@]}" "${file%.rb}")
+      fi
+    fi
+  done
+
+  apps_utils_cask_installed=()
+  apps_utils_cask_installed_caskname=()
+  apps_utils_cask_notinstalled=()
+  apps_utils_cask_notinstalled_caskname=()
+  apps_utils_noncask=()
+  for a in "${apps_utils[@]}";do
+    find_app "$a"
+    if [ $is_cask -eq 0 ];then
+      apps_utils_noncask=("${apps_utils_noncask[@]}" "$a")
+      echo "Non Cask app: $a"
+    else
+      notinstalled=$(brew cask info ${file%.rb}|grep "Not installed")
+      if [ $is_installed -eq 1 ];then
+        echo "Installed by Cask: $file, $a"
+        apps_utils_cask_installed=("${apps_utils_cask_installed[@]}" "$a")
+        apps_utils_cask_installed_caskname=("${apps_utils_cask_installed_caskname[@]}" "${file%.rb}")
+      else
+        echo "Not installed by Cask: $file, $a"
+        apps_utils_cask_notinstalled=("${apps_utils_cask_notinstalled[@]}" "$a")
+        apps_utils_cask_notinstalled_caskname=("${apps_utils_cask_notinstalled_caskname[@]}" "${file%.rb}")
       fi
     fi
   done
@@ -761,14 +787,21 @@ function check_cask {
     echo "#tap caskroom/cask"
     echo "#install brew-cask"
     echo ""
-    echo "### Apps installed by Cask in /Applications"
+    echo "### Apps installed by Cask in /Applications:"
     i=0
     while [ $i -lt ${#apps_root_cask_installed[@]} ];do
       echo "cask install ${apps_root_cask_installed_caskname[$i]} # ${apps_root_cask_installed[$i]}"
       ((i++))
     done
     echo ""
-    echo "### Apps installed by Cask in ~/Applications."
+    echo "### Apps installed by Cask in /Applications/Utilities:"
+    i=0
+    while [ $i -lt ${#apps_utils_cask_installed[@]} ];do
+      echo "cask install ${apps_utils_cask_installed_caskname[$i]} # ${apps_utils_cask_installed[$i]}"
+      ((i++))
+    done
+    echo ""
+    echo "### Apps installed by Cask in ~/Applications:"
     i=0
     while [ $i -lt ${#apps_home_cask_installed[@]} ];do
       echo "cask install ${apps_home_cask_installed_caskname[$i]} # ${apps_home_cask_installed[$i]/$HOME/~}"
@@ -777,7 +810,7 @@ function check_cask {
     echo ""
     echo "#############################"
     echo ""
-    echo "### Apps not installed by Cask, but installed in /Applications."
+    echo "### Apps not installed by Cask, but installed in /Applications:"
     echo "### If you want to install them with Cask, remove comments."
     i=0
     while [ $i -lt ${#apps_root_cask_notinstalled[@]} ];do
@@ -785,7 +818,15 @@ function check_cask {
       ((i++))
     done
     echo ""
-    echo "### Apps not installed by Cask, but installed in ~/Applications."
+    echo "### Apps not installed by Cask, but installed in /Applications/Utilities:"
+    echo "### If you want to install them with Cask, remove comments."
+    i=0
+    while [ $i -lt ${#apps_utils_cask_notinstalled[@]} ];do
+      echo "#cask install ${apps_utils_cask_notinstalled_caskname[$i]} # ${apps_utils_cask_notinstalled[$i]}"
+      ((i++))
+    done
+    echo ""
+    echo "### Apps not installed by Cask, but installed in ~/Applications:"
     echo "### If you want to install them with Cask, remove comments."
     i=0
     while [ $i -lt ${#apps_home_cask_notinstalled[@]} ];do
@@ -796,12 +837,17 @@ function check_cask {
     echo ""
     echo "#############################"
     echo ""
-    echo "### Apps not registered in Cask, but installed in /Applications."
+    echo "### Apps not registered in Cask, but installed in /Applications:"
     for a in "${apps_root_noncask[@]}";do
       echo "# $a"
     done
     echo ""
-    echo "### Apps not registered in Cask, but installed in ~/Applications."
+    echo "### Apps not registered in Cask, but installed in /Applications/Utilities:"
+    for a in "${apps_utils_noncask[@]}";do
+      echo "# $a"
+    done
+    echo ""
+    echo "### Apps not registered in Cask, but installed in ~/Applications:"
     for a in "${apps_home_noncask[@]/$HOME/~}";do
       echo "# $a"
     done
@@ -812,20 +858,23 @@ function check_cask {
   echo ""
   echo "### Summary ###"
   echo ""
-  echo "Total: $((${#apps_root[@]} + ${#apps_home[@]})) Apps have been checked."
-  echo "       (Apps of /Applications/*.app and ~/Applications/*.app)"
+  echo "Total: $((${#apps_root[@]} + ${#apps_utils[@]} + ${#apps_home[@]})) Apps have been checked."
+  echo "       (Apps of /Applications/*.app, /Applications/Utilities/*.app and ~/Applications/*.app)"
   echo ""
   echo "Installed by Cask:"
-  echo "-  /Applications: ${#apps_root_cask_installed[@]} Apps"
-  echo "- ~/Applications: ${#apps_home_cask_installed[@]} Apps"
+  echo "- /Applications           : ${#apps_root_cask_installed[@]} Apps"
+  echo "- /Applications/Utilities : ${#apps_utils_cask_installed[@]} Apps"
+  echo "- ~/Applications          : ${#apps_home_cask_installed[@]} Apps"
   echo ""
   echo "Not installed by Cask, but can be installed by Cask:"
-  echo "-  /Applications: ${#apps_root_cask_notinstalled[@]} Apps"
-  echo "- ~/Applications: ${#apps_home_cask_notinstalled[@]} Apps"
+  echo "- /Applications           : ${#apps_root_cask_notinstalled[@]} Apps"
+  echo "- /Applications/Utilities : ${#apps_utils_cask_notinstalled[@]} Apps"
+  echo "- ~/Applications          : ${#apps_home_cask_notinstalled[@]} Apps"
   echo ""
   echo "No Cask Apps:"
-  echo "-  /Applications: ${#apps_root_noncask[@]} Apps"
-  echo "- ~/Applications: ${#apps_home_noncask[@]} Apps"
+  echo "- /Applications           : ${#apps_root_noncask[@]} Apps"
+  echo "- /Applications/Utilities : ${#apps_utils_noncask[@]} Apps"
+  echo "- ~/Applications          : ${#apps_home_noncask[@]} Apps"
   echo ""
 
 } # }}}

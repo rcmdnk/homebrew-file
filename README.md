@@ -122,7 +122,7 @@ and want to use `brewall update`.
 Otherwise, please be careful to use `brewall update`,
 because it deletes what you installed, but you have not registered in Brewfile.
 
-If you want to check your Apps in `/Applications` or `~/Applications/`
+If you want to check your Apps in `/Applications`, `/Applications/Utilities` or `~/Applications/`
 for Cask, use:
 
     $ brewall casklist
@@ -140,6 +140,9 @@ This command makes `Caskfile.txt`, which is like:
     cask install adobe-reader # /Applications/Adobe Reader.app
     cask install xtrafinder # /Applications/XtraFinder.app
     
+    ### Apps installed by Cask in /Applications/Utilities:
+    cask install xquartz # /Applications/Utilities/XQuartz.app
+    
     ### Apps installed by Cask in ~/Applications.
     cask install bettertouchtool.rb # ~/Applications/BetterTouchTool.app
     
@@ -149,6 +152,9 @@ This command makes `Caskfile.txt`, which is like:
     ### If you want to install them with Cask, remove comments.
     #cask install keyremap4macbook # /Applications/KeyRemap4MacBook.app
     
+    ### Apps not installed by Cask, but installed in /Applications/Utilities:
+    ### If you want to install them with Cask, remove comments.
+
     ### Apps not installed by Cask, but installed in ~/Applications.
     ### If you want to install them with Cask, remove comments.
     #cask install copy.rb # ~/Applications/Copy.app
@@ -159,6 +165,9 @@ This command makes `Caskfile.txt`, which is like:
     ### Apps not registered in Cask, but installed in /Applications.
     # /Applications/App Store.app
     # /Applications/Calendar.app
+    ...
+    
+    ### Apps not registered in Cask, but installed in /Applications/Utilities:
     ...
     
     ### Apps not registered in Cask, but installed in ~/Applications.
