@@ -104,7 +104,14 @@ If the repository has a file named "Brewfile", the file will be used instead of
 `/usr/local/Library/Brewfile`.
 (then `/usr/local/Library/Brewfile` will have this repository informatoin.)
 
-If the repository doesn't have "Brewfile", `brewall init` initialize the file.
+`repository` should be like [rcmdnk/Brewfile](https://github.com/rcmdnk/Brewfile) in GitHub,
+which should have "Brewfile" (different file name can be used by `-f`).
+
+If you want to use other hosts than github, use full path for the repository, like
+
+    $ brewall set_repo -r git@bitbucket.org:rcmdnk/my_brewfile
+
+If the repository doesn't have "Brewfile"(or specified by `-f`, `brewall init` initialize the file.
 Then, you can push it by `brewall push`.
 
 With this procedure, you can synchronize all your Mac easily :thumbsup:

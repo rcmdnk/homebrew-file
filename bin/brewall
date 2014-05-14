@@ -63,7 +63,7 @@ Commands:
   brewall install            : Install packages in BREWFILE (do 'brew update', too).
   brewall brew [command ...] : Execute brew command, and update BREWFILE.
   brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
-  brewall set_repo (or -s)   : Set BREWFILE repository.
+  brewall set_repo (or -s)   : Set BREWFILE repository (e.g. rcmdnk/Brewfile).
   brewall pull               : Update BREWFILE from the repository.
   brewall push               : Push your BREWFILE to the repository.
   brewall clean    (or -c)   : Clenup
@@ -193,7 +193,7 @@ function repo_file {
   repo_name=$(basename ${repo%.git})
   user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
   inputdir=$(dirname $input)
-  echo $inputdir/${user_name}_${repo_name}/Brewfile
+  echo $inputdir/${user_name}_${repo_name}/$(basename $input)
 } # }}}
 
 # Helper check repository file {{{
