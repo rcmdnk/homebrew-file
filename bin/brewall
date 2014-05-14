@@ -427,7 +427,7 @@ function initialize {
     for tp in ${tap_packs[@]};do
       if echo " ${brew_list[@]} "|grep -q " $tp ";then
         opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-        echo "brew ${tp}${opt}" |tee -a $brewfile
+        echo "install ${tp}${opt}" |tee -a $brewfile
         brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
       fi
     done
