@@ -192,6 +192,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
       brewall install            : Install packages in BREWFILE (do 'brew update', too).
       brewall brew [command ...] : Execute brew command, and update BREWFILE.
       brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
+      brewall brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
       brewall set_repo (or -s)   : Set BREWFILE repository.
       brewall pull               : Update BREWFILE from the repository.
       brewall push               : Push your BREWFILE to the repository.

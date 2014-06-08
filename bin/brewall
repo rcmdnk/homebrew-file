@@ -34,6 +34,7 @@ brewfile="$input"
 repo=""
 brewall_inst=0
 brew=0
+noinit=0
 link=1
 cleanup=0
 dryrun=1
@@ -62,6 +63,7 @@ HELP="Usage: $0 [-increvh][-f <input file>] command ...
 Commands:
   brewall install            : Install packages in BREWFILE (do 'brew update', too).
   brewall brew [command ...] : Execute brew command, and update BREWFILE.
+  brewall brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
   brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
   brewall set_repo (or -s)   : Set BREWFILE repository (e.g. rcmdnk/Brewfile).
   brewall pull               : Update BREWFILE from the repository.
@@ -109,7 +111,13 @@ while [ $# != 0 ] ; do
       brewall_inst=1; : $((ncommands++));
       ;;
     brew)
-      brew=1; shift; brew_args="$@"; : $((ncommands++)); break;
+      brew=1
+      shift
+      if [ "$1" = "noinit" ];then
+        noinit=1
+        shift
+      fi
+      brew_args="$@"; : $((ncommands++)); break;
       ;;
     -i|init)
       init=1; : $((ncommands++));
@@ -935,7 +943,9 @@ if [ $brew -eq 1 ];then
   if [ $ret -ne 0 ];then
     exit $ret
   fi
-  initialize 0
+  if [ $noinit -eq 0 ];then
+    initialize 0
+  fi
   exit $?
 fi
 
