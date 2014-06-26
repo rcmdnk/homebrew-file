@@ -431,41 +431,48 @@ function initialize {
 
   # Check list
   {
-  echo "# Tap repositories and their packages"
-  for p in ${tap_list[@]};do
-    get_tap $p
-    ret=$?
-    if [ $ret -ne 0 ];then
-      continue
-    fi
-    echo "tap $p"
-    for tp in ${tap_packs[@]};do
-      if echo " ${brew_list[@]} "|grep -q " $tp ";then
-        opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-        echo "install ${tp}${opt}"
-        brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
+  if [ ${#tap_list[@]} -gt 0 ];then
+    echo "# Tap repositories and their packages"
+    for p in ${tap_list[@]};do
+      get_tap $p
+      ret=$?
+      if [ $ret -ne 0 ];then
+        continue
       fi
+      echo "tap $p"
+      for tp in ${tap_packs[@]};do
+        if echo " ${brew_list[@]} "|grep -q " $tp ";then
+          opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
+          echo "install ${tp}${opt}"
+          brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
+        fi
+      done
+      echo ""
     done
-    echo ""
-  done
+  fi
 
-  echo ""
-  echo "# Homebrew packages"
-  for p in ${brew_list[@]};do
-    opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-    echo "install ${p}${opt}"
-  done
-  echo ""
-  echo "# pip packages"
-  for p in ${pip_list[@]};do
-    opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-    echo "pip ${p}${opt}"
-  done
-  echo ""
-  echo "# Cask Applications"
-  for p in ${cask_list[@]};do
-    echo "cask install $p"
-  done
+  if [ ${#brew_list[@]} -gt 0 ];then
+    echo ""
+    echo "# Homebrew packages"
+    for p in ${brew_list[@]};do
+      opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
+      echo "install ${p}${opt}"
+    done
+  fi
+  if [ ${#pip_list[@]} -gt 0 ];then
+    echo ""
+    echo "# pip packages"
+    for p in ${pip_list[@]};do
+      echo "pip ${p}"
+    done
+  fi
+  if [ ${#cask_list[@]} -gt 0 ];then
+    echo ""
+    echo "# Cask Applications"
+    for p in ${cask_list[@]};do
+      echo "cask install $p"
+    done
+  fi
   } |tee -a $brewfile
   echo ""
   echo "***********************************************"
@@ -512,7 +519,7 @@ function cleanup {
   # Check packages in the input file
   read_input
 
-  if [ ${#cask_list[@]} != 0 ];then
+  if [ ${#cask_list[@]} -gt 0 ];then
     echo ""
     echo "*********************"
     echo "Cleanup cask packages"
@@ -534,7 +541,7 @@ function cleanup {
     fi
   fi
 
-  if [ ${#pip_list[@]} != 0 ];then
+  if [ ${#pip_list[@]} -gt 0 ];then
     echo ""
     echo "*********************"
     echo "Cleanup pip packages"
@@ -557,7 +564,7 @@ function cleanup {
     fi
   fi
 
-  if [ ${#tap_list[@]} != 0 ];then
+  if [ ${#tap_list[@]} -gt 0 ];then
     echo ""
     echo "********************"
     echo "Cleanup tap packages"
@@ -585,7 +592,7 @@ function cleanup {
     done
   fi
 
-  if [ ${#brew_list[@]} != 0 ];then
+  if [ ${#brew_list[@]} -gt 0 ];then
     echo ""
     echo "*********************"
     echo "Cleanup brew packages"
