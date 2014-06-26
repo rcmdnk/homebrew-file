@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.1.2
+version=0.1.4
 #############################################
 
 #The MIT License (MIT) {{{
@@ -53,6 +53,7 @@ else
 fi
 cask_pack="brew-cask"
 cask_repo="phinze/cask"
+pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
 
 # }}}
@@ -265,11 +266,11 @@ function repomgr {
 
 # Helper for tap configuration file {{{
 function get_tap {
-  tap_user=`dirname $1`
-  tap_repo=`basename $1`
-  formulae=`ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/*rb 2>/dev/null`
+  tap_user=$(dirname $1)
+  tap_repo=$(basename $1)
+  formulae=$(ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/*rb 2>/dev/null)
   if [ "$formulae" = "" ];then
-    formulae=`ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/*rb 2>/dev/null`
+    formulae=$(ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/*rb 2>/dev/null)
   fi
   tap_packs=()
   #echo \$1=$1
@@ -291,9 +292,10 @@ function get_tap {
 
 # Get list {{{
 function get_list {
-  brew_list=(`brew list`)
-  tap_list=(`brew tap`)
-  cask_list=(`brew cask list 2>/dev/null`)
+  brew_list=($(brew list|grep -v "^pip-"))
+  tap_list=($(brew tap))
+  cask_list=($(brew cask list 2>/dev/null))
+  pip_list=($(brew list|grep "^pip"))
 } # }}}
 
 # Read input file {{{
@@ -301,6 +303,7 @@ function read_input {
   # Check packages in the input file
   cmd_input=()
   cask_input=()
+  pip_input=()
   tap_input=()
   brew_input=()
   brew_input_opt=()
@@ -315,28 +318,31 @@ function read_input {
     cmd=${args[0]}
     p=`echo ${args[1]}|sed s:\'::g|sed s:\"::g`
     opt=`echo ${args[@]: 2}|sed s:\'::g|sed s:\"::g`
+    if [ "$p" = "install" ];then
+      p=`echo ${args[2]}|sed s:\'::g|sed s:\"::g`
+      opt=`echo ${args[@]: 3}|sed s:\'::g|sed s:\"::g`
+    fi
     if [ "$cmd" = "brew" -o "$cmd" = "install" ];then
       brew_input=(${brew_input[@]} $p)
       brew_input_opt=("${brew_input_opt[@]}" "$p $opt")
     elif [ "$cmd" = "tap" ];then
-      tap_input=(${tap_input[@]} $p)
+      tap_input=("${tap_input[@]}" "$p $opt")
     elif [ "$cmd" = "tapall" ];then
-      tap_input=(${tap_input[@]} $p)
+      tap_input=("${tap_input[@]}" "$p $opt")
       get_tap $p
       ret=$?
       if [ $ret -ne 0 ];then
         continue
       fi
-      brew_input=(${brew_input[@]} $tap_packs)
+      brew_input=("${brew_input[@]}" "${tap_packs[@]}")
     elif [ "$cmd" = "cask" ];then
-      if [ "$p" = "install" ];then
-        p="$opt"
-      fi
-      cask_input=(${cask_input[@]} $p)
+      cask_input=("${cask_input[@]}" "$p $opt")
+    elif [ "$cmd" = "pip" ];then
+      pip_input=("${pip_input[@]}" "$p $opt")
     else
       #echo "WARNING: $cmd is unknown, please check $brewfile"
       #continue
-      brew_cmd=(${cmd_input[@]} $p)
+      brew_cmd=("${cmd_input[@]}" "$p $opt")
     fi
   done < $brewfile
 } # }}}
@@ -424,35 +430,43 @@ function initialize {
   get_list
 
   # Check list
-  echo "# Tap repositories and their packages" |tee -a $brewfile
+  {
+  echo "# Tap repositories and their packages"
   for p in ${tap_list[@]};do
     get_tap $p
     ret=$?
     if [ $ret -ne 0 ];then
       continue
     fi
-    echo "tap $p" |tee -a $brewfile
+    echo "tap $p"
     for tp in ${tap_packs[@]};do
       if echo " ${brew_list[@]} "|grep -q " $tp ";then
         opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-        echo "install ${tp}${opt}" |tee -a $brewfile
+        echo "install ${tp}${opt}"
         brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
       fi
     done
-    echo "" |tee -a $brewfile
+    echo ""
   done
 
-  echo "" |tee -a $brewfile
-  echo "# Homebrew packages" |tee -a $brewfile
+  echo ""
+  echo "# Homebrew packages"
   for p in ${brew_list[@]};do
     opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-    echo "install ${p}${opt}" |tee -a $brewfile
+    echo "install ${p}${opt}"
   done
-  echo "" |tee -a $brewfile
-  echo "# Cask Applications" |tee -a $brewfile
+  echo ""
+  echo "# pip packages"
+  for p in ${pip_list[@]};do
+    opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
+    echo "pip ${p}${opt}"
+  done
+  echo ""
+  echo "# Cask Applications"
   for p in ${cask_list[@]};do
-    echo "cask install $p" |tee -a $brewfile
+    echo "cask install $p"
   done
+  } |tee -a $brewfile
   echo ""
   echo "***********************************************"
   echo "You can edit $brewfile with:"
@@ -498,71 +512,100 @@ function cleanup {
   # Check packages in the input file
   read_input
 
-  echo ""
-  echo "*********************"
-  echo "Cleanup cask packages"
-  echo "*********************"
-  echo ""
-  for p in ${cask_list[@]};do
-    if ! echo " ${cask_input[@]} "|grep -q " $p ";then
-      echo brew cask uninstall $p
-      if [ $dryrun -ne 1 ];then
-        brew cask uninstall $p
+  if [ ${#cask_list[@]} != 0 ];then
+    echo ""
+    echo "*********************"
+    echo "Cleanup cask packages"
+    echo "*********************"
+    echo ""
+    for p in ${cask_list[@]};do
+      if ! echo " ${cask_input[@]} "|grep -q " $p ";then
+        echo brew cask uninstall $p
+        if [ $dryrun -ne 1 ];then
+          brew cask uninstall $p
+        fi
+        cask_list=(`echo " ${cask_list[@]} "|sed "s: ${p} : :g"`)
       fi
-      cask_list=(`echo " ${cask_list[@]} "|sed "s: ${p} : :g"`)
+    done
+    # Skip cask at tap/brew if any cask packages exist
+    if [ ${#cask_list[@]} -ne 0 ];then
+      tap_list=(`echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"`)
+      brew_list=(`echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"`)
     fi
-  done
-  # Skip cask at tap/brew if any cask packages exist
-  if [ ${#cask_list[@]} -ne 0 ];then
-    tap_list=(`echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"`)
-    brew_list=(`echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"`)
   fi
 
-  echo ""
-  echo "********************"
-  echo "Cleanup tap packages"
-  echo "********************"
-  echo ""
-  for p in ${tap_list[@]};do
-    if ! echo " ${tap_input[@]} "|grep -q " $p ";then
-      get_tap $p
-      untapflag=1
-      for tp in ${tap_packs[@]};do
-        if echo " ${brew_input[@]} "|grep -q " $tp ";then
-          # keep tap as related package is remained
-          untapflag=0
-          break
+  if [ ${#pip_list[@]} != 0 ];then
+    echo ""
+    echo "*********************"
+    echo "Cleanup pip packages"
+    echo "*********************"
+    echo ""
+    for p in ${pip_list[@]};do
+      if ! echo " ${pip_input[@]} "|grep -q " $p ";then
+        echo brew pip rm $p
+        if [ $dryrun -ne 1 ];then
+          pip uninstall -y $p >/dev/null
+          brew uninstall $p 2>/dev/null
+          brew uninstall pip-$p 2>/dev/null
         fi
-      done
-      if [ $untapflag -eq 0 ];then
-        continue
+        pip_list=(`echo " ${pip_list[@]} "|sed "s: ${p} : :g"`)
       fi
-      echo brew untap $p
-      if [ $dryrun -ne 1 ];then
-        brew untap $p
-      fi
+    done
+    # Skip brew-pip at brew if any pip packages exist
+    if [ ${#pip_list[@]} -ne 0 ];then
+      brew_list=(`echo " ${brew_list[@]} "|sed "s: ${pip_pack} : :g"`)
     fi
-  done
+  fi
 
-  echo ""
-  echo "*********************"
-  echo "Cleanup brew packages"
-  echo "*********************"
-  echo ""
-  for p in ${brew_list[@]};do
-    if ! echo " ${brew_input[@]} "|grep -q " $p ";then
-      echo brew uninstall $p
-      if [ $dryrun -ne 1 ];then
-        app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}') 2>/dev/null)
-        if [ "$app" != "" ];then
-          rm -f /Applications/$app
-          rm -f /Applications/Utilities/$app
-          rm -f ~/Applications/$app
+  if [ ${#tap_list[@]} != 0 ];then
+    echo ""
+    echo "********************"
+    echo "Cleanup tap packages"
+    echo "********************"
+    echo ""
+    for p in ${tap_list[@]};do
+      if ! echo " ${tap_input[@]} "|grep -q " $p ";then
+        get_tap $p
+        untapflag=1
+        for tp in ${tap_packs[@]};do
+          if echo " ${brew_input[@]} "|grep -q " $tp ";then
+            # keep tap as related package is remained
+            untapflag=0
+            break
+          fi
+        done
+        if [ $untapflag -eq 0 ];then
+          continue
         fi
-        brew uninstall $p
+        echo brew untap $p
+        if [ $dryrun -ne 1 ];then
+          brew untap $p
+        fi
       fi
-    fi
-  done
+    done
+  fi
+
+  if [ ${#brew_list[@]} != 0 ];then
+    echo ""
+    echo "*********************"
+    echo "Cleanup brew packages"
+    echo "*********************"
+    echo ""
+    for p in ${brew_list[@]};do
+      if ! echo " ${brew_input[@]} "|grep -q " $p ";then
+        echo brew uninstall $p
+        if [ $dryrun -ne 1 ];then
+          app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}') 2>/dev/null)
+          if [ "$app" != "" ];then
+            rm -f /Applications/$app
+            rm -f /Applications/Utilities/$app
+            rm -f ~/Applications/$app
+          fi
+          brew uninstall $p
+        fi
+      fi
+    done
+  fi
 
   echo ""
   echo "*********************"
@@ -600,6 +643,13 @@ function install {
     cask_installed=0
   fi
 
+  # Flag for pip
+  if brew list|grep -q "${pip_pack}";then
+    pip_installed=1
+  else
+    pip_installed=0
+  fi
+
   # Tap
   for p in ${tap_input[@]};do
     if ! echo " ${tap_list[@]} "|grep -q " $p ";then
@@ -629,6 +679,21 @@ function install {
       fi
       echo brew cask install $p
       brew cask install $p
+    fi
+  done
+
+  # pip
+  for p in ${pip_input[@]};do
+    if ! echo " ${pip_list[@]} "|grep -q " $p ";then
+      if [ $pip_installed -eq 0 ];then
+        echo "$pip_pack has not been installed, install now."
+        echo brew install ${pip_pack}
+        brew install ${pip_pack}
+        brew_list=(${brew_list[@]} ${pip_pack})
+        pip_installed=1
+      fi
+      echo brew pip $p
+      brew pip $p
     fi
   done
 
