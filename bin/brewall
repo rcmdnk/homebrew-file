@@ -75,7 +75,7 @@ Commands:
                                Cleanup cache (brew cleanup)
                                By drault, cleanup runs as dry-run.
                                If you want to enforce cleanup, use '-C' option.
-  brewall update   (or -u)   : Do pull, install, brew upgrade, init, push and clean -C.
+  brewall update   (or -u)   : Do pull, install, brew update/upgrade, init, push and clean -C.
                                pull, push and clean are done only if
                                the repository is assigned.
   brewall edit     (or -e)   : Edit input file.
@@ -1062,6 +1062,7 @@ if [ $update -eq 1 ];then
     repomgr pull
   fi
   install
+  brew update
   brew upgrade
   initialize 0
   if [ "$repo" != "" ];then
