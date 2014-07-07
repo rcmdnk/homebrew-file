@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.1.4
+version=0.1.5
 #############################################
 
 #The MIT License (MIT) {{{
