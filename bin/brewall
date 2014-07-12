@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.1.5
+version=0.1.6
 #############################################
 
 #The MIT License (MIT) {{{
@@ -175,8 +175,7 @@ fi
 
 # Function {{{
 
-# Helper for yes/no {{{
-function ask_yn {
+function ask_yn { # Helper for yes/no {{{
   question="$1"
   printf "$1 [y/n]: "
   read yn
@@ -197,16 +196,14 @@ function ask_yn {
   done
 } # }}}
 
-# Helper to build brewfile path for the repository {{{
-function repo_file {
+function repo_file { # Helper to build brewfile path for the repository {{{
   repo_name=$(basename ${repo%.git})
   user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
   inputdir=$(dirname $input)
   echo $inputdir/${user_name}_${repo_name}/$(basename $input)
 } # }}}
 
-# Helper check repository file {{{
-function check_repo {
+function check_repo { # Helper check repository file {{{
   if [ ! -f $input ];then
     return 0
   fi
@@ -232,8 +229,7 @@ function check_repo {
   fi
 } # }}}
 
-# Helper repository management {{{
-function repomgr {
+function repomgr { # Helper repository management {{{
   local l_pull=$pull
   local l_push=$push
   if [ "$1" = "pull" ];then
@@ -263,43 +259,31 @@ function repomgr {
   fi
 } # }}}
 
-
-# Helper for tap configuration file {{{
-function get_tap {
+function get_tap { # Helper for tap configuration file {{{
   tap_user=$(dirname $1)
   tap_repo=$(basename $1)
-  formulae=$(ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/*rb 2>/dev/null)
-  if [ "$formulae" = "" ];then
-    formulae=$(ls ${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/*rb 2>/dev/null)
-  fi
+  formulae=($(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/"*.rb 2>/dev/null))
+  formulae=("${formulae[@]}" $(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/"*.rb 2>/dev/null))
   tap_packs=()
-  #echo \$1=$1
-  #echo tap_user=$tap_user
-  #echo tap_repo=$tap_repo
-  #echo formulae=$formulae
-  for f in ${formulae[@]};do
-    tap_packs=(${tap_packs[@]} $(basename ${f%.rb}))
+  for f in "${formulae[@]}";do
+    tap_packs=("${tap_packs[@]}" $(basename "${f%.rb}"))
   done
-  # Note: Some repositories, such caskroom/homebrew-cask, don't have any formulae.
-  #if [ ${#tap_packs[@]} -eq 0 ];then
-  #  echo ""
-  #  echo "WARNING: No formula is found in $tap_dir/${user}-${repo}, you might have already untap $1"
-  #  echo "WARNING: or $1 doesn't have any formula."
-  #  echo ""
-  #fi
+  casks=($(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/Casks/"*rb 2>/dev/null))
+  tap_casks=()
+  for c in "${casks[@]}";do
+    tap_casks=("${tap_casks[@]}" $(basename "${c%.rb}"))
+  done
   return 0
 } # }}}
 
-# Get list {{{
-function get_list {
+function get_list { # Get list {{{
   brew_list=($(brew list|grep -v "^pip-"))
   tap_list=($(brew tap))
   cask_list=($(brew cask list 2>/dev/null))
   pip_list=($(brew list|grep "^pip"))
 } # }}}
 
-# Read input file {{{
-function read_input {
+function read_input { # Read input file {{{
   # Check packages in the input file
   cmd_input=()
   cask_input=()
@@ -347,8 +331,7 @@ function read_input {
   done < $brewfile
 } # }}}
 
-# Set Brewfile Repository {{{
-function set_brewfile_repo {
+function set_brewfile_repo { # Set Brewfile Repository {{{
 
   # Check input file
   if [ -f $input ];then
@@ -400,8 +383,18 @@ function set_brewfile_repo {
   return $?
 } # }}}
 
-# Initialize Brewfile {{{
-function initialize {
+function get_options { # Get install options from brew info {{{
+  p=$1
+  # Get options for build
+  opt=`brew info $p|grep "Built from source with"|cut -d: -f2`
+  # is head or not
+  if brew info $p| grep "^$(brew --cellar $p)"|grep -q HEAD;then
+    opt="$opt --HEAD"
+  fi
+  echo $opt
+} # }}}
+
+function initialize { # Initialize Brewfile {{{
   if [ -f $input ] && [ "$1" != "0" ];then
     if [ "$repo" != "" ];then
       echo "You are using Brewfile of $repo."
@@ -439,15 +432,22 @@ function initialize {
       if [ $ret -ne 0 ];then
         continue
       fi
+      echo ""
+      echo "## $p"
       echo "tap $p"
       for tp in ${tap_packs[@]};do
         if echo " ${brew_list[@]} "|grep -q " $tp ";then
-          opt=`brew info $tp|grep "Built from source with"|cut -d: -f2`
-          echo "install ${tp}${opt}"
+          opt=$(get_options $tp)
+          echo "install ${tp}${opt:+ $opt}"
           brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
         fi
       done
-      echo ""
+      for tc in ${tap_casks[@]};do
+        if echo " ${cask_list[@]} "|grep -q " $tc ";then
+          echo "cask install ${tc}"
+          cask_list=(`echo " ${cask_list[@]} "|sed "s: $tc : :g"`)
+        fi
+      done
     done
   fi
 
@@ -455,8 +455,8 @@ function initialize {
     echo ""
     echo "# Homebrew packages"
     for p in ${brew_list[@]};do
-      opt=`brew info $p|grep "Built from source with"|tail -n1|cut -d: -f2`
-      echo "install ${p}${opt}"
+      opt=$(get_options $p)
+      echo "install ${p}${opt:+ $opt}"
     done
   fi
   if [ ${#pip_list[@]} -gt 0 ];then
@@ -476,14 +476,13 @@ function initialize {
   } |tee -a $brewfile
   echo ""
   echo "***********************************************"
-  echo "You can edit $brewfile with:"
+  echo "You can edit $brewfile by:"
   echo "    $0 edit"
   echo "***********************************************"
   return 0
 } # }}}
 
-# Check input file {{{
-function check_input_file {
+function check_input_file { # Check input file {{{
   if [ ! -f $brewfile ];then
     echo "WARNING: Input file $brewfile is not found."
     ask_yn "WARNING: Do you want to initialize from installed packages?"
@@ -494,20 +493,18 @@ function check_input_file {
     else
       echo ""
       echo "WARNING: OK, please prepare Brewfile"
-      echo "WARNING: or you can initialize $brewfile with:"
+      echo "WARNING: or you can initialize $brewfile by:"
       echo "WARNING:     $ $0 init"
       return 1
     fi
   fi
 } # }}}
 
-# Edit file {{{
-function edit_brewfile {
+function edit_brewfile { # Edit file {{{
   $my_editor $brewfile
 } # }}}
 
-# Cleanup {{{
-function cleanup {
+function cleanup { # Cleanup {{{
   if [ $dryrun -eq 1 ];then
     echo ""
     echo "*******"
@@ -635,8 +632,7 @@ function cleanup {
   return 0
 } # }}}
 
-# Install {{{
-function install {
+function install { # Install {{{
   # First update Homebrew
   brew update
 
@@ -730,8 +726,7 @@ function install {
   return 0
 } # }}}
 
-# Helper function for Cask# {{{
-function find_app {
+function find_app { # Helper function for Cask# {{{
   app="$1"
   is_cask=0
   is_installed=0
@@ -765,8 +760,8 @@ function find_app {
 }
 
 # }}}
-# Check applications for Cask # {{{
-function check_cask {
+
+function check_cask { # Check applications for Cask # {{{
   echo "Starting to check applications for Cask..."
   caskdir=$(brew info  brew-cask|grep "/usr/local/Cellar/brew-cask"|cut -d" " -f1)/Casks
   if [ "$caskdir" = "/Casks" ];then
@@ -960,7 +955,6 @@ function check_cask {
 } # }}}
 
 # }}}
-
 
 # Main {{{
 
