@@ -3,7 +3,7 @@
 #############################################
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.1.6
+version=0.1.7
 #############################################
 
 #The MIT License (MIT) {{{
@@ -326,7 +326,7 @@ function read_input { # Read input file {{{
     else
       #echo "WARNING: $cmd is unknown, please check $brewfile"
       #continue
-      brew_cmd=("${cmd_input[@]}" "$p $opt")
+      cmd_input=("${cmd_input[@]}" "$p $opt")
     fi
   done < $brewfile
 } # }}}
@@ -702,7 +702,7 @@ function install { # Install {{{
 
   # Brew
   for p in "${brew_input_opt[@]}";do
-    if ! echo " ${brew_list[@]} "|grep -q " ${p% *} ";then
+    if ! echo " ${brew_list[@]} "|grep -q " ${p%% *} ";then
       echo brew install $p
       brew install $p | tee .brewall_install_log
       linkcmd=`grep "ln -s" .brewall_install_log`
@@ -715,11 +715,10 @@ function install { # Install {{{
     fi
   done
 
-  echo "brewall install does automatically 'brew update'"
+  # Other commands
   if [ ${#cmd_input[@]} -ne 0 ];then
-    echo "Following commands have not been executed."
     for c in "${#cmd_input[@]}";do
-      echo "$c"
+      $c
     done
   fi
 
@@ -1056,7 +1055,6 @@ if [ $update -eq 1 ];then
     repomgr pull
   fi
   install
-  brew update
   brew upgrade
   initialize 0
   if [ "$repo" != "" ];then
