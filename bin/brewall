@@ -1,9 +1,16 @@
 #!/bin/bash
 
-#############################################
+## Description {{{
+#
 # Brewall: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-brewall
-version=0.1.7
+#
+# Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
+#
+BREWALL_VERSION=v0.1.8
+SENTAKU_DATE="01/Aug/2014"
+#
+# }}}
 #############################################
 
 #The MIT License (MIT) {{{
@@ -154,13 +161,15 @@ while [ $# != 0 ] ; do
       casklist=1; : $((ncommands++));
       ;;
     -v|version)
-      echo "brewall v$version";exit 0;
+      echo "brewall $BREWALL_VERSION";exit 0;
       ;;
     -h|help)
       echo "$HELP" 1>&2; exit 0;
+      echo "$HELP"|${PAGER:-less}; exit 0;
       ;;
     *)
-      echo $1: unknown option; echo; echo "$HELP" 1>&2; exit 1;
+      echo "$(basename $0) $1: unknown argument
+Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
   esac
   shift
 done
@@ -453,7 +462,7 @@ function initialize { # Initialize Brewfile {{{
 
   if [ ${#brew_list[@]} -gt 0 ];then
     echo ""
-    echo "# Homebrew packages"
+    echo "# Other Homebrew packages"
     for p in ${brew_list[@]};do
       opt=$(get_options $p)
       echo "install ${p}${opt:+ $opt}"

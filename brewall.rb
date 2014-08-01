@@ -1,6 +1,6 @@
 require 'formula'
 
-HOMEBREW_BREWALL_VERSION = '0.1.7'
+HOMEBREW_BREWALL_VERSION = '0.1.8'
 class Brewall < Formula
   homepage 'https://github.com/rcmdnk/homebrew-brewall/'
   url 'https://github.com/rcmdnk/homebrew-brewall.git', :tag => "v#{HOMEBREW_BREWALL_VERSION}"
