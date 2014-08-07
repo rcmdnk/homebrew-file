@@ -164,7 +164,6 @@ while [ $# != 0 ] ; do
       echo "brewall $BREWALL_VERSION";exit 0;
       ;;
     -h|help)
-      echo "$HELP" 1>&2; exit 0;
       echo "$HELP"|${PAGER:-less}; exit 0;
       ;;
     *)
