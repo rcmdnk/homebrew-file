@@ -7,8 +7,8 @@
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREWALL_VERSION=v0.1.8
-SENTAKU_DATE="01/Aug/2014"
+BREWALL_VERSION=v0.1.9
+SENTAKU_DATE="13/Aug/2014"
 #
 # }}}
 #############################################
@@ -285,10 +285,16 @@ function get_tap { # Helper for tap configuration file {{{
 } # }}}
 
 function get_list { # Get list {{{
+  brew list >/dev/null
+  [ $? -ne 0 ] && exit
   brew_list=($(brew list|grep -v "^pip-"))
-  tap_list=($(brew tap))
-  cask_list=($(brew cask list 2>/dev/null))
   pip_list=($(brew list|grep "^pip"))
+
+  tap_list=($(brew tap))
+  [ $? -ne 0 ] && exit
+
+  cask_list=($(brew cask list))
+  [ $? -ne 0 ] && exit
 } # }}}
 
 function read_input { # Read input file {{{
