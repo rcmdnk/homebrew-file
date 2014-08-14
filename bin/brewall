@@ -7,8 +7,8 @@
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREWALL_VERSION=v0.1.9
-SENTAKU_DATE="13/Aug/2014"
+BREWALL_VERSION=v0.2.0
+SENTAKU_DATE="14/Aug/2014"
 #
 # }}}
 #############################################
