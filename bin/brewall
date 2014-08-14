@@ -172,6 +172,7 @@ while [ $# != 0 ] ; do
       ;;
     *)
       echo "$(basename $0) $1: unknown argument
+
 Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
       ;;
   esac
@@ -179,10 +180,13 @@ Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
 done
 
 if [ $ncommands -eq 0 ];then
-  echo "$HELP" 1>&1; exit 0;
+  echo "$HELP|head -n1" 1>&2;
+  echo
+  echo "Check \"$(basename $0) help\" for further information" 1>&2; exit 0;
 elif [ $ncommands -ne 1 ];then
-  echo "More than 1 commands are given!";echo;
-  echo "$HELP" 1>&1; exit 1;
+  echo "More than 1 commands are given!
+
+Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
 fi
 # }}}
 
