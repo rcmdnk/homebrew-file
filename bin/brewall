@@ -63,41 +63,45 @@ cask_repo="phinze/cask"
 pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
 
+thisname=$(basename $0)
+if [ "$thisname" = "brew-all" ];then
+  thisname="brew all"
+fi
 # }}}
 
 # Help {{{
-HELP="Usage: $(basename $0) [-increvh][-f <input file>] command ...
+HELP="Usage: $thisname [-increvh][-f <input file>][command] ...
 
 Commands:
-  brewall install            : Install packages in BREWFILE (do 'brew update', too).
-  brewall brew [command ...] : Execute brew command, and update BREWFILE.
-  brewall brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
-  brewall init     (or -i)   : Initialize/Update BREWFILE with installed packages.
-  brewall set_repo (or -s)   : Set BREWFILE repository (e.g. rcmdnk/Brewfile).
-  brewall pull               : Update BREWFILE from the repository.
-  brewall push               : Push your BREWFILE to the repository.
-  brewall clean    (or -c)   : Clenup
-                               Uninstall packages not in the list.
-                               Untap packages not in the list.
-                               Cleanup cache (brew cleanup)
-                               By drault, cleanup runs as dry-run.
-                               If you want to enforce cleanup, use '-C' option.
-  brewall update   (or -u)   : Do pull, install, brew update/upgrade, init, push and clean -C.
-                               pull, push and clean are done only if
-                               the repository is assigned.
-  brewall edit     (or -e)   : Edit input file.
-  brewall casklist           : Check applications for Cask
-  brewall version  (or -v)   : Show version.
-  brewall help     (or -h)   : Print Help (this message) and exit.
+  install            : Install packages in BREWFILE (do 'brew update', too).
+  brew [command ...] : Execute brew command, and update BREWFILE.
+  brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
+  init     (or -i)   : Initialize/Update BREWFILE with installed packages.
+  set_repo (or -s)   : Set BREWFILE repository (e.g. rcmdnk/Brewfile).
+  pull               : Update BREWFILE from the repository.
+  push               : Push your BREWFILE to the repository.
+  clean    (or -c)   : Clenup
+                     Uninstall packages not in the list.
+                     Untap packages not in the list.
+                     Cleanup cache (brew cleanup)
+                     By drault, cleanup runs as dry-run.
+                     If you want to enforce cleanup, use '-C' option.
+  update   (or -u)   : Do pull, install, brew update/upgrade, init, push and clean -C.
+                     pull, push and clean are done only if
+                     the repository is assigned.
+  edit     (or -e)   : Edit input file.
+  casklist           : Check applications for Cask
+  version  (or -v)   : Show version.
+  help     (or -h)   : Print Help (this message) and exit.
 
 Options:
-      -f  <file> Set input file (current default: ${input})
-                 You can set input file by environmental variable,
-                 HOMEBREW_BREWFILE, like:
-                      export HOMEBREW_BREWFILE=~/.brewfile
-      -n         Don't make links for Apps
-      -C         Run cleanup in non dry-run mode.
-      -r  <repo> Set repository name. Use with set_repo (-s).
+  -f  <file> Set input file (current default: ${input})
+             You can set input file by environmental variable,
+             HOMEBREW_BREWFILE, like:
+                  export HOMEBREW_BREWFILE=~/.brewfile
+  -n         Don't make links for Apps
+  -C         Run cleanup in non dry-run mode.
+  -r  <repo> Set repository name. Use with set_repo (-s).
 
 If you want to use repository's BREWFILE,
 please prepare a repository which has a file named 'Brewfile'.
