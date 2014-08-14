@@ -66,7 +66,7 @@ my_editor=${EDITOR:-"vim"}
 # }}}
 
 # Help {{{
-HELP="Usage: $0 [-increvh][-f <input file>] command ...
+HELP="Usage: $(basename $0) [-increvh][-f <input file>] command ...
 
 Commands:
   brewall install            : Install packages in BREWFILE (do 'brew update', too).
@@ -164,11 +164,12 @@ while [ $# != 0 ] ; do
       echo "brewall $BREWALL_VERSION";exit 0;
       ;;
     -h|help)
-      echo "$HELP"|${PAGER:-less}; exit 0;
+      echo "$HELP"|${PAGER:-less} 1>&2; exit 0;
       ;;
     *)
       echo "$(basename $0) $1: unknown argument
 Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
+      ;;
   esac
   shift
 done
