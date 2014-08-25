@@ -9,9 +9,9 @@ if ! which brew >& /dev/null;then
   echo
 fi
 echo
-echo Install brewall...
-brew tap rcmdnk/brewall
-brew install brewall
+echo Install Brew-file...
+brew tap rcmdnk/file
+brew install brew-file
 
 if [ $brew_installed -eq 0 ];then
   brew doctor
