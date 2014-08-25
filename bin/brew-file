@@ -64,8 +64,8 @@ pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
 
 thisname=$(basename $0)
-if [ "$thisname" = "brew-all" ];then
-  thisname="brew all"
+if [ "$thisname" = "brew-file" ];then
+  thisname="brew file"
 fi
 # }}}
 
@@ -165,28 +165,28 @@ while [ $# != 0 ] ; do
       casklist=1; : $((ncommands++));
       ;;
     -v|version)
-      echo "$(basename $0) $BREW_FILE_VERSION";exit 0;
+      echo "$thisname $BREW_FILE_VERSION";exit 0;
       ;;
     -h|help)
       echo "$HELP"|${PAGER:-less} 1>&2; exit 0;
       ;;
     *)
-      echo "$(basename $0) $1: unknown argument
+      echo "$thisname $1: unknown argument
 
-Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
+Check \"$thisname help\" for further information" 1>&2; exit 1;
       ;;
   esac
   shift
 done
 
 if [ $ncommands -eq 0 ];then
-  echo "$HELP|head -n1" 1>&2;
+  echo "$HELP"|head -n1 1>&2;
   echo
-  echo "Check \"$(basename $0) help\" for further information" 1>&2; exit 0;
+  echo "Check \"$thisname help\" for further information" 1>&2; exit 0;
 elif [ $ncommands -ne 1 ];then
-  echo "More than 1 commands are given!
-
-Check \"$(basename $0) help\" for further information" 1>&2; exit 1;
+  echo "More than 1 commands are given!"
+  echo
+  echo "Check \"$thisname help\" for further information" 1>&2; exit 0;
 fi
 # }}}
 
