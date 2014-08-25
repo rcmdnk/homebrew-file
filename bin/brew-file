@@ -2,13 +2,13 @@
 
 ## Description {{{
 #
-# Brewall: Manager for packages of Homebrew
-# https://github.com/rcmdnk/homebrew-brewall
+# Brew-file: Manager for packages of Homebrew
+# https://github.com/rcmdnk/homebrew-file
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREWALL_VERSION=v0.2.0
-SENTAKU_DATE="14/Aug/2014"
+BREW_FILE_VERSION=v1.0.0
+SENTAKU_DATE="25/Aug/2014"
 #
 # }}}
 #############################################
@@ -39,7 +39,7 @@ SENTAKU_DATE="14/Aug/2014"
 input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
 brewfile="$input"
 repo=""
-brewall_inst=0
+install=0
 brew=0
 noinit=0
 link=1
@@ -106,7 +106,7 @@ Options:
 If you want to use repository's BREWFILE,
 please prepare a repository which has a file named 'Brewfile'.
 If you assign the repository which doesn't have 'Brewfile',
-then brewall will try to make 'Brewfile' in the repository.
+then Brew-file will try to make 'Brewfile' in the repository.
 For GitHub repository, you can shorten the address like user_name/repo_name.
 
 "
@@ -120,7 +120,7 @@ while [ $# != 0 ] ; do
       input=$2; shift;
       ;;
     install)
-      brewall_inst=1; : $((ncommands++));
+      install=1; : $((ncommands++));
       ;;
     brew)
       brew=1
@@ -165,7 +165,7 @@ while [ $# != 0 ] ; do
       casklist=1; : $((ncommands++));
       ;;
     -v|version)
-      echo "brewall $BREWALL_VERSION";exit 0;
+      echo "$(basename $0) $BREW_FILE_VERSION";exit 0;
       ;;
     -h|help)
       echo "$HELP"|${PAGER:-less} 1>&2; exit 0;
@@ -1067,7 +1067,7 @@ if [ $cleanup -eq 1 ];then
 fi
 
 # Install
-if [ $brewall_inst -eq 1 ];then
+if [ $install -eq 1 ];then
   install
   exit $?
 fi
