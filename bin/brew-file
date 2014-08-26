@@ -7,8 +7,8 @@
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREW_FILE_VERSION=v1.0.0
-SENTAKU_DATE="25/Aug/2014"
+BREW_FILE_VERSION=v1.0.1
+SENTAKU_DATE="27/Aug/2014"
 #
 # }}}
 #############################################
@@ -240,7 +240,7 @@ function check_repo { # Helper check repository file {{{
     if [ $? -ne 0 ];then
       echo "Can't clone $repo."
       echo "Please check the repository, or reset by"
-      echo "    $ $0 set_repo"
+      echo "    $ $thisname set_repo"
       exit 1
     fi
   fi
@@ -258,7 +258,7 @@ function repomgr { # Helper repository management {{{
   fi
   if [ "$repo" = "" ];then
     echo "Please set the repository, or reset by"
-    echo "    $ $0 set_repo"
+    echo "    $ $thisname set_repo"
     return 1
   fi
   if [ ! -d $(dirname $brewfile) ];then
@@ -302,8 +302,17 @@ function get_list { # Get list {{{
   tap_list=($(brew tap))
   [ $? -ne 0 ] && exit
 
-  cask_list=($(brew cask list))
-  [ $? -ne 0 ] && exit
+  cask_list=()
+  cask_list_nocask=()
+  while read p e;do
+    if [ "$e" = "" ];then
+      cask_list=(${cask_list[@]} $p)
+    else
+      printf "\e[31;1mThe cask file of \e[31;7m$p\e[0m\e[31;1m doesn't exist.\n"
+      printf "Please check later.\n\n\e[0m"
+      cask_list_nocask=(${cask_list_nocask[@]} $p)
+    fi
+  done < <(brew cask list)
 } # }}}
 
 function read_input { # Read input file {{{
@@ -496,11 +505,20 @@ function initialize { # Initialize Brewfile {{{
       echo "cask install $p"
     done
   fi
+  if [ ${#cask_list_nocask[@]} -gt 0 ];then
+    echo ""
+    echo "# Below application were installed by Cask,"
+    echo "# but no cask were found."
+    echo ""
+    for p in ${cask_list_nocask[@]};do
+      echo "# cask install $p"
+    done
+  fi
   } |tee -a $brewfile
   echo ""
   echo "***********************************************"
   echo "You can edit $brewfile by:"
-  echo "    $0 edit"
+  echo "    $thisname edit"
   echo "***********************************************"
   return 0
 } # }}}
@@ -517,7 +535,7 @@ function check_input_file { # Check input file {{{
       echo ""
       echo "WARNING: OK, please prepare Brewfile"
       echo "WARNING: or you can initialize $brewfile by:"
-      echo "WARNING:     $ $0 init"
+      echo "WARNING:     $ $thisname init"
       return 1
     fi
   fi
@@ -648,7 +666,7 @@ function cleanup { # Cleanup {{{
     echo "*****************************************"
     echo "This is dry run."
     echo "If you want to enforce cleanup, use '-C':"
-    echo "    $ $0 clean -C"
+    echo "    $ $thisname clean -C"
     echo "*****************************************"
   fi
 
