@@ -243,3 +243,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## Information
 More information could be found in [my blog](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/).
+
+> [Brewall: brewパッケージを管理する](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/)
+
+> [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/)
