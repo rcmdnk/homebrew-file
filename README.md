@@ -24,7 +24,21 @@ By Homebrew:
 
 Or download `bin/brew-file` and put it in anywhere under `PATH` (e.g. `~/usr/bin/`)
 
+## Manage Brewfile with GitHub
+
+Brew-file uses Brewfile, with which packages are managed.
+
+With Brew-file, you can manage Brewfile with GitHub.
+
+To do so, before starting to use Brew-file,
+make GitHub repository named **Brewfile**,
+and make one file named **Brewfile** in the repository.
+
+You can make the initial Brewfile by yourself,
+or can initialize Brewfile by Brew-file as written below.
+
 ## Usage
+
 Brwe-file manages pakcages installed by Homebrew.
 It also supports [brew-tap](https://github.com/mxcl/homebrew/wiki/brew-tap)
 and [brew-cask](https://github.com/phinze/homebrew-cask).
