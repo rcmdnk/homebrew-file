@@ -36,7 +36,7 @@ SENTAKU_DATE="27/Aug/2014"
 # }}}
 
 # Variables {{{
-input=${HOMEBREW_BREWFILE:-"/usr/local/Library/Brewfile"}
+input=${HOMEBREW_BREWFILE:-"$(brew --repository)/Library/Brewfile"}
 brewfile="$input"
 repo=""
 install=0
@@ -53,12 +53,8 @@ pull=0
 push=0
 update=0
 casklist=0
-tap_dir="/usr/local/Library/Taps"
-if [ -d ~/Library/Caches/Homebrew ];then
-  cache_dir=${HOMEBREW_CACHE:-"~/Library/Caches/Homebrew"}
-else
-  cache_dir=${HOMEBREW_CACHE:-"/Library/Caches/Homebrew"}
-fi
+tap_dir="$(brew --repository)/Library/Taps"
+cache_dir=$(brew --cache)
 cask_pack="brew-cask"
 cask_repo="phinze/cask"
 pip_pack="brew-pip"
