@@ -301,7 +301,6 @@ Package list for [Homebrew](http://brew.sh/).
 Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).
 " > README.md
   touch $(basename $input)
-  git init
   git add -A
   git commit -m "Prepared by $thisname"
   git push -u origin master
