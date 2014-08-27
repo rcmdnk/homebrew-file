@@ -7,7 +7,7 @@
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREW_FILE_VERSION=v1.1.0
+BREW_FILE_VERSION=v1.1.1
 SENTAKU_DATE="27/Aug/2014"
 #
 # }}}
@@ -517,7 +517,15 @@ function initialize { # Initialize Brewfile {{{
   if [ $initialized -eq 1 ];then
     return
   fi
-  if [ -f $input ] && [ "$1" != "0" ];then
+
+  if [ ! -f $input ];then
+    ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
+    ret=$?
+    if [ $ret -eq 0 ];then
+      set_brewfile_repo
+      return $?
+    fi
+  elif [ "$1" != "0" ];then
     if [ "$repo" != "" ];then
       echo "You are using Brewfile of $repo."
     else
@@ -533,13 +541,6 @@ function initialize { # Initialize Brewfile {{{
       fi
     else
       return 1
-    fi
-  elif [ ! -f $input ] && [ "$1" != "0" ];then
-    ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
-    ret=$?
-    if [ $ret -eq 0 ];then
-      set_brewfile_repo
-      return $?
     fi
   fi
   rm -f ${brewfile}
