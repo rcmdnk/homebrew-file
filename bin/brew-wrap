@@ -2,23 +2,28 @@
 
 # Arguments
 cmd=$1
-caskcmd=$2
+cmd2=$2
+cmd3=$3
 
-# brew install/uninstall
+# brew install/uninstall, pip
 if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
   || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
   if [ $# -gt 1 ];then
-    brew file brew "$@"
-    exit $?
+    if [ "$cmd2" != "-h" ];then
+      brew file brew "$@"
+      exit $?
+    fi
   fi
 fi
 
 # brew cask install/uninstall
 if [ "$cmd" = "cask" ];then
-  if [ "$caskcmd" = "rm" ] || [ "$caskcmd" = "remove" ] || [ "$caskcmd" = "uninstall" ] || [ "$caskcmd" = "install" ];then
+  if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
     if [ $# -gt 2 ];then
-      brew file brew "$@"
-      exit $?
+      if [ "$cmd3" != "-h" ];then
+        brew file brew "$@"
+        exit $?
+      fi
     fi
   fi
 fi
