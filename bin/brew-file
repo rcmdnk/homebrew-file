@@ -5,7 +5,7 @@
 # Brew-file: Manager for packages of Homebrew
 # https://github.com/rcmdnk/homebrew-file
 #
-# Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
+# Usage: brew-file [-increvh][-f <input file>][command] ...
 #
 BREW_FILE_VERSION=v1.1.1
 SENTAKU_DATE="27/Aug/2014"
