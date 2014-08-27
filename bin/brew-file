@@ -254,13 +254,28 @@ function check_github_repo { # Helper to check and create github repository {{{
 
   # Try to create w/o two-factor code
   description="Package list for Homebrew"
-  ret=$(curl -u ${user_name}:${pass} https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+  while [ 1 ];do
+    ret=$(curl -u ${user_name}:${pass} https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+    if ! echo $ret| grep -q "Bad credentials";then
+      break
+    fi
+    printf "\e[31;1mWrong Password!\e[0m GitHub Password: "
+    read -s pass
+    echo
+  done
 
   # If it failed, try with two-factor code
   if echo $ret| grep -q "Must specify two-factor authentication OTP code";then
     echo -n "GitHub Two-Factor Code: "
     read twofac
-    ret=$(curl -u ${user_name}:${pass} -H "X-GitHub-OTP: $twofac" https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+    while [ 1 ];do
+      ret=$(curl -u ${user_name}:${pass} -H "X-GitHub-OTP: $twofac" https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+      if ! echo $ret| grep -q "Must specify two-factor authentication OTP code";then
+        break
+      fi
+      printf "\e[31;1mWrong code!\e[0m GitHub Two-Factor Code: "
+      read twofac
+    done
   fi
 
   # Initialize the repository
