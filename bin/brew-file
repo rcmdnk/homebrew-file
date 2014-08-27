@@ -7,7 +7,7 @@
 #
 # Usage: sentaku [-HNladnh] [-f <file>] [-s <sep>]
 #
-BREW_FILE_VERSION=v1.0.1
+BREW_FILE_VERSION=v1.1.0
 SENTAKU_DATE="27/Aug/2014"
 #
 # }}}
@@ -46,6 +46,7 @@ link=1
 cleanup=0
 dryrun=1
 init=0
+initialized=0
 edit=0
 set_repo=0
 pull=0
@@ -220,6 +221,86 @@ function repo_file { # Helper to build brewfile path for the repository {{{
   echo $inputdir/${user_name}_${repo_name}/$(basename $input)
 } # }}}
 
+function check_github_repo { # Helper to check and create github repository {{{
+  repo_name=$(basename ${repo%.git})
+  user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
+
+  # Check if the repository already exists or not.
+  ret=$(curl --head https://github.com/$user_name/$repo_name 2>/dev/null|head -n1)
+  if echo $ret| grep -q "OK";then
+    git clone $repo $(dirname $brewfile)
+    if [ $? -ne 0 ];then
+      echo "Can't clone $repo."
+      echo "Please check the repository, or reset with"
+      echo "    $ $thisname set_repo"
+      exit 1
+    fi
+    return
+  fi
+
+  # Create new repository
+  echo "GitHub repository: $user_name/$repo_name doesn't exist."
+  ask_yn "Do you want to create the repository?"
+  ret=$?
+  echo
+  if [ $ret -ne 0 ];then
+    exit 1
+  fi
+
+  # Check password
+  echo -n "GitHub password: "
+  read -s pass
+  echo
+
+  # Try to create w/o two-factor code
+  description="Package list for Homebrew"
+  ret=$(curl -u ${user_name}:${pass} https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+
+  # If it failed, try with two-factor code
+  if echo $ret| grep -q "Must specify two-factor authentication OTP code";then
+    echo -n "GitHub Two-Factor Code: "
+    read twofac
+    ret=$(curl -u ${user_name}:${pass} -H "X-GitHub-OTP: $twofac" https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
+  fi
+
+  # Initialize the repository
+  git clone $repo $(dirname $brewfile)
+  if [ $? -ne 0 ];then
+    echo "Can't clone $repo."
+    echo "Please check the repository, or reset with"
+    echo "    $ $thisname set_repo"
+    exit 1
+  fi
+  cd $(dirname $brewfile)
+  if [ $? -ne 0 ];then
+    echo "Can't cd to $(dirname $brewfile)."
+    echo "Please check the repository, or reset with"
+    echo "    $ $thisname set_repo"
+    exit 1
+  fi
+  echo "Brewfile
+========
+
+Package list for [Homebrew](http://brew.sh/).
+
+Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).
+" > README.md
+  touch $(basename $input)
+  git init
+  git add -A
+  git commit -m "Prepared by $thisname"
+  git push -u origin master
+  cd -
+
+  echo
+  ask_yn "Do you want to initialize from installed packages?"
+  ret=$?
+  if [ $ret -eq 0 ];then
+    initialize 0
+    return $?
+  fi
+} # }}}
+
 function check_repo { # Helper check repository file {{{
   if [ ! -f $input ];then
     return 0
@@ -236,12 +317,16 @@ function check_repo { # Helper check repository file {{{
   fi
   brewfile=$(repo_file)
   if [ ! -d $(dirname $brewfile) ];then
-    git clone $repo $(dirname $brewfile)
-    if [ $? -ne 0 ];then
-      echo "Can't clone $repo."
-      echo "Please check the repository, or reset by"
-      echo "    $ $thisname set_repo"
-      exit 1
+    if echo $repo |grep -q "github";then
+      check_github_repo
+    else
+      git clone $repo $(dirname $brewfile)
+      if [ $? -ne 0 ];then
+        echo "Can't clone $repo."
+        echo "Please check the repository, or reset with"
+        echo "    $ $thisname set_repo"
+        exit 1
+      fi
     fi
   fi
 } # }}}
@@ -257,7 +342,7 @@ function repomgr { # Helper repository management {{{
     l_push=1
   fi
   if [ "$repo" = "" ];then
-    echo "Please set the repository, or reset by"
+    echo "Please set the repository, or reset with"
     echo "    $ $thisname set_repo"
     return 1
   fi
@@ -376,6 +461,7 @@ function set_brewfile_repo { # Set Brewfile Repository {{{
     fi
     ask_yn "Do you want to overwrite it?"
     ret=$?
+    echo
     if [ $ret -eq 0 ];then
       mv ${input} ${input}.bak
       echo "ok, old $input was moved to ${input}.bak"
@@ -387,13 +473,14 @@ function set_brewfile_repo { # Set Brewfile Repository {{{
 
   # Get repository
   if [ "$repo" = "" ];then
-    echo 'Set repository, "non" to use local Brewfile'
-    echo -n ': '
+    echo
+    echo 'Set repository, "non" for local Brewfile.'
+    echo '<user>/<repo> for GitHub repository,'
+    echo -n 'or full path for the repository: '
     read repo
     while [ "$repo" = "" ];do
-      echo -n "Repository can't be empty."
-      echo 'Set repository, "non" to use local Brewfile'
-      echo -n ': '
+      echo "Repository can't be empty."
+      echo -n 'Set repository: '
       read repo
     done
   fi
@@ -427,6 +514,9 @@ function get_options { # Get install options from brew info {{{
 } # }}}
 
 function initialize { # Initialize Brewfile {{{
+  if [ $initialized -eq 1 ];then
+    return
+  fi
   if [ -f $input ] && [ "$1" != "0" ];then
     if [ "$repo" != "" ];then
       echo "You are using Brewfile of $repo."
@@ -435,6 +525,7 @@ function initialize { # Initialize Brewfile {{{
     fi
     ask_yn "Do you want to overwrite it?"
     ret=$?
+    echo
     if [ $ret -eq 0 ];then
       if [ "$repo" = "" ];then
         mv ${input} ${input}.bak
@@ -442,6 +533,13 @@ function initialize { # Initialize Brewfile {{{
       fi
     else
       return 1
+    fi
+  elif [ ! -f $input ] && [ "$1" != "0" ];then
+    ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
+    ret=$?
+    if [ $ret -eq 0 ];then
+      set_brewfile_repo
+      return $?
     fi
   fi
   rm -f ${brewfile}
@@ -517,9 +615,12 @@ function initialize { # Initialize Brewfile {{{
   } |tee -a $brewfile
   echo ""
   echo "***********************************************"
-  echo "You can edit $brewfile by:"
-  echo "    $thisname edit"
+  echo "You can edit $brewfile with:"
+  echo "    $ $thisname edit"
   echo "***********************************************"
+
+  initialized=1
+
   return 0
 } # }}}
 
@@ -528,13 +629,14 @@ function check_input_file { # Check input file {{{
     echo "WARNING: Input file $brewfile is not found."
     ask_yn "WARNING: Do you want to initialize from installed packages?"
     ret=$?
+    echo
     if [ $ret -eq 0 ];then
-      initialize
+      initialize 0
       return $?
     else
       echo ""
       echo "WARNING: OK, please prepare Brewfile"
-      echo "WARNING: or you can initialize $brewfile by:"
+      echo "WARNING: or you can initialize $brewfile with:"
       echo "WARNING:     $ $thisname init"
       return 1
     fi

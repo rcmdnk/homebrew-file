@@ -28,10 +28,25 @@ Or download `bin/brew-file` and put it in anywhere under `PATH` (e.g. `~/usr/bin
 
 Brew-file uses Brewfile, with which packages are managed.
 
-With Brew-file, you can manage Brewfile with GitHub.
+With Brew-file, you can manage Brewfile with GitHub (or other server).
 
-To do so, before starting to use Brew-file,
-make GitHub repository named **Brewfile**,
+### Create a repository in GitHub with brew-file
+
+You can create a repository with brew-file command:
+
+    $ brew file set_repo
+
+    Set repository, "non" for local Brewfile.
+    <user>/<repo> for GitHub repository,
+    or full path for the repository: 
+
+Then give a name like `rcmdnk/Brewfile`, or `git@github.com:rcmdnk/Brewfile`.
+
+If the repository doesn't exist, it enters a repository creation process.
+
+### Prepare a repository in GitHub or other Git server.
+
+Make GitHub repository named **Brewfile**,
 and make one file named **Brewfile** in the repository.
 
 You can make the initial Brewfile by yourself,
