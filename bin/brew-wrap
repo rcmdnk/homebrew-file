@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Arguments
+cmd=$1
+caskcmd=$2
+
+# brew install/uninstall
+if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
+  || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
+  if [ $# -gt 1 ];then
+    brew file brew "$@"
+    exit $?
+  fi
+fi
+
+# brew cask install/uninstall
+if [ "$cmd" = "cask" ];then
+  if [ "$caskcmd" = "rm" ] || [ "$caskcmd" = "remove" ] || [ "$caskcmd" = "uninstall" ] || [ "$caskcmd" = "install" ];then
+    if [ $# -gt 2 ];then
+      brew file brew "$@"
+      exit $?
+    fi
+  fi
+fi
+
+# others
+brew "$@"
