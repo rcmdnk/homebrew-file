@@ -262,3 +262,16 @@ More information could be found in [my blog](http://rcmdnk.github.io/blog/2013/0
 > [Brewall: brewパッケージを管理する](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/)
 
 > [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/)
+
+# brew-wrap
+
+If you want to automatically update Brewfile after `brew install/uninstall`,
+please use `brew-wrap`.
+
+You can use it by set as alias:
+
+    alias brew="brew-wrap"
+
+Write it in your setting file like `.bashrc`.
+
+
