@@ -916,7 +916,7 @@ function find_app { # Helper function for Cask# {{{
 
 function check_cask { # Check applications for Cask # {{{
   echo "Starting to check applications for Cask..."
-  caskdir=$(brew info  brew-cask|grep "/usr/local/Cellar/brew-cask"|cut -d" " -f1)/Casks
+  caskdir=$(brew info  brew-cask|grep "$(brew --cellar brew-cask)"|cut -d" " -f1)/Casks
   if [ "$caskdir" = "/Casks" ];then
     echo "You may not have installed cask"
     echo "Please check and install cask first"
