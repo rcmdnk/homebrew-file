@@ -322,7 +322,7 @@ function check_repo { # Helper check repository file {{{
   if [ "$repo" = "" ];then
     return 0
   fi
-  if [[ ! $repo =~ ^git@ &&  ! $repo =~ ^http ]];then
+  if [[ ! $repo =~ ^git ]] && [[ ! $repo =~ ^http ]];then
     repo=git@github.com:$repo
   fi
   brewfile=$(repo_file)
