@@ -364,7 +364,7 @@ function repomgr { # Helper repository management {{{
     git pull
     return 0
   elif [ $l_push -eq 1 ];then
-    git add Brewfile
+    git add $(basename $brewfile)
     git commit -m "Updated the Package List"
     git push
     return 0
