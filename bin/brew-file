@@ -539,29 +539,31 @@ function initialize { # Initialize Brewfile {{{
     return
   fi
 
-  if [ ! -f $input ];then
-    ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
-    ret=$?
-    if [ $ret -eq 0 ];then
-      set_brewfile_repo
-      return $?
-    fi
-  elif [ "$1" != "0" ];then
-    if [ "$repo" != "" ];then
-      echo "You are using Brewfile of $repo."
-    else
-      echo "$input is already there."
-    fi
-    ask_yn "Do you want to overwrite it?"
-    ret=$?
-    echo
-    if [ $ret -eq 0 ];then
-      if [ "$repo" = "" ];then
-        mv ${input} ${input}.bak
-        echo "ok, old $input was moved to ${input}.bak"
+  if [ "$1" != "0" ];then
+    if [ ! -f $input ];then
+      ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
+      ret=$?
+      if [ $ret -eq 0 ];then
+        set_brewfile_repo
+        return $?
       fi
     else
-      return 1
+      if [ "$repo" != "" ];then
+        echo "You are using Brewfile of $repo."
+      else
+        echo "$input is already there."
+      fi
+      ask_yn "Do you want to overwrite it?"
+      ret=$?
+      echo
+      if [ $ret -eq 0 ];then
+        if [ "$repo" = "" ];then
+          mv ${input} ${input}.bak
+          echo "ok, old $input was moved to ${input}.bak"
+        fi
+      else
+        return 1
+      fi
     fi
   fi
   rm -f ${brewfile}
