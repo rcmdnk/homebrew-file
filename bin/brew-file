@@ -7,7 +7,7 @@
 #
 # Usage: brew-file [-increvh][-f <input file>][command] ...
 #
-BREW_FILE_VERSION=v1.1.2
+BREW_FILE_VERSION=v1.1.3
 SENTAKU_DATE="30/Aug/2014"
 #
 # }}}
@@ -59,7 +59,8 @@ cask_pack="brew-cask"
 cask_repo="phinze/cask"
 pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
-is_cask_cmd=1
+is_cask_cmd=0
+is_pip_cmd=0
 
 thisname=$(basename $0)
 if [ "$thisname" = "brew-file" ];then
@@ -390,8 +391,45 @@ function get_tap { # Helper for tap configuration file {{{
 } # }}}
 
 function check_cask_cmd { # If cask is installed or not {{{
-  if [ $is_cask_cmd -eq 1 ] && ! brwe cask >& /dev/null;then
-    is_cask_cmd=0
+  if [ $is_cask_cmd -eq 1 ];then
+    return
+  fi
+  if brwe cask >& /dev/null;then
+    is_cask_cmd=1
+  fi
+  is_cask_cmd=0
+  if [ "$1" = "1" ];then
+    echo "cask has not been installed, install now."
+    echo brew tap ${cask_repo}
+    brew tap ${cask_repo}
+    tap_list=(${tap_list[@]} ${cask_repo})
+    get_tap ${cask_repo}
+    if ! echo " ${tap_packs[@]} "|grep -q " ${cask_pack} ";then
+      echo "WARNING: ${cask_pack} was not in ${cask_repo}."
+      echo "WARNING: Maybe you need to modify cask_repo."
+      exit 1
+    fi
+    echo brew install ${cask_pack}
+    brew install ${cask_pack}
+    brew_list=(${brew_list[@]} ${cask_pack})
+    is_cask_cmd=1
+  fi
+}
+
+function check_pip_cmd { # If pip is installed or not {{{
+  if [ $is_pip_cmd -eq 1 ];then
+    return
+  fi
+  if brwe pip >& /dev/null;then
+    is_pip_cmd=1
+  fi
+  is_pip_cmd=0
+  if [ "$1" = "1" ];then
+    echo "pip has not been installed, install now."
+    echo brew install ${pip_pack}
+    brew install ${pip_pack}
+    brew_list=(${brew_list[@]} ${pip_pack})
+    is_pip_cmd=1
   fi
 }
 
@@ -683,28 +721,26 @@ function cleanup { # Cleanup {{{
   # Check packages in the input file
   read_input
 
-  check_cask_cmd
-  if [ $is_cask_cmd -eq 1 ];then
-    if [ ${#cask_list[@]} -gt 0 ];then
-      echo ""
-      echo "*********************"
-      echo "Cleanup cask packages"
-      echo "*********************"
-      echo ""
-      for p in ${cask_list[@]};do
-        if ! echo " ${cask_input[@]} "|grep -q " $p ";then
-          echo brew cask uninstall $p
-          if [ $dryrun -ne 1 ];then
-            brew cask uninstall $p
-          fi
-          cask_list=($(echo " ${cask_list[@]} "|sed "s: ${p} : :g"))
+  if [ ${#cask_list[@]} -gt 0 ];then
+    echo ""
+    echo "*********************"
+    echo "Cleanup cask packages"
+    echo "*********************"
+    echo ""
+    for p in ${cask_list[@]};do
+      if ! echo " ${cask_input[@]} "|grep -q " $p ";then
+        echo brew cask uninstall $p
+        if [ $dryrun -ne 1 ];then
+          check_cask_cmd 1
+          brew cask uninstall $p
         fi
-      done
-      # Skip cask at tap/brew if any cask packages exist
-      if [ ${#cask_list[@]} -ne 0 ];then
-        tap_list=($(echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"))
-        brew_list=($(echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"))
+        cask_list=($(echo " ${cask_list[@]} "|sed "s: ${p} : :g"))
       fi
+    done
+    # Skip cask at tap/brew if any cask packages exist
+    if [ ${#cask_list[@]} -ne 0 ];then
+      tap_list=($(echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"))
+      brew_list=($(echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"))
     fi
   fi
 
@@ -809,20 +845,6 @@ function install { # Install {{{
   # Check packages in the input file
   read_input
 
-  # Flag for cask
-  if brew list|grep -q "${cask_pack}";then
-    cask_installed=1
-  else
-    cask_installed=0
-  fi
-
-  # Flag for pip
-  if brew list|grep -q "${pip_pack}";then
-    pip_installed=1
-  else
-    pip_installed=0
-  fi
-
   # Tap
   for p in ${tap_input[@]};do
     if ! echo " ${tap_list[@]} "|grep -q " $p ";then
@@ -832,26 +854,10 @@ function install { # Install {{{
   done
 
   # Cask
-  check_cask_cmd
   if [ $is_cask_cmd -eq 1 ];then
     for p in ${cask_input[@]};do
       if ! echo " ${cask_list[@]} "|grep -q " $p ";then
-        if [ $cask_installed -eq 0 ];then
-          echo "cask has not been installed, install now."
-          echo brew tap ${cask_repo}
-          brew tap ${cask_repo}
-          tap_list=(${tap_list[@]} ${cask_repo})
-          get_tap ${cask_repo}
-          if ! echo " ${tap_packs[@]} "|grep -q " ${cask_pack} ";then
-            echo "WARNING: ${cask_pack} was not in ${cask_repo}."
-            echo "WARNING: Maybe you need to modify cask_repo."
-            continue
-          fi
-          echo brew install ${cask_pack}
-          brew install ${cask_pack}
-          brew_list=(${brew_list[@]} ${cask_pack})
-          cask_installed=1
-        fi
+        check_cask_cmd 1
         echo brew cask install $p
         brew cask install $p
       fi
@@ -861,13 +867,7 @@ function install { # Install {{{
   # pip
   for p in ${pip_input[@]};do
     if ! echo " ${pip_list[@]} "|grep -q " $p ";then
-      if [ $pip_installed -eq 0 ];then
-        echo "$pip_pack has not been installed, install now."
-        echo brew install ${pip_pack}
-        brew install ${pip_pack}
-        brew_list=(${brew_list[@]} ${pip_pack})
-        pip_installed=1
-      fi
+      check_pip_cmd 1
       echo brew pip $p
       brew pip $p
     fi
@@ -899,13 +899,7 @@ function install { # Install {{{
 } # }}}
 
 function find_app { # Helper function for Cask# {{{
-  check_cask_cmd
-  if [ $is_cask_cmd -eq 0 ];then
-    echo "Homebrew-cask has not been installed, yet!"
-    echo "Please install Homebrew-cask:"
-    echo "    $ brew install caskroom/cask/brew-cask"
-    exit 1
-  fi
+  check_cask_cmd 1
   app="$1"
   is_cask=0
   is_installed=0
@@ -941,13 +935,7 @@ function find_app { # Helper function for Cask# {{{
 # }}}
 
 function check_cask { # Check applications for Cask # {{{
-  check_cask_cmd
-  if [ $is_cask_cmd -eq 0 ];then
-    echo "Homebrew-cask has not been installed, yet!"
-    echo "Please install Homebrew-cask:"
-    echo "    $ brew install caskroom/cask/brew-cask"
-    exit 1
-  fi
+  check_cask_cmd 1
   echo "Starting to check applications for Cask..."
   caskdir=$(brew info  brew-cask|grep "$(brew --cellar brew-cask)"|cut -d" " -f1)/Casks
   if [ "$caskdir" = "/Casks" ];then
