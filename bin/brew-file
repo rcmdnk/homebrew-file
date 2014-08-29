@@ -59,7 +59,7 @@ cask_pack="brew-cask"
 cask_repo="phinze/cask"
 pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
-is_cask=1
+is_cask_cmd=1
 
 thisname=$(basename $0)
 if [ "$thisname" = "brew-file" ];then
@@ -390,8 +390,8 @@ function get_tap { # Helper for tap configuration file {{{
 } # }}}
 
 function check_cask_cmd { # If cask is installed or not {{{
-  if [ $is_cask -eq 1 ] && ! brwe cask >& /dev/null;then
-    is_cask=0
+  if [ $is_cask_cmd -eq 1 ] && ! brwe cask >& /dev/null;then
+    is_cask_cmd=0
   fi
 }
 
@@ -407,7 +407,7 @@ function get_list { # Get list {{{
   cask_list=()
   cask_list_nocask=()
   check_cask_cmd
-  if [ $is_cask -eq 0 ];then
+  if [ $is_cask_cmd -eq 0 ];then
     return
   fi
   while read p e;do
@@ -682,7 +682,7 @@ function cleanup { # Cleanup {{{
   read_input
 
   check_cask_cmd
-  if [ $is_cask -eq 1 ];then
+  if [ $is_cask_cmd -eq 1 ];then
     if [ ${#cask_list[@]} -gt 0 ];then
       echo ""
       echo "*********************"
@@ -831,7 +831,7 @@ function install { # Install {{{
 
   # Cask
   check_cask_cmd
-  if [ $is_cask -eq 1 ];then
+  if [ $is_cask_cmd -eq 1 ];then
     for p in ${cask_input[@]};do
       if ! echo " ${cask_list[@]} "|grep -q " $p ";then
         if [ $cask_installed -eq 0 ];then
@@ -898,7 +898,7 @@ function install { # Install {{{
 
 function find_app { # Helper function for Cask# {{{
   check_cask_cmd
-  if [ $is_cask -eq 0 ];then
+  if [ $is_cask_cmd -eq 0 ];then
     echo "Homebrew-cask has not been installed, yet!"
     echo "Please install Homebrew-cask:"
     echo "    $ brew install caskroom/cask/brew-cask"
@@ -940,7 +940,7 @@ function find_app { # Helper function for Cask# {{{
 
 function check_cask { # Check applications for Cask # {{{
   check_cask_cmd
-  if [ $is_cask -eq 0 ];then
+  if [ $is_cask_cmd -eq 0 ];then
     echo "Homebrew-cask has not been installed, yet!"
     echo "Please install Homebrew-cask:"
     echo "    $ brew install caskroom/cask/brew-cask"
