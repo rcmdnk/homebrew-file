@@ -436,13 +436,13 @@ function read_input { # Read input file {{{
       continue
     fi
     # Get arguments
-    args=(${line})
+    args=($(ehco ${line}|sed s:\'::g|sed s:\"::g`))
     cmd=${args[0]}
-    p=`echo ${args[1]}|sed s:\'::g|sed s:\"::g`
-    opt=`echo ${args[@]: 2}|sed s:\'::g|sed s:\"::g`
+    p=${args[1]}
+    opt=${args[@]: 2}
     if [ "$p" = "install" ];then
-      p=`echo ${args[2]}|sed s:\'::g|sed s:\"::g`
-      opt=`echo ${args[@]: 3}|sed s:\'::g|sed s:\"::g`
+      p=${args[2]}
+      opt=${args[@]: 3}
     fi
     if [ "$cmd" = "brew" -o "$cmd" = "install" ];then
       brew_input=(${brew_input[@]} $p)
