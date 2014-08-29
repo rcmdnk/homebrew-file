@@ -436,7 +436,7 @@ function read_input { # Read input file {{{
       continue
     fi
     # Get arguments
-    args=($(ehco ${line}|sed s:\'::g|sed s:\"::g`))
+    args=($(echo ${line}|sed s:\'::g|sed s:\"::g))
     cmd=${args[0]}
     p=${args[1]}
     opt=${args[@]: 2}
@@ -464,7 +464,7 @@ function read_input { # Read input file {{{
     else
       #echo "WARNING: $cmd is unknown, please check $brewfile"
       #continue
-      cmd_input=("${cmd_input[@]}" "$p $opt")
+      cmd_input=("${cmd_input[@]}" "$line")
     fi
   done < $brewfile
 } # }}}
@@ -526,7 +526,7 @@ function set_brewfile_repo { # Set Brewfile Repository {{{
 function get_options { # Get install options from brew info {{{
   p=$1
   # Get options for build
-  opt=`brew info $p|grep "Built from source with"|cut -d: -f2`
+  opt=$(brew info $p|grep "Built from source with"|cut -d: -f2)
   # is head or not
   if brew info $p| grep "^$(brew --cellar $p)"|grep -q HEAD;then
     opt="$opt --HEAD"
@@ -591,13 +591,13 @@ function initialize { # Initialize Brewfile {{{
         if echo " ${brew_list[@]} "|grep -q " $tp ";then
           opt=$(get_options $tp)
           echo "install ${tp}${opt:+ $opt}"
-          brew_list=(`echo " ${brew_list[@]} "|sed "s: $tp : :g"`)
+          brew_list=($(echo " ${brew_list[@]} "|sed "s: $tp : :g"))
         fi
       done
       for tc in ${tap_casks[@]};do
         if echo " ${cask_list[@]} "|grep -q " $tc ";then
           echo "cask install ${tc}"
-          cask_list=(`echo " ${cask_list[@]} "|sed "s: $tc : :g"`)
+          cask_list=($(echo " ${cask_list[@]} "|sed "s: $tc : :g"))
         fi
       done
     done
@@ -695,13 +695,13 @@ function cleanup { # Cleanup {{{
           if [ $dryrun -ne 1 ];then
             brew cask uninstall $p
           fi
-          cask_list=(`echo " ${cask_list[@]} "|sed "s: ${p} : :g"`)
+          cask_list=($(echo " ${cask_list[@]} "|sed "s: ${p} : :g"))
         fi
       done
       # Skip cask at tap/brew if any cask packages exist
       if [ ${#cask_list[@]} -ne 0 ];then
-        tap_list=(`echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"`)
-        brew_list=(`echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"`)
+        tap_list=($(echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"))
+        brew_list=($(echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"))
       fi
     fi
   fi
@@ -720,12 +720,12 @@ function cleanup { # Cleanup {{{
           brew uninstall $p 2>/dev/null
           brew uninstall pip-$p 2>/dev/null
         fi
-        pip_list=(`echo " ${pip_list[@]} "|sed "s: ${p} : :g"`)
+        pip_list=($(echo " ${pip_list[@]} "|sed "s: ${p} : :g"))
       fi
     done
     # Skip brew-pip at brew if any pip packages exist
     if [ ${#pip_list[@]} -ne 0 ];then
-      brew_list=(`echo " ${brew_list[@]} "|sed "s: ${pip_pack} : :g"`)
+      brew_list=($(echo " ${brew_list[@]} "|sed "s: ${pip_pack} : :g"))
     fi
   fi
 
@@ -876,7 +876,7 @@ function install { # Install {{{
     if ! echo " ${brew_list[@]} "|grep -q " ${p%% *} ";then
       echo brew install $p
       brew install $p | tee .brewall_install_log
-      linkcmd=`grep "ln -s" .brewall_install_log`
+      linkcmd=$(grep "ln -s" .brewall_install_log)
       if [ "$linkcmd" != "" ];then
         if [ "$link" -eq 1 ];then
           $linkcmd
