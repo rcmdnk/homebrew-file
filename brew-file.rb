@@ -1,6 +1,6 @@
 require 'formula'
 
-HOMEBREW_BREW_FILE_VERSION = '1.1.3'
+HOMEBREW_BREW_FILE_VERSION = '1.1.4'
 class BrewFile < Formula
   homepage 'https://github.com/rcmdnk/homebrew-file/'
   url 'https://github.com/rcmdnk/homebrew-file.git', :tag => "v#{HOMEBREW_BREW_FILE_VERSION}"
