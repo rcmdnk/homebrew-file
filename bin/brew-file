@@ -36,7 +36,7 @@ SENTAKU_DATE="31/Aug/2014"
 # }}}
 
 # Variables {{{
-input=${HOMEBREW_BREWFILE:-"$(brew --repository)/Library/Brewfile"}
+input=${HOMEBREW_BREWFILE:-"$(brew --prefix)/Library/Brewfile"}
 brewfile="$input"
 repo=""
 install=0
@@ -53,7 +53,7 @@ pull=0
 push=0
 update=0
 casklist=0
-tap_dir="$(brew --repository)/Library/Taps"
+tap_dir="$(brew --prefix)/Library/Taps"
 cache_dir=$(brew --cache)
 cask_pack="brew-cask"
 cask_repo="phinze/cask"
@@ -905,7 +905,7 @@ function find_app { # Helper function for Cask# {{{
   app="$1"
   is_cask=0
   is_installed=0
-  file=$($(brew --repository)/Library/Taps/caskroom/homebrew-cask/developer/bin/cask_namer "$app" 2>/dev/null|grep "Proposed file name"|awk '{print $4}')
+  file=$($(brew --prefix)/Library/Taps/caskroom/homebrew-cask/developer/bin/cask_namer "$app" 2>/dev/null|grep "Proposed file name"|awk '{print $4}')
   for c in "${othercaskdirs[@]}" "$caskdir";do
     if [ -f $c/$file ];then
       is_cask=1
@@ -948,8 +948,8 @@ function check_cask { # Check applications for Cask # {{{
   echo "OK, cask was installed!"
   echo ""
   othercaskdirs=()
-  for dir in $(brew --repository)/Library/Taps/*/*/Casks;do
-    if [ "$dir" !=  "$(brew --repository)/Library/Taps/caskroom/homebrew-cask/Casks" ];then
+  for dir in $(brew --prefix)/Library/Taps/*/*/Casks;do
+    if [ "$dir" !=  "$(brew --prefix)/Library/Taps/caskroom/homebrew-cask/Casks" ];then
       othercaskdirs=("${othercaskdirs[@]}" "$dir")
     fi
   done
