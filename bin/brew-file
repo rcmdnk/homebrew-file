@@ -7,8 +7,8 @@
 #
 # Usage: brew-file [-increvh][-f <input file>][command] ...
 #
-BREW_FILE_VERSION=v1.1.4
-SENTAKU_DATE="31/Aug/2014"
+BREW_FILE_VERSION=v1.1.5
+SENTAKU_DATE="1/Sep/2014"
 #
 # }}}
 #############################################
@@ -53,6 +53,7 @@ pull=0
 push=0
 update=0
 casklist=0
+cask_upgrade=0
 tap_dir="$(brew --prefix)/Library/Taps"
 cache_dir=$(brew --cache)
 cask_pack="brew-cask"
@@ -90,6 +91,7 @@ Commands:
                      the repository is assigned.
   edit     (or -e)   : Edit input file.
   casklist           : Check applications for Cask
+  cask_upgrade       : Upgrade cask applications
   version  (or -v)   : Show version.
   help     (or -h)   : Print Help (this message) and exit.
 
@@ -162,6 +164,9 @@ while [ $# != 0 ] ; do
       ;;
     casklist)
       casklist=1; : $((ncommands++));
+      ;;
+    cask_upgrade)
+      cask_upgrade=1; : $((ncommands++));
       ;;
     -v|version)
       echo "$thisname $BREW_FILE_VERSION";exit 0;
@@ -415,7 +420,7 @@ function check_cask_cmd { # If cask is installed or not {{{
     brew_list=(${brew_list[@]} ${cask_pack})
     is_cask_cmd=1
   fi
-}
+} # }}}
 
 function check_pip_cmd { # If pip is installed or not {{{
   if [ $is_pip_cmd -eq 1 ];then
@@ -433,7 +438,7 @@ function check_pip_cmd { # If pip is installed or not {{{
     brew_list=(${brew_list[@]} ${pip_pack})
     is_pip_cmd=1
   fi
-}
+} # }}}
 
 function get_list { # Get list {{{
   brew list >/dev/null
@@ -1130,6 +1135,21 @@ function check_cask { # Check applications for Cask # {{{
 
 } # }}}
 
+function cask_upgrade { # Upgrade cask applications # {{{
+  check_cask_cmd 0
+  ret=$?
+  if [ $ret -ne 0 ];then
+    echo "Homebrew-cask has not been installed, yet."
+    return $ret
+  fi
+  apps=($(brew cask list))
+  for a in "${apps[@]}";do
+    if grep -q "Not installed" < <(brew cask info $a);then
+      brew cask install $a
+    fi
+  done
+} # }}}
+
 # }}}
 
 # Main {{{
@@ -1160,6 +1180,12 @@ fi
 # Cask list check
 if [ $casklist -eq 1 ];then
   check_cask
+  exit $?
+fi
+
+# Upgrade cask applications
+if [ $cask_upgrade -eq 1 ];then
+  cask_upgrade
   exit $?
 fi
 
