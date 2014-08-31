@@ -1,1270 +1,1203 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-## Description {{{
-#
-# Brew-file: Manager for packages of Homebrew
-# https://github.com/rcmdnk/homebrew-file
-#
-# Usage: brew-file [-increvh][-f <input file>][command] ...
-#
-BREW_FILE_VERSION=v1.1.5
-SENTAKU_DATE="1/Sep/2014"
-#
-# }}}
-#############################################
+"""
+Brew-file: Manager for packages of Homebrew
+https://github.com/rcmdnk/homebrew-file
 
-#The MIT License (MIT) {{{
-#
-#Copyright (c) 2013 rcmdnk
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy of
-#this software and associated documentation files (the "Software"), to deal in
-#the Software without restriction, including without limitation the rights to
-#use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-#the Software, and to permit persons to whom the Software is furnished to do so,
-#subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in all
-#copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-#FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-#COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-#IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-#CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# }}}
+requirement: Python 2.7 or later
+"""
 
-# Variables {{{
-input=${HOMEBREW_BREWFILE:-"$(brew --prefix)/Library/Brewfile"}
-brewfile="$input"
-repo=""
-install=0
-brew=0
-noinit=0
-link=1
-cleanup=0
-dryrun=1
-init=0
-initialized=0
-edit=0
-set_repo=0
-pull=0
-push=0
-update=0
-casklist=0
-cask_upgrade=0
-tap_dir="$(brew --prefix)/Library/Taps"
-cache_dir=$(brew --cache)
-cask_pack="brew-cask"
-cask_repo="phinze/cask"
-pip_pack="brew-pip"
-my_editor=${EDITOR:-"vim"}
-is_cask_cmd=0
-is_pip_cmd=0
+__prog__ = "brew file"
+__author__ = "rcmdnk"
+__copyright__ = "Copyright (c) 2013 rcmdnk"
+__credits__ = ["rcmdnk"]
+__license__ = "MIT"
+__version__ = "v2.0.0"
+__date__ = "28/Aug/2014"
+__maintainer__ = "rcmdnk"
+__email__ = "rcmdnk@gmail.com"
+__status__ = "Prototype"
 
-thisname=$(basename $0)
-if [ "$thisname" = "brew-file" ];then
-  thisname="brew file"
-fi
-# }}}
+import sys, os, urllib2
 
-# Help {{{
-HELP="Usage: $thisname [-increvh][-f <input file>][command] ...
+class Tee:
+    def __init__(self, out1, out2 = sys.stdout):
+        if type(out1) == str:
+            self.out1 = open(out1, "w")
+        else:
+            self.out1 = out1
+        if type(out2) == str:
+            self.out2 = open(out2, "w")
+        else:
+            self.out2 = out2
+    def __del__(self):
+        if self.out1 != sys.stdout and self.out1 != sys.stderr:
+            self.out1.close()
+        if self.out2 != sys.stdout and self.out2 != sys.stderr:
+            self.out2.close()
+    def write(self, text):
+        self.out1.write(text)
+        self.out2.write(text)
+    def writeln(self, text):
+        self.out1.write(text + "\n")
+        self.out2.write(text + "\n")
+    def flush(self):
+        self.out1.flush()
+        self.out2.flush()
 
-Commands:
-  install            : Install packages in BREWFILE (do 'brew update', too).
-  brew [command ...] : Execute brew command, and update BREWFILE.
-  brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
-  init     (or -i)   : Initialize/Update BREWFILE with installed packages.
-  set_repo (or -s)   : Set BREWFILE repository (e.g. rcmdnk/Brewfile).
-  pull               : Update BREWFILE from the repository.
-  push               : Push your BREWFILE to the repository.
-  clean    (or -c)   : Clenup
-                     Uninstall packages not in the list.
-                     Untap packages not in the list.
-                     Cleanup cache (brew cleanup)
-                     By drault, cleanup runs as dry-run.
-                     If you want to enforce cleanup, use '-C' option.
-  update   (or -u)   : Do pull, install, brew update/upgrade, init, push and clean -C.
-                     pull, push and clean are done only if
-                     the repository is assigned.
-  edit     (or -e)   : Edit input file.
-  casklist           : Check applications for Cask
-  cask_upgrade       : Upgrade cask applications
-  version  (or -v)   : Show version.
-  help     (or -h)   : Print Help (this message) and exit.
+class BrewFile:
+    """Main class of Brew-file."""
 
-Options:
-  -f  <file> Set input file (current default: ${input})
-             You can set input file by environmental variable,
-             HOMEBREW_BREWFILE, like:
-                  export HOMEBREW_BREWFILE=~/.brewfile
-  -n         Don't make links for Apps
-  -C         Run cleanup in non dry-run mode.
-  -r  <repo> Set repository name. Use with set_repo (-s).
+    def __init__(self):
+        """initialization."""
 
-If you want to use repository's BREWFILE,
-please prepare a repository which has a file named 'Brewfile'.
-If you assign the repository which doesn't have 'Brewfile',
-then Brew-file will try to make 'Brewfile' in the repository.
-For GitHub repository, you can shorten the address like user_name/repo_name.
+        self.opt = {}
 
-"
-# }}}
+        self.opt["command"]     = ""
+        self.opt["brew_repo"]   = self.proc("brew --prefix")[1]
+        self.opt["input"]       = os.environ.get("HOMEBREW_BREWFILE",
+                                      self.opt["brew_repo"] + "/Library/Brewfile")
+        self.opt["brewfile"]    = self.opt["input"]
+        self.opt["repo"]        = ""
+        self.opt["link"]        = True
+        self.opt["dryrun"]      = True
+        self.opt["initialized"] = False
+        self.opt["tap_dir"]     = self.opt["brew_repo"] + "/Library/Taps"
+        self.opt["cache_dir"]   = self.proc("brew --cache")[1]
+        self.opt["cask_pack"]   = "brew-cask"
+        self.opt["cask_repo"]   = "caskroom/cask"
+        self.opt["pip_pack"]    = "brew-pip"
+        self.opt["my_editor"]   = os.environ.get("EDITOR", "vim")
+        self.opt["tap_packs"]   = []
+        self.opt["tap_casks"]   = []
+        self.opt["brew_list"]   = []
+        self.opt["pip_list"]    = []
+        self.opt["tap_list"]    = []
+        self.opt["cask_list"]   = []
+        self.opt["cask_list_nocask"] = []
+        self.opt["is_brew_cmd"] = False
+        self.opt["is_cask_cmd"] = False
+        self.opt["is_pip_cmd"]  = False
+        self.opt["cmd_input"]   = []
+        self.opt["cask_input"]  = []
+        self.opt["pip_input"]   = []
+        self.opt["tap_input"]   = []
+        self.opt["brew_input"]  = []
+        self.opt["brew_input_opt"] = []
+        self.opt["args"] = []
 
-# Check arguments {{{
-ncommands=0
-while [ $# != 0 ] ; do
-  case $1 in
-    -f )
-      input=$2; shift;
-      ;;
-    install)
-      install=1; : $((ncommands++));
-      ;;
-    brew)
-      brew=1
-      shift
-      if [ "$1" = "noinit" ];then
-        noinit=1
-        shift
-      fi
-      brew_args="$@"; : $((ncommands++)); break;
-      ;;
-    -i|init)
-      init=1; : $((ncommands++));
-      ;;
-    -s|set_repo)
-      set_repo=1; : $((ncommands++));
-      ;;
-    -r )
-      repo=$2; shift;
-      ;;
-    pull)
-      pull=1; : $((ncommands++));
-      ;;
-    push)
-      push=1; : $((ncommands++));
-      ;;
-    -n)
-      link=0;
-      ;;
-    -c|clean)
-      cleanup=1; : $((ncommands++));
-      ;;
-    -u|update)
-      update=1; : $((ncommands++));
-      ;;
-    -C)
-      dryrun=0;
-      ;;
-    -e|edit)
-      edit=1; : $((ncommands++));
-      ;;
-    casklist)
-      casklist=1; : $((ncommands++));
-      ;;
-    cask_upgrade)
-      cask_upgrade=1; : $((ncommands++));
-      ;;
-    -v|version)
-      echo "$thisname $BREW_FILE_VERSION";exit 0;
-      ;;
-    -h|help)
-      echo "$HELP"|${PAGER:-less} 1>&2; exit 0;
-      ;;
-    *)
-      echo "$thisname $1: unknown argument
+    def set_args(self, **kw):
+        """Set arguments."""
+        for k, v in kw.items():
+            self.opt[k] = v
 
-Check \"$thisname help\" for further information" 1>&2; exit 1;
-      ;;
-  esac
-  shift
-done
+    def proc(self, cmd):
+        """ Get process output."""
+        import popen2
+        p = popen2.Popen3(cmd)
+        ret = p.wait()
+        return (ret, p.fromchild.read().rstrip())
 
-if [ $ncommands -eq 0 ];then
-  echo "$HELP"|head -n1 1>&2;
-  echo
-  echo "Check \"$thisname help\" for further information" 1>&2; exit 0;
-elif [ $ncommands -ne 1 ];then
-  echo "More than 1 commands are given!"
-  echo
-  echo "Check \"$thisname help\" for further information" 1>&2; exit 0;
-fi
-# }}}
+    def ask_yn(self, question):
+        """Helper for yes/no."""
+        yes = ["yes","y", ""]
+        no = ["no","n"]
 
-# Function {{{
+        yn = raw_input(quetion + " [y/n]: ").lower()
+        while True:
+            if yn in yes:
+               return True
+            elif yn in no:
+               return False
+            else:
+               yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
-function ask_yn { # Helper for yes/no {{{
-  question="$1"
-  printf "$1 [y/n]: "
-  read yn
-  while [ 1 ];do
-    case $yn in
-      "y"|"Y"|"yes"|"Yes"|"YES" )
+    def print_banner(self, text):
+        max = 0
+        for l in text.split("\n"):
+            if max < len(l):
+                max = len(l)
+        print "\n"
+        print "#" * max
+        print text
+        print "#" * max
+        print "\n"
+
+    def remove(self, path):
+        """Helper to remove file/directory."""
+        import shutil
+        if os.path.islink(path) or os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+
+    def get_tap_path(self, tap):
+        """Get tap path"""
+        tap_user = os.path.dirname(tap)
+        tap_repo = os.path.basename(tap)
+        return self.opt["tap_dir"] + "/" + tap_user + "/homebrew-" + tap_repo
+
+    def repo_file(self):
+        """Helper to build Brewfile path for the repository."""
+        repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
+        user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
+        inputdir = os.path.dirname(self.opt["input"])
+        input = self.opt["input"].split("/")[-1]
+        return inputdir + "/" + user_name + "_" + repo_name + "/" + input
+
+    def clone_repo(self):
+        import popen2
+        cmd = "git clone " + self.opt["repo"] +\
+                " " + sys.path.dirname(self.opt["brewfile"])
+        ret = self.proc(cmd)[0]
+        if ret != 0:
+            print "can't clone " + self.opt["repo"] + ".\n"\
+                  "please check the repository, or reset with\n"\
+                  "    $ " + __prog__ + " set_repo"
+            sys.exit(ret)
+
+    def check_github_repo(self):
+        """helper to check and create GitHub repository."""
+
+        import urllib
+        import urllib2
+
+        repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
+        user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
+        url = "https://github.com/" + user_name + "/" + repo_name
+
+        # Check if the repository already exists or not.
+        exist_repo = True
+        try:
+            check = urllib2.urlopen(url)
+        except urllib2.HTTPError, e:
+            exist_repo = False
+
+        # Clone if exists
+        if exist_repo:
+            self.clone_repo()
+            return
+
+        # Create new repository
+        print "GitHub repository: " + user_name + "/" + repo_name + "doesn't exist.\n"
+        ans = self.ask_yn("do you want to create the repository?")
+        if not ans:
+            exit(0)
+
+        # Check password
+        import getpass
+        password = getpass.getpass("GitHub password: ")
+
+        # Try to create w/o two-factor code
+        import requests
+        url = "https://api.github.com/user/repos"
+        description = "package list for Homebrew"
+        data = {"name": repo_name, "description": "Package list for Homebrew"}
+        headers = {}
+        is_ok = True
+        while True:
+            r = requests.post(url=url, data=json.dumps(data),
+                              auth=(user_name, password), headers=headers)
+            if r.ok:
+                break
+            if r.json()["message"] == "Bad credentials":
+                password = getpass.getpass("\033[31;1mWrong password!\033[0m GitHub password: ")
+                continue
+            if r.json()["message"] == "Must specify two-factor authentication OTP code.":
+                is_ok = False
+            print r.json()["message"]
+            sys.exit(1)
+
+        # Try with two-factor code
+        twofac = raw_input("GitHub two-factor code: ")
+        headers.update({"X-Github-OTP": twofac})
+        while True:
+            r = requests.post(url=url, data=json.dumps(data),
+                              auth=(user_name, password), headers=headers)
+            if r.ok:
+                break
+            if r.json()["message"] == "Must specify two-factor authentication OTP code.":
+                twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
+                headers.update({"X-Github-OTP": twofac})
+                continue
+            print r.json()["message"]
+            sys.exit(1)
+
+        # Clone and initialize
+        self.clone_repo()
+        os.chdir(sys.path.dirname(self.opt["brewfile"]))
+        f = open("README.md", "w")
+        f.write("# " + self.opt["brewfile"].split("/")[-1] + "\n\n"\
+                "Package list for [homebrew](http://brew.sh/).\n\n"\
+                "Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).")
+        f.close()
+        open(self.opt["brewfile"], "a").close()
+
+        ret = self.proc("git add -A")[0]
+        ret = self.proc("git commit -m \"Prepared by " + __prog__ + "\"")[0]
+        ret = self.proc("git push -u origin master")[0]
+
+        ans = self.ask_yn("Do you want to initialize from installed packages?")
+        if ans:
+            self.initialize(False)
+
+    def check_repo(self):
+        """Check input file for GitHub repository."""
+        import re
+
+        # Check input file
+        if not os.path.exists(self.opt["input"]):
+            return
+
+        # Check input file if it points repository or not
+        self.opt["repo"] = ""
+        f = open(self.opt["input"], "r")
+        lines = f.readlines()
+        f.close()
+        for l in lines:
+            if re.match(" *git ", l) == None:
+                continue
+            git_line = l.split()
+            if len(git_line) > 1:
+                self.opt["repo"] = git_line[1]
+                break
+        if self.opt["repo"] == "":
+            return
+
+        # Check repository name and add git@github.com: if necessary
+        if (re.match("git://", self.opt["repo"]) == None
+                and re.match("git@", self.opt["repo"]) == None
+                and re.match("https?://", self.opt["repo"]) == None):
+            self.opt["repo"] = "git@github.com:" + self.opt["repo"]
+
+        # Set Brewfile in the repository
+        self.opt["brewfile"] = self.repo_file()
+        if os.path.exists(self.opt["brewfile"]):
+            return
+
+        # Check and prepare repository
+        if self.opt["repo"].find("github") >= 0:
+            self.check_github_repo()
+        else:
+            self.clone_repo()
+
+    def repomgr(self, cmd=""):
+        """Helper of repository management."""
+        pull = self.opt["pull"]
+        push = self.opt["push"]
+        if cmd == "pull":
+            pull = True
+            push = False
+        elif cmd == "push":
+            pull = False
+            push = True
+
+        # Check the repository
+        if self.opt["repo"] == "":
+            print "Please set a repository, or reset with:\n"
+            print "    $ " + __prog__ + "set_repo\n"
+            sys.exit(1)
+
+        # Clone if it doesn't exist
+        if not os.path.exists(os.path.dirname(self.opt["brewfile"])):
+            self.clone_repo()
+
+
+        # pull/push
+        os.chdir(sys.path.dirname(self.opt["brewfile"]))
+        if pull:
+            ret = self.proc("git pull")[0]
+            return
+        elif push:
+            ret = self.proc("git add " + self.opt["brewfile"].split("/")[-1])[0]
+            ret = self.proc("git commit -m \"Update the package list\"")[0]
+            ret = self.proc("git push")[0]
+            return
+
+    def get_tap(self, tap):
+        """Helper for tap configuration file"""
+        tap_path = self.get_tap_path(tap)
+        self.opt["tap_packs"] = map(lambda x: x.replace(".rb", ""),
+                filter(lambda y: y.endswith(".rb"), os.listdir(tap_path)))
+        self.opt["tap_packs"] += map(lambda x: x.replace(".rb", ""),
+                filter(lambda y: y.endswith(".rb"),
+                       os.listdir(tap_path + "/Formula")))
+        self.opt["tap_casks"] = map(lambda x: x.replace(".rb", ""),
+                filter(lambda y: y.endswith(".rb"),
+                       os.listdir(tap_path + "/Casks")))
+
+    def check_brew_cmd(self):
+        """Check Homebrew"""
+        if self.proc("brew help")[0] != 0:
+            print "Homebrew has not been installed, install now..."
+            cmd="ruby -e \"$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)\""
+            self.proc(cmd)
+            (ret, list) =  self.proc("brew doctor")
+            if ret != 0:
+                print list
+                self.print_banner("# Check brew environment and fix problems\n"
+                                  "# You can check with:\n"
+                                  "#     $ brew doctor")
+
+    def check_cask_cmd(self, force=False):
+        """Check cask is installed or not"""
+        if self.opt["is_cask_cmd"]:
+            return True
+        if self.proc("brew cask")[0] == 0:
+            self.opt["is_cask_cmd"] = True
+            return True
+        if force:
+            print self.opt["cask_pack"]\
+                    + " has not been installed, install now.\n"
+            cmd = "brew install "\
+                    + self.opt["cask_repo"] + "/" + self.opt["cask_pack"]
+            print cmd + "\n"
+            (ret, list) = self.proc(cmd)
+            if ret != 0:
+                print "\n\033[31;1mFailed to install "\
+                        + self.opt["cask_pack"] + "\033[0m\n"
+                print list
+                sys.exit(ret)
+            if not self.opt["cask_repo"] in self.opt["tap_list"]:
+                self.opt["tap_list"].append(self.opt["cask_repo"])
+            if not self.opt["cask_pack"] in self.opt["brew_list"]:
+                self.opt["brew_list"].append(self.opt["cask_pack"])
+            self.opt["is_cask_cmd"] = True
+        return self.opt["is_cask_cmd"]
+
+    def check_pip_cmd(self, force=False):
+        """Check pip is installed or not"""
+        if self.opt["is_pip_cmd"]:
+            return True
+        if self.proc("brew pip -h")[0] == 0:
+            self.opt["is_pip_cmd"] = True
+            return True
+        if force:
+            print self.opt["pip_pack"]\
+                    + " has not been installed, install now.\n"
+            cmd = "brew install " + self.opt["pip_pack"]
+            print cmd + "\n"
+            (ret, list) = self.proc(cmd)
+            if ret != 0:
+                print "\n\033[31;1mFailed to install "\
+                        + self.opt["pip_pack"] + "\033[0m\n"
+                print list
+                sys.exit(ret)
+            if not self.opt["pip_pack"] in self.opt["brew_list"]:
+                self.opt["brew_list"].append(self.opt["pip_pack"])
+            self.opt["is_pip_cmd"] = True
+        return self.opt["is_pip_cmd"]
+
+    def get_list(self):
+        """Get List"""
+
+        # Brew packages
+        (ret, list) = self.proc("brew list")
+        if ret != 0:
+            print "`brew list` returned error:\n\n" + list + "\n"
+            sys.exit(ret)
+        self.opt["brew_list"] = []
+        self.opt["pip_list"] = []
+        for p in list.split("\n"):
+            if p.startswith("pip-"):
+                self.opt["pip_list"].append(p)
+            else:
+                self.opt["brew_list"].append(p)
+
+        # Taps
+        (ret, list) = self.proc("brew tap")
+        if ret != 0:
+            print "`brew tap` returned error:\n\n" + list + "\n"
+            sys.exit(ret)
+        self.opt["tap_list"] = list.split("\n")
+
+        # Casks
+        if self.check_cask_cmd():
+            (ret, list) = self.proc("brew cask list")
+            if ret != 0:
+                print "`brew cask list` returned error:\n\n" + list + "\n"
+                sys.exit(ret)
+            self.opt["cask_list"] = []
+            self.opt["cask_list_nocask"] = []
+            for p in list.split("\n"):
+                if len(p.split()) == 1:
+                    self.opt["cask_list"].append(p)
+                else:
+                    print "\033[31;1mthe cask file of \033[31;7m$p\033[0m\033[31;1m doesn't exist.\n"
+                    print "please check later.\n\n\033[0m\n"
+                    self.opt["cask_list_nocask"].append(p)
+
+    def read_input(self):
+        """Read input file"""
+
+        # Check packages in the input file
+        self.opt["cmd_input"]   = []
+        self.opt["cask_input"]  = []
+        self.opt["pip_input"]   = []
+        self.opt["tap_input"]   = []
+        self.opt["brew_input"]  = []
+        self.opt["brew_input_opt"] = []
+
+        f = open(self.opt["brewfile"], "r")
+        lines = f.readlines()
+        f.close()
+        import re
+        for l in linees:
+            if re.match(" *", l) != None or re.match(" *#", l) != None:
+                continue
+            args = l.replace("'","").replace('"',"").split()
+            cmd = args[0]
+            if len(args) < 2:
+                print "\n\033[31;1mWrong line: " + l + "\033[0m\n"
+                continue
+            p = args[1]
+            if len(args) > 2 and p == "install":
+                p = args[2]
+                args.pop(2)
+
+            opt = " ".join(args[2:])
+
+            if cmd == "brew" or cmd == "install":
+                self.opt["brew_input"].append(p)
+                self.opt["brew_input_opt"].append(p + " " + opt)
+            elif cmd == "tap":
+                self.opt["tap_input"].append(p + " " + opt)
+            elif cmd == "tapall":
+                self.opt["tap_input"].append(p + " " + opt)
+                self.get_tap(p)
+                self.opt["brew_input"] += self.opt["tap_packs"]
+            elif cmd == "cask":
+                self.opt["cask_input"].append(p + " " + opt)
+            elif cmd == "pip":
+                self.opt["pip_input"].append(p + " " + opt)
+            else:
+                self.opt["cmd_input"].append(l)
+                continue
+
+    def set_brewfile_repo(self):
+        """Set Brewfile repository"""
+        import re
+
+        # Check input file
+        if os.path.exists(self.opt["input"]):
+            prev_repo = ""
+            f = open(self.opt["input"], "r")
+            lines = f.readlines()
+            f.close()
+            for l in lines:
+                if re.match(" *git ", l) == None:
+                    continue
+                git_line = l.split()
+                if len(git_line) > 1:
+                    prev_repo = git_line[1]
+                    break
+            print "Input file: " + self.opt["input"] + " is already there.\n"
+            if prev_repo != "":
+                print "git repository for Brewfile is already set as " + prev_repo + "\n"
+
+            ans = self.ask_yn("Do you want to overwrite it?")
+            if ans:
+                os.rename(self.opt["input"], self.opt["input"] + ".bak")
+                print "Ok, old input file was moved to " + self.opt["input"] + ".bak."  + "\n"
+            else:
+                sys.exit(0)
+
+        # Get repository
+        if self.opt["repo"] != "":
+            print "Set repository, \"non\" for local Brewfile,\n"
+            print "<user>/<repo> for github repository,\n"
+            self.opt["repo"] = raw_input("or full path for the repository: ")
+            while True:
+                if self.opt["repo"] != "":
+                    break
+                print "Repository can not be empty\n"
+                self.opt["repo"] = raw_input("Set repository: ")
+            self.print_banner("# Set Brewfile repository as " + self.opt["repo"])
+
+        if self.opt["repo"] == "non":
+            # Reset non repository type Brewfile
+            self.initialize(False)
+            return
+        else:
+            # Write repository to the input file
+            f = open(self.opt["input"], "w")
+            f.write("git " + self.opt["repo"])
+            self.check_repo()
+
+    def get_options(self, package):
+        """get install options from brew info"""
+
+        opt=""
+        # Get options for build
+        (ret, lines) = self.proc("brew info " + package)
+        for l in lines.split("\n"):
+            ltmp = l.split("Built from source with: ")
+            if len(ltmp) > 1:
+                opt += " " + ltmp[1]
+                continue
+            if l.find(self.proc("brew --cellar " + package) + "/HEAD") >= 0:
+                opt += " " + "--HEAD"
+
+        return opt
+
+    def initialize(self, check = True):
+        """Initialize Brewfile"""
+        if self.opt["initialized"]:
+            return
+
+        if check == 1:
+            if not os.path.exists(self.opt["input"]):
+                ans = ask_yn("Do you want to set a repository (y)? ((n) for local Brewfile).")
+                if ans:
+                    self.set_brewfile_repo()
+                    return
+            else:
+                if self.opt["repo"] != "":
+                    print "You are using Brewfile of " + self.opt["repo"] + "." + "\n"
+                else:
+                    print self.opt["input"] + " is already there." + "\n"
+
+                ans = self.ask_yn("Do you want to overwrite it?")
+                if ans:
+                    os.rename(self.opt["input"], self.opt["input"] + ".bak")
+                    print "Ok, old input file was moved to " + self.opt["input"] + ".bak." + "\n"
+                else:
+                    sys.exit(0)
+
+        self.print_banner("# Initialize " + self.opt["brewfile"])
+
+        # Get installed package list
+        self.get_list()
+
+        # Check list
+        out = Tee(self.opt["brewfile"])
+
+        # Taps
+        if len(self.opt["tap_list"]) > 0:
+            out.writeln("# tap repositories and their packages")
+            for p in self.opt["tap_list"]:
+                self.get_tap(p)
+                out.writeln("\n## " + p + "\ntap " + p)
+                for tp in self.opt["tap_packs"]:
+                    if tp in self.opt["brew_list"]:
+                        opt = self.get_options(tp)
+                        out.writeln("install " + tp + opt)
+                        self.opt["brew_list"].remove(tp)
+                for tc in self.opt["tap_casks"]:
+                    if tc in self.opt["cask_list"]:
+                        opt = self.get_options(tc)
+                        out.writeln("cask install " + tc + opt)
+                        self.opt["cask_list"].remove(tc)
+
+        # Brew packages
+        if len(self.opt["brew_list"]) > 0:
+            out.writeln("\n# Other Homebrew packages")
+            for p in self.opt["brew_list"]:
+                opt = self.get_options(p)
+                out.writeln("install " + p + opt)
+
+        # pip packages
+        if len(self.opt["pip_list"]) > 0:
+            out.writeln("\n# pip packages")
+            for p in self.opt["pip_list"]:
+                #opt = self.get_options(p)
+                opt = ""
+                out.writeln("pip " + p + opt)
+
+        # Casks
+        if len(self.opt["cask_list"]) > 0:
+            out.writeln("\n# Cask applications")
+            for p in self.opt["cask_list"]:
+                #opt = self.get_options(p)
+                opt = ""
+                out.writeln("cask install " + p + opt)
+
+        # Installed by cask, but cask files were not found...
+        if len(self.opt["cask_list_nocask"]) > 0:
+            out.writeln("\n# Below applications were installed by Cask,")
+            out.writeln("but not corresponding casks were found.\n")
+            for p in self.opt["cask_list_nocask"]:
+                #opt = self.get_options(p)
+                opt = ""
+                out.writeln("#cask  install " + p + opt)
+
+        # Close Brewfile
+        del out
+
+        self.print_banner("# You can edit " + self.out["brewfile"] + " with:\n"
+                          "#     $ " + __prog__ + " edit")
+
+        self.opt["initialized"] = True
+
+    def check_input_file(self):
+        """Check input file"""
+
+        if not os.path.exists(self.opt["brewfile"]):
+            print "WARNING: Input file $brewfile is not found.\n"
+            ans = ask_yn("WARNING: Do you want to initialize from installed packages?")
+            if ans:
+                self.initialize(False)
+                return
+            else:
+                print "\n"
+                print "WARNING: Ok, please prepare brewfile\n"
+                print "WARNING: or you can initialize " + self.opt["brewfile"] + " with:\n"
+                print "WARNING:     $ " + __prog__ + " init\n"
+                print "\n"
+                sys.exit(1)
+
+    def edit_brewfile(self):
+        """Edit brewfile"""
+        import subprocess
+        subprocess.call([self.opt["my_editor"], self.opt["brewfile"]])
+
+    def cleanup(self):
+        """Clean up."""
+        if self.opt["dryrun"]:
+            self.print_banner("# Dry run")
+
+        # Check up packages in the input file
+        self.read_input()
+
+        # Clean up cask packages
+        if len(self.opt["cask_list"]) > 0:
+            self.print_banner("# Clean up cask packages")
+            for p in self.opt["cask_list"]:
+                if p in self.opt["cask_input"]:
+                    continue
+                slef.check_cask_cmd(True)
+                cmd = "brew cask uninstall " + p
+                print cmd + "\n"
+                if not self.opt["dryrun"]:
+                    self.proc(cmd)
+                self.opt["cask_list"].remove(p)
+        # Skip clean up cask at tap/brew if any cask packages exist
+        if len(self.opt["cask_list"]) > 0:
+            self.opt["tap_list"].remove(self.opt["cask_repo"])
+            self.opt["brew_list"].remove(self.opt["cask_pack"])
+
+        # Clean up pip packages
+        if len(self.opt["pip_list"]) > 0:
+            self.print_banner("# Clean up pip packages")
+            for p in self.opt["pip_list"]:
+                if p in self.opt["pip_input"]:
+                    continue
+                cmd0 = "pip uninstall -y " + p
+                cmd1 = "brew uninstall " + p
+                cmd2 = "brew uninstall pip-" + p
+                #print cmd0 + "\n"
+                #print cmd1 + "\n"
+                print cmd2 + "\n"
+                if not self.opt["dryrun"]:
+                    self.proc(cmd0)
+                    self.proc(cmd1)
+                    self.proc(cmd2)
+                self.opt["pip_list"].remove(p)
+        # Skip clean up cask at tap/brew if any cask packages exist
+        if len(self.opt["pip_list"]) > 0:
+            self.opt["tap_list"].remove(self.opt["pip_repo"])
+            self.opt["brew_list"].remove(self.opt["pip_pack"])
+
+        # Clean up tap packages
+        if len(self.opt["tap_list"]) > 0:
+            self.print_banner("# Clean up tap packages")
+            for p in self.opt["tap_list"]:
+                if p in self.opt["tap_input"]:
+                    continue
+                self.get_tap(p)
+                untapflag = True
+                for tp in self.opt["tap_packs"]:
+                    if tp in self.opt["brew_input"]:
+                        # Keep the Tap as related package is remained
+                        untapflag = False
+                        break
+                if not untapflag:
+                    continue
+                cmd = "brew untap " + p
+                print cmd + "\n"
+                if not self.opt["dryrun"]:
+                    self.proc(cmd)
+
+        # Clean up brew packages
+        if len(self.opt["brew_list"]) > 0:
+            self.print_banner("# Clean up brew packages")
+            for p in self.opt["brew_list"]:
+                if p in self.opt["brew_input"]:
+                    continue
+                cmd = "brew uninstall " + p
+                print cmd + "\n"
+                if not self.opt["dryrun"]:
+                    (ret, lines) = self.proc("brew info " + p)
+                    for l in lines.split("\n"):
+                        if l.find("ln -s") >= 0:
+                            if len(l.split()) > 2:
+                                app = l.split()[2]
+                                break
+                    self.remove("/Applications/" + app)
+                    self.remove("/Applications/Utilities/" + app)
+                    self.remove(os.environ["HOME"] + "/Applications/" + app)
+                    self.remove(os.environ["HOME"] + "/Applications/Utilities/" + app)
+
+                    self.proc(cmd)
+
+        # Clean up cashe
+        self.print_banner("# Clean up cache")
+        cmd0 = "brew cleanup --force"
+        cmd1 = "rm -rf " + self.opt["cache_dir"]
+        print cmd0 + "\n"
+        print cmd1 + "\n"
+        if not self.opt["dryrun"]:
+            self.proc(cmd0)
+            self.proc(cmd1)
+        else:
+            # Dry run message
+            self.print_banner("# This is dry run.\n"
+                              "# If you want to enforce cleanup, use '-C':\n"
+                              "#     $ " + __prog__ + " clean -C")
+
+    def install(self):
+        """Install"""
+        # First update Homebrew
+        self.proc("brew update")
+
+        # Check packages in the input file
+        self.read_input
+
+        # Tap
+        for p in self.opt["tap_input"]:
+            if not p in self.opt["tap_list"]:
+                cmd = "brew tap " + p
+                print cmd + "\n"
+                self.proc(cmd)
+
+        # Cask
+        for p in self.opt["cask_input"]:
+            if not p in self.opt["cask_list"]:
+                self.check_cask_cmd(True)
+                cmd = "brew cask install " + p
+                print cmd + "\n"
+                self.proc(cmd)
+
+        # pip
+        for p in self.opt["pip_input"]:
+            if not p in self.opt["pip_list"]:
+                self.check_pip_cmd(True)
+                cmd = "brew pip " + p
+                print cmd + "\n"
+                self.proc(cmd)
+
+        # Brew
+        for p in self.opt["brew_input_opt"]:
+            if not p in self.opt["brew_list"]:
+                cmd = "brew install " + p
+                print cmd + "\n"
+                (ret, lines) = self.proc(cmd)
+                for l in lines.split("\n"):
+                    if l.find("ln -s") >= 0:
+                        if self.opt["link"]:
+                            self.proc(l)
+
+        # Other commands
+        for c in self.opt["cmd_input"]:
+            self.proc(c)
+            if ret != 0:
+                print c + ": returned error:\n\n" + list + "\n"
+                sys.exit(ret)
+
         return 0
-        ;;
-      "n"|"N"|"no"|"No"|"NO" )
-        return 1
-        ;;
-      * )
-        printf "Answer with yes (y) or no (n): "
-        read yn
-        continue
-        ;;
-    esac
-  done
-} # }}}
-
-function repo_file { # Helper to build brewfile path for the repository {{{
-  repo_name=$(basename ${repo%.git})
-  user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
-  inputdir=$(dirname $input)
-  echo $inputdir/${user_name}_${repo_name}/$(basename $input)
-} # }}}
-
-function check_github_repo { # Helper to check and create github repository {{{
-  repo_name=$(basename ${repo%.git})
-  user_name=$(echo $(basename $(dirname $repo))|awk '{n=split($1,tmp,":")}{print tmp[n]}')
-
-  # Check if the repository already exists or not.
-  ret=$(curl --head https://github.com/$user_name/$repo_name 2>/dev/null|head -n1)
-  if echo $ret| grep -q "OK";then
-    git clone $repo $(dirname $brewfile)
-    if [ $? -ne 0 ];then
-      echo "Can't clone $repo."
-      echo "Please check the repository, or reset with"
-      echo "    $ $thisname set_repo"
-      exit 1
-    fi
-    return
-  fi
-
-  # Create new repository
-  echo "GitHub repository: $user_name/$repo_name doesn't exist."
-  ask_yn "Do you want to create the repository?"
-  ret=$?
-  echo
-  if [ $ret -ne 0 ];then
-    exit 1
-  fi
-
-  # Check password
-  echo -n "GitHub password: "
-  read -s pass
-  echo
-
-  # Try to create w/o two-factor code
-  description="Package list for Homebrew"
-  while [ 1 ];do
-    ret=$(curl -u ${user_name}:${pass} https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
-    if ! echo $ret| grep -q "Bad credentials";then
-      break
-    fi
-    printf "\e[31;1mWrong Password!\e[0m GitHub Password: "
-    read -s pass
-    echo
-  done
-
-  # If it failed, try with two-factor code
-  if echo $ret| grep -q "Must specify two-factor authentication OTP code";then
-    echo -n "GitHub Two-Factor Code: "
-    read twofac
-    while [ 1 ];do
-      ret=$(curl -u ${user_name}:${pass} -H "X-GitHub-OTP: $twofac" https://api.github.com/user/repos -d "{\"name\":\"$repo_name\",\"description\":\"$description\"}" 2>/dev/null)
-      if ! echo $ret| grep -q "Must specify two-factor authentication OTP code";then
-        break
-      fi
-      printf "\e[31;1mWrong code!\e[0m GitHub Two-Factor Code: "
-      read twofac
-    done
-  fi
-
-  # Initialize the repository
-  git clone $repo $(dirname $brewfile)
-  if [ $? -ne 0 ];then
-    echo "Can't clone $repo."
-    echo "Please check the repository, or reset with"
-    echo "    $ $thisname set_repo"
-    exit 1
-  fi
-  cd $(dirname $brewfile)
-  if [ $? -ne 0 ];then
-    echo "Can't cd to $(dirname $brewfile)."
-    echo "Please check the repository, or reset with"
-    echo "    $ $thisname set_repo"
-    exit 1
-  fi
-  echo "Brewfile
-========
-
-Package list for [Homebrew](http://brew.sh/).
-
-Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).
-" > README.md
-  touch $(basename $input)
-  git add -A
-  git commit -m "Prepared by $thisname"
-  git push -u origin master
-  cd -
-
-  echo
-  ask_yn "Do you want to initialize from installed packages?"
-  ret=$?
-  if [ $ret -eq 0 ];then
-    initialize 0
-    return $?
-  fi
-} # }}}
-
-function check_repo { # Helper check repository file {{{
-  if [ ! -f $input ];then
-    return 0
-  fi
-  if ! grep -q "^ *git" $input;then
-    return 0
-  fi
-  repo=$(grep "^ *git" $input |awk '{print $2}')
-  if [ "$repo" = "" ];then
-    return 0
-  fi
-  if [[ ! $repo =~ ^git ]] && [[ ! $repo =~ ^http ]];then
-    repo=git@github.com:$repo
-  fi
-  brewfile=$(repo_file)
-  if [ ! -d $(dirname $brewfile) ];then
-    if echo $repo |grep -q "github";then
-      check_github_repo
-    else
-      git clone $repo $(dirname $brewfile)
-      if [ $? -ne 0 ];then
-        echo "Can't clone $repo."
-        echo "Please check the repository, or reset with"
-        echo "    $ $thisname set_repo"
-        exit 1
-      fi
-    fi
-  fi
-} # }}}
-
-function repomgr { # Helper repository management {{{
-  local l_pull=$pull
-  local l_push=$push
-  if [ "$1" = "pull" ];then
-    l_pull=1
-    l_push=0
-  elif [ "$1" = "push" ];then
-    l_pull=0
-    l_push=1
-  fi
-  if [ "$repo" = "" ];then
-    echo "Please set the repository, or reset with"
-    echo "    $ $thisname set_repo"
-    return 1
-  fi
-  if [ ! -d $(dirname $brewfile) ];then
-    git clone $repo $(dirname $brewfile)
-  fi
-  cd $(dirname $brewfile)
-  if [ $l_pull -eq 1 ];then
-    git pull
-    return 0
-  elif [ $l_push -eq 1 ];then
-    git add $(basename $brewfile)
-    git commit -m "Updated the Package List"
-    git push
-    return 0
-  fi
-} # }}}
-
-function get_tap { # Helper for tap configuration file {{{
-  tap_user=$(dirname $1)
-  tap_repo=$(basename $1)
-  formulae=($(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/"*.rb 2>/dev/null))
-  formulae=("${formulae[@]}" $(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/Formula/"*.rb 2>/dev/null))
-  tap_packs=()
-  for f in "${formulae[@]}";do
-    tap_packs=("${tap_packs[@]}" $(basename "${f%.rb}"))
-  done
-  casks=($(ls "${tap_dir}/${tap_user}/homebrew-${tap_repo}/Casks/"*rb 2>/dev/null))
-  tap_casks=()
-  for c in "${casks[@]}";do
-    tap_casks=("${tap_casks[@]}" $(basename "${c%.rb}"))
-  done
-  return 0
-} # }}}
-
-function check_cask_cmd { # If cask is installed or not {{{
-  if [ $is_cask_cmd -eq 1 ];then
-    return
-  fi
-  if brew cask >& /dev/null;then
-    is_cask_cmd=1
-    return
-  fi
-  is_cask_cmd=0
-  if [ "$1" = "1" ];then
-    echo "cask has not been installed, install now."
-    echo brew tap ${cask_repo}
-    brew tap ${cask_repo}
-    tap_list=(${tap_list[@]} ${cask_repo})
-    get_tap ${cask_repo}
-    if ! echo " ${tap_packs[@]} "|grep -q " ${cask_pack} ";then
-      echo "WARNING: ${cask_pack} was not in ${cask_repo}."
-      echo "WARNING: Maybe you need to modify cask_repo."
-      exit 1
-    fi
-    echo brew install ${cask_pack}
-    brew install ${cask_pack}
-    brew_list=(${brew_list[@]} ${cask_pack})
-    is_cask_cmd=1
-  fi
-} # }}}
-
-function check_pip_cmd { # If pip is installed or not {{{
-  if [ $is_pip_cmd -eq 1 ];then
-    return
-  fi
-  if brew pip >& /dev/null;then
-    is_pip_cmd=1
-    return
-  fi
-  is_pip_cmd=0
-  if [ "$1" = "1" ];then
-    echo "pip has not been installed, install now."
-    echo brew install ${pip_pack}
-    brew install ${pip_pack}
-    brew_list=(${brew_list[@]} ${pip_pack})
-    is_pip_cmd=1
-  fi
-} # }}}
-
-function get_list { # Get list {{{
-  brew list >/dev/null
-  [ $? -ne 0 ] && exit
-  brew_list=($(brew list|grep -v "^pip-"))
-  pip_list=($(brew list|grep "^pip"))
-
-  tap_list=($(brew tap))
-  [ $? -ne 0 ] && exit
-
-  cask_list=()
-  cask_list_nocask=()
-  check_cask_cmd
-  if [ $is_cask_cmd -eq 0 ];then
-    return
-  fi
-  while read p e;do
-    if [ "$e" = "" ];then
-      cask_list=(${cask_list[@]} $p)
-    else
-      printf "\e[31;1mThe cask file of \e[31;7m$p\e[0m\e[31;1m doesn't exist.\n"
-      printf "Please check later.\n\n\e[0m"
-      cask_list_nocask=(${cask_list_nocask[@]} $p)
-    fi
-  done < <(brew cask list)
-} # }}}
-
-function read_input { # Read input file {{{
-  # Check packages in the input file
-  cmd_input=()
-  cask_input=()
-  pip_input=()
-  tap_input=()
-  brew_input=()
-  brew_input_opt=()
-  while read line;do
-    # Skip empty line/comment line
-    line=${line%%#*}
-    if [ "$line" = "" ];then
-      continue
-    fi
-    # Get arguments
-    args=($(echo ${line}|sed s:\'::g|sed s:\"::g))
-    cmd=${args[0]}
-    p=${args[1]}
-    opt=${args[@]: 2}
-    if [ "$p" = "install" ];then
-      p=${args[2]}
-      opt=${args[@]: 3}
-    fi
-    if [ "$cmd" = "brew" -o "$cmd" = "install" ];then
-      brew_input=(${brew_input[@]} $p)
-      brew_input_opt=("${brew_input_opt[@]}" "$p $opt")
-    elif [ "$cmd" = "tap" ];then
-      tap_input=("${tap_input[@]}" "$p $opt")
-    elif [ "$cmd" = "tapall" ];then
-      tap_input=("${tap_input[@]}" "$p $opt")
-      get_tap $p
-      ret=$?
-      if [ $ret -ne 0 ];then
-        continue
-      fi
-      brew_input=("${brew_input[@]}" "${tap_packs[@]}")
-    elif [ "$cmd" = "cask" ];then
-      cask_input=("${cask_input[@]}" "$p $opt")
-    elif [ "$cmd" = "pip" ];then
-      pip_input=("${pip_input[@]}" "$p $opt")
-    else
-      #echo "WARNING: $cmd is unknown, please check $brewfile"
-      #continue
-      cmd_input=("${cmd_input[@]}" "$line")
-    fi
-  done < $brewfile
-} # }}}
-
-function set_brewfile_repo { # Set Brewfile Repository {{{
-
-  # Check input file
-  if [ -f $input ];then
-    if grep -q "^ *git" $input;then
-      prev_repo=$(grep "^ *git" $input |awk '{print $2}')
-    fi
-    echo "$input is already there."
-    if [ "$prev_repo" != "" ];then
-      echo "Git repository for Brewfile is already set as $prev_repo."
-    fi
-    ask_yn "Do you want to overwrite it?"
-    ret=$?
-    echo
-    if [ $ret -eq 0 ];then
-      mv ${input} ${input}.bak
-      echo "ok, old $input was moved to ${input}.bak"
-    else
-      return 1
-    fi
-  fi
-  rm -f ${input}
-
-  # Get repository
-  if [ "$repo" = "" ];then
-    echo
-    echo 'Set repository, "non" for local Brewfile.'
-    echo '<user>/<repo> for GitHub repository,'
-    echo -n 'or full path for the repository: '
-    read repo
-    while [ "$repo" = "" ];do
-      echo "Repository can't be empty."
-      echo -n 'Set repository: '
-      read repo
-    done
-  fi
-  echo ""
-  echo "***********************************************"
-  echo "Set Brewfile Repository as $repo"
-  echo "***********************************************"
-  echo ""
-
-  # Reset to no repository type Brewfile
-  if [ "$repo" = "non" ];then
-    initialize 0
-    return $?
-  fi
-
-  # Set repository to input file
-  echo "git $repo" > $input
-  check_repo
-  return $?
-} # }}}
-
-function get_options { # Get install options from brew info {{{
-  p=$1
-  # Get options for build
-  opt=$(brew info $p|grep "Built from source with"|cut -d: -f2)
-  # is head or not
-  if brew info $p| grep "^$(brew --cellar $p)"|grep -q HEAD;then
-    opt="$opt --HEAD"
-  fi
-  echo $opt
-} # }}}
-
-function initialize { # Initialize Brewfile {{{
-  if [ $initialized -eq 1 ];then
-    return
-  fi
-
-  if [ "$1" != "0" ];then
-    if [ ! -f $input ];then
-      ask_yn "Do you want to set repository (y)? ((n) for local Brewfile)."
-      ret=$?
-      if [ $ret -eq 0 ];then
-        set_brewfile_repo
-        return $?
-      fi
-    else
-      if [ "$repo" != "" ];then
-        echo "You are using Brewfile of $repo."
-      else
-        echo "$input is already there."
-      fi
-      ask_yn "Do you want to overwrite it?"
-      ret=$?
-      echo
-      if [ $ret -eq 0 ];then
-        if [ "$repo" = "" ];then
-          mv ${input} ${input}.bak
-          echo "ok, old $input was moved to ${input}.bak"
-        fi
-      else
-        return 1
-      fi
-    fi
-  fi
-  rm -f ${brewfile}
-  echo ""
-  echo "***********************************************"
-  echo "Initialize $brewfile"
-  echo "***********************************************"
-  echo ""
-
-  # Get installed package list
-  get_list
-
-  # Check list
-  {
-  if [ ${#tap_list[@]} -gt 0 ];then
-    echo "# Tap repositories and their packages"
-    for p in ${tap_list[@]};do
-      get_tap $p
-      ret=$?
-      if [ $ret -ne 0 ];then
-        continue
-      fi
-      echo ""
-      echo "## $p"
-      echo "tap $p"
-      for tp in ${tap_packs[@]};do
-        if echo " ${brew_list[@]} "|grep -q " $tp ";then
-          opt=$(get_options $tp)
-          echo "install ${tp}${opt:+ $opt}"
-          brew_list=($(echo " ${brew_list[@]} "|sed "s: $tp : :g"))
-        fi
-      done
-      for tc in ${tap_casks[@]};do
-        if echo " ${cask_list[@]} "|grep -q " $tc ";then
-          echo "cask install ${tc}"
-          cask_list=($(echo " ${cask_list[@]} "|sed "s: $tc : :g"))
-        fi
-      done
-    done
-  fi
-
-  if [ ${#brew_list[@]} -gt 0 ];then
-    echo ""
-    echo "# Other Homebrew packages"
-    for p in ${brew_list[@]};do
-      opt=$(get_options $p)
-      echo "install ${p}${opt:+ $opt}"
-    done
-  fi
-  if [ ${#pip_list[@]} -gt 0 ];then
-    echo ""
-    echo "# pip packages"
-    for p in ${pip_list[@]};do
-      echo "pip ${p}"
-    done
-  fi
-  if [ ${#cask_list[@]} -gt 0 ];then
-    echo ""
-    echo "# Cask Applications"
-    for p in ${cask_list[@]};do
-      echo "cask install $p"
-    done
-  fi
-  if [ ${#cask_list_nocask[@]} -gt 0 ];then
-    echo ""
-    echo "# Below application were installed by Cask,"
-    echo "# but no cask were found."
-    echo ""
-    for p in ${cask_list_nocask[@]};do
-      echo "# cask install $p"
-    done
-  fi
-  } |tee -a $brewfile
-  echo ""
-  echo "***********************************************"
-  echo "You can edit $brewfile with:"
-  echo "    $ $thisname edit"
-  echo "***********************************************"
-
-  initialized=1
-
-  return 0
-} # }}}
-
-function check_input_file { # Check input file {{{
-  if [ ! -f $brewfile ];then
-    echo "WARNING: Input file $brewfile is not found."
-    ask_yn "WARNING: Do you want to initialize from installed packages?"
-    ret=$?
-    echo
-    if [ $ret -eq 0 ];then
-      initialize 0
-      return $?
-    else
-      echo ""
-      echo "WARNING: OK, please prepare Brewfile"
-      echo "WARNING: or you can initialize $brewfile with:"
-      echo "WARNING:     $ $thisname init"
-      return 1
-    fi
-  fi
-} # }}}
-
-function edit_brewfile { # Edit file {{{
-  $my_editor $brewfile
-} # }}}
-
-function cleanup { # Cleanup {{{
-  if [ $dryrun -eq 1 ];then
-    echo ""
-    echo "*******"
-    echo "Dry Run"
-    echo "*******"
-    echo ""
-  fi
-
-  # Check packages in the input file
-  read_input
-
-  if [ ${#cask_list[@]} -gt 0 ];then
-    echo ""
-    echo "*********************"
-    echo "Cleanup cask packages"
-    echo "*********************"
-    echo ""
-    for p in ${cask_list[@]};do
-      if ! echo " ${cask_input[@]} "|grep -q " $p ";then
-        echo brew cask uninstall $p
-        if [ $dryrun -ne 1 ];then
-          check_cask_cmd 1
-          brew cask uninstall $p
-        fi
-        cask_list=($(echo " ${cask_list[@]} "|sed "s: ${p} : :g"))
-      fi
-    done
-    # Skip cask at tap/brew if any cask packages exist
-    if [ ${#cask_list[@]} -ne 0 ];then
-      tap_list=($(echo " ${tap_list[@]} "|sed "s: ${cask_repo} : :g"))
-      brew_list=($(echo " ${brew_list[@]} "|sed "s: ${cask_pack} : :g"))
-    fi
-  fi
-
-  if [ ${#pip_list[@]} -gt 0 ];then
-    echo ""
-    echo "*********************"
-    echo "Cleanup pip packages"
-    echo "*********************"
-    echo ""
-    for p in ${pip_list[@]};do
-      if ! echo " ${pip_input[@]} "|grep -q " $p ";then
-        echo brew pip rm $p
-        if [ $dryrun -ne 1 ];then
-          pip uninstall -y $p >/dev/null
-          brew uninstall $p 2>/dev/null
-          brew uninstall pip-$p 2>/dev/null
-        fi
-        pip_list=($(echo " ${pip_list[@]} "|sed "s: ${p} : :g"))
-      fi
-    done
-    # Skip brew-pip at brew if any pip packages exist
-    if [ ${#pip_list[@]} -ne 0 ];then
-      brew_list=($(echo " ${brew_list[@]} "|sed "s: ${pip_pack} : :g"))
-    fi
-  fi
-
-  if [ ${#tap_list[@]} -gt 0 ];then
-    echo ""
-    echo "********************"
-    echo "Cleanup tap packages"
-    echo "********************"
-    echo ""
-    for p in ${tap_list[@]};do
-      if ! echo " ${tap_input[@]} "|grep -q " $p ";then
-        get_tap $p
-        untapflag=1
-        for tp in ${tap_packs[@]};do
-          if echo " ${brew_input[@]} "|grep -q " $tp ";then
-            # keep tap as related package is remained
-            untapflag=0
-            break
-          fi
-        done
-        if [ $untapflag -eq 0 ];then
-          continue
-        fi
-        echo brew untap $p
-        if [ $dryrun -ne 1 ];then
-          brew untap $p
-        fi
-      fi
-    done
-  fi
-
-  if [ ${#brew_list[@]} -gt 0 ];then
-    echo ""
-    echo "*********************"
-    echo "Cleanup brew packages"
-    echo "*********************"
-    echo ""
-    for p in ${brew_list[@]};do
-      if ! echo " ${brew_input[@]} "|grep -q " $p ";then
-        echo brew uninstall $p
-        if [ $dryrun -ne 1 ];then
-          app=$(basename $(brew info ${p% *}|grep "ln -s"|awk '{print $3}') 2>/dev/null)
-          if [ "$app" != "" ];then
-            rm -f /Applications/$app
-            rm -f /Applications/Utilities/$app
-            rm -f ~/Applications/$app
-          fi
-          brew uninstall $p
-        fi
-      fi
-    done
-  fi
-
-  echo ""
-  echo "*********************"
-  echo "Cleanup cache        "
-  echo "*********************"
-  echo ""
-  echo brew cleanup --force
-  echo rm -rf $cache_dir
-  if [ $dryrun -ne 1 ];then
-    brew cleanup --force
-    rm -rf $cache_dir
-  else
-    echo "*****************************************"
-    echo "This is dry run."
-    echo "If you want to enforce cleanup, use '-C':"
-    echo "    $ $thisname clean -C"
-    echo "*****************************************"
-  fi
-
-  return 0
-} # }}}
-
-function install { # Install {{{
-  # First update Homebrew
-  brew update
-
-  # Check packages in the input file
-  read_input
-
-  # Tap
-  for p in ${tap_input[@]};do
-    if ! echo " ${tap_list[@]} "|grep -q " $p ";then
-      echo brew tap $p
-      brew tap $p
-    fi
-  done
-
-  # Cask
-  if [ $is_cask_cmd -eq 1 ];then
-    for p in ${cask_input[@]};do
-      if ! echo " ${cask_list[@]} "|grep -q " $p ";then
-        check_cask_cmd 1
-        echo brew cask install $p
-        brew cask install $p
-      fi
-    done
-  fi
-
-  # pip
-  for p in ${pip_input[@]};do
-    if ! echo " ${pip_list[@]} "|grep -q " $p ";then
-      check_pip_cmd 1
-      echo brew pip $p
-      brew pip $p
-    fi
-  done
-
-  # Brew
-  for p in "${brew_input_opt[@]}";do
-    if ! echo " ${brew_list[@]} "|grep -q " ${p%% *} ";then
-      echo brew install $p
-      brew install $p | tee .brewall_install_log
-      linkcmd=$(grep "ln -s" .brewall_install_log)
-      if [ "$linkcmd" != "" ];then
-        if [ "$link" -eq 1 ];then
-          $linkcmd
-        fi
-      fi
-      rm -f .brewall_install_log
-    fi
-  done
-
-  # Other commands
-  if [ ${#cmd_input[@]} -ne 0 ];then
-    for c in "${#cmd_input[@]}";do
-      $c
-    done
-  fi
-
-  return 0
-} # }}}
-
-function find_app { # Helper function for Cask# {{{
-  check_cask_cmd 1
-  app="$1"
-  is_cask=0
-  is_installed=0
-  file=$($(brew --prefix)/Library/Taps/caskroom/homebrew-cask/developer/bin/cask_namer "$app" 2>/dev/null|grep "Proposed file name"|awk '{print $4}')
-  for c in "${othercaskdirs[@]}" "$caskdir";do
-    if [ -f $c/$file ];then
-      is_cask=1
-      notinstalled=$(brew cask info ${file%.rb}|grep "Not installed")
-      if [ "$notinstalled" = "" ];then
-        is_installed=1
-        break
-      fi
-    else
-      for ftmp in $(grep "'$(basename "$app")'" $c/*.rb|cut -d: -f1);do
-        ftmp=$(basename "$ftmp")
-        if [ "$ftmp" != "" ];then
-          is_cask=1
-          file=$ftmp
-          notinstalled=$(brew cask info ${file%.rb}|grep "Not installed")
-          if [ "$notinstalled" = "" ];then
-            is_installed=1
-            break
-          fi
-        fi
-      done
-      if [ $is_installed -eq 1 ];then
-        break
-      fi
-    fi
-  done
-}
-
-# }}}
-
-function check_cask { # Check applications for Cask # {{{
-  check_cask_cmd 1
-  echo "Starting to check applications for Cask..."
-  caskdir=$(brew info  brew-cask|grep "$(brew --cellar brew-cask)"|cut -d" " -f1)/Casks
-  if [ "$caskdir" = "/Casks" ];then
-    echo "You may not have installed cask"
-    echo "Please check and install cask first"
-    return 1
-  fi
-  echo "OK, cask was installed!"
-  echo ""
-  othercaskdirs=()
-  for dir in $(brew --prefix)/Library/Taps/*/*/Casks;do
-    if [ "$dir" !=  "$(brew --prefix)/Library/Taps/caskroom/homebrew-cask/Casks" ];then
-      othercaskdirs=("${othercaskdirs[@]}" "$dir")
-    fi
-  done
-  orig_ifs=$IFS
-  IFS=$'\n'
-  apps_root=($(ls -d /Applications/*app))
-  apps_utils=($(ls -d /Applications/Utilities/*app))
-  apps_home=($(ls -d ~/Applications/*app))
-  IFS=$orig_ifs
-
-  apps_root_cask_installed=()
-  apps_root_cask_installed_caskname=()
-  apps_root_cask_notinstalled=()
-  apps_root_cask_notinstalled_caskname=()
-  apps_root_noncask=()
-  for a in "${apps_root[@]}";do
-    find_app "$a"
-    if [ $is_cask -eq 0 ];then
-      apps_root_noncask=("${apps_root_noncask[@]}" "$a")
-      echo "Non Cask app: $a"
-    else
-      notinstalled=$(brew cask info ${file%.rb}|grep "Not installed")
-      if [ $is_installed -eq 1 ];then
-        echo "Installed by Cask: $file, $a"
-        apps_root_cask_installed=("${apps_root_cask_installed[@]}" "$a")
-        apps_root_cask_installed_caskname=("${apps_root_cask_installed_caskname[@]}" "${file%.rb}")
-      else
-        echo "Not installed by Cask: $file, $a"
-        apps_root_cask_notinstalled=("${apps_root_cask_notinstalled[@]}" "$a")
-        apps_root_cask_notinstalled_caskname=("${apps_root_cask_notinstalled_caskname[@]}" "${file%.rb}")
-      fi
-    fi
-  done
-
-  apps_utils_cask_installed=()
-  apps_utils_cask_installed_caskname=()
-  apps_utils_cask_notinstalled=()
-  apps_utils_cask_notinstalled_caskname=()
-  apps_utils_noncask=()
-  for a in "${apps_utils[@]}";do
-    find_app "$a"
-    if [ $is_cask -eq 0 ];then
-      apps_utils_noncask=("${apps_utils_noncask[@]}" "$a")
-      echo "Non Cask app: $a"
-    else
-      notinstalled=$(brew cask info ${file%.rb}|grep "Not installed")
-      if [ $is_installed -eq 1 ];then
-        echo "Installed by Cask: $file, $a"
-        apps_utils_cask_installed=("${apps_utils_cask_installed[@]}" "$a")
-        apps_utils_cask_installed_caskname=("${apps_utils_cask_installed_caskname[@]}" "${file%.rb}")
-      else
-        echo "Not installed by Cask: $file, $a"
-        apps_utils_cask_notinstalled=("${apps_utils_cask_notinstalled[@]}" "$a")
-        apps_utils_cask_notinstalled_caskname=("${apps_utils_cask_notinstalled_caskname[@]}" "${file%.rb}")
-      fi
-    fi
-  done
-
-  apps_home_cask_installed=()
-  apps_home_cask_installed_caskname=()
-  apps_home_cask_notinstalled=()
-  apps_home_cask_notinstalled_caskname=()
-  apps_home_noncask=()
-  for a in "${apps_home[@]}";do
-    find_app "$a"
-    if [ $is_cask -eq 0 ];then
-      apps_home_noncask=("${apps_home_noncask[@]}" "$a")
-    else
-      if [ $is_installed -eq 1 ];then
-        echo "Installed by Cask: $file, ${a/$HOME/~}"
-        apps_home_cask_installed=("${apps_home_cask_installed[@]}" "$a")
-        apps_home_cask_installed_caskname=("${apps_home_cask_installed_caskname[@]}" "${file#.rb}")
-      else
-        echo "Not installed by Cask: $file, ${a/$HOME/~}"
-        apps_home_cask_notinstalled=("${apps_home_cask_notinstalled[@]}" "$a")
-        apps_home_cask_notinstalled_caskname=("${apps_home_cask_notinstalled_caskname[@]}" "${file%.rb}")
-      fi
-    fi
-  done
-
-  {
-    echo "### Cask applications"
-    echo "### Please copy these lines to your Brewfile and use with \`brew bundle\`."
-    echo ""
-    echo "### tap and install Cask (remove comment if necessary)."
-    echo "#tap caskroom/cask"
-    echo "#install brew-cask"
-    echo ""
-    echo "### Apps installed by Cask in /Applications:"
-    i=0
-    while [ $i -lt ${#apps_root_cask_installed[@]} ];do
-      echo "cask install ${apps_root_cask_installed_caskname[$i]} # ${apps_root_cask_installed[$i]}"
-      ((i++))
-    done
-    echo ""
-    echo "### Apps installed by Cask in /Applications/Utilities:"
-    i=0
-    while [ $i -lt ${#apps_utils_cask_installed[@]} ];do
-      echo "cask install ${apps_utils_cask_installed_caskname[$i]} # ${apps_utils_cask_installed[$i]}"
-      ((i++))
-    done
-    echo ""
-    echo "### Apps installed by Cask in ~/Applications:"
-    i=0
-    while [ $i -lt ${#apps_home_cask_installed[@]} ];do
-      echo "cask install ${apps_home_cask_installed_caskname[$i]} # ${apps_home_cask_installed[$i]/$HOME/~}"
-      ((i++))
-    done
-    echo ""
-    echo "#############################"
-    echo ""
-    echo "### Apps not installed by Cask, but installed in /Applications:"
-    echo "### If you want to install them with Cask, remove comments."
-    i=0
-    while [ $i -lt ${#apps_root_cask_notinstalled[@]} ];do
-      echo "#cask install ${apps_root_cask_notinstalled_caskname[$i]} # ${apps_root_cask_notinstalled[$i]}"
-      ((i++))
-    done
-    echo ""
-    echo "### Apps not installed by Cask, but installed in /Applications/Utilities:"
-    echo "### If you want to install them with Cask, remove comments."
-    i=0
-    while [ $i -lt ${#apps_utils_cask_notinstalled[@]} ];do
-      echo "#cask install ${apps_utils_cask_notinstalled_caskname[$i]} # ${apps_utils_cask_notinstalled[$i]}"
-      ((i++))
-    done
-    echo ""
-    echo "### Apps not installed by Cask, but installed in ~/Applications:"
-    echo "### If you want to install them with Cask, remove comments."
-    i=0
-    while [ $i -lt ${#apps_home_cask_notinstalled[@]} ];do
-      echo "#cask install ${apps_home_cask_notinstalled_caskname[$i]} # ${apps_home_cask_notinstalled[$i]/$HOME/~}"
-      ((i++))
-    done
-    echo ""
-    echo ""
-    echo "#############################"
-    echo ""
-    echo "### Apps not registered in Cask, but installed in /Applications:"
-    for a in "${apps_root_noncask[@]}";do
-      echo "# $a"
-    done
-    echo ""
-    echo "### Apps not registered in Cask, but installed in /Applications/Utilities:"
-    for a in "${apps_utils_noncask[@]}";do
-      echo "# $a"
-    done
-    echo ""
-    echo "### Apps not registered in Cask, but installed in ~/Applications:"
-    for a in "${apps_home_noncask[@]/$HOME/~}";do
-      echo "# $a"
-    done
-  } > Caskfile.txt
-  #} |tee Caskfile.txt
-
-  echo ""
-  echo ""
-  echo "### Summary ###"
-  echo ""
-  echo "Total: $((${#apps_root[@]} + ${#apps_utils[@]} + ${#apps_home[@]})) Apps have been checked."
-  echo "       (Apps of /Applications/*.app, /Applications/Utilities/*.app and ~/Applications/*.app)"
-  echo ""
-  echo "Installed by Cask:"
-  echo "- /Applications           : ${#apps_root_cask_installed[@]} Apps"
-  echo "- /Applications/Utilities : ${#apps_utils_cask_installed[@]} Apps"
-  echo "- ~/Applications          : ${#apps_home_cask_installed[@]} Apps"
-  echo ""
-  echo "Not installed by Cask, but can be installed by Cask:"
-  echo "- /Applications           : ${#apps_root_cask_notinstalled[@]} Apps"
-  echo "- /Applications/Utilities : ${#apps_utils_cask_notinstalled[@]} Apps"
-  echo "- ~/Applications          : ${#apps_home_cask_notinstalled[@]} Apps"
-  echo ""
-  echo "No Cask Apps:"
-  echo "- /Applications           : ${#apps_root_noncask[@]} Apps"
-  echo "- /Applications/Utilities : ${#apps_utils_noncask[@]} Apps"
-  echo "- ~/Applications          : ${#apps_home_noncask[@]} Apps"
-  echo ""
-
-} # }}}
-
-function cask_upgrade { # Upgrade cask applications # {{{
-  check_cask_cmd 0
-  ret=$?
-  if [ $ret -ne 0 ];then
-    echo "Homebrew-cask has not been installed, yet."
-    return $ret
-  fi
-  apps=($(brew cask list))
-  for a in "${apps[@]}";do
-    if grep -q "Not installed" < <(brew cask info $a);then
-      brew cask install $a
-    fi
-  done
-} # }}}
-
-# }}}
-
-# Main {{{
-
-# Check Homebrew
-
-if ! which brew >& /dev/null;then
-  echo Homebrew is not installed!
-  echo Install now...
-  echo ruby -e \"\$\(curl -fsSL https://raw.github.com/mxcl/homebrew/go\)\"
-  ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
-  brew doctor
-  if [ $? -ne 0 ];then
-    echo
-    echo "#################################"
-    echo "#################################"
-    echo "Check brew environment:"
-    echo "    $ brew doctor"
-    echo
-    echo "Check later, anyway, let's continue..."
-    echo "#################################"
-    echo "#################################"
-    echo
-    echo
-  fi
-fi
-
-# Cask list check
-if [ $casklist -eq 1 ];then
-  check_cask
-  exit $?
-fi
-
-# Upgrade cask applications
-if [ $cask_upgrade -eq 1 ];then
-  cask_upgrade
-  exit $?
-fi
-
-# Set BREWFILE repository
-if [ $set_repo -eq 1 ];then
-  set_brewfile_repo
-  exit $?
-fi
-
-# Change brewfile if it is repository's one.
-check_repo
-
-# Do pull/push for the repository.
-if [ $pull -eq 1 ] || [ $push -eq 1 ];then
-  repomgr
-fi
-
-# brew command
-if [ $brew -eq 1 ];then
-  echo brew $brew_args
-  brew $brew_args
-  ret=$?
-  if [ $ret -ne 0 ];then
-    exit $ret
-  fi
-  if [ $noinit -eq 0 ];then
-    initialize 0
-  fi
-  exit $?
-fi
-
-# Initialize
-if [ $init -eq 1 ];then
-  initialize
-  exit $?
-fi
-
-# Check input file
-# If the file doesn't exist, initialize it.
-check_input_file
-ret=$?
-if [ $edit -ne 1 ] && [ $ret -ne 0 ];then
-  exit $ret
-fi
-
-# Edit
-if [ $edit -eq 1 ];then
-  edit_brewfile
-  exit 0
-fi
-
-# Get list for cleanup/install
-get_list
-
-# Cleanup
-if [ $cleanup -eq 1 ];then
-  cleanup
-  exit $?
-fi
-
-# Install
-if [ $install -eq 1 ];then
-  install
-  exit $?
-fi
-
-# Update
-if [ $update -eq 1 ];then
-  if [ "$repo" != "" ];then
-    repomgr pull
-  fi
-  install
-  brew upgrade
-  initialize 0
-  if [ "$repo" != "" ];then
-    repomgr push
-    dryrun=0
-    cleanup
-  fi
-  exit 0
-fi
-# }}}
+
+    def find_app(self, app, taps):
+        """Helper function for Cask"""
+        self.check_cask_cmd(True)
+        [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
+        cask_namer = self.get_tap_path(self.opt["cask_repo"])\
+                     + "/developer/bin/cask_namer"
+        name = ""
+        cmd = cask_namer + " \"" + app + "\" 2> /dev/null"
+        lines = self.proc(cmd)[1]
+        for l in lines.split("\n"):
+            if l.find("Proposed Cask name") >= 0:
+                name = l.split()[3]
+
+        tap = ""
+        installed = False
+        if name != "":
+            for t in taps:
+                d = self.get_tap_path(t) + "/Casks"
+                if os.path.exists(d + "/" + name + ".rb"):
+                    tap = t
+                    lines = self.proc("brew cask info " + name)[1]
+                    installed =True
+                    for l in lines.split("\n"):
+                        if l.find("Not installed") >= 0:
+                            installed = False
+                            break
+                    break
+        if not installed:
+            name = ""
+            for t in taps:
+                d = self.get_tap_path(t) + "/Casks"
+                for n in map(lambda x: x.replace(".rb", ""),
+                        filter(lambda y: y.endswith(".rb"), os.listdir(d))):
+                    f = open(d + "/" + n + ".rb", "r")
+                    content = f.read()
+                    f.close()
+                    if content.find(app) >= 0:
+                        lines = self.proc("brew cask info " + n)[1]
+                        installed =True
+                        for l in lines.split("\n"):
+                            if l.find("Not installed") >= 0:
+                                installed = False
+                                break
+                        tap = t
+                        name = n
+        if name == "":
+            print "Non Cask app:", app
+        elif installed:
+            print "Installed by Cask:", app, name
+        else:
+            print "Installed directly, instead of by Cask:", app, name
+        return (tap, installed, name)
+
+    def check_cask(self):
+        """Check applications for Cask"""
+        self.check_cask_cmd(True)
+
+        print "Starting to check applications for Cask...\n"
+
+        # Set cask directories and reset application information list
+        taps = filter(lambda t: os.path.isdir(self.get_tap_path(t) + "/Casks"),
+                      self.proc("brew tap")[1].split("\n"))
+        apps = dict([d,{True:[], False:[]}] for d in taps + [""])
+
+        # Set applications directories
+        app_dirs = [d for d in ["/Applications", "/Applications/Utilities",
+                os.environ["HOME"] + "/Applications",
+                os.environ["HOME"] + "/Applications/Utilities"]
+                if os.path.isdir(d)]
+        apps_check = {"cask": dict([d, 0] for d in app_dirs),
+                      "has_cask": dict([d, 0] for d in app_dirs),
+                      "no_cask": dict([d, 0] for d in app_dirs)}
+
+        # Get applications
+        napps = 0
+        for d in app_dirs:
+            for app in filter(lambda x: x.endswith(".app"), os.listdir(d)):
+                (tap, installed, name) = self.find_app(app, taps)
+                apps[tap][installed].append((name, d + "/" + app))
+                check = "no_cask"
+                if installed:
+                    check = "cask"
+                elif name != "":
+                    check = "has_cask"
+                apps_check[check][d] += 1
+                napps += 1
+
+        # Make list
+        out = Tee("Caskfile")
+
+        out.writeln("# Cask applications")
+        out.writeln("# Please copy these lines to your Brewfile"
+                    " and use with `" + __prog__ + " install`.\n")
+
+        if apps.has_key(self.opt["cask_repo"]):
+            out.writeln("# Main tap repository for " + self.opt["cask_pack"])
+            out.writeln("tap " + self.opt["cask_repo"])
+            out.writeln("install " + self.opt["cask_pack"])
+            out.writeln("")
+            out.writeln("# Apps installed by Cask in " + self.opt["cask_pack"])
+            for (name,app_path) in apps[self.opt["cask_repo"]][True]:
+                    out.writeln("cask install " + name
+                                + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+            out.writeln("# Apps installed directly instead of by Cask in " + self.opt["cask_pack"])
+            for (name,app_path) in apps[self.opt["cask_repo"]][False]:
+                    out.writeln("#cask install " + name
+                                + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+        for t in filter(lambda x: x != self.opt["cask_repo"] and x != "", taps):
+            out.writeln("# Casks in " + t)
+            out.writeln("tap " + t)
+            out.writeln("")
+            out.writeln("# Apps installed by Cask in " + t)
+            for (name,app_path) in apps[t][True]:
+                    out.writeln("cask install " + name
+                                + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+            out.writeln("# Apps installed directly instead of by Cask in " + t)
+            for (name,app_path) in apps[t][False]:
+                    out.writeln("#cask install " + name
+                                + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+        out.writeln("# Apps installed but no casks are available")
+        for (name,app_path) in apps[""][False]:
+                out.writeln("#" + app_path)
+
+        del out
+
+        # Summary
+        self.print_banner("# Summary")
+        print "Total:", napps, "apps have been checked."
+        print "Apps in", app_dirs
+        print ""
+        maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
+        print "Installed by Cask:"
+        for d in app_dirs:
+            print "{0:<{1}s} : {2:d}".format(d.replace(
+                    os.environ["HOME"], "~"), maxlen, apps_check["cask"][d])
+        print ""
+        print "Installed directly, but casks are available:"
+        for d in app_dirs:
+            print "{0:<{1}s} : {2:d}".format(d.replace(
+                    os.environ["HOME"], "~"), maxlen, apps_check["has_cask"][d])
+        print ""
+        print "No casks"
+        for d in app_dirs:
+            print "{0:<{1}s} : {2:d}".format(d.replace(
+                    os.environ["HOME"], "~"), maxlen, apps_check["no_cask"][d])
+        print ""
+
+    def cask_upgrade(self):
+        """Upgrade cask applications"""
+        if not self.check_cask_cmd():
+            return
+        apps = self.proc("brew cask list")[1].split("\n")
+        import subprocess
+        for a in apps:
+            lines = self.proc("brew cask info " + a)[1]
+            installed =True
+            for l in lines.split("\n"):
+                if l.find("Not installed") >= 0:
+                    installed = False
+                    break
+            if installed:
+                continue
+            subprocess.call(["brew", "cask", "install", a])
+
+    def execute(self):
+        """Main execute function"""
+
+        # Check Homebrew
+        self.check_brew_cmd()
+
+        # Cask list check
+        if self.opt["command"] == "casklist":
+            self.check_cask()
+            sys.exit(0)
+
+        # Upgrade cask applications
+        if self.opt["command"] == "cask_upgrade":
+            self.cask_upgrade()
+            sys.exit(0)
+
+        # Set BREWFILE repository
+        if self.opt["command"] == "set_repo":
+            self.set_brewfile_repo()
+            sys.exit(0)
+
+        # Change brewfile if it is repository's one.
+        self.check_repo()
+
+        # Do pull/push for the repository.
+        if self.opt["command"] in ["pull", "push"]:
+            self.repomgr()
+            sys.exit(0)
+
+        # brew command
+        if self.opt["command"] == "brew":
+            noinit = False
+            if len(self.opt["args"]) > 0:
+                if self.opt["args"] == "noinit":
+                    noinit = True
+                    self.opt["args"].pop(0)
+            cmd = "brew " + " ".join(self.opt["args"])
+            (ret, lines) = self.proc(cmd)
+            print lines
+            if ret != 0 or noinit:
+                sys.exit(ret)
+            self.initialize(False)
+            sys.exit(0)
+
+        # Initialize
+        if self.opt["command"] == "initialize":
+            self.initialize()
+            sys.exit(0)
+
+        # Check input file
+        # If the file doesn't exist, initialize it.
+        self.check_input_file()
+
+        # Edit
+        if self.opt["command"] == "edit":
+            self.edit_brewfile()
+            sys.exit(0)
+
+        # Get list for cleanup/install
+        self.get_list()
+
+        # Cleanup
+        if self.opt["command"] == "clean":
+            self.cleanup()
+            sys.exit(0)
+
+        # Install
+        if self.opt["command"] == "install":
+            self.install()
+            sys.exit(0)
+
+        # Update
+        if self.opt["command"] == "update":
+            if self.opt["repo"] != "":
+                self.repomgr("pull")
+            self.install()
+            self.proc("brew upgrade")
+            self.initialize(False)
+            if self.opt["repo"] != "":
+                self.repomgr("push")
+                self.opt["dryrun"] = False
+                self.cleanup()
+            sys.exit(0)
+
+def main():
+    # Prepare BrewFile
+    b = BrewFile()
+
+    import argparse
+
+    # Pre Parser
+    pre_parser = argparse.ArgumentParser(add_help=False, usage= __prog__  + "...")
+    group = pre_parser.add_mutually_exclusive_group()
+    group.add_argument("-i", "--init", action="store_const",
+                       dest="command", const="init")
+    group.add_argument("-s", "--set_repo", action="store_const",
+                       dest="command", const="set_repo")
+    group.add_argument("-c", "--clean", action="store_const",
+                       dest="command", const="clean")
+    group.add_argument("-u", "--update", action="store_const",
+                       dest="command", const="update")
+    group.add_argument("-e", "--edit", action="store_const",
+                       dest="command", const="edit")
+    group.add_argument("-v", "--version", action="store_const",
+                       dest="command", const="version")
+    group.add_argument("-h", "--help", action="store_const",
+                       dest="command", const="help")
+
+    # Parent parser
+    file_parser = argparse.ArgumentParser(add_help=False)
+    file_parser.add_argument("-f", "--file", action="store", dest="input",
+            default=b.opt["input"],
+            help="Set input file (default: %(default)s). \n"
+                  "You can set input file by environmental variable,\n"
+                  "HOMEBREW_BREWFILE, like:\n"
+                  "    export HOMEBREW_BREWFILE=~/.brewfile")
+
+    repo_parser = argparse.ArgumentParser(add_help=False)
+    repo_parser.add_argument("-r", action="store", default="", dest="repo",
+            help="Set repository name. Use with set_repo.")
+
+    link_parser = argparse.ArgumentParser(add_help=False)
+    link_parser.add_argument("-n", action="store_false", default=True,
+            dest="link", help="Don't make links for Apps.")
+
+    dryrun_parser = argparse.ArgumentParser(add_help=False)
+    dryrun_parser.add_argument("-C", action="store_false", default=True,
+            dest="dryrun", help="Run cleanup in non dry-run mode.")
+
+    args_parser = argparse.ArgumentParser(add_help=False)
+    args_parser.add_argument("args", action="store", nargs="*",
+            help="brew arguments")
+
+    subparser_options = {"parents":[file_parser],
+            "formatter_class": argparse.RawTextHelpFormatter}
+
+    # Main parser
+    parser = argparse.ArgumentParser(add_help=False, prog=__prog__,
+            parents=[file_parser, repo_parser, link_parser, dryrun_parser],
+            formatter_class = argparse.RawTextHelpFormatter,
+            description = "Brew-file: Manager for packages of Homebrew\n"
+                          "https://github.com/rcmdnk/homebrew-file")
+
+    subparsers = parser.add_subparsers(
+            title="subcommands", metavar="[command]", help="", dest="command")
+
+    help="Install packages in BREWFILE (do 'brew update', too)."
+    install_parser = subparsers.add_parser("install", description=help, help=help,
+            **subparser_options)
+    help="Execute brew command, and update BREWFILE."
+    brew_parser = subparsers.add_parser("brew", description=help, help=help,
+            parents=[file_parser, args_parser],
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="or -i/--init\nInitialize/Update BREWFILE with installed packages."
+    init_parser = subparsers.add_parser("init", description=help, help=help,
+            parents=[file_parser, link_parser],
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
+    set_repo_parser = subparsers.add_parser("set_repo", description=help, help=help,
+            parents=[file_parser, repo_parser],
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="Update BREWFILE from the repository."
+    pull_parser = subparsers.add_parser("pull", description=help, help=help,
+            **subparser_options)
+    help="Push your BREWFILE to the repository."
+    push_parser = subparsers.add_parser("push", description=help, help=help,
+            **subparser_options)
+    help="or -c/--clean\nCleanup.\n"\
+         "Uninstall packages not in the list.\n"\
+         "Untap packages not in the list.\n"\
+         "Cleanup cache (brew cleanup)\n"\
+         "By drault, cleanup runs as dry-run.\n"\
+         "If you want to enforce cleanup, use '-C' option."
+    clean_parser = subparsers.add_parser("clean", description=help, help=help,
+            parents=[file_parser, dryrun_parser],
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="or -u/--update\nDo pull, install, brew update/upgrade, init,\n"\
+         "push and clean -C.\n"\
+         "In addition, pull, push and clean\n"\
+         "will be done if the repository is assigned."
+    update_parser = subparsers.add_parser("update", description=help, help=help,
+            parents=[file_parser, link_parser],
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="or -e/--edit\nEdit input file."
+    edit_parser = subparsers.add_parser("edit", description=help, help=help,
+            **subparser_options)
+    help="Check applications for Cask."
+    casklist_parser = subparsers.add_parser("casklist", description=help, help=help,
+        formatter_class = argparse.RawTextHelpFormatter)
+    help="Upgrade cask applications."
+    cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help, help=help,
+        formatter_class = argparse.RawTextHelpFormatter)
+    help="or -v/--version\nShow version."
+    version_parser = subparsers.add_parser("version", description=help, help=help,
+            formatter_class=argparse.RawTextHelpFormatter)
+    help="or -v/--help\nPrint Help (this message) and exit."
+    help_parser = subparsers.add_parser("help", description=help, help=help,
+            formatter_class=argparse.RawTextHelpFormatter)
+
+    if len(sys.argv) == 1:
+        parser.print_usage()
+        print ""
+        print "Execute `" + __prog__ + " help` for more information."
+        sys.exit(1)
+
+    (ns, args) = pre_parser.parse_known_args()
+    if ns.command != None:
+        args = [ns.command] + args
+
+    b.set_args(**vars(parser.parse_args(args)))
+
+    if b.opt["command"] == "help":
+        parser.print_help()
+        sys.exit(0)
+    if b.opt["command"] == "version":
+        print __prog__ + " " + __version__ + " " + __date__
+        sys.exit(0)
+
+    b.execute()
+
+if __name__ == "__main__":
+    main()
