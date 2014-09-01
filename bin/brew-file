@@ -312,6 +312,7 @@ class BrewFile:
 
 
         # pull/push
+        print "cd", os.path.dirname(self.opt["brewfile"])
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         if pull:
             ret = self.proc("git pull")[0]
@@ -540,12 +541,13 @@ class BrewFile:
         opt=""
         # Get options for build
         (ret, lines) = self.proc("brew info " + package, False, False)
+        head = self.proc("brew --cellar " + package + "/HEAD", False, False)[1][0]
         for l in lines:
             ltmp = l.split("Built from source with: ")
             if len(ltmp) > 1:
                 opt += " " + ltmp[1]
                 continue
-            if l.find(self.proc("brew --cellar " + package, False, False)[1][0] + "/HEAD") >= 0:
+            if l.find(head) >= 0:
                 opt += " " + "--HEAD"
 
         return opt
@@ -590,7 +592,8 @@ class BrewFile:
                 out.writeln("\n## " + p + "\ntap " + p)
                 for tp in self.opt["tap_packs"]:
                     if tp in self.opt["brew_list"]:
-                        out.writeln("install " + tp)
+                        opt = self.get_options(tp)
+                        out.writeln("install " + tp + opt)
                         self.opt["brew_list"].remove(tp)
                 for tc in self.opt["tap_casks"]:
                     if tc in self.opt["cask_list"]:
