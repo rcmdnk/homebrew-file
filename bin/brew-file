@@ -542,7 +542,7 @@ class BrewFile:
         opt=""
         # Get options for build
         (ret, lines) = self.proc("brew info " + package, False, False)
-        head = self.proc("brew --cellar " + package + "/HEAD", False, False)[1][0]
+        head = self.proc("brew --cellar " + package, False, False)[1][0] + "/HEAD"
         for l in lines:
             ltmp = l.split("Built from source with: ")
             if len(ltmp) > 1:
@@ -573,6 +573,10 @@ class BrewFile:
                 ans = self.ask_yn("Do you want to overwrite it?")
                 if ans:
                     os.rename(self.opt["input"], self.opt["input"] + ".bak")
+                    if self.opt["repo"] != "":
+                        f = open(self.opt["input"], "w")
+                        f.write("git " + self.opt["repo"])
+                        f.close()
                     print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
                 else:
                     sys.exit(0)
