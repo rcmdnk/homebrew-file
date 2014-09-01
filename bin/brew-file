@@ -65,6 +65,7 @@ class BrewFile:
         self.opt["initialized"] = False
         self.opt["tap_dir"]     = self.opt["brew_repo"] + "/Library/Taps"
         self.opt["cache_dir"]   = self.proc("brew --cache", False, False)[1][0]
+        self.opt["caskroom"]   = "/opt/homebrew-cask/Caskroom"
         self.opt["cask_pack"]   = "brew-cask"
         self.opt["cask_repo"]   = "caskroom/cask"
         self.opt["pip_pack"]    = "brew-pip"
@@ -976,9 +977,22 @@ class BrewFile:
                 if l.find("Not installed") >= 0:
                     installed = False
                     break
-            if installed:
-                continue
-            self.proc(["brew", "cask", "install", a])
+            if not installed:
+                self.proc(["brew", "cask", "install", a])
+            if not self.opt["dryrun"]:
+                current = ""
+                for l in lines:
+                    if l.startswith(self.opt["caskroom"]):
+                        current = l.split()[0]
+                if current == "":
+                    continue
+                appdir = os.path.dirname(current)
+                for d in os.listdir(appdir):
+                    if d != current.split("/")[-1]:
+                        print "rm -rf " + appdir + "/" + d
+                        self.remove(appdir + "/" + d)
+
+
 
     def execute(self):
         """Main execute function"""
@@ -1166,10 +1180,12 @@ def main():
             **subparser_options)
     help="Check applications for Cask."
     casklist_parser = subparsers.add_parser("casklist", description=help, help=help,
-        formatter_class = argparse.RawTextHelpFormatter)
-    help="Upgrade cask applications."
-    cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help, help=help,
-        formatter_class = argparse.RawTextHelpFormatter)
+            formatter_class = argparse.RawTextHelpFormatter)
+    help="Upgrade cask applications.\n"\
+         "With -C, old versions will be removed."
+    cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help,
+            help=help, parents=[dryrun_parser],
+            formatter_class = argparse.RawTextHelpFormatter)
     help="or -v/--version\nShow version."
     version_parser = subparsers.add_parser("version", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
