@@ -7,7 +7,7 @@
 #
 # Usage: brew-file [-increvh][-f <input file>][command] ...
 #
-BREW_FILE_VERSION=v1.1.5
+BREW_FILE_VERSION=v1.1.6
 SENTAKU_DATE="1/Sep/2014"
 #
 # }}}
@@ -62,6 +62,7 @@ pip_pack="brew-pip"
 my_editor=${EDITOR:-"vim"}
 is_cask_cmd=0
 is_pip_cmd=0
+caskroom="/opt/homebrew-cask/Caskroom"
 
 thisname=$(basename $0)
 if [ "$thisname" = "brew-file" ];then
@@ -102,6 +103,7 @@ Options:
                   export HOMEBREW_BREWFILE=~/.brewfile
   -n         Don't make links for Apps
   -C         Run cleanup in non dry-run mode.
+             In addition, do cleanup in cask_upgrade.
   -r  <repo> Set repository name. Use with set_repo (-s).
 
 If you want to use repository's BREWFILE,
@@ -1143,9 +1145,20 @@ function cask_upgrade { # Upgrade cask applications # {{{
     return $ret
   fi
   apps=($(brew cask list))
-  for a in "${apps[@]}";do
-    if grep -q "Not installed" < <(brew cask info $a);then
-      brew cask install $a
+  for a in ${apps[@]};do
+    info=$(brew cask info $a)
+    if echo "$info"| grep -q "Not installed";then
+      brw cask install $a
+    fi
+    if [ $dryrun -eq 0 ];then
+      current=$(echo "$info"|grep "${caskroom}/${a}"|cut -d' ' -f1)
+      for dir in $(ls ${caskroom}/${a});do
+        testdir="${caskroom}/${a}/${dir}"
+        if [ "$testdir" != "$current" ];then
+          echo rm -rf "$testdir"
+          rm -rf "$testdir"
+        fi
+      done
     fi
   done
 } # }}}
