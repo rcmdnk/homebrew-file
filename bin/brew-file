@@ -572,12 +572,9 @@ class BrewFile:
 
                 ans = self.ask_yn("Do you want to overwrite it?")
                 if ans:
-                    os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                    if self.opt["repo"] != "":
-                        f = open(self.opt["input"], "w")
-                        f.write("git " + self.opt["repo"])
-                        f.close()
-                    print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
+                    if self.opt["repo"] == "":
+                        os.rename(self.opt["input"], self.opt["input"] + ".bak")
+                        print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
                 else:
                     sys.exit(0)
 
