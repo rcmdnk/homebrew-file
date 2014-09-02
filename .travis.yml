@@ -7,6 +7,8 @@ python:
   - "3.4"
 install:
 env:
+  - PAGER=cat
+  - EDITOR=cat
   - version="--devel"
   - version="--HEAD"
 
