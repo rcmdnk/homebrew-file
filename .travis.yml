@@ -1,4 +1,5 @@
-language: python
+language:
+  - c
 os:
   - linux
   - osx
