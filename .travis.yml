@@ -3,6 +3,9 @@ os:
 - osx
 script: ./test.sh
 before_install:
+  - echo OSTYPE=$OSTYPE
+  - echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
+  - echo OSX=$OSX
   - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 python:
 #  - "2.6"
