@@ -2,6 +2,7 @@ Brew-file
 =========
 
 [![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=python)](https://travis-ci.org/rcmdnk/homebrew-file)
+[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png)](https://coveralls.io/r/rcmdnk/homebrew-file)
 
 Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
 
