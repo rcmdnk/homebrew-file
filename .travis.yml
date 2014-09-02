@@ -1,6 +1,6 @@
 language: bash
 os:
-- osx
+  - osx
 script: ./test.sh
 before_install:
   - echo OSTYPE=$OSTYPE
