@@ -4,4 +4,5 @@ echo OSTYPE=$OSTYPE
 echo OSX=$OSX
 echo HOSTNAME=$HOSTNAME
 echo Hellow World
+env
 #brew file help
