@@ -10,7 +10,7 @@ python:
 
 before_install:
   - if [ -z $OSX ];then echo OSX!;else echo not OSX!;fi
-  - [ -z $OSX ] && brew update
+  - if [ -z $OSX ];then brew update;fi
 ## command to install dependencies
 #install:
 #  - brew install rcmdnk/homebrew-file/brew-file
