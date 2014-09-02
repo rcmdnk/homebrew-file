@@ -5,7 +5,7 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
-#install:
+install:
   - brew install rcmdnk/file/brew-file --python
 
 # command to run tests
