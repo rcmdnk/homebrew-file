@@ -1,29 +1,16 @@
-language: objective-c
-compiler:
+language: bash
 os:
 - osx
 script: ./test.sh
 before_install:
-- brew update
-- travis_wait 40 brew install boost --with-python SDL2 SDL2_image SDL2_ttf
-- echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
-#os:
-#  - osx
-#language: python
-#python:
-##  - "2.6"
-#  - "2.7"
-##  - "3.2"
-##  - "3.3"
-##  - "3.4"
-#
-#before_install:
-#  - if [ -z $OSX ];then echo OSX!;else echo not OSX!;fi
-#  - if [ -z $OSX ];then brew update;fi
-### command to install dependencies
-##install:
-##  - brew install rcmdnk/homebrew-file/brew-file
-#
-## command to run tests
-#script: ./test.sh
+  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+python:
+#  - "2.6"
+  - "2.7"
+#  - "3.2"
+#  - "3.3"
+#  - "3.4"
+install:
+  - brew install rcmdnk/homebrew-file/brew-file
+script: ./test.sh
 
