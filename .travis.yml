@@ -8,7 +8,7 @@ python:
 install:
 env:
   - version="--devel"
-  - version="--head"
+  - version="--HEAD"
 
 
 # command to run tests
