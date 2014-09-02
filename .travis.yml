@@ -6,7 +6,10 @@ python:
   - "3.3"
   - "3.4"
 install:
-  - brew install rcmdnk/file/brew-file --python
+env:
+  - version="--devel"
+  - version="--head"
+
 
 # command to run tests
 script: ./test.sh

@@ -1,4 +1,5 @@
 #!/bin/sh
+brew install rcmdnk/file/brew-file $version
 brew file version
 brew file help
 brew install vim --with-lua --HEAD
