@@ -22,7 +22,6 @@
 ##install:
 ##  - brew install rcmdnk/homebrew-file/brew-file
 
-I build for flowgrind. See https://travis-ci.org for details.
 # Flowgrind also uses Coverity Scan. See https://scan.coverity.com/ for details.
 language:
   - c
