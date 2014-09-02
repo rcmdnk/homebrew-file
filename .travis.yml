@@ -7,10 +7,12 @@ python:
   - "3.4"
 install:
 env:
-  - PAGER=cat
-  - EDITOR=cat
-  - version="--devel"
-  - version="--HEAD"
+  global:
+    - PAGER=cat
+    - EDITOR=cat
+  matrix:
+    - version="--devel"
+    - version="--HEAD"
 
 
 # command to run tests
