@@ -8,6 +8,9 @@ before_install:
   - echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
   - echo OSX=$OSX
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then OSX!; fi
+env:
+  - PACKAGE=a
+  - PACKAGE=b
 #  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 #python:
 #  - "2.6"

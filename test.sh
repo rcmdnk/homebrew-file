@@ -6,3 +6,4 @@ echo HOSTNAME=$HOSTNAME
 echo Hellow World
 #env
 #brew file help
+echo PACKAGE=$PACKAGE
