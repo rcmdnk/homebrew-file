@@ -1,19 +1,21 @@
-os:
-  - osx
-language: python
+language: objective-c
 python:
-#  - "2.6"
+  - "2.6"
   - "2.7"
-#  - "3.2"
-#  - "3.3"
-#  - "3.4"
-
-before_install:
-  - if [ -z $OSX ];then echo OSX!;else echo not OSX!;fi
-  - if [ -z $OSX ];then brew update;fi
-## command to install dependencies
+  - "3.2"
+  - "3.3"
+  - "3.4"
 #install:
-#  - brew install rcmdnk/homebrew-file/brew-file
+  - brew install rcmdnk/file/brew-file --python
 
 # command to run tests
-script: ./test.sh
+script:
+  - brew file version
+  - brew file help
+  - brew install vim --with-lua --HEAD
+  - brew install caskroom/cask/brew-file
+  - brew cask install firefox
+  - brew file init
+  - brew file update
+  - brew file casklist
+  - brew file edit
