@@ -1,3 +1,12 @@
+language: objective-c
+compiler:
+os:
+- osx
+script: ./test.sh
+before_install:
+- brew update
+- travis_wait 40 brew install boost --with-python SDL2 SDL2_image SDL2_ttf
+- echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
 #os:
 #  - osx
 #language: python
@@ -18,12 +27,3 @@
 ## command to run tests
 #script: ./test.sh
 
-language: objective-c
-compiler:
-os:
-- osx
-script: ./test.sh
-before_install:
-- brew update
-- travis_wait 40 brew install boost --with-python SDL2 SDL2_image SDL2_ttf
-- echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
