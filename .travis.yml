@@ -6,14 +6,12 @@ before_install:
   - echo OSTYPE=$OSTYPE
   - echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
   - echo OSX=$OSX
-  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-python:
+#  - ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+#python:
 #  - "2.6"
-  - "2.7"
+#  - "2.7"
 #  - "3.2"
 #  - "3.3"
 #  - "3.4"
-install:
-  - brew install rcmdnk/homebrew-file/brew-file
-script: ./test.sh
-
+#install:
+#  - brew install rcmdnk/homebrew-file/brew-file
