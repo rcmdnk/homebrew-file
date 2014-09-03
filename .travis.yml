@@ -4,6 +4,8 @@ env:
     - PAGER=cat
     - EDITOR=cat
     - VISUAL=cat
+  matrix:
+    - version="--devel"
 before_script:
   - brew update
 script:
