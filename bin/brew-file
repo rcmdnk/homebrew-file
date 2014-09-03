@@ -64,6 +64,7 @@ is_cask_cmd=0
 is_pip_cmd=0
 caskroom="/opt/homebrew-cask/Caskroom"
 yes_no=0
+noupdate=0
 
 thisname=$(basename $0)
 if [ "$thisname" = "brew-file" ];then
@@ -107,6 +108,7 @@ Options:
              In addition, do cleanup in cask_upgrade.
   -r  <repo> Set repository name. Use with set_repo (-s).
   -y         Answer yes to yes/no questions.
+  -U         Don't execute brew update in initialize or other commands.
 
 If you want to use repository's BREWFILE,
 please prepare a repository which has a file named 'Brewfile'.
@@ -174,6 +176,9 @@ while [ $# != 0 ] ; do
       ;;
     -y)
       yes_no=1;
+      ;;
+    -U)
+      noupdate=1;
       ;;
     -v|version)
       echo "$thisname $BREW_FILE_VERSION";exit 0;
@@ -860,7 +865,9 @@ function cleanup { # Cleanup {{{
 
 function install { # Install {{{
   # First update Homebrew
-  brew update
+  if [ $noupdate -ne 1 ];then
+    brew update
+  fi
 
   # Check packages in the input file
   read_input
