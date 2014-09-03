@@ -208,7 +208,8 @@ function ask_yn { # Helper for yes/no {{{
   printf "$1 [y/n]: "
   if [ $yes_no -eq 1 ];then
     yn=yes
-    echo
+    echo y
+    reutnr 0
   else
     read yn
   fi
