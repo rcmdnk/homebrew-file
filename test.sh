@@ -18,3 +18,6 @@ f brew file init -y
 f brew file update -y
 f brew file casklist
 f brew file edit
+f brew file set_repo -r https://github.com/rcmdnk/Brewfile -y
+f brew file install
+f brew file update -y
