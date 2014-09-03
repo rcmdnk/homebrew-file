@@ -87,6 +87,7 @@ class BrewFile:
         self.opt["brew_input"]  = []
         self.opt["brew_input_opt"] = []
         self.opt["args"] = []
+        self.opt["yn"] = False
 
     def set_args(self, **kw):
         """Set arguments."""
@@ -111,6 +112,9 @@ class BrewFile:
 
     def ask_yn(self, question):
         """Helper for yes/no."""
+        if self.opt["yn"] == True:
+            return True
+
         yes = ["yes","y", ""]
         no = ["no","n"]
 
@@ -1122,11 +1126,15 @@ def main():
     dryrun_parser.add_argument("-C", action="store_false", default=True,
             dest="dryrun", help="Run cleanup in non dry-run mode.")
 
+    yn_parser = argparse.ArgumentParser(add_help=False)
+    yn_parser.add_argument("-y", action="store_true", default=False,
+            dest="yn", help="Answer yes to all yes/no questions.")
+
     args_parser = argparse.ArgumentParser(add_help=False)
     args_parser.add_argument("args", action="store", nargs="*",
             help="brew arguments")
 
-    subparser_options = {"parents":[file_parser],
+    subparser_options = {"parents":[file_parser, yn_parser],
             "formatter_class": argparse.RawTextHelpFormatter}
 
     # Main parser
@@ -1144,15 +1152,15 @@ def main():
             **subparser_options)
     help="Execute brew command, and update BREWFILE."
     brew_parser = subparsers.add_parser("brew", description=help, help=help,
-            parents=[file_parser, args_parser],
+            parents=[file_parser, args_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -i/--init\nInitialize/Update BREWFILE with installed packages."
     init_parser = subparsers.add_parser("init", description=help, help=help,
-            parents=[file_parser, link_parser],
+            parents=[file_parser, link_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
     set_repo_parser = subparsers.add_parser("set_repo", description=help, help=help,
-            parents=[file_parser, repo_parser],
+            parents=[file_parser, repo_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="Update BREWFILE from the repository."
     pull_parser = subparsers.add_parser("pull", description=help, help=help,
@@ -1167,14 +1175,14 @@ def main():
          "By drault, cleanup runs as dry-run.\n"\
          "If you want to enforce cleanup, use '-C' option."
     clean_parser = subparsers.add_parser("clean", description=help, help=help,
-            parents=[file_parser, dryrun_parser],
+            parents=[file_parser, dryrun_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -u/--update\nDo pull, install, brew update/upgrade, init,\n"\
          "push and clean -C.\n"\
          "In addition, pull, push and clean\n"\
          "will be done if the repository is assigned."
     update_parser = subparsers.add_parser("update", description=help, help=help,
-            parents=[file_parser, link_parser],
+            parents=[file_parser, link_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -e/--edit\nEdit input file."
     edit_parser = subparsers.add_parser("edit", description=help, help=help,
@@ -1185,7 +1193,7 @@ def main():
     help="Upgrade cask applications.\n"\
          "With -C, old versions will be removed."
     cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help,
-            help=help, parents=[dryrun_parser],
+            help=help, parents=[dryrun_parser, yn_parser],
             formatter_class = argparse.RawTextHelpFormatter)
     help="or -v/--version\nShow version."
     version_parser = subparsers.add_parser("version", description=help, help=help,
