@@ -113,6 +113,7 @@ class BrewFile:
     def ask_yn(self, question):
         """Helper for yes/no."""
         if self.opt["yn"] == True:
+            print question + " [y/n]: y"
             return True
 
         yes = ["yes","y", ""]
