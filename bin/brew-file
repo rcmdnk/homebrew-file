@@ -63,6 +63,7 @@ my_editor=${EDITOR:-"vim"}
 is_cask_cmd=0
 is_pip_cmd=0
 caskroom="/opt/homebrew-cask/Caskroom"
+yes_no=0
 
 thisname=$(basename $0)
 if [ "$thisname" = "brew-file" ];then
@@ -105,6 +106,7 @@ Options:
   -C         Run cleanup in non dry-run mode.
              In addition, do cleanup in cask_upgrade.
   -r  <repo> Set repository name. Use with set_repo (-s).
+  -y         Answer yes to yes/no questions.
 
 If you want to use repository's BREWFILE,
 please prepare a repository which has a file named 'Brewfile'.
@@ -170,6 +172,9 @@ while [ $# != 0 ] ; do
     cask_upgrade)
       cask_upgrade=1; : $((ncommands++));
       ;;
+    -y)
+      yes_no=1;
+      ;;
     -v|version)
       echo "$thisname $BREW_FILE_VERSION";exit 0;
       ;;
@@ -201,7 +206,12 @@ fi
 function ask_yn { # Helper for yes/no {{{
   question="$1"
   printf "$1 [y/n]: "
-  read yn
+  if [ $yes_no -eq 1 ];then
+    yn=yes
+    echo
+  else
+    read yn
+  fi
   while [ 1 ];do
     case $yn in
       "y"|"Y"|"yes"|"Yes"|"YES" )
