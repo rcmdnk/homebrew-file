@@ -1,24 +1,29 @@
 language: objective-c
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-install:
 env:
   global:
     - PAGER=cat
     - EDITOR=cat
-  matrix:
-    - version="--devel"
-    - version="--HEAD"
-script: ./test.sh
+    - VISUAL=cat
+before_script:
+  - brew update
+script:
+  - brew install rcmdnk/file/brew-file $version
+  - brew file version
+  - brew file help
+  - brew install vim --with-lua --HEAD
+  - brew install caskroom/cask/brew-cask
+  - brew cask install firefox
+  - touch "$(brew --prefix)/Library/Brewfile"
+  - brew file init -y -U
+  - brew file update -y -U
+  - brew file casklist
+  - brew file edit
+  - brew file set_repo -r https://github.com/rcmdnk/Brewfile -y
+  - brew file install -U
+  - brew file update -y -U
 notifications:
   email:
     recipients:
       - rcmdnk@gmail.com
     on_success: change
     on_failure: always
-
-
