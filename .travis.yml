@@ -1,0 +1,9 @@
+language: objective-c
+script:
+  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install |sh
+notifications:
+  email:
+    recipients:
+      - rcmdnk@gmail.com
+    on_success: change
+    on_failure: always
