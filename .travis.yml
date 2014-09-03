@@ -13,7 +13,12 @@ env:
   matrix:
     - version="--devel"
     - version="--HEAD"
-
-
-# command to run tests
 script: ./test.sh
+notifications:
+  email:
+    recipients:
+      - rcmdnk@gmail.com
+    on_success: change
+    on_failure: always
+
+
