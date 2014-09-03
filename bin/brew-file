@@ -1191,7 +1191,7 @@ def main():
          "In addition, pull, push and clean\n"\
          "will be done if the repository is assigned."
     update_parser = subparsers.add_parser("update", description=help, help=help,
-            parents=[file_parser, link_parser, yn_parser],
+            parents=[file_parser, link_parser, yn_parser, noupdate_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -e/--edit\nEdit input file."
     edit_parser = subparsers.add_parser("edit", description=help, help=help,
