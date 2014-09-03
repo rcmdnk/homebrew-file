@@ -18,7 +18,7 @@ Renamed from brewall.
 
 By install script:
 
-    $ curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install |sh
+    $ curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 
 This installs Homebrew if it has not been installed, too.
 
