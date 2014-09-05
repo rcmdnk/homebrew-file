@@ -20,7 +20,7 @@ script:
   - brew file update -y -U
   - brew file casklist
   - brew file edit
-  - brew file set_repo -r https://github.com/rcmdnk/Brewfile -y
+  - brew file set_repo -r https://github.com/rcmdnk/BrewfileTest -y
   - brew file install -U
   - brew file update -y -U
 notifications:

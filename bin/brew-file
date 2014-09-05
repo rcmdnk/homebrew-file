@@ -194,7 +194,7 @@ class BrewFile:
             return
 
         # Create new repository
-        print "GitHub repository: " + user_name + "/" + repo_name + "doesn't exist."
+        print "GitHub repository: " + user_name + "/" + repo_name + " doesn't exist."
         ans = self.ask_yn("do you want to create the repository?")
         if not ans:
             exit(0)
@@ -204,7 +204,7 @@ class BrewFile:
         password = getpass.getpass("GitHub password: ")
 
         # Try to create w/o two-factor code
-        import requests
+        import requests, json
         url = "https://api.github.com/user/repos"
         description = "package list for Homebrew"
         data = {"name": repo_name, "description": "Package list for Homebrew"}
