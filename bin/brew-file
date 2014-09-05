@@ -245,7 +245,7 @@ class BrewFile:
         self.clone_repo()
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         f = open("README.md", "w")
-        f.write("# " + self.opt["brewfile"].split("/")[-1] + "\n\n"\
+        f.write("# " + repo_name + "\n\n"\
                 "Package list for [homebrew](http://brew.sh/).\n\n"\
                 "Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).")
         f.close()
