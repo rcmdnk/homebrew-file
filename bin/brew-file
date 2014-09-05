@@ -314,8 +314,7 @@ function check_github_repo { # Helper to check and create github repository {{{
     echo "    $ $thisname set_repo"
     exit 1
   fi
-  echo "Brewfile
-========
+  echo "# $repo_name
 
 Package list for [Homebrew](http://brew.sh/).
 
