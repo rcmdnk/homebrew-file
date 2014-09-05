@@ -1207,7 +1207,7 @@ def main():
     help="or -v/--version\nShow version."
     version_parser = subparsers.add_parser("version", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
-    help="or -v/--help\nPrint Help (this message) and exit."
+    help="or -h/--help\nPrint Help (this message) and exit."
     help_parser = subparsers.add_parser("help", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
 
