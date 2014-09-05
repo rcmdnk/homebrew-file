@@ -220,23 +220,25 @@ class BrewFile:
                 continue
             if r.json()["message"] == "Must specify two-factor authentication OTP code.":
                 is_ok = False
+                break
             print r.json()["message"]
             sys.exit(1)
 
-        # Try with two-factor code
-        twofac = raw_input("GitHub two-factor code: ")
-        headers.update({"X-Github-OTP": twofac})
-        while True:
-            r = requests.post(url=url, data=json.dumps(data),
-                              auth=(user_name, password), headers=headers)
-            if r.ok:
-                break
-            if r.json()["message"] == "Must specify two-factor authentication OTP code.":
-                twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
-                headers.update({"X-Github-OTP": twofac})
-                continue
-            print r.json()["message"]
-            sys.exit(1)
+        if not is_ok:
+            # Try with two-factor code
+            twofac = raw_input("GitHub two-factor code: ")
+            headers.update({"X-Github-OTP": twofac})
+            while True:
+                r = requests.post(url=url, data=json.dumps(data),
+                                  auth=(user_name, password), headers=headers)
+                if r.ok:
+                    break
+                if r.json()["message"] == "Must specify two-factor authentication OTP code.":
+                    twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
+                    headers.update({"X-Github-OTP": twofac})
+                    continue
+                print r.json()["message"]
+                sys.exit(1)
 
         # Clone and initialize
         self.clone_repo()
