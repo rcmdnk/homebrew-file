@@ -588,11 +588,36 @@ function set_brewfile_repo { # Set Brewfile Repository {{{
 function get_options { # Get install options from brew info {{{
   p=$1
   # Get options for build
-  opt=$(brew info $p|grep "Built from source with"|cut -d: -f2)
-  # is head or not
-  if brew info $p| grep "^$(brew --cellar $p)"|grep -q HEAD;then
-    opt="$opt --HEAD"
+  local info=$(brew info $p)
+  local l1=$(echo "$info"|head -n1)
+  local orig_ifs=$IFS
+  local versions=$(echo $l1|cut -d":" -f2)
+  IFS=','
+  versions=($versions)
+  IFS=$orig_ifs
+  local v
+  local v_stable
+  local v_devel
+  local v_head
+  for v in "${versions[@]}";do
+    if echo $v|grep -q stable;then
+      v_stable=$(echo $v|awk '{print $2}')
+    elif echo $v|grep -q devel;then
+      v_devel=$(echo $v|awk '{print $2}')
+    elif echo $v|grep -q HEAD;then
+      v_head=HEAD
+    fi
+  done
+  local v_inst=$(basename $(echo "$info"|grep "^$(brew --cellar $p)"|cut -d" " -f1))
+  local opt=""
+  if [ "$v_inst" = "$v_stable" ];then
+    opt=""
+  elif [ "$v_inst" = "$v_devel" ];then
+    opt=" --devel"
+  elif [ "$v_inst" = "$v_head" ];then
+    opt=" --HEAD"
   fi
+  opt=${opt}$(echo "$info"|grep "Built from source with"|cut -d: -f2)
   echo $opt
 } # }}}
 
