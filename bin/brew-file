@@ -551,15 +551,29 @@ class BrewFile:
         opt=""
         # Get options for build
         (ret, lines) = self.proc("brew info " + package, False, False)
-        head = self.proc("brew --cellar " + package, False, False)[1][0] + "/HEAD"
+        versions = {"stable":"", "devel":"", "HEAD":""}
+        v_tmp = map(lambda x: x.strip().split(),
+                    lines[0].split(":")[1].split(","))
+        for v in v_tmp:
+            if v[0] == "stable":
+                versions["stable"] = v[1]
+            elif v[0] == "devel":
+                versions["devel"] = v[1]
+            elif v[0] == "HEAD":
+                versions["HEAD"] = "HEAD"
+        cellar = self.proc("brew --cellar " + package, False, False)[1][0]
         for l in lines:
             ltmp = l.split("Built from source with: ")
             if len(ltmp) > 1:
                 opt += " " + ltmp[1]
                 continue
-            if l.find(head) >= 0:
-                opt += " " + "--HEAD"
-
+            if l.startswith(cellar):
+                v = l.split()[0].split("/")[-1]
+                for k in versions.keys():
+                    if v == versions[k]:
+                        if k != "stable":
+                            opt += " --" + k
+                        break
         return opt
 
     def initialize(self, check = True):
