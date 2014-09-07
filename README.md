@@ -1,6 +1,8 @@
 Brew-file
 =========
 
+[![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.org/rcmdnk/homebrew-file)
+
 Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
 
 Renamed from brewall.
