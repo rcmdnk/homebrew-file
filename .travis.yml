@@ -8,12 +8,12 @@ env:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
 install:
-  - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls'
+  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls'
   - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors'
 before_script:
   - brew update
   - version=""
-  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python"'
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
 script:
   - coverage run --source=bin/brew-file brew install rcmdnk/file/brew-file $version
   - coverage run --source=bin/brew-file brew file version
