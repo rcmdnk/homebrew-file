@@ -7,7 +7,7 @@ env:
 before_script:
   - brew update
   - version=""
-  - '[ $TRAVIS_BRANCH = python ] && version="--devel"'
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python"'
 script:
   - brew install rcmdnk/file/brew-file $version
   - brew file version
