@@ -10,16 +10,16 @@ env:
 before_install:
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
-  - brew update >& /dev/null && brew upgrade >& /dev/null
+    #- brew update >& /dev/null && brew upgrade >& /dev/null
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew install rcmdnk/file/brew-file $version
-  - coverage run --source=bin/brew-file brew install vim --with-lua --HEAD
-  - coverage run --source=bin/brew-file brew install caskroom/cask/brew-cask
-  - coverage run --source=bin/brew-file brew cask install firefox
+  - brew install vim --with-lua --HEAD
+  - brew install caskroom/cask/brew-cask
+  - brew cask install firefox
   - touch "$(brew --prefix)/Library/Brewfile"
-  - exe=$(which brwe-file)
+  - exe=$(which brew-file)
 script:
   - coverage run $exe version
   - coverage run $exe help
