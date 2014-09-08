@@ -4,10 +4,10 @@ env:
     - PAGER=cat
     - EDITOR=cat
     - VISUAL=cat
-  matrix:
-    - version="--HEAD"
 before_script:
   - brew update
+  - version=""
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python"'
 script:
   - brew install rcmdnk/file/brew-file $version
   - brew file version
