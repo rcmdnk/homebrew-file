@@ -275,7 +275,9 @@ please use `brew-wrap`.
 
 You can use it by set as alias:
 
-    alias brew="brew-wrap"
+    if type brew >& /dev/null && type brew-file && type brew-wrap >& /dev/null;then
+      alias brew="brew-wrap"
+    fi
 
 Write it in your setting file like `.bashrc`.
 
