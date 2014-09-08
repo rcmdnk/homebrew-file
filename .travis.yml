@@ -8,8 +8,8 @@ env:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
 install:
-  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls'
-  - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors'
+  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
+  - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
 before_script:
   - brew update
   - version=""
