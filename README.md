@@ -275,7 +275,7 @@ please use `brew-wrap`.
 
 You can use it by set as alias:
 
-    if type brew >& /dev/null && type brew-file && type brew-wrap >& /dev/null;then
+    if type brew >& /dev/null && type brew-file >& /dev/null && type brew-wrap >& /dev/null;then
       alias brew="brew-wrap"
     fi
 
