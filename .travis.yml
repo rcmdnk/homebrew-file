@@ -7,28 +7,29 @@ env:
   matrix:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
+before_install:
+  - version=""
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
+  - brew update && brew upgrade >& /dev/null
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
-before_script:
-  - brew update
-  - version=""
-  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
-script:
-  - coverage run --source=bin/brew-file brew install rcmdnk/file/brew-file $version
-  - coverage run --source=bin/brew-file brew file version
-  - coverage run --source=bin/brew-file brew file help
+  - install rcmdnk/file/brew-file $version
   - coverage run --source=bin/brew-file brew install vim --with-lua --HEAD
   - coverage run --source=bin/brew-file brew install caskroom/cask/brew-cask
   - coverage run --source=bin/brew-file brew cask install firefox
   - touch "$(brew --prefix)/Library/Brewfile"
-  - coverage run --source=bin/brew-file brew file init -y -U
-  - coverage run --source=bin/brew-file brew file update -y -U
-  - coverage run --source=bin/brew-file brew file casklist
-  - coverage run --source=bin/brew-file brew file edit
-  - coverage run --source=bin/brew-file brew file set_repo -r https://github.com/rcmdnk/BrewfileTest -y
-  - coverage run --source=bin/brew-file brew file install -U
-  - coverage run --source=bin/brew-file brew file update -y -U
+  - exe=$(which brwe-file)
+script:
+  - coverage run $exe version
+  - coverage run $exe help
+  - coverage run $exe init -y -U
+  - coverage run $exe update -y -U
+  - coverage run $exe casklist
+  - coverage run $exe edit
+  - coverage run $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y
+  - coverage run $exe install -U
+  - coverage run $exe update -y -U
 after_success:
   coveralls
 notifications:
