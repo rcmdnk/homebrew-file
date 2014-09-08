@@ -10,7 +10,7 @@ env:
 before_install:
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
-    #- brew update >& /dev/null && brew upgrade >& /dev/null
+  - brew update >& /dev/null && brew upgrade >& /dev/null
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
@@ -21,17 +21,18 @@ install:
   - touch "$(brew --prefix)/Library/Brewfile"
   - exe=$(which brew-file)
 script:
-  - coverage run $exe version
-  - coverage run $exe help
-  - coverage run $exe init -y -U
-  - coverage run $exe update -y -U
-  - coverage run $exe casklist
-  - coverage run $exe edit
-  - coverage run $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y
-  - coverage run $exe install -U
-  - coverage run $exe update -y -U
+  - coverage run --parallel-mode $exe version
+  - coverage run --parallel-mode $exe help
+  - coverage run --parallel-mode $exe init -y -U
+  - coverage run --parallel-mode $exe update -y -U
+  - coverage run --parallel-mode $exe casklist
+  - coverage run --parallel-mode $exe edit
+  - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y
+  - coverage run --parallel-mode $exe install -U
+  - coverage run --parallel-mode $exe update -y -U
 after_success:
-  coveralls
+  - coverage combine
+  - coveralls
 notifications:
   email:
     recipients:
