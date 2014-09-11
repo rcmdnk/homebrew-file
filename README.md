@@ -2,9 +2,7 @@ Brew-file
 =========
 
 [![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=python)](https://travis-ci.org/rcmdnk/homebrew-file)
-[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png)](https://coveralls.io/r/rcmdnk/homebrew-file)
-[![Code Climate](https://codeclimate.com/github/rcmdnk/homebrew-file/badges/gpa.svg)](https://codeclimate.com/github/rcmdnk/homebrew-file)
-[![Test Coverage](https://codeclimate.com/github/rcmdnk/homebrew-file/badges/coverage.svg)](https://codeclimate.com/github/rcmdnk/homebrew-file)
+[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=python)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=python)
 
 Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
 
