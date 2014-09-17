@@ -1,7 +1,7 @@
 require 'formula'
 
 HOMEBREW_BREW_FILE_VERSION = '1.1.8'
-HOMEBREW_BREW_FILE_PYTHON_VERSION = '2.0.0'
+HOMEBREW_BREW_FILE_PYTHON_VERSION = '2.0.1'
 class BrewFile < Formula
   homepage 'https://github.com/rcmdnk/homebrew-file/'
   url 'https://github.com/rcmdnk/homebrew-file.git', :tag => "v#{HOMEBREW_BREW_FILE_VERSION}"
