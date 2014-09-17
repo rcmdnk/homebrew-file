@@ -617,7 +617,7 @@ function get_options { # Get install options from brew info {{{
   elif [ "$v_inst" = "$v_head" ];then
     opt=" --HEAD"
   fi
-  opt=${opt}$(echo "$info"|grep "Built from source with"|cut -d: -f2)
+  opt=${opt}$(echo "$info"|grep "Built from source with"|cut -d: -f2|sed -e 's/, / /g')
   echo $opt
 } # }}}
 
