@@ -1,6 +1,6 @@
 require 'formula'
 
-HOMEBREW_BREW_FILE_VERSION = '1.1.7'
+HOMEBREW_BREW_FILE_VERSION = '1.1.8'
 HOMEBREW_BREW_FILE_PYTHON_VERSION = '2.0.0'
 class BrewFile < Formula
   homepage 'https://github.com/rcmdnk/homebrew-file/'
