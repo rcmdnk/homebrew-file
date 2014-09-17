@@ -565,7 +565,7 @@ class BrewFile:
         for l in lines:
             ltmp = l.split("Built from source with: ")
             if len(ltmp) > 1:
-                opt += " " + ltmp[1]
+                opt += " " + ltmp[1].replace(",", "")
                 continue
             if l.startswith(cellar):
                 v = l.split()[0].split("/")[-1]
