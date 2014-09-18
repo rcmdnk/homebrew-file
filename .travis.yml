@@ -10,7 +10,7 @@ env:
 before_install:
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
-  #- brew update >& /dev/null && brew upgrade >& /dev/null
+  - brew update >& /dev/null && brew upgrade >& /dev/null
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
