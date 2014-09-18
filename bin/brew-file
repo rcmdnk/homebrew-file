@@ -1155,10 +1155,6 @@ def main():
     yn_parser.add_argument("-y", "--yes", action="store_true", default=False,
             dest="yn", help="Answer yes to all yes/no questions.")
 
-    args_parser = argparse.ArgumentParser(add_help=False)
-    args_parser.add_argument("args", action="store", nargs="*",
-            help="brew arguments")
-
     subparser_options = {"parents":[file_parser, yn_parser, noupdate_parser],
             "formatter_class": argparse.RawTextHelpFormatter}
 
@@ -1178,7 +1174,7 @@ def main():
             **subparser_options)
     help="Execute brew command, and update BREWFILE."
     brew_parser = subparsers.add_parser("brew", description=help, help=help,
-            parents=[file_parser, args_parser, yn_parser],
+            parents=[file_parser, yn_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -i/--init\nInitialize/Update BREWFILE with installed packages."
     init_parser = subparsers.add_parser("init", description=help, help=help,
@@ -1238,7 +1234,11 @@ def main():
     if ns.command != None:
         args = [ns.command] + args
 
-    b.set_args(**vars(parser.parse_args(args)))
+    (ns, args_tmp) = parser.parse_known_args(args)
+    args = vars(ns)
+    args.update({'args': args_tmp})
+
+    b.set_args(**args)
 
     if b.opt["command"] == "help":
         parser.print_help()
