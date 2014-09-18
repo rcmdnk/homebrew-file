@@ -12,9 +12,10 @@ script:
   - brew install rcmdnk/file/brew-file $version
   - brew file version
   - brew file help
-  - brew install vim --with-lua --HEAD
-  - brew install caskroom/cask/brew-cask
-  - brew cask install firefox
+  - brew install vim --with-lua --HEAD >/dev/null
+  - brew install wget --enable-debug --enable-iri >/dev/null
+  - brew install caskroom/cask/brew-cask >/dev/null
+  - brew cask install firefox >/dev/null
   - touch "$(brew --prefix)/Library/Brewfile"
   - brew file init -y -U
   - brew file update -y -U
