@@ -13,8 +13,10 @@ script:
   - alias brew="brew-wrap"
   - brew file version
   - brew file help
+  - 'if brew list| grep -q vim;then brew uninstall vim >/dev/null;fi'
   - brew install vim --with-lua --HEAD >/dev/null
-  - brew install wget --enable-debug --enable-iri >/dev/null
+  - 'if brew list| grep -q wget;then brew uninstall wget >/dev/null;fi'
+  - brew install wget --enable-debug --enable-iri >/dev/null'
   - brew install caskroom/cask/brew-cask >/dev/null
   - brew cask install firefox >/dev/null
   - touch "$(brew --prefix)/Library/Brewfile"
