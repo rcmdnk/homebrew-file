@@ -10,6 +10,7 @@ before_script:
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
 script:
   - brew install rcmdnk/file/brew-file $version
+  - alias brew="brew-wrap"
   - brew file version
   - brew file help
   - brew install vim --with-lua --HEAD >/dev/null

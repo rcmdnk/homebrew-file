@@ -278,4 +278,13 @@ You can use it by set as alias:
 
 Write it in your setting file like `.bashrc`.
 
+When you un-install brew-file, please do `unalias brew`.
+
+If you want to remove it temporarily (to switch branch to python/shell/master),
+then use `command` like:
+
+    $ brew uninstall brew-file
+    $ command brew install brew-file --python
+
+
 
