@@ -826,6 +826,9 @@ class BrewFile:
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
                             self.proc(l)
+                    if l.find("brew linkapps") >= 0:
+                        if self.opt["link"]:
+                            self.proc("brew linkapps")
 
         # Other commands
         for c in self.opt["cmd_input"]:
