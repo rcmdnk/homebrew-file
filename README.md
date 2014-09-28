@@ -8,6 +8,19 @@ Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andr
 
 Renamed from brewall.
 
+## Update
+
+### 28/Sep/2014
+
+Master branch was switched to python version from bash version.
+
+If you have already installed brew-file with Homebrew,
+please uninstall, and untap brew-file, and install again:
+
+    $ brew uninstall brew-file
+    $ command brew untap rcmdnk/file
+    $ command brew install rcmdnk/file/brew-file
+
 ## Requirements
 
 [Homebrew](https://github.com/mxcl/homebrew)
@@ -22,8 +35,7 @@ This installs Homebrew if it has not been installed, too.
 
 By Homebrew:
 
-    $ brew tap rcmdnk/file
-    $ brew install brew-file
+    $ brew install rcmdnk/file/brew-file
 
 Or download `bin/brew-file` and put it in anywhere under `PATH` (e.g. `~/usr/bin/`)
 
