@@ -1,8 +1,8 @@
 Brew-file
 =========
 
-[![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=python)](https://travis-ci.org/rcmdnk/homebrew-file)
-[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=python)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=python)
+[![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.org/rcmdnk/homebrew-file)
+[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=master)
 
 Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
 
@@ -286,6 +286,3 @@ then use `command` like:
 
     $ brew uninstall brew-file
     $ command brew install brew-file --python
-
-
-
