@@ -7,8 +7,8 @@
 #
 # Usage: brew-file [-increvh][-f <input file>][command] ...
 #
-BREW_FILE_VERSION=v1.1.6
-SENTAKU_DATE="1/Sep/2014"
+BREW_FILE_VERSION=v1.1.8
+SENTAKU_DATE="18/Sep/2014"
 #
 # }}}
 #############################################
