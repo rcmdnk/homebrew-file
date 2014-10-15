@@ -51,6 +51,12 @@ class BrewFile:
 
     def __init__(self):
         """initialization."""
+        import re
+        cask_opts = {"--caskroom" : ""}
+        env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
+        if env_cask_opts != "":
+            cask_opts = dict(map(lambda x: x.split("="),
+                                 re.split(r'(?<!\\)\s*', env_cask_opts)))
 
         self.opt = {}
 
@@ -66,7 +72,9 @@ class BrewFile:
         self.opt["initialized"] = False
         self.opt["tap_dir"]     = self.opt["brew_repo"] + "/Library/Taps"
         self.opt["cache_dir"]   = self.proc("brew --cache", False, False)[1][0]
-        self.opt["caskroom"]   = "/opt/homebrew-cask/Caskroom"
+        self.opt["caskroom"]    = cask_opts["--caskroom"] \
+                                  if cask_opts["--caskroom"] != "" \
+                                  else "/opt/homebrew-cask/Caskroom"
         self.opt["cask_pack"]   = "brew-cask"
         self.opt["cask_repo"]   = "caskroom/cask"
         self.opt["pip_pack"]    = "brew-pip"

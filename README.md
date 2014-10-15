@@ -83,6 +83,12 @@ in your setup file (e.g. .bashrc), like:
 
     export HOMEBREW_BREWFILE=~/.brewfile
 
+You can also modify the default installation locations of Cask packages.
+To make this settings, it is the same as issuing [How to Use Homebrew-cask#Options](https://github.com/caskroom/homebrew-cask/blob/master/USAGE.md#options).
+you might want to add the following line to your .bash_profile or .zshenv:
+
+    export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom"
+
 If there is no Brewfile, Brew-file ask you if you want to initialize Brewfile
 with installed packages.
 You can also make it with `-i` option.
