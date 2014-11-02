@@ -2,7 +2,7 @@ language: objective-c
 env:
   global:
     - PAGER=cat
-    - EDITOR=cat
+    - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
   matrix:
     - coveralls=coveralls-python
@@ -15,14 +15,15 @@ install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew install rcmdnk/file/brew-file $version
-  - brew install vim --with-lua --HEAD
+  - brew install vim --with-lua --HEAD # for option check test
   - brew install caskroom/cask/brew-cask
-  - brew cask install firefox
+  - brew cask install firefox # for brew cask list test
+  - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - brew update && brew upgrade
 before_script:
   - touch "$(brew --prefix)/Library/Brewfile"
   - exe=$(which brew-file)
-  -  git config --global push.default simple
+  - git config --global push.default simple # to suppress git warning
 script:
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe help
