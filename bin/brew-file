@@ -59,8 +59,8 @@ class BrewFile:
                 cask_opts.update(dict(map(lambda x: x.split("="),
                                      re.split(r'(?<!\\)\s*', env_cask_opts))))
         except ValueError:
-            print "\033[31mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
-            print "\033[31mIgnore the value.\n\033[m"
+            print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
+            print "\033[31;1mIgnore the value.\n\033[m"
 
         self.opt = {}
 
@@ -451,13 +451,14 @@ class BrewFile:
             (ret, lines) = self.proc("brew cask list", False, False)
             self.opt["cask_list"] = []
             self.opt["cask_list_nocask"] = []
-            for p in lines:
-                if len(p.split()) == 1:
-                    self.opt["cask_list"].append(p)
-                else:
-                    print "\033[31;1mthe cask file of \033[31;7m" + p + "\033[0m\033[31;1m doesn't exist."
-                    print "please check later.\n\n\033[0m"
-                    self.opt["cask_list_nocask"].append(p)
+            if ret != 0:
+                for p in lines:
+                    if len(p.split()) == 1:
+                        self.opt["cask_list"].append(p)
+                    else:
+                        print "\033[31;1mthe cask file of \033[31;7m" + p + "\033[0m\033[31;1m doesn't exist."
+                        print "\033[31;1mplease check later.\n\n\033[0m"
+                        self.opt["cask_list_nocask"].append(p)
 
     def read_input(self):
         """Read input file"""
