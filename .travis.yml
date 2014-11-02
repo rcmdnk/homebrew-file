@@ -8,6 +8,9 @@ env:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
 before_install:
+  - openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d
+  - cp .travis_rsa ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
   #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
