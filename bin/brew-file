@@ -638,8 +638,8 @@ class BrewFile:
                         self.opt["cask_list"].remove(tc)
 
         # Brew packages
-        self.proc("brew list")
-        #self.proc("ls /usr/local/Library/Formula")
+        #self.proc("brew list")
+        self.proc("ls /usr/local/Library/Formula")
         if len(self.opt["brew_list"]) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.opt["brew_list"]:
