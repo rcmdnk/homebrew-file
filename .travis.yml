@@ -18,28 +18,27 @@ install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls >/dev/null || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors >/dev/null || :'
   - brew install rcmdnk/file/brew-file $version
-  - brew install vim --with-lua --HEAD # for option check test
+    #- brew install vim --with-lua --HEAD # for option check test
   - brew install caskroom/cask/brew-cask
-  - brew cask install firefox # for brew cask list test
+    #- brew cask install firefox # for brew cask list test
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
-  - brew update && brew upgrade >/dev/null
 before_script:
   - touch "$(brew --prefix)/Library/Brewfile"
   - exe=$(which brew-file)
   - git config --global push.default simple # to suppress git warning
 script:
-  - coverage run --parallel-mode $exe version
-  - coverage run --parallel-mode $exe help
-  - coverage run --parallel-mode $exe brew list >/dev/null
-  - coverage run --parallel-mode $exe init -y >/dev/null
-  - coverage run --parallel-mode $exe update -y -U >/dev/null
-  - coverage run --parallel-mode $exe casklist
-  - coverage run --parallel-mode $exe edit
+  #- coverage run --parallel-mode $exe version
+  #- coverage run --parallel-mode $exe help
+  #- coverage run --parallel-mode $exe brew list >/dev/null
+  #- coverage run --parallel-mode $exe init -y >/dev/null
+  #- coverage run --parallel-mode $exe update -y -U >/dev/null
+  #- coverage run --parallel-mode $exe casklist
+  #- coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y
-  - coverage run --parallel-mode $exe install -U >/dev/null
+  #- coverage run --parallel-mode $exe install -U >/dev/null
   - coverage run --parallel-mode $exe update -y -U >/dev/null
-  - export HOMEBREW_CASK_OPT="--caskroom=/opt/homebrew-cask/Caskroom"
-  - coverage run --parallel-mode $exe cask_upgrade
+  #- export HOMEBREW_CASK_OPT="--caskroom=/opt/homebrew-cask/Caskroom"
+  #- coverage run --parallel-mode $exe cask_upgrade
 after_success:
   - coverage combine
   - coveralls
