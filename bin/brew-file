@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v2.1.1"
-__date__ = "15/Oct/2014"
+__version__ = "v2.1.2"
+__date__ = "2/Nov/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -54,9 +54,13 @@ class BrewFile:
         import re
         cask_opts = {"--caskroom" : ""}
         env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
-        if env_cask_opts != "":
-            cask_opts = dict(map(lambda x: x.split("="),
-                                 re.split(r'(?<!\\)\s*', env_cask_opts)))
+        try:
+            if env_cask_opts != "":
+                cask_opts.update(dict(map(lambda x: x.split("="),
+                                     re.split(r'(?<!\\)\s*', env_cask_opts))))
+        except ValueError:
+            print "\033[31mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
+            print "\033[31mIgnore the value.\n\033[m"
 
         self.opt = {}
 
