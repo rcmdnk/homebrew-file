@@ -562,7 +562,7 @@ class BrewFile:
 
         opt=""
         # Get options for build
-        (ret, lines) = self.proc("brew info " + package, True, False)
+        (ret, lines) = self.proc("brew info " + package, False, False)
         versions = {"stable":"", "devel":"", "HEAD":""}
         v_tmp = map(lambda x: x.strip().split(),
                     lines[0].split(":")[1].split(","))
@@ -573,7 +573,7 @@ class BrewFile:
                 versions["devel"] = v[1]
             elif v[0] == "HEAD":
                 versions["HEAD"] = "HEAD"
-        cellar = self.proc("brew --cellar " + package, True, False)[1][0]
+        cellar = self.proc("brew --cellar " + package, False, False)[1][0]
         for l in lines:
             ltmp = l.split("Built from source with: ")
             if len(ltmp) > 1:
@@ -638,6 +638,7 @@ class BrewFile:
                         self.opt["cask_list"].remove(tc)
 
         # Brew packages
+        self.proc("ls /usr/local/Library/Formula")
         if len(self.opt["brew_list"]) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.opt["brew_list"]:
