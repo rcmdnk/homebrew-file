@@ -113,7 +113,7 @@ class BrewFile:
         if type(cmd) == str:
             cmd = cmd.split()
         if print_cmd:
-            print ' '.join(cmd)
+            print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in p.stdout.readlines():
@@ -639,7 +639,7 @@ class BrewFile:
 
         # Brew packages
         self.proc("brew list")
-        self.proc("ls /usr/local/Library/Formula")
+        #self.proc("ls /usr/local/Library/Formula")
         if len(self.opt["brew_list"]) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.opt["brew_list"]:
