@@ -27,6 +27,7 @@ before_script:
 script:
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe help
+  - coverage run --parallel-mode $exe brew list >/dev/null
   - coverage run --parallel-mode $exe init -y -U
   - coverage run --parallel-mode $exe update -y -U
   - coverage run --parallel-mode $exe casklist
@@ -34,6 +35,8 @@ script:
   - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y
   - coverage run --parallel-mode $exe install -U
   - coverage run --parallel-mode $exe update -y -U
+  - export HOMEBREW_CASK_OPT="--caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe cask_upgrade
 after_success:
   - coverage combine
   - coveralls
