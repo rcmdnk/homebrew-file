@@ -15,6 +15,7 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d
   - cp .travis_rsa ~/.ssh/id_rsa
   - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
   #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
@@ -22,7 +23,6 @@ install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls >/dev/null || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors >/dev/null || :'
   - brew install rcmdnk/file/brew-file $version
-  - brew install openssl
     #- brew install vim --with-lua --HEAD # for option check test
   - brew install caskroom/cask/brew-cask
     #- brew cask install firefox # for brew cask list test
