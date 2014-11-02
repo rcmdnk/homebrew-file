@@ -1,6 +1,10 @@
 language: objective-c
 env:
   global:
+    - GIT_COMMITTER_NAME=rcmdnk
+    - GIT_COMMITTER_EMAIL=rcmdnk@gmail.com
+    - GIT_AUTHOR_NAME=rcmdnk
+    - GIT_AUTHOR_EMAIL=rcmdnk@gmail.com
     - PAGER=cat
     - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
