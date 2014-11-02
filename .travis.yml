@@ -20,6 +20,8 @@ install:
   - brew cask install firefox
   - touch "$(brew --prefix)/Library/Brewfile"
   - exe=$(which brew-file)
+before_script:
+  -  git config --global push.default simple
 script:
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe help
