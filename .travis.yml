@@ -40,10 +40,14 @@ script:
   #- coverage run --parallel-mode $exe casklist
   #- coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y
+  - cp $(brew --prefix)/Library/BrewfileTest/rcmdnk_BrewfileTest/Brewfile .
   #- coverage run --parallel-mode $exe install -U >/dev/null
-  - coverage run --parallel-mode $exe update -y -U >/dev/null
+  - coverage run --parallel-mode $exe update -y -U
   #- export HOMEBREW_CASK_OPT="--caskroom=/opt/homebrew-cask/Caskroom"
   #- coverage run --parallel-mode $exe cask_upgrade
+  - coverage run --parallel-mode $exe pull
+  - cp Brewfile $(brew --prefix)/Library/BrewfileTest/rcmdnk_BrewfileTest/Brewfile
+  - coverage run --parallel-mode $exe push
 after_success:
   - coverage combine
   - coveralls
