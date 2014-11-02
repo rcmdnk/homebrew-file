@@ -31,13 +31,13 @@ script:
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe help
   - coverage run --parallel-mode $exe brew list >/dev/null
-  - coverage run --parallel-mode $exe init -y -U
-  - coverage run --parallel-mode $exe update -y -U
+  - coverage run --parallel-mode $exe init -y >/dev/null
+  - coverage run --parallel-mode $exe update -y -U >/dev/null
   - coverage run --parallel-mode $exe casklist
   - coverage run --parallel-mode $exe edit
-  - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y
-  - coverage run --parallel-mode $exe install -U
-  - coverage run --parallel-mode $exe update -y -U
+  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y
+  - coverage run --parallel-mode $exe install -U >/dev/null
+  - coverage run --parallel-mode $exe update -y -U >/dev/null
   - export HOMEBREW_CASK_OPT="--caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe cask_upgrade
 after_success:
