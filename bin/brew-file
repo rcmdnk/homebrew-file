@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v2.1.2"
-__date__ = "2/Nov/2014"
+__version__ = "v2.1.3"
+__date__ = "11/Nov/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -281,6 +281,7 @@ class BrewFile:
     def check_repo(self):
         """Check input file for GitHub repository."""
         import re
+        self.opt["brewfile"] = self.opt["input"]
 
         # Check input file
         if not os.path.exists(self.opt["input"]):
@@ -374,7 +375,7 @@ class BrewFile:
         """Check Homebrew"""
         if self.proc("brew help", False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
-            cmd="ruby -e \"$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)\""
+            cmd="ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
             self.proc(cmd)
             (ret, lines) =  self.proc("brew doctor", True, True, False)
             if ret != 0:
