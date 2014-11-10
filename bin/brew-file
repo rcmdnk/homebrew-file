@@ -452,7 +452,7 @@ class BrewFile:
             (ret, lines) = self.proc("brew cask list", False, False)
             self.opt["cask_list"] = []
             self.opt["cask_list_nocask"] = []
-            if ret != 0:
+            if ret == 0:
                 for p in lines:
                     if len(p.split()) == 1:
                         self.opt["cask_list"].append(p)
