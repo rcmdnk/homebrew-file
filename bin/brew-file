@@ -23,18 +23,23 @@ import sys, os, urllib2
 
 class Tee:
     def __init__(self, out1, out2 = sys.stdout):
+        from cStringIO import StringIO
         if type(out1) == str:
-            self.out1 = open(out1, "w")
+            self.out1name = out1
+            self.out1 = StringIO()
         else:
+            self.out1name = ""
             self.out1 = out1
         if type(out2) == str:
-            self.out2 = open(out2, "w")
+            self.out2name = out2
+            self.out2 = StringIO()
         else:
+            self.out2name = ""
             self.out2 = out2
     def __del__(self):
-        if self.out1 != sys.stdout and self.out1 != sys.stderr:
+        if self.out1name != "":
             self.out1.close()
-        if self.out2 != sys.stdout and self.out2 != sys.stderr:
+        if self.out2name != "":
             self.out2.close()
     def write(self, text):
         self.out1.write(text)
@@ -45,6 +50,16 @@ class Tee:
     def flush(self):
         self.out1.flush()
         self.out2.flush()
+    def copy(self):
+        if self.out1name != "":
+            f = open(self.out1name, "w")
+            f.write(self.out1.getvalue())
+            f.close()
+        if self.out2name != "":
+            f = open(self.out2name, "w")
+            f.write(self.out2.getvalue())
+            f.close()
+        self.__del__()
 
 class BrewFile:
     """Main class of Brew-file."""
@@ -672,7 +687,7 @@ class BrewFile:
                 out.writeln("#cask  install " + p + opt)
 
         # Close Brewfile
-        del out
+        out.close()
 
         self.print_banner("# You can edit " + self.opt["brewfile"] + " with:\n"
                           "#     $ " + __prog__ + " edit")
@@ -983,7 +998,7 @@ class BrewFile:
         for (name,app_path) in apps[""][False]:
                 out.writeln("#" + app_path)
 
-        del out
+        out.close()
 
         # Summary
         self.print_banner("# Summary")
