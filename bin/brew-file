@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v2.1.4"
+__version__ = "v2.1.5"
 __date__ = "11/Nov/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -22,7 +22,7 @@ __status__ = "Prototype"
 import sys, os, urllib2
 
 class Tee:
-    def __init__(self, out1, out2 = sys.stdout):
+    def __init__(self, out1, out2 = sys.stdout, use2 = True):
         from cStringIO import StringIO
         if type(out1) == str:
             self.out1name = out1
@@ -30,35 +30,42 @@ class Tee:
         else:
             self.out1name = ""
             self.out1 = out1
-        if type(out2) == str:
-            self.out2name = out2
-            self.out2 = StringIO()
-        else:
-            self.out2name = ""
-            self.out2 = out2
+        self.use2 = use2
+        if self.use2:
+            if type(out2) == str:
+                self.out2name = out2
+                self.out2 = StringIO()
+            else:
+                self.out2name = ""
+                self.out2 = out2
     def __del__(self):
         if self.out1name != "":
             self.out1.close()
-        if self.out2name != "":
-            self.out2.close()
+        if self.use2:
+            if self.out2name != "":
+                self.out2.close()
     def write(self, text):
         self.out1.write(text)
-        self.out2.write(text)
+        if self.use2:
+            self.out2.write(text)
     def writeln(self, text):
         self.out1.write(text + "\n")
-        self.out2.write(text + "\n")
+        if self.use2:
+            self.out2.write(text + "\n")
     def flush(self):
         self.out1.flush()
-        self.out2.flush()
-    def copy(self):
+        if self.use2:
+            self.out2.flush()
+    def close(self):
         if self.out1name != "":
             f = open(self.out1name, "w")
             f.write(self.out1.getvalue())
             f.close()
-        if self.out2name != "":
-            f = open(self.out2name, "w")
-            f.write(self.out2.getvalue())
-            f.close()
+        if self.use2:
+            if self.out2name != "":
+                f = open(self.out2name, "w")
+                f.write(self.out2.getvalue())
+                f.close()
         self.__del__()
 
 class BrewFile:
@@ -74,8 +81,9 @@ class BrewFile:
                 cask_opts.update(dict(map(lambda x: x.split("="),
                                      re.split(r'(?<!\\)\s*', env_cask_opts))))
         except ValueError:
-            print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
-            print "\033[31;1mIgnore the value.\n\033[m"
+            if self.opt["verbose"] > 0:
+                print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
+                print "\033[31;1mIgnore the value.\n\033[m"
 
         self.opt = {}
 
@@ -116,6 +124,7 @@ class BrewFile:
         self.opt["brew_input_opt"] = []
         self.opt["args"] = []
         self.opt["yn"] = False
+        self.opt["verbose"]      = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
 
     def set_args(self, **kw):
         """Set arguments."""
@@ -127,18 +136,18 @@ class BrewFile:
         import subprocess
         if type(cmd) == str:
             cmd = cmd.split()
-        if print_cmd:
+        if print_cmd and self.opt["verbose"] > 0:
             print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in p.stdout.readlines():
             lines.append(l.rstrip())
-            if print_out:
+            if print_out and self.opt["verbose"] > 0:
                 print l
         ret = p.wait()
 
         if exit_on_error and ret != 0:
-            if not print_out:
+            if not (print_out and self.opt["verbose"] > 0):
                 print '\n'.join(lines)
             sys.exit(ret)
 
@@ -163,6 +172,9 @@ class BrewFile:
                yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
     def print_banner(self, text):
+        if self.opt["verbose"] < 2:
+            return
+
         max = 0
         for l in text.split("\n"):
             if max < len(l):
@@ -191,9 +203,8 @@ class BrewFile:
         """Helper to build Brewfile path for the repository."""
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
         user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
-        inputdir = os.path.dirname(self.opt["input"])
         input = self.opt["input"].split("/")[-1]
-        return inputdir + "/" + user_name + "_" + repo_name + "/" + input
+        return self.opt["brew_repo"] + "/Library/" + user_name + "_" + repo_name + "/" + input
 
     def clone_repo(self):
         ret = self.proc("git clone " + self.opt["repo"] + " "
@@ -357,7 +368,8 @@ class BrewFile:
 
 
         # pull/push
-        print "cd", os.path.dirname(self.opt["brewfile"])
+        if self.opt["verbose"] > 0:
+            print "cd", os.path.dirname(self.opt["brewfile"])
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         if pull:
             ret = self.proc("git pull")[0]
@@ -547,7 +559,8 @@ class BrewFile:
             ans = self.ask_yn("Do you want to overwrite it?")
             if ans:
                 os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
+                if self.opt["verbose"] > 0:
+                    print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
             else:
                 sys.exit(0)
 
@@ -626,7 +639,8 @@ class BrewFile:
                 if ans:
                     if self.opt["repo"] == "":
                         os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                        print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
+                        if self.opt["verbose"] > 0:
+                            print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
                 else:
                     sys.exit(0)
 
@@ -636,7 +650,7 @@ class BrewFile:
         self.get_list()
 
         # Check list
-        out = Tee(self.opt["brewfile"])
+        out = Tee(self.opt["brewfile"], sys.stdout, self.opt["verbose"] > 1)
 
         # Taps
         if len(self.opt["tap_list"]) > 0:
@@ -729,10 +743,11 @@ class BrewFile:
                 if p in self.opt["cask_input"]:
                     continue
                 self.check_cask_cmd(True)
-                cmd = "brew cask uninstall " + p
-                print cmd
-                if not self.opt["dryrun"]:
-                    self.proc(cmd, False, True)
+                cmd = "$ brew cask uninstall " + p
+                if self.opt["dryrun"]:
+                    print cmd
+                else:
+                    self.proc(cmd, True, True)
                 self.opt["cask_list"].remove(p)
         # Skip clean up cask at tap/brew if any cask packages exist
         if len(self.opt["cask_list"]) > 0:
@@ -748,14 +763,13 @@ class BrewFile:
                 cmd0 = "pip uninstall -y " + p
                 cmd1 = "brew uninstall " + p
                 cmd2 = "brew uninstall pip-" + p
-                print cmd0
-                if not self.opt["dryrun"]:
+                if self.opt["dryrun"]:
+                    print cmd0
+                    print cmd1
+                    print cmd2
+                else:
                     self.proc(cmd0, False, True)
-                print cmd1
-                if not self.opt["dryrun"]:
                     self.proc(cmd1, False, True)
-                print cmd2
-                if not self.opt["dryrun"]:
                     self.proc(cmd2, False, True)
                 self.opt["pip_list"].remove(p)
         # Skip clean up cask at tap/brew if any cask packages exist
@@ -779,8 +793,9 @@ class BrewFile:
                 if not untapflag:
                     continue
                 cmd = "brew untap " + p
-                print cmd
-                if not self.opt["dryrun"]:
+                if self.opt["dryrun"]:
+                    print cmd
+                else:
                     self.proc(cmd, False, True)
 
         # Clean up brew packages
@@ -790,8 +805,9 @@ class BrewFile:
                 if p in self.opt["brew_input"]:
                     continue
                 cmd = "brew uninstall " + p
-                print cmd
-                if not self.opt["dryrun"]:
+                if self.opt["dryrun"]:
+                    print cmd
+                else:
                     (ret, lines) = self.proc("brew info " + p, False, False)
                     for l in lines:
                         if l.find("ln -s") >= 0:
@@ -809,17 +825,16 @@ class BrewFile:
         self.print_banner("# Clean up cache")
         cmd0 = "brew cleanup --force"
         cmd1 = "rm -rf " + self.opt["cache_dir"]
-        print cmd0
-        if not self.opt["dryrun"]:
-            self.proc(cmd0, False)
-        print cmd1
-        if not self.opt["dryrun"]:
-            self.proc(cmd1, False)
-        else:
+        if self.opt["dryrun"]:
+            print cmd0
+            print cmd1
             # Dry run message
             self.print_banner("# This is dry run.\n"
                               "# If you want to enforce cleanup, use '-C':\n"
                               "#     $ " + __prog__ + " clean -C")
+        else:
+            self.proc(cmd0, False)
+            self.proc(cmd1, False)
 
     def install(self):
         """Install"""
@@ -912,19 +927,20 @@ class BrewFile:
                                 break
                         tap = t
                         name = n
-        if name == "":
-            print "Non Cask app:", app
-        elif installed:
-            print "Installed by Cask:", app, name
-        else:
-            print "Installed directly, instead of by Cask:", app, name
+        if self.opt["verbose"] > 1:
+            if name == "":
+                print "Non Cask app:", app
+            elif installed:
+                print "Installed by Cask:", app, name
+            else:
+                print "Installed directly, instead of by Cask:", app, name
         return (tap, installed, name)
 
     def check_cask(self):
         """Check applications for Cask"""
         self.check_cask_cmd(True)
 
-        print "Starting to check applications for Cask..."
+        self.print_banner("# Starting to check applications for Cask...")
 
         # Set cask directories and reset application information list
         taps = filter(lambda t: os.path.isdir(self.get_tap_path(t) + "/Casks"),
@@ -955,7 +971,7 @@ class BrewFile:
                 napps += 1
 
         # Make list
-        out = Tee("Caskfile")
+        out = Tee("Caskfile", sys.stdout, self.opt["verbose"] > 1)
 
         out.writeln("# Cask applications")
         out.writeln("# Please copy these lines to your Brewfile"
@@ -1002,25 +1018,26 @@ class BrewFile:
 
         # Summary
         self.print_banner("# Summary")
-        print "Total:", napps, "apps have been checked."
-        print "Apps in", app_dirs
-        print ""
-        maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
-        print "Installed by Cask:"
-        for d in app_dirs:
-            print "{0:<{1}s} : {2:d}".format(d.replace(
-                    os.environ["HOME"], "~"), maxlen, apps_check["cask"][d])
-        print ""
-        print "Installed directly, but casks are available:"
-        for d in app_dirs:
-            print "{0:<{1}s} : {2:d}".format(d.replace(
-                    os.environ["HOME"], "~"), maxlen, apps_check["has_cask"][d])
-        print ""
-        print "No casks"
-        for d in app_dirs:
-            print "{0:<{1}s} : {2:d}".format(d.replace(
-                    os.environ["HOME"], "~"), maxlen, apps_check["no_cask"][d])
-        print ""
+        if self.opt["verbose"] > 0:
+            print "Total:", napps, "apps have been checked."
+            print "Apps in", app_dirs
+            print ""
+            maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
+            print "Installed by Cask:"
+            for d in app_dirs:
+                print "{0:<{1}s} : {2:d}".format(d.replace(
+                        os.environ["HOME"], "~"), maxlen, apps_check["cask"][d])
+            print ""
+            print "Installed directly, but casks are available:"
+            for d in app_dirs:
+                print "{0:<{1}s} : {2:d}".format(d.replace(
+                        os.environ["HOME"], "~"), maxlen, apps_check["has_cask"][d])
+            print ""
+            print "No casks"
+            for d in app_dirs:
+                print "{0:<{1}s} : {2:d}".format(d.replace(
+                        os.environ["HOME"], "~"), maxlen, apps_check["no_cask"][d])
+            print ""
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
@@ -1046,7 +1063,8 @@ class BrewFile:
                 appdir = os.path.dirname(current)
                 for d in os.listdir(appdir):
                     if d != current.split("/")[-1]:
-                        print "rm -rf " + appdir + "/" + d
+                        if self.opt["verbose"] > 0:
+                            print "rm -rf " + appdir + "/" + d
                         self.remove(appdir + "/" + d)
 
 
@@ -1187,12 +1205,17 @@ def main():
     yn_parser.add_argument("-y", "--yes", action="store_true", default=False,
             dest="yn", help="Answer yes to all yes/no questions.")
 
-    subparser_options = {"parents":[file_parser, yn_parser, noupdate_parser],
-            "formatter_class": argparse.RawTextHelpFormatter}
+    verbose_parser = argparse.ArgumentParser(add_help=False)
+    verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
+            dest="verbose", help="Verbose level 0/1/2")
+
+    subparser_options = {
+        "parents":[file_parser, yn_parser, noupdate_parser, verbose_parser],
+        "formatter_class": argparse.RawTextHelpFormatter}
 
     # Main parser
     parser = argparse.ArgumentParser(add_help=False, prog=__prog__,
-            parents=[file_parser, repo_parser, link_parser, dryrun_parser],
+            parents=[file_parser, repo_parser, link_parser, dryrun_parser, verbose_parser],
             formatter_class = argparse.RawTextHelpFormatter,
             description = "Brew-file: Manager for packages of Homebrew\n"
                           "https://github.com/rcmdnk/homebrew-file")
@@ -1206,15 +1229,15 @@ def main():
             **subparser_options)
     help="Execute brew command, and update BREWFILE."
     brew_parser = subparsers.add_parser("brew", description=help, help=help,
-            parents=[file_parser, yn_parser],
+            parents=[file_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -i/--init\nInitialize/Update BREWFILE with installed packages."
     init_parser = subparsers.add_parser("init", description=help, help=help,
-            parents=[file_parser, link_parser, yn_parser, noupdate_parser],
+            parents=[file_parser, link_parser, yn_parser, noupdate_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
     set_repo_parser = subparsers.add_parser("set_repo", description=help, help=help,
-            parents=[file_parser, repo_parser, yn_parser],
+            parents=[file_parser, repo_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="Update BREWFILE from the repository."
     pull_parser = subparsers.add_parser("pull", description=help, help=help,
@@ -1229,14 +1252,14 @@ def main():
          "By drault, cleanup runs as dry-run.\n"\
          "If you want to enforce cleanup, use '-C' option."
     clean_parser = subparsers.add_parser("clean", description=help, help=help,
-            parents=[file_parser, dryrun_parser, yn_parser],
+            parents=[file_parser, dryrun_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -u/--update\nDo pull, install, brew update/upgrade, init,\n"\
          "push and clean -C.\n"\
          "In addition, pull, push and clean\n"\
          "will be done if the repository is assigned."
     update_parser = subparsers.add_parser("update", description=help, help=help,
-            parents=[file_parser, link_parser, yn_parser, noupdate_parser],
+            parents=[file_parser, link_parser, yn_parser, noupdate_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -e/--edit\nEdit input file."
     edit_parser = subparsers.add_parser("edit", description=help, help=help,
@@ -1247,7 +1270,7 @@ def main():
     help="Upgrade cask applications.\n"\
          "With -C, old versions will be removed."
     cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help,
-            help=help, parents=[dryrun_parser, yn_parser],
+            help=help, parents=[dryrun_parser, yn_parser, verbose_parser],
             formatter_class = argparse.RawTextHelpFormatter)
     help="or -v/--version\nShow version."
     version_parser = subparsers.add_parser("version", description=help, help=help,
