@@ -1122,7 +1122,7 @@ class BrewFile:
         if self.opt["command"] == "brew":
             noinit = False
             if len(self.opt["args"]) > 0:
-                if self.opt["args"] == "noinit":
+                if "noinit" in self.opt["args"]:
                     noinit = True
                     self.opt["args"].pop(0)
             (ret, lines) = self.proc(["brew"] + self.opt["args"], True, True, False)
