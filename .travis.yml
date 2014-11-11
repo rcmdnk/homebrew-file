@@ -57,6 +57,7 @@ script:
   - coverage run --parallel-mode $exe test -V 2
   # Install test
   - rm -rf $(brew --prefix)/*
+  - rm -rf $(brew --prefix)/.git*
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
   - coverage combine
