@@ -56,6 +56,8 @@ script:
   - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe push -V 0
   - coverage run --parallel-mode $exe test -V 2
+  - coverage combine
+  - coveralls
   # Install test
   - brew rm brew-file
   - brew untap rcmdnk/file
@@ -63,8 +65,8 @@ script:
   - rm -rf $brewprefix/.git*
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
-  - coverage combine
-  - coveralls
+  #- coverage combine # should be done before removing brew-file
+  #- coveralls
 notifications:
   email:
     recipients:
