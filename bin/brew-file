@@ -146,18 +146,19 @@ class BrewFile:
         for k in self.float_opts:
             self.opt[k] = float(self.opt[k])
 
-    def proc(self, cmd, print_cmd = True, print_out = True, exit_on_error = True):
+    def proc(self, cmd, print_cmd = True, print_out = True,
+             exit_on_error = True, verbose_check = True):
         """ Get process output."""
         import shlex, subprocess
         if type(cmd) == str:
             cmd = shlex.split(cmd)
-        if print_cmd and self.opt["verbose"] > 0:
+        if (not verbose_check) or (print_cmd and self.opt["verbose"] > 0):
             print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
-            if print_out and self.opt["verbose"] > 0:
+            if (not verbose_check) or (print_out and self.opt["verbose"] > 0):
                 print l
         ret = p.wait()
 
@@ -422,12 +423,12 @@ class BrewFile:
     def check_brew_cmd(self):
         """Check Homebrew"""
         print "check_brew_cmd()"
-        if self.proc("brew help", True, True, False)[0] != 0:
-        #if self.proc("brew help", False, False, False)[0] != 0:
+        if self.proc("brew help", True, True, False, False)[0] != 0:
+        #if self.proc("brew help", False, False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
-            self.proc(cmd)
-            (ret, lines) =  self.proc("brew doctor", True, True, False)
+            self.proc(cmd, True, True, False, False)
+            (ret, lines) =  self.proc("brew doctor", True, True, False, False)
             if ret != 0:
                 self.print_banner("# Check brew environment and fix problems\n"
                                   "# You can check with:\n"
