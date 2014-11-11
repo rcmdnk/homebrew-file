@@ -1082,7 +1082,7 @@ class BrewFile:
 
     def my_test(self):
             out = Tee(sys.stdout, "test")
-            out.write("test")
+            out.write("test\n")
             out.flush()
             self.remove("test")
             os.mkdir("dir")
@@ -1174,10 +1174,12 @@ class BrewFile:
         # test
         if self.opt["command"] == "test":
             self.my_test()
+            sys.exit(0)
 
         # No command found
         print "Wrong command: ", self.opt["command"]
         print "Execute `" + __prog__ + " help` for more information."
+        sys.exit(1)
 
 def main():
     # Prepare BrewFile
