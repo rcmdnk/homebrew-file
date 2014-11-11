@@ -81,9 +81,8 @@ class BrewFile:
                 cask_opts.update(dict(map(lambda x: x.split("="),
                                      re.split(r'(?<!\\)\s*', env_cask_opts))))
         except ValueError:
-            if self.opt["verbose"] > 0:
-                print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
-                print "\033[31;1mIgnore the value.\n\033[m"
+            print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
+            print "\033[31;1mIgnore the value.\n\033[m"
 
         self.opt = {}
 
