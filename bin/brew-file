@@ -140,9 +140,9 @@ class BrewFile:
 
     def proc(self, cmd, print_cmd = True, print_out = True, exit_on_error = True):
         """ Get process output."""
-        import subprocess
+        import shlex, subprocess
         if type(cmd) == str:
-            cmd = cmd.split()
+            cmd = shlex.split(cmd)
         if print_cmd and self.opt["verbose"] > 0:
             print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
