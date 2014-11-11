@@ -48,9 +48,6 @@ script:
   - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - rm -rf $brewprefix/rcmdnk_BrewfileTest
-  - brew install python
-  - which pip
-  - sudo easy_install pip
   - coverage run --parallel-mode $exe install -U -V 0
   - coverage run --parallel-mode $exe update -y -U -V 0
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
