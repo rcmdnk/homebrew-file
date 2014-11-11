@@ -376,7 +376,9 @@ class BrewFile:
             return
         elif push:
             ret = self.proc("git add " + self.opt["brewfile"].split("/")[-1])[0]
-            ret = self.proc(["git", "commit", "-m", "\"Update the package list\""])[0]
+            ret = self.proc(
+                ["git", "commit", "-m", "\"Update the package list\""],
+                 exit_on_error=False)[0]
             ret = self.proc("git push")[0]
             return
 
