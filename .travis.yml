@@ -54,7 +54,6 @@ script:
   - coverage run --parallel-mode $exe clean
   - cp Brewfile $(brew --prefix)/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe push -V 0
-  - export HOMEBREW_CASK_OPTS="test test --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe test -V 2
   # Install test
   - rm -rf $(brew --prefix)
