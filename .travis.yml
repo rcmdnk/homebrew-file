@@ -56,6 +56,7 @@ script:
   - coverage run --parallel-mode $exe push -V 0
   - export HOMEBREW_CASK_OPTS="test test --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe test -V 2
+  # Install test
   - rm -rf $(brew --prefix)
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
