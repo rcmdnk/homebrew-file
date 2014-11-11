@@ -1081,6 +1081,9 @@ class BrewFile:
 
 
     def my_test(self):
+            out = Tee("test")
+            out.write("test\n")
+            out.close()
             out = Tee(sys.stdout, "test")
             out.write("test\n")
             out.flush()
