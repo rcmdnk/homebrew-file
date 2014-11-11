@@ -59,7 +59,7 @@ script:
   - ls -ld /usr/local
   - ls -l /usr/local
   - ls -l /usr/local/bin/brew
-  #  - rm -rf $(brew --prefix)
+  - rm -rf $(brew --prefix)/*
   #  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
   - coverage combine
