@@ -32,35 +32,35 @@ before_script:
   - exe=$(which brew-file)
   - git config --global push.default simple # to suppress git warning
 script:
-  - coverage run --parallel-mode $exe version
-  - coverage run --parallel-mode $exe --version
-  - coverage run --parallel-mode $exe help
-  - coverage run --parallel-mode $exe || echo test
-  - coverage run --parallel-mode $exe brew list >/dev/null
-  - coverage run --parallel-mode $exe init -y -V 1
-  - coverage run --parallel-mode $exe update -y -U -V 0
-  - coverage run --parallel-mode $exe casklist -V 0
-  - brew rm brew-cask
-  - brew untap caskroom/cask
-  - coverage run --parallel-mode $exe casklist -V 0
-  - coverage run --parallel-mode $exe edit
-  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
-  - cp $(brew --prefix)/Library/rcmdnk_BrewfileTest/Brewfile .
-  - coverage run --parallel-mode $exe install -U -V 2
-  - coverage run --parallel-mode $exe update -y -U -V 0
-  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-  - coverage run --parallel-mode $exe brew noinit list -V 0
-  - coverage run --parallel-mode $exe clean
-  - cp Brewfile $(brew --prefix)/Library/rcmdnk_BrewfileTest/Brewfile
-  - coverage run --parallel-mode $exe push -V 0
-  - coverage run --parallel-mode $exe test -V 2
-  # Install test
+  #  - coverage run --parallel-mode $exe version
+  #  - coverage run --parallel-mode $exe --version
+  #  - coverage run --parallel-mode $exe help
+  #  - coverage run --parallel-mode $exe || echo test
+  #  - coverage run --parallel-mode $exe brew list >/dev/null
+  #  - coverage run --parallel-mode $exe init -y -V 1
+  #  - coverage run --parallel-mode $exe update -y -U -V 0
+  #  - coverage run --parallel-mode $exe casklist -V 0
+  #  - brew rm brew-cask
+  #  - brew untap caskroom/cask
+  #  - coverage run --parallel-mode $exe casklist -V 0
+  #  - coverage run --parallel-mode $exe edit
+  #  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
+  #  - cp $(brew --prefix)/Library/rcmdnk_BrewfileTest/Brewfile .
+  #  - coverage run --parallel-mode $exe install -U -V 0
+  #  - coverage run --parallel-mode $exe update -y -U -V 0
+  #  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  #  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  #  - coverage run --parallel-mode $exe brew noinit list -V 0
+  #  - coverage run --parallel-mode $exe clean
+  #  - cp Brewfile $(brew --prefix)/Library/rcmdnk_BrewfileTest/Brewfile
+  #  - coverage run --parallel-mode $exe push -V 0
+  #  - coverage run --parallel-mode $exe test -V 2
+  #  # Install test
   - ls -ld /usr/local
   - ls -l /usr/local
   - ls -l /usr/local/bin/brew
-  - rm -rf $(brew --prefix)
-  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
+  #  - rm -rf $(brew --prefix)
+  #  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
   - coverage combine
   - coveralls
