@@ -73,6 +73,11 @@ class BrewFile:
 
     def __init__(self):
         """initialization."""
+
+        # Check Homebrew
+        self.check_brew_cmd()
+
+        # Check HOMEBREW_CASK_OPTS
         import re
         cask_opts = {"--caskroom" : ""}
         env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
@@ -84,6 +89,7 @@ class BrewFile:
             print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
             print "\033[31;1mIgnore the value.\n\033[m"
 
+        # Set default values
         self.opt = {}
 
         self.opt["command"]     = ""
@@ -1096,9 +1102,6 @@ class BrewFile:
 
     def execute(self):
         """Main execute function"""
-
-        # Check Homebrew
-        self.check_brew_cmd()
 
         # Cask list check
         if self.opt["command"] == "casklist":
