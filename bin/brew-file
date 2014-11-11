@@ -836,7 +836,7 @@ class BrewFile:
         # Clean up cashe
         self.print_banner("# Clean up cache")
         cmd0 = "brew cleanup --force"
-        cmd1 = "em -rf " + self.opt["cache_dir"]
+        cmd1 = "rm -rf " + self.opt["cache_dir"]
         if self.opt["dryrun"]:
             print cmd0
             print cmd1
