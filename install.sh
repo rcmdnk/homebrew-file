@@ -4,8 +4,8 @@ if ! which brew >& /dev/null;then
   brwe_installed=0
   echo Homebrew is not installed!
   echo Install now...
-  echo ruby -e \"\$\(curl -fsSL https://raw.github.com/mxcl/homebrew/go\)\"
-  ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+  echo ruby -e \"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install\)\"
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   echo
 fi
 echo
