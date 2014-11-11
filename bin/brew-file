@@ -75,7 +75,9 @@ class BrewFile:
         """initialization."""
 
         # Check Homebrew
+        print "check_brew_cmd"
         self.check_brew_cmd()
+        print "done check_brew_cmd"
 
         # Check HOMEBREW_CASK_OPTS
         import re
@@ -419,7 +421,9 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew"""
-        if self.proc("brew help", False, False, False)[0] != 0:
+        print "check_brew_cmd()"
+        if self.proc("brew help", True, True, False)[0] != 0:
+        #if self.proc("brew help", False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
             self.proc(cmd)
