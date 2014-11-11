@@ -68,7 +68,7 @@ script:
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
-  - brew file install -V 0
+  - brew-file install -V 0
 after_success:
   #- coverage combine # should be done before removing brew-file
   #- coveralls
