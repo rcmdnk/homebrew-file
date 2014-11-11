@@ -59,7 +59,7 @@ script:
   # Install test
   - brew rm brew-file
   - brew untap rcmdnk/file
-  - rm -rf $brewprefix/bin/brew$brewprefix/Library $brewprefix/Cellar
+  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:

@@ -1084,6 +1084,7 @@ class BrewFile:
             out = Tee(sys.stdout, "test")
             out.write("test\n")
             out.flush()
+            out.close()
             self.remove("test")
             os.mkdir("dir")
             self.remove("dir")
