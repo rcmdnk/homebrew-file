@@ -200,6 +200,9 @@ class BrewFile:
             os.remove(path)
         elif os.path.isdir(path):
             shutil.rmtree(path)
+        else:
+            if self.opt["verbose"] > 0:
+                print "WARNING: Tried to remove non usual file/directory:", path
 
     def get_tap_path(self, tap):
         """Get tap path"""
@@ -834,7 +837,7 @@ class BrewFile:
         # Clean up cashe
         self.print_banner("# Clean up cache")
         cmd0 = "brew cleanup --force"
-        cmd1 = "rm -rf " + self.opt["cache_dir"]
+        cmd1 = "em -rf " + self.opt["cache_dir"]
         if self.opt["dryrun"]:
             print cmd0
             print cmd1
@@ -1078,6 +1081,14 @@ class BrewFile:
                         self.remove(appdir + "/" + d)
 
 
+    def my_test(self):
+            out = Tee(sys.stdout, "test")
+            out.write("test")
+            out.flush()
+            self.remove("test")
+            os.mkdir("dir")
+            self.remove("dir")
+            self.remove("aaa")
 
     def execute(self):
         """Main execute function"""
@@ -1161,6 +1172,14 @@ class BrewFile:
                 self.cleanup()
             sys.exit(0)
 
+        # test
+        if self.opt["command"] == "test":
+            self.my_test()
+
+        # No command found
+        print "Wrong command: ", self.opt["command"]
+        print "Execute `" + __prog__ + " help` for more information."
+
 def main():
     # Prepare BrewFile
     b = BrewFile()
@@ -1180,6 +1199,8 @@ def main():
                        dest="command", const="update")
     group.add_argument("-e", "--edit", action="store_const",
                        dest="command", const="edit")
+    group.add_argument("--test", action="store_const",
+                       dest="command", const="test")
     group.add_argument("-v", "--version", action="store_const",
                        dest="command", const="version")
     group.add_argument("-h", "--help", action="store_const",
@@ -1282,6 +1303,9 @@ def main():
     cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help,
             help=help, parents=[dryrun_parser, yn_parser, verbose_parser],
             formatter_class = argparse.RawTextHelpFormatter)
+    help="Used for test."
+    test_parser = subparsers.add_parser("test", description=help, help=help,
+            formatter_class=argparse.RawTextHelpFormatter)
     help="or -v/--version\nShow version."
     version_parser = subparsers.add_parser("version", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
