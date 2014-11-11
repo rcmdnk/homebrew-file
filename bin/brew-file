@@ -169,6 +169,7 @@ class BrewFile:
         yes = ["yes","y", ""]
         no = ["no","n"]
 
+        # pragma: no cover
         yn = raw_input(question + " [y/n]: ").lower()
         while True:
             if yn in yes:
@@ -240,7 +241,7 @@ class BrewFile:
         exist_repo = True
         try:
             check = urllib2.urlopen(url)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError, e: # pragma: no cover
             exist_repo = False
 
         # Clone if exists
@@ -248,7 +249,7 @@ class BrewFile:
             self.clone_repo()
             return
 
-        # Create new repository
+        # Create new repository # pragma: no cover
         print "GitHub repository: " + user_name + "/" + repo_name + " doesn't exist."
         ans = self.ask_yn("do you want to create the repository?")
         if not ans:
@@ -1006,7 +1007,7 @@ class BrewFile:
                                 + " #" + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
-        for t in filter(lambda x: x != self.opt["cask_repo"] and x != "", taps):
+        for t in filter(lambda x: x != self.opt["cask_repo"] and x != "", taps): # pragma: no cover
             out.writeln("# Casks in " + t)
             out.writeln("tap " + t)
             out.writeln("")
