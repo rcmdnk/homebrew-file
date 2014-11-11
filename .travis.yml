@@ -56,6 +56,9 @@ script:
   - coverage run --parallel-mode $exe push -V 0
   - coverage run --parallel-mode $exe test -V 2
   # Install test
+  - ls -ld /usr/local
+  - ls -l /usr/local
+  - ls -l /usr/local/bin/brew
   - rm -rf $(brew --prefix)
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 after_success:
