@@ -145,18 +145,19 @@ class BrewFile:
             self.opt[k] = float(self.opt[k])
 
     def proc(self, cmd, print_cmd = True, print_out = True,
-             exit_on_error = True, verbose_check = True):
+             exit_on_error = True, verbose = -1):
         """ Get process output."""
         import shlex, subprocess
+        verbose = verbose if verbose != -1 else self.opt["verbose"]
         if type(cmd) == str:
             cmd = shlex.split(cmd)
-        if verbose_check and print_cmd and self.opt["verbose"] > 0:
+        if print_cmd and verbose > 0:
             print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
-            if verbose_check and print_out and self.opt["verbose"] > 0:
+            if print_out and verbose > 0:
                 print l
         ret = p.wait()
 
@@ -186,8 +187,9 @@ class BrewFile:
             else:
                 yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
-    def print_banner(self, text):
-        if self.opt["verbose"] < 2:
+    def print_banner(self, text, verbose=-1):
+        verbose = verbose if verbose != -1 else self.opt["verbose"]
+        if verbose < 2:
             return
 
         max = 0
@@ -420,17 +422,20 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew"""
-        if self.proc("which brew", False, False, False, False)[0] != 0:
+        if self.proc("which brew", True, True, False, 2)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="curl -O https://raw.githubusercontent.com/Homebrew/install/master/install"
-            self.proc(cmd, True, True, False, False)
+            self.proc(cmd, True, True, False, 2)
             cmd="ruby install"
-            self.proc(cmd, True, True, False, False)
-            (ret, lines) =  self.proc("brew doctor", True, True, False, False)
+            self.proc(cmd, True, True, False, 2)
+            (ret, lines) =  self.proc("brew doctor", True, True, False, 2)
             if ret != 0:
+                for l in lines:
+                    print l
+                print
                 self.print_banner("# Check brew environment and fix problems\n"
                                   "# You can check with:\n"
-                                  "#     $ brew doctor")
+                                  "#     $ brew doctor", 2)
 
     def check_cask_cmd(self, force=False):
         """Check cask is installed or not"""
