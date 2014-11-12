@@ -180,11 +180,11 @@ class BrewFile:
         yn = raw_input(question + " [y/n]: ").lower()
         while True:
             if yn in yes:
-               return True
+                return True
             elif yn in no:
-               return False
+                return False
             else:
-               yn = raw_input("Answer with yes (y) or no (n): ").lower()
+                yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
     def print_banner(self, text):
         if self.opt["verbose"] < 2:
@@ -732,7 +732,7 @@ class BrewFile:
         """Check input file"""
 
         if not os.path.exists(self.opt["brewfile"]):
-            print "WARNING: Input file $brewfile is not found."
+            print "WARNING: Input file", self.opt["brewfile"], "is not found."
             ans = self.ask_yn("WARNING: Do you want to initialize from installed packages?")
             if ans:
                 self.initialize(False)

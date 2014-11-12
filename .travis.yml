@@ -35,8 +35,8 @@ before_script:
   - git config --global push.default simple # to suppress git warning
 script:
   - diff $installed_brew $exe
-  - diff < (brew file help) < ($exe help)
-  - diff < (brew file version) < ($exe version)
+  - brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0
+  - brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe --version
   - coverage run --parallel-mode $exe help
@@ -70,9 +70,9 @@ script:
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
-  - coverage run --parallel-mode $exe install -V 0
+  - coverage run --parallel-mode $exe help -V 2
   - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  - coverage run --parallel-mode $exe install -V 0
+  - coverage run --parallel-mode $exe help -V 2
 after_success:
   - coverage combine # should be done before removing brew-file
   - coveralls
