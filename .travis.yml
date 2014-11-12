@@ -33,7 +33,7 @@ before_script:
   - installed_brew=$(which brew-file)
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
-cript:
+script:
   - diff $installed_brew $exe
   - diff < $(brew file help) < ($exe help)
   - diff < $(brew file version) < ($exe version)
