@@ -420,10 +420,6 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew"""
-        print "Homebrew has not been installed, install now..."
-        cmd=["wget", "https://raw.githubusercontent.com/Homebrew/install/master/install"]
-        self.proc(cmd, True, True, False, False)
-        sys.exit(0)
         if self.proc("which brew", False, False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="wget https://raw.githubusercontent.com/Homebrew/install/master/install"
