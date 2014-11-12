@@ -8,7 +8,6 @@ env:
     - PAGER=cat
     - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
-script:
   matrix:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
