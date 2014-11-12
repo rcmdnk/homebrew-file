@@ -158,7 +158,7 @@ class BrewFile:
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
             if print_out and verbose > 0:
-                print l
+                sys.stdout.write(l)
         ret = p.wait()
 
         if exit_on_error and ret != 0:
@@ -431,7 +431,7 @@ class BrewFile:
             (ret, lines) =  self.proc("brew doctor", True, True, False, 2)
             if ret != 0:
                 for l in lines:
-                    print l
+                    sys.stdout.write(l)
                 print
                 self.print_banner("# Check brew environment and fix problems\n"
                                   "# You can check with:\n"
