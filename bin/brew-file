@@ -85,7 +85,7 @@ class BrewFile:
             if env_cask_opts != "":
                 cask_opts.update(dict(map(lambda x: x.split("="),
                                      re.split(r'(?<!\\)\s*', env_cask_opts))))
-        except ValueError: # pragma: no cover
+        except ValueError:
             print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
             print "\033[31;1mIgnore the value.\n\033[m"
 
@@ -132,8 +132,7 @@ class BrewFile:
         self.opt["verbose"]      = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
 
         self.int_opts=["verbose"]
-        if True: # pragma: no cover
-            self.float_opts=[]
+        self.float_opts=[]
 
     def set_args(self, **kw):
         """Set arguments."""
@@ -162,7 +161,7 @@ class BrewFile:
                 print l
         ret = p.wait()
 
-        if exit_on_error and ret != 0: # pragma: no cover
+        if exit_on_error and ret != 0:
             if not (print_out and self.opt["verbose"] > 0):
                 print '\n'.join(lines)
             sys.exit(ret)
@@ -178,15 +177,15 @@ class BrewFile:
         yes = ["yes","y", ""]
         no = ["no","n"]
 
-        if True: # pragma: no cover
-            yn = raw_input(question + " [y/n]: ").lower()
-            while True:
-                if yn in yes:
-                    return True
-                elif yn in no:
-                    return False
-                else:
-                    yn = raw_input("Answer with yes (y) or no (n): ").lower()
+        # pragma: no cover
+        yn = raw_input(question + " [y/n]: ").lower()
+        while True:
+            if yn in yes:
+                return True
+            elif yn in no:
+                return False
+            else:
+                yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
     def print_banner(self, text, verbose=-1):
         verbose = verbose if verbose != -1 else self.opt["verbose"]
@@ -231,7 +230,7 @@ class BrewFile:
         ret = self.proc("git clone " + self.opt["repo"] + " "
                         + os.path.dirname(self.opt["brewfile"]),
                         True, True, False)[0]
-        if ret != 0: # pragma: no cover
+        if ret != 0:
             print "can't clone " + self.opt["repo"] + ".\n"\
                   "please check the repository, or reset with\n"\
                   "    $ " + __prog__ + " set_repo"
@@ -259,72 +258,71 @@ class BrewFile:
             self.clone_repo()
             return
 
-        # Create new repository
-        if True: # pragma: no cover
-            print "GitHub repository: " + user_name + "/" + repo_name + " doesn't exist."
-            ans = self.ask_yn("do you want to create the repository?")
-            if not ans:
-                exit(0)
+        # Create new repository # pragma: no cover
+        print "GitHub repository: " + user_name + "/" + repo_name + " doesn't exist."
+        ans = self.ask_yn("do you want to create the repository?")
+        if not ans:
+            exit(0)
 
-            # Check password
-            import getpass
-            password = getpass.getpass("GitHub password: ")
+        # Check password
+        import getpass
+        password = getpass.getpass("GitHub password: ")
 
-            # Try to create w/o two-factor code
-            import requests, json
-            url = "https://api.github.com/user/repos"
-            description = "package list for Homebrew"
-            data = {"name": repo_name, "description": "Package list for Homebrew",
-                    "auto_init": "true"}
-            headers = {}
-            is_ok = True
+        # Try to create w/o two-factor code
+        import requests, json
+        url = "https://api.github.com/user/repos"
+        description = "package list for Homebrew"
+        data = {"name": repo_name, "description": "Package list for Homebrew",
+                "auto_init": "true"}
+        headers = {}
+        is_ok = True
+        while True:
+            r = requests.post(url=url, data=json.dumps(data),
+                              auth=(user_name, password), headers=headers)
+            if r.ok:
+                break
+            if r.json()["message"] == "Bad credentials":
+                password = getpass.getpass("\033[31;1mWrong password!\033[0m GitHub password: ")
+                continue
+            if r.json()["message"] == "Must specify two-factor authentication OTP code.":
+                is_ok = False
+                break
+            print r.json()["message"]
+            sys.exit(1)
+
+        if not is_ok:
+            # Try with two-factor code
+            twofac = raw_input("GitHub two-factor code: ")
+            headers.update({"X-Github-OTP": twofac})
             while True:
                 r = requests.post(url=url, data=json.dumps(data),
                                   auth=(user_name, password), headers=headers)
                 if r.ok:
                     break
-                if r.json()["message"] == "Bad credentials":
-                    password = getpass.getpass("\033[31;1mWrong password!\033[0m GitHub password: ")
-                    continue
                 if r.json()["message"] == "Must specify two-factor authentication OTP code.":
-                    is_ok = False
-                    break
+                    twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
+                    headers.update({"X-Github-OTP": twofac})
+                    continue
                 print r.json()["message"]
                 sys.exit(1)
 
-            if not is_ok:
-                # Try with two-factor code
-                twofac = raw_input("GitHub two-factor code: ")
-                headers.update({"X-Github-OTP": twofac})
-                while True:
-                    r = requests.post(url=url, data=json.dumps(data),
-                                      auth=(user_name, password), headers=headers)
-                    if r.ok:
-                        break
-                    if r.json()["message"] == "Must specify two-factor authentication OTP code.":
-                        twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
-                        headers.update({"X-Github-OTP": twofac})
-                        continue
-                    print r.json()["message"]
-                    sys.exit(1)
+        # Clone and initialize
+        self.clone_repo()
+        os.chdir(os.path.dirname(self.opt["brewfile"]))
+        f = open("README.md", "w")
+        f.write("# " + repo_name + "\n\n"\
+                "Package list for [homebrew](http://brew.sh/).\n\n"\
+                "Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).")
+        f.close()
+        open(self.opt["brewfile"], "a").close()
 
-            # Clone and initialize
-            self.clone_repo()
-            os.chdir(os.path.dirname(self.opt["brewfile"]))
-            f = open("README.md", "w")
-            f.write("# " + repo_name + "\n\n"\
-                    "Package list for [homebrew](http://brew.sh/).\n\n"\
-                    "Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file).")
-            f.close()
-            open(self.opt["brewfile"], "a").close()
+        ret = self.proc("git add -A")[0]
+        ret = self.proc(["git", "commit", "-m", "\"Prepared by " + __prog__ + "\""])[0]
+        ret = self.proc("git push")[0]
 
-            ret = self.proc("git add -A")[0]
-            ret = self.proc(["git", "commit", "-m", "\"Prepared by " + __prog__ + "\""])[0]
-            ret = self.proc("git push")[0]
-
-            ans = self.ask_yn("Do you want to initialize from installed packages?")
-            if ans:
-                self.initialize(False)
+        ans = self.ask_yn("Do you want to initialize from installed packages?")
+        if ans:
+            self.initialize(False)
 
     def check_repo(self):
         """Check input file for GitHub repository."""
@@ -332,7 +330,7 @@ class BrewFile:
         self.opt["brewfile"] = self.opt["input"]
 
         # Check input file
-        if not os.path.exists(self.opt["input"]): # pragma: no cover
+        if not os.path.exists(self.opt["input"]):
             return
 
         # Check input file if it points repository or not
@@ -353,7 +351,7 @@ class BrewFile:
         # Check repository name and add git@github.com: if necessary
         if (re.match("git://", self.opt["repo"]) == None
                 and re.match("git@", self.opt["repo"]) == None
-                and re.match("https?://", self.opt["repo"]) == None): # pragma: no cover
+                and re.match("https?://", self.opt["repo"]) == None):
             self.opt["repo"] = "git@github.com:" + self.opt["repo"]
 
         # Set Brewfile in the repository
@@ -364,7 +362,7 @@ class BrewFile:
         # Check and prepare repository
         if self.opt["repo"].find("github") >= 0:
             self.check_github_repo()
-        else: # pragma: no cover
+        else:
             self.clone_repo()
 
     def repomgr(self, cmd=""):
@@ -379,18 +377,18 @@ class BrewFile:
             push = True
 
         # Check the repository
-        if self.opt["repo"] == "": # pragma: no cover
+        if self.opt["repo"] == "":
             print "Please set a repository, or reset with:"
             print "    $ " + __prog__ + "set_repo\n"
             sys.exit(1)
 
         # Clone if it doesn't exist
-        if not os.path.exists(os.path.dirname(self.opt["brewfile"])): # pragma: no cover
+        if not os.path.exists(os.path.dirname(self.opt["brewfile"])):
             self.clone_repo()
 
 
         # pull/push
-        if self.opt["verbose"] > 0: # pragma: no cover
+        if self.opt["verbose"] > 0:
             print "cd", os.path.dirname(self.opt["brewfile"])
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         if pull:
@@ -407,12 +405,12 @@ class BrewFile:
     def get_tap(self, tap):
         """Helper for tap configuration file"""
         tap_path = self.get_tap_path(tap)
-        if not os.path.isdir(tap_path): # pragma: no cover
+        if not os.path.isdir(tap_path):
             return
         self.opt["tap_packs"] = map(lambda x: x.replace(".rb", ""),
                 filter(lambda y: y.endswith(".rb"), os.listdir(tap_path)))
         path = tap_path + "/Formula"
-        if os.path.isdir(path): # pragma: no cover
+        if os.path.isdir(path):
             self.opt["tap_packs"] += map(lambda x: x.replace(".rb", ""),
                     filter(lambda y: y.endswith(".rb"),
                            os.listdir(path)))
@@ -452,7 +450,7 @@ class BrewFile:
             ret = self.proc(["brew", "install",
                     self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
                     True, True, False)[0]
-            if ret != 0: # pragma: no cover
+            if ret != 0:
                 print "\n\033[31;1mFailed to install "\
                         + self.opt["cask_pack"] + "\033[0m\n"
                 print list
@@ -464,7 +462,7 @@ class BrewFile:
             self.opt["is_cask_cmd"] = True
         return self.opt["is_cask_cmd"]
 
-    def check_pip_cmd(self, force=False): # pragma: no cover
+    def check_pip_cmd(self, force=False):
         """Check pip is installed or not"""
         if self.opt["is_pip_cmd"]:
             return True
@@ -494,7 +492,7 @@ class BrewFile:
         self.opt["brew_list"] = []
         self.opt["pip_list"] = []
         for p in lines:
-            if p.startswith("pip-"): # pragma: no cover
+            if p.startswith("pip-"):
                 self.opt["pip_list"].append(p)
             else:
                 self.opt["brew_list"].append(p)
@@ -512,7 +510,7 @@ class BrewFile:
                 for p in lines:
                     if len(p.split()) == 1:
                         self.opt["cask_list"].append(p)
-                    else: # pragma: no cover
+                    else:
                         print "\033[31;1mthe cask file of \033[31;7m" + p + "\033[0m\033[31;1m doesn't exist."
                         print "\033[31;1mplease check later.\n\n\033[0m"
                         self.opt["cask_list_nocask"].append(p)
@@ -537,7 +535,7 @@ class BrewFile:
                 continue
             args = l.replace("'","").replace('"',"").split()
             cmd = args[0]
-            if len(args) < 2: # pragma: no cover
+            if len(args) < 2:
                 print "\n\033[31;1mWrong line: " + l + "\033[0m"
                 continue
             p = args[1]
@@ -552,15 +550,15 @@ class BrewFile:
                 self.opt["brew_input_opt"].append((p + " " + opt).strip())
             elif cmd == "tap":
                 self.opt["tap_input"].append(p)
-            elif cmd == "tapall": # pragma: no cover
+            elif cmd == "tapall":
                 self.opt["tap_input"].append(p)
                 self.get_tap(p)
                 self.opt["brew_input"] += self.opt["tap_packs"]
             elif cmd == "cask":
                 self.opt["cask_input"].append(p)
-            elif cmd == "pip": # pragma: no cover
+            elif cmd == "pip":
                 self.opt["pip_input"].append(p)
-            else: # pragma: no cover
+            else:
                 self.opt["cmd_input"].append(l.strip())
                 continue
 
@@ -574,7 +572,7 @@ class BrewFile:
             f = open(self.opt["input"], "r")
             lines = f.readlines()
             f.close()
-            for l in lines: # pragma: no cover
+            for l in lines:
                 if re.match(" *git ", l) == None:
                     continue
                 git_line = l.split()
@@ -582,7 +580,7 @@ class BrewFile:
                     prev_repo = git_line[1]
                     break
             print "Input file: " + self.opt["input"] + " is already there."
-            if prev_repo != "": # pragma: no cover
+            if prev_repo != "":
                 print "git repository for Brewfile is already set as " + prev_repo
 
             ans = self.ask_yn("Do you want to overwrite it?")
@@ -590,11 +588,11 @@ class BrewFile:
                 os.rename(self.opt["input"], self.opt["input"] + ".bak")
                 if self.opt["verbose"] > 0:
                     print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
-            else: # pragma: no cover
+            else:
                 sys.exit(0)
 
         # Get repository
-        if self.opt["repo"] == "": # pragma: no cover
+        if self.opt["repo"] == "":
             print "Set repository, \"non\" for local Brewfile,"
             print "<user>/<repo> for github repository,"
             self.opt["repo"] = raw_input("or full path for the repository: ")
@@ -605,7 +603,7 @@ class BrewFile:
                 self.opt["repo"] = raw_input("Set repository: ")
             self.print_banner("# Set Brewfile repository as " + self.opt["repo"])
 
-        if self.opt["repo"] == "non": # pragma: no cover
+        if self.opt["repo"] == "non":
             # Reset non repository type Brewfile
             self.initialize(False)
             return
@@ -649,17 +647,17 @@ class BrewFile:
 
     def initialize(self, check = True):
         """Initialize Brewfile"""
-        if self.opt["initialized"]: # pragma: no cover
+        if self.opt["initialized"]:
             return
 
         if check == 1:
-            if not os.path.exists(self.opt["input"]): # pragma: no cover
+            if not os.path.exists(self.opt["input"]):
                 ans = self.ask_yn("Do you want to set a repository (y)? ((n) for local Brewfile).")
                 if ans:
                     self.set_brewfile_repo()
                     return
             else:
-                if self.opt["repo"] != "": # pragma: no cover
+                if self.opt["repo"] != "":
                     print "You are using Brewfile of " + self.opt["repo"] + "."
                 else:
                     print self.opt["input"] + " is already there."
@@ -670,7 +668,7 @@ class BrewFile:
                         os.rename(self.opt["input"], self.opt["input"] + ".bak")
                         if self.opt["verbose"] > 0:
                             print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
-                else:  # pragma: no cover
+                else:
                     sys.exit(0)
 
         self.print_banner("# Initialize " + self.opt["brewfile"])
@@ -704,8 +702,8 @@ class BrewFile:
                 opt = self.get_options(p)
                 out.writeln("install " + p + opt)
 
-        # pip package
-        if len(self.opt["pip_list"]) > 0: # pragma: no cover
+        # pip packages
+        if len(self.opt["pip_list"]) > 0:
             out.writeln("\n# pip packages")
             for p in self.opt["pip_list"]:
                 #opt = self.get_options(p)
@@ -740,7 +738,7 @@ class BrewFile:
     def check_input_file(self):
         """Check input file"""
 
-        if not os.path.exists(self.opt["brewfile"]): # pragma: no cover
+        if not os.path.exists(self.opt["brewfile"]):
             print "WARNING: Input file", self.opt["brewfile"], "is not found."
             ans = self.ask_yn("WARNING: Do you want to initialize from installed packages?")
             if ans:
@@ -768,7 +766,7 @@ class BrewFile:
         # Clean up cask packages
         if len(self.opt["cask_list"]) > 0:
             self.print_banner("# Clean up cask packages")
-            for p in self.opt["cask_list"]: # pragma: no cover
+            for p in self.opt["cask_list"]:
                 if p in self.opt["cask_input"]:
                     continue
                 self.check_cask_cmd(True)
@@ -784,7 +782,7 @@ class BrewFile:
             self.opt["brew_list"].remove(self.opt["cask_pack"])
 
         # Clean up pip packages
-        if len(self.opt["pip_list"]) > 0: # pragma: no cover
+        if len(self.opt["pip_list"]) > 0:
             self.print_banner("# Clean up pip packages")
             for p in self.opt["pip_list"]:
                 if p in self.opt["pip_input"]:
@@ -802,14 +800,14 @@ class BrewFile:
                     self.proc(cmd2, False, True)
                 self.opt["pip_list"].remove(p)
         # Skip clean up cask at tap/brew if any cask packages exist
-        if len(self.opt["pip_list"]) > 0: # pragma: no cover
+        if len(self.opt["pip_list"]) > 0:
             self.opt["tap_list"].remove(self.opt["pip_repo"])
             self.opt["brew_list"].remove(self.opt["pip_pack"])
 
         # Clean up tap packages
         if len(self.opt["tap_list"]) > 0:
             self.print_banner("# Clean up tap packages")
-            for p in self.opt["tap_list"]: # pragma: no cover
+            for p in self.opt["tap_list"]:
                 if p in self.opt["tap_input"]:
                     continue
                 self.get_tap(p)
@@ -830,7 +828,7 @@ class BrewFile:
         # Clean up brew packages
         if len(self.opt["brew_list"]) > 0:
             self.print_banner("# Clean up brew packages")
-            for p in self.opt["brew_list"]: # pragma: no cover
+            for p in self.opt["brew_list"]:
                 if p in self.opt["brew_input"]:
                     continue
                 cmd = "brew uninstall " + p
@@ -868,7 +866,7 @@ class BrewFile:
     def install(self):
         """Install"""
         # First update Homebrew
-        if not self.opt["noupdate"]: # pragma: no cover
+        if not self.opt["noupdate"]:
             self.proc("brew update")
 
         # Check packages in the input file
@@ -886,7 +884,7 @@ class BrewFile:
                 self.proc("brew cask install " + p)
 
         # pip
-        for p in self.opt["pip_input"]: # pragma: no cover
+        for p in self.opt["pip_input"]:
             if not p in self.opt["pip_list"]:
                 self.check_pip_cmd(True)
                 self.proc("brew pip " + p)
@@ -895,7 +893,7 @@ class BrewFile:
         for p in self.opt["brew_input_opt"]:
             if not p.split()[0] in self.opt["brew_list"]:
                 (ret, lines) = self.proc("brew install " + p)
-                for l in lines: # pragma: no cover
+                for l in lines:
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
                             self.proc(l)
@@ -903,7 +901,7 @@ class BrewFile:
                         if self.opt["link"]:
                             self.proc("brew linkapps")
 
-        # Other commands # pragma: no cover
+        # Other commands
         for c in self.opt["cmd_input"]:
             self.proc(c)
             if ret != 0:
@@ -956,7 +954,7 @@ class BrewFile:
                                 break
                         tap = t
                         name = n
-        if self.opt["verbose"] > 1: # pragma: no cover
+        if self.opt["verbose"] > 1:
             if name == "":
                 print "Non Cask app:", app
             elif installed:
@@ -1070,28 +1068,28 @@ class BrewFile:
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
-        if not self.check_cask_cmd(): # pragma: no cover
+        if not self.check_cask_cmd():
             return
         apps = self.proc("brew cask list", False, False)[1]
         for a in apps:
             lines = self.proc("brew cask info " + a, False, False)[1]
             installed =True
             for l in lines:
-                if l.find("Not installed") >= 0: # pragma: no cover
+                if l.find("Not installed") >= 0:
                     installed = False
                     break
-            if not installed: # pragma: no cover
+            if not installed:
                 self.proc(["brew", "cask", "install", a])
             if not self.opt["dryrun"]:
                 current = ""
                 for l in lines:
                     if l.startswith(self.opt["caskroom"]):
                         current = l.split()[0]
-                if current == "": # pragma: no cover
+                if current == "":
                     continue
                 appdir = os.path.dirname(current)
                 for d in os.listdir(appdir):
-                    if d != current.split("/")[-1]: # pragma: no cover
+                    if d != current.split("/")[-1]:
                         if self.opt["verbose"] > 0:
                             print "rm -rf " + appdir + "/" + d
                         self.remove(appdir + "/" + d)
@@ -1195,10 +1193,9 @@ class BrewFile:
             sys.exit(0)
 
         # No command found
-        if True: # pragma: no cover
-            print "Wrong command: ", self.opt["command"]
-            print "Execute `" + __prog__ + " help` for more information."
-            sys.exit(1)
+        print "Wrong command: ", self.opt["command"]
+        print "Execute `" + __prog__ + " help` for more information."
+        sys.exit(1)
 
 def main():
     # Prepare BrewFile
