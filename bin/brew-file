@@ -150,14 +150,14 @@ class BrewFile:
         import shlex, subprocess
         if type(cmd) == str:
             cmd = shlex.split(cmd)
-        #if verbose_check and print_cmd and self.opt["verbose"] > 0:
-        print '$', ' '.join(cmd)
+        if verbose_check and print_cmd and self.opt["verbose"] > 0:
+            print '$', ' '.join(cmd)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
-            #if verbose_check and print_out and self.opt["verbose"] > 0:
-            print l
+            if verbose_check and print_out and self.opt["verbose"] > 0:
+                print l
         ret = p.wait()
 
         if exit_on_error and ret != 0:
@@ -423,13 +423,8 @@ class BrewFile:
         if self.proc("which brew", False, False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd=["ruby", "-e", "\"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""]
-            (ret, lines) = self.proc(cmd, True, True, False, False)
-            print ret
-            print lines
-            (ret, lines) = self.proc("which brew", True, True, False, False)
+            self.proc(cmd, True, True, False, False)
             (ret, lines) =  self.proc("brew doctor", True, True, False, False)
-            print ret
-            print lines
             if ret != 0:
                 self.print_banner("# Check brew environment and fix problems\n"
                                   "# You can check with:\n"

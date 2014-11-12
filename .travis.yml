@@ -11,71 +11,70 @@ env:
   matrix:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
-#before_install:
-#  - openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d
-#  - cp .travis_rsa ~/.ssh/id_rsa
-#  - chmod 600 ~/.ssh/id_rsa
-#  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-#  - version=""
-#  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
-#  #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
-#  - brewprefix=$(brew --prefix)
-#install:
-#  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls >/dev/null || :'
-#  - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors >/dev/null || :'
-#  - brew install rcmdnk/file/brew-file $version
-#  - brew install vim --with-lua --HEAD # for option check test
-#  - brew install caskroom/cask/brew-cask
-#  - brew cask install firefox # for brew cask list test
-#  - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
-#before_script:
-#  - touch "$brewprefix/Library/Brewfile"
-#  - exe=$(which brew-file)
-#  - git config --global push.default simple # to suppress git warning
-script:
-#  - coverage run --parallel-mode $exe version
-#  - coverage run --parallel-mode $exe --version
-#  - coverage run --parallel-mode $exe help
-#  - coverage run --parallel-mode $exe || echo test
-#  - coverage run --parallel-mode $exe brew list >/dev/null
-#  - coverage run --parallel-mode $exe init -y -V 2
-#  - coverage run --parallel-mode $exe update -y -U -V 0
-#  - coverage run --parallel-mode $exe casklist -V 0
-#  - brew rm brew-cask
-#  - brew untap caskroom/cask
-#  - coverage run --parallel-mode $exe casklist -V 0
-#  - coverage run --parallel-mode $exe edit
-#  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
-#  - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
-#  - rm -rf $brewprefix/rcmdnk_BrewfileTest
-#  - coverage run --parallel-mode $exe install -U -V 0
-#  - coverage run --parallel-mode $exe update -y -U -V 0
-#  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-#  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-#  - coverage run --parallel-mode $exe brew noinit list -V 0
-#  - coverage run --parallel-mode $exe clean
-#  - coverage run --parallel-mode $exe test -V 2
-#  - coverage run --parallel-mode $exe wrongcommand || echo test
-#  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-#  - coverage run --parallel-mode $exe push -V 0
-#    #  - coverage combine
-#    #  - coveralls
-#  # Install test
-#  - brew rm brew-file
-#  - brew untap rcmdnk/file
-#  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
-#  - rm -rf $brewprefix/.git*
-#  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
-#  - brew rm brew-file
-#  - brew install brew-file $version
-  - brew install rcmdnk/file/brew-file --HEAD
+before_install:
+  - openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d
+  - cp .travis_rsa ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - version=""
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
+  #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
+  - brewprefix=$(brew --prefix)
+install:
+  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls >/dev/null || :'
+  - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors >/dev/null || :'
+  - brew install rcmdnk/file/brew-file $version
+  - brew install vim --with-lua --HEAD # for option check test
+  - brew install caskroom/cask/brew-cask
+  - brew cask install firefox # for brew cask list test
+  - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
+before_script:
+  - touch "$brewprefix/Library/Brewfile"
+  - installed_brew=$(which brew-file)
+  - exe=$(pwd)/bin/brew-file
+  - git config --global push.default simple # to suppress git warning
+cript:
+  - diff $installed_brew $exe
+  - diff < $(brew file help) < ($exe help)
+  - diff < $(brew file version) < ($exe version)
+  - coverage run --parallel-mode $exe version
+  - coverage run --parallel-mode $exe --version
+  - coverage run --parallel-mode $exe help
+  - coverage run --parallel-mode $exe || echo test
+  - coverage run --parallel-mode $exe brew list >/dev/null
+  - coverage run --parallel-mode $exe init -y -V 2
+  - coverage run --parallel-mode $exe update -y -U -V 0
+  - coverage run --parallel-mode $exe casklist -V 0
+  - brew rm brew-cask
+  - brew untap caskroom/cask
+  - coverage run --parallel-mode $exe casklist -V 0
+  - coverage run --parallel-mode $exe edit
+  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
+  - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
+  - rm -rf $brewprefix/rcmdnk_BrewfileTest
+  - coverage run --parallel-mode $exe install -U -V 0
+  - coverage run --parallel-mode $exe update -y -U -V 0
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - coverage run --parallel-mode $exe brew noinit list -V 0
+  - coverage run --parallel-mode $exe clean
+  - coverage run --parallel-mode $exe test -V 2
+  - coverage run --parallel-mode $exe wrongcommand || echo test
+  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - coverage run --parallel-mode $exe push -V 0
+  # Install test
+  - brew rm brew-file
+  - brew untap rcmdnk/file
+  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
+  - rm -rf $brewprefix/.git*
+  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
   - rm -rf /usr/local/bin/brew /usr/local/Library
   - rm -rf /usr/local/.git*
-#  - coverage run --parallel-mode $exe install -V 0
+  - coverage run --parallel-mode $exe install -V 0
   - brew-file install -V 0
-#after_success:
-#  - coverage combine # should be done before removing brew-file
-#  - coveralls
+after_success:
+  - coverage combine # should be done before removing brew-file
+  - coveralls
 notifications:
   email:
     recipients:
