@@ -423,8 +423,8 @@ class BrewFile:
     def check_brew_cmd(self):
         """Check Homebrew"""
         print "check_brew_cmd()"
-        if self.proc("brew help", True, True, False, False)[0] != 0:
-        #if self.proc("brew help", False, False, False, False)[0] != 0:
+        if self.proc("which brew", True, True, False, False)[0] != 0:
+        #if self.proc("wiich brew", False, False, False, False)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\""
             self.proc(cmd, True, True, False, False)
