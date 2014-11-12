@@ -156,7 +156,7 @@ class BrewFile:
         lines = []
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
-            if verbose_check print_out and self.opt["verbose"] > 0:
+            if verbose_check and print_out and self.opt["verbose"] > 0:
                 print l
         ret = p.wait()
 
