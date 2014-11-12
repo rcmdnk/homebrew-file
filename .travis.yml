@@ -71,7 +71,8 @@ script:
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
   - coverage run --parallel-mode $exe install -V 0
-  - brew-file install -V 0
+  - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  - coverage run --parallel-mode $exe install -V 0
 after_success:
   - coverage combine # should be done before removing brew-file
   - coveralls
