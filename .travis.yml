@@ -28,6 +28,12 @@ install:
   - brew install caskroom/cask/brew-cask
   - brew cask install firefox # for brew cask list test
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
+  - cd ../
+  - git clone git@github.com:rcmdnk/BrewfileTest
+  - cd BrewfileTest
+  - cp ../homebrew-file/BrewfileTest ./Brewfile
+  - git commit -m "init" && git push -f
+  - cd ../homebrew-file
 before_script:
   - touch "$brewprefix/Library/Brewfile"
   - installed_brew=$(which brew-file)
