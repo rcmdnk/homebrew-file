@@ -93,7 +93,7 @@ class BrewFile:
         self.opt = {}
 
         self.opt["command"]     = ""
-        self.opt["brew_repo"]   = self.proc("brew --prefix", False, False)[1][0]
+        self.opt["brew_repo"]   = self.proc("brew --prefix", False, False, True, 0)[1][0]
         self.opt["input"]       = os.environ.get("HOMEBREW_BREWFILE",
                                       self.opt["brew_repo"] + "/Library/Brewfile")
         self.opt["brewfile"]    = self.opt["input"]
@@ -103,7 +103,7 @@ class BrewFile:
         self.opt["dryrun"]      = True
         self.opt["initialized"] = False
         self.opt["tap_dir"]     = self.opt["brew_repo"] + "/Library/Taps"
-        self.opt["cache_dir"]   = self.proc("brew --cache", False, False)[1][0]
+        self.opt["cache_dir"]   = self.proc("brew --cache", False, False, True, 0)[1][0]
         self.opt["caskroom"]    = cask_opts["--caskroom"] \
                                   if cask_opts["--caskroom"] != "" \
                                   else "/opt/homebrew-cask/Caskroom"
@@ -422,7 +422,7 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew"""
-        if self.proc("which brew", True, True, False, 2)[0] != 0:
+        if self.proc("which brew", False, False, False, 0)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="curl -O https://raw.githubusercontent.com/Homebrew/install/master/install"
             self.proc(cmd, True, True, False, 2)
