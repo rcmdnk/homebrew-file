@@ -32,7 +32,7 @@ install:
   - git clone git@github.com:rcmdnk/BrewfileTest
   - cd BrewfileTest
   - cp ../homebrew-file/BrewfileTest ./Brewfile
-  - git commit -a -m "init" && git push -f
+  - git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
 before_script:
   - touch "$brewprefix/Library/Brewfile"
