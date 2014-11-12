@@ -58,20 +58,22 @@ script:
   - coverage run --parallel-mode $exe wrongcommand || echo test
   - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe push -V 0
-  - coverage combine
-  - coveralls
+    #  - coverage combine
+    #  - coveralls
   # Install test
   - brew rm brew-file
   - brew untap rcmdnk/file
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
+  - brew rm brew-file
+  - brew install brew-file $version
   - rm -rf $brewprefix/bin/brew $brewprefix/Library
   - rm -rf $brewprefix/.git*
-  - brew-file install -V 0
+  - coverage run --parallel-mode $exe install -V 0
 after_success:
-  #- coverage combine # should be done before removing brew-file
-  #- coveralls
+  - coverage combine # should be done before removing brew-file
+  - coveralls
 notifications:
   email:
     recipients:
