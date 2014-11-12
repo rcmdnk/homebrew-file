@@ -68,9 +68,9 @@ script:
 #  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
 #  - brew rm brew-file
 #  - brew install brew-file $version
-  - brew install brew-file --HEAD
-  - rm -rf $brewprefix/bin/brew $brewprefix/Library
-  - rm -rf $brewprefix/.git*
+  - brew install rcmdnk/file/brew-file --HEAD
+  - rm -rf /usr/local/bin/brew /usr/local/Library
+  - rm -rf /usr/local/.git*
 #  - coverage run --parallel-mode $exe install -V 0
   - brew-file install -V 0
 #after_success:
