@@ -11,9 +11,6 @@ env:
 script:
   - rm -rf /usr/local/bin/brew /usr/local/Library /usr/local/Cellar
   - rm -rf /usr/local/.git*
-  - which wget
-  - ./bin/brew-file help -V 2
-  - brew install wget
   - ./bin/brew-file help -V 2
 #  matrix:
 #    - coveralls=coveralls-python
