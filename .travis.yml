@@ -9,8 +9,8 @@ env:
     - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
 script:
-  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
-  - rm -rf $brewprefix/.git*
+  - rm -rf /usr/local/bin/brew /usr/local/Library /usr/local/Cellar
+  - rm -rf /usr/local/.git*
   - which wget
   - ./bin/brew-file help -V 2
   - brew install wget
