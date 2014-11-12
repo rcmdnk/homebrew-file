@@ -25,7 +25,7 @@ install:
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors >/dev/null || :'
   - brew install rcmdnk/file/brew-file $version
     #- brew install vim --with-lua --HEAD # for option check test
-  - brew install wget --HEAD --with-iri --with-debug
+  - brew install mobile-shell --HEAD --with-check
   - brew install caskroom/cask/brew-cask
   - brew cask install firefox # for brew cask list test
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
