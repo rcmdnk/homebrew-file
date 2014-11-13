@@ -304,4 +304,3 @@ then use `command` like:
 
     $ brew uninstall brew-file
     $ command brew install brew-file --python
-
