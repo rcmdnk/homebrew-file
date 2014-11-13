@@ -37,6 +37,7 @@ install:
   - cp ../homebrew-file/BrewfileTest ./Brewfile
   - git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
+  - rm -rf ../BrewfileTest
 before_script:
   - touch "$brewprefix/Library/Brewfile"
   - installed_brew=$(which brew-file)
