@@ -49,7 +49,7 @@ script:
   - coverage run --parallel-mode $exe help
   - coverage run --parallel-mode $exe || echo test
   - coverage run --parallel-mode $exe brew list >/dev/null
-  - coverage run --parallel-mode $exe init -y -V 2
+  - coverage run --parallel-mode $exe init -y -V 0
   - coverage run --parallel-mode $exe update -y -U -V 0
   - coverage run --parallel-mode $exe casklist -V 0
   - brew rm brew-cask
