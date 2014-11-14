@@ -86,8 +86,8 @@ class BrewFile:
                 cask_opts.update(dict(map(lambda x: x.split("="),
                                      re.split(r'(?<!\\)\s*', env_cask_opts))))
         except ValueError:
-            print "\033[31;1mHOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.\033[m"
-            print "\033[31;1mIgnore the value.\n\033[m"
+            self.warning("HOMEBREW_CASK_OPTS: " + env_cask_opts + " is not a proper format.", 0)
+            self.warning("Ignore the value.\n", 0)
 
         # Set default values
         self.opt = {}
@@ -111,22 +111,24 @@ class BrewFile:
         self.opt["cask_repo"]   = "caskroom/cask"
         self.opt["pip_pack"]    = "brew-pip"
         self.opt["my_editor"]   = os.environ.get("EDITOR", "vim")
+        self.opt["brew_list"]   = []
+        self.opt["tap_list"]    = []
         self.opt["tap_packs"]   = []
         self.opt["tap_casks"]   = []
-        self.opt["brew_list"]   = []
-        self.opt["pip_list"]    = []
-        self.opt["tap_list"]    = []
         self.opt["cask_list"]   = []
         self.opt["cask_list_nocask"] = []
+        self.opt["pip_list"]    = []
+        self.opt["appstore_list"] = []
         self.opt["is_brew_cmd"] = False
         self.opt["is_cask_cmd"] = False
         self.opt["is_pip_cmd"]  = False
-        self.opt["cmd_input"]   = []
-        self.opt["cask_input"]  = []
-        self.opt["pip_input"]   = []
-        self.opt["tap_input"]   = []
         self.opt["brew_input"]  = []
         self.opt["brew_input_opt"] = []
+        self.opt["tap_input"]   = []
+        self.opt["cask_input"]  = []
+        self.opt["pip_input"]   = []
+        self.opt["cmd_input"]   = []
+        self.opt["appstore_input"]  = []
         self.opt["args"] = []
         self.opt["yn"] = False
         self.opt["verbose"]      = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
@@ -145,24 +147,25 @@ class BrewFile:
             self.opt[k] = float(self.opt[k])
 
     def proc(self, cmd, print_cmd = True, print_out = True,
-             exit_on_error = True, verbose = -1):
+             exit_on_error = True, verbose_level = 1):
         """ Get process output."""
         import shlex, subprocess
-        verbose = verbose if verbose != -1 else self.opt["verbose"]
         if type(cmd) == str:
             cmd = shlex.split(cmd)
-        if print_cmd and verbose > 0:
-            print '$', ' '.join(cmd)
+        if print_cmd:
+            self.info('$ '+ ' '.join(cmd), verbose_level)
         p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         lines = []
         for l in iter(p.stdout.readline, ''):
             lines.append(l.rstrip())
-            if print_out and verbose > 0:
-                sys.stdout.write(l)
+            if print_out:
+                self.info(l.strip(), verbose_level)
         ret = p.wait()
 
         if exit_on_error and ret != 0:
-            if not (print_out and self.opt["verbose"] > 0):
+            if not (print_out and
+                    ((not self.opt.has_key("verbose")) or
+                      self.opt["verbose"] > voerbose_level)):
                 print '\n'.join(lines)
             sys.exit(ret)
 
@@ -186,20 +189,21 @@ class BrewFile:
             else:
                 yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
-    def print_banner(self, text, verbose=-1):
-        verbose = verbose if verbose != -1 else self.opt["verbose"]
-        if verbose < 2:
+    def info(self, text, verbose_level=2):
+        verbose = self.opt["verbose"] if self.opt.has_key("verbose") else 10
+        if verbose < verbose_level:
             return
+        print text
 
+    def banner(self, text, verbose_level=2):
         max = 0
         for l in text.split("\n"):
             if max < len(l):
                 max = len(l)
-        print "\n"
-        print "#" * max
-        print text
-        print "#" * max
-        print "\n"
+        self.info("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose_level)
+
+    def warning(self, text, verbose_level=1):
+        self.info("\033[31;1m" + text + "\033[m", verbose_level)
 
     def remove(self, path):
         """Helper to remove file/directory."""
@@ -209,8 +213,7 @@ class BrewFile:
         elif os.path.isdir(path):
             shutil.rmtree(path)
         else:
-            if self.opt["verbose"] > 0:
-                print "WARNING: Tried to remove non usual file/directory:", path
+            self.warning("Tried to remove non usual file/directory:" + path, 0)
 
     def get_tap_path(self, tap):
         """Get tap path"""
@@ -230,9 +233,9 @@ class BrewFile:
                         + os.path.dirname(self.opt["brewfile"]),
                         True, True, False)[0]
         if ret != 0:
-            print "can't clone " + self.opt["repo"] + ".\n"\
+            self.warning("can't clone " + self.opt["repo"] + ".\n"\
                   "please check the repository, or reset with\n"\
-                  "    $ " + __prog__ + " set_repo"
+                  "    $ " + __prog__ + " set_repo", 0)
             sys.exit(ret)
 
     def check_github_repo(self):
@@ -286,7 +289,7 @@ class BrewFile:
             if r.json()["message"] == "Must specify two-factor authentication OTP code.":
                 is_ok = False
                 break
-            print r.json()["message"]
+            self.err(r.json()["message"])
             sys.exit(1)
 
         if not is_ok:
@@ -302,7 +305,7 @@ class BrewFile:
                     twofac = getpass.getpass("\033[31;1mWrong code!\033[0m GitHub two-factor code: ")
                     headers.update({"X-Github-OTP": twofac})
                     continue
-                print r.json()["message"]
+                self.warning(r.json()["message"], 0)
                 sys.exit(1)
 
         # Clone and initialize
@@ -377,8 +380,8 @@ class BrewFile:
 
         # Check the repository
         if self.opt["repo"] == "":
-            print "Please set a repository, or reset with:"
-            print "    $ " + __prog__ + "set_repo\n"
+            self.warning("Please set a repository, or reset with:", 0)
+            self.warning("    $ " + __prog__ + "set_repo\n", 0)
             sys.exit(1)
 
         # Clone if it doesn't exist
@@ -387,8 +390,7 @@ class BrewFile:
 
 
         # pull/push
-        if self.opt["verbose"] > 0:
-            print "cd", os.path.dirname(self.opt["brewfile"])
+        self.info("cd " + os.path.dirname(self.opt["brewfile"]), 1)
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         if pull:
             ret = self.proc("git pull")[0]
@@ -424,17 +426,17 @@ class BrewFile:
         if self.proc("which brew", False, False, False, 0)[0] != 0:
             print "Homebrew has not been installed, install now..."
             cmd="curl -O https://raw.githubusercontent.com/Homebrew/install/master/install"
-            self.proc(cmd, True, True, False, 2)
+            self.proc(cmd, True, True, False, 0)
             cmd="ruby install"
-            self.proc(cmd, True, True, False, 2)
-            (ret, lines) =  self.proc("brew doctor", True, True, False, 2)
+            self.proc(cmd, True, True, False, 0)
+            (ret, lines) =  self.proc("brew doctor", True, True, False, 0)
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
                 print
-                self.print_banner("# Check brew environment and fix problems\n"
+                self.warning("\nCheck brew environment and fix problems\n"
                                   "# You can check with:\n"
-                                  "#     $ brew doctor", 2)
+                                  "#     $ brew doctor", 0)
 
     def check_cask_cmd(self, force=False):
         """Check cask is installed or not"""
@@ -450,9 +452,8 @@ class BrewFile:
                     self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
                     True, True, False)[0]
             if ret != 0:
-                print "\n\033[31;1mFailed to install "\
-                        + self.opt["cask_pack"] + "\033[0m\n"
-                print list
+                self.warning("\nFailed to install "\
+                         + self.opt["cask_pack"] + "\n", 0)
                 sys.exit(ret)
             if not self.opt["cask_repo"] in self.opt["tap_list"]:
                 self.opt["tap_list"].append(self.opt["cask_repo"])
@@ -474,9 +475,8 @@ class BrewFile:
             ret = self.proc(["brew", "install", self.opt["pip_pack"]],
                             True, True, False)[0]
             if ret != 0:
-                print "\n\033[31;1mFailed to install "\
-                        + self.opt["pip_pack"] + "\033[0m\n"
-                print list
+                self.warning("\nFailed to install "\
+                        + self.opt["pip_pack"] + "\n", 0)
                 sys.exit(ret)
             if not self.opt["pip_pack"] in self.opt["brew_list"]:
                 self.opt["brew_list"].append(self.opt["pip_pack"])
@@ -501,29 +501,35 @@ class BrewFile:
         self.opt["tap_list"] = lines
 
         # Casks
+        self.opt["cask_list"] = []
+        self.opt["cask_list_nocask"] = []
         if self.check_cask_cmd():
             (ret, lines) = self.proc("brew cask list", False, False)
-            self.opt["cask_list"] = []
-            self.opt["cask_list_nocask"] = []
             if ret == 0:
                 for p in lines:
                     if len(p.split()) == 1:
                         self.opt["cask_list"].append(p)
                     else:
-                        print "\033[31;1mthe cask file of \033[31;7m" + p + "\033[0m\033[31;1m doesn't exist."
-                        print "\033[31;1mplease check later.\n\n\033[0m"
+                        self.warning("The cask file of " + p + " doesn't exist.", 0)
+                        self.warning("Please check later.\n\n", 0)
                         self.opt["cask_list_nocask"].append(p)
+
+        # App Store
+        import glob
+        apps = glob.glob('/Applications/*/Contents/_MASReceipt/receipt')
+        self.opt["appstore_list"] = [x.split("/")[2].split(".app")[0] for x in apps]
 
     def read_input(self):
         """Read input file"""
 
         # Check packages in the input file
-        self.opt["cmd_input"]   = []
-        self.opt["cask_input"]  = []
-        self.opt["pip_input"]   = []
-        self.opt["tap_input"]   = []
         self.opt["brew_input"]  = []
         self.opt["brew_input_opt"] = []
+        self.opt["tap_input"]   = []
+        self.opt["cask_input"]  = []
+        self.opt["pip_input"]   = []
+        self.opt["cmd_input"]   = []
+        self.opt["appstore_input"]   = []
 
         f = open(self.opt["brewfile"], "r")
         lines = f.readlines()
@@ -535,7 +541,7 @@ class BrewFile:
             args = l.replace("'","").replace('"',"").split()
             cmd = args[0]
             if len(args) < 2:
-                print "\n\033[31;1mWrong line: " + l + "\033[0m"
+                self.error("\nWrong line: " + l + "", 0)
                 continue
             p = args[1]
             if len(args) > 2 and p == "install":
@@ -557,6 +563,8 @@ class BrewFile:
                 self.opt["cask_input"].append(p)
             elif cmd == "pip":
                 self.opt["pip_input"].append(p)
+            elif cmd == "appstore":
+                self.opt["appstore_input"].append(p)
             else:
                 self.opt["cmd_input"].append(l.strip())
                 continue
@@ -585,8 +593,7 @@ class BrewFile:
             ans = self.ask_yn("Do you want to overwrite it?")
             if ans:
                 os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                if self.opt["verbose"] > 0:
-                    print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
+                self.info("Ok, old input file was moved to " + self.opt["input"] + ".bak.", 1)
             else:
                 sys.exit(0)
 
@@ -600,7 +607,7 @@ class BrewFile:
                     break
                 print "Repository can not be empty"
                 self.opt["repo"] = raw_input("Set repository: ")
-            self.print_banner("# Set Brewfile repository as " + self.opt["repo"])
+            self.banner("# Set Brewfile repository as " + self.opt["repo"])
 
         if self.opt["repo"] == "non":
             # Reset non repository type Brewfile
@@ -665,12 +672,11 @@ class BrewFile:
                 if ans:
                     if self.opt["repo"] == "":
                         os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                        if self.opt["verbose"] > 0:
-                            print "Ok, old input file was moved to " + self.opt["input"] + ".bak."
+                        self.info("Ok, old input file was moved to " + self.opt["input"] + ".bak.", 1)
                 else:
                     sys.exit(0)
 
-        self.print_banner("# Initialize " + self.opt["brewfile"])
+        self.banner("# Initialize " + self.opt["brewfile"])
 
         # Get installed package list
         self.get_list()
@@ -726,10 +732,16 @@ class BrewFile:
                 opt = ""
                 out.writeln("#cask  install " + p + opt)
 
+        # Casks
+        if len(self.opt["appstore_list"]) > 0:
+            out.writeln("\n# App Store applications")
+            for p in self.opt["appstore_list"]:
+                out.writeln("appstore " + p)
+
         # Close Brewfile
         out.close()
 
-        self.print_banner("# You can edit " + self.opt["brewfile"] + " with:\n"
+        self.banner("# You can edit " + self.opt["brewfile"] + " with:\n"
                           "#     $ " + __prog__ + " edit")
 
         self.opt["initialized"] = True
@@ -738,15 +750,15 @@ class BrewFile:
         """Check input file"""
 
         if not os.path.exists(self.opt["brewfile"]):
-            print "WARNING: Input file", self.opt["brewfile"], "is not found."
-            ans = self.ask_yn("WARNING: Do you want to initialize from installed packages?")
+            self.warning("Input file " + self.opt["brewfile"] + " is not found.", 0)
+            ans = self.ask_yn("Do you want to initialize from installed packages?")
             if ans:
                 self.initialize(False)
                 return
             else:
-                print "WARNING: Ok, please prepare brewfile"
-                print "WARNING: or you can initialize " + self.opt["brewfile"] + " with:"
-                print "WARNING:     $ " + __prog__ + " init"
+                self.warning("Ok, please prepare brewfile", 0)
+                self.warning("or you can initialize " + self.opt["brewfile"] + " with:", 0)
+                self.warning("    $ " + __prog__ + " init", 0)
                 sys.exit(1)
 
     def edit_brewfile(self):
@@ -757,14 +769,14 @@ class BrewFile:
     def cleanup(self):
         """Clean up."""
         if self.opt["dryrun"]:
-            self.print_banner("# Dry run")
+            self.banner("# Dry run")
 
         # Check up packages in the input file
         self.read_input()
 
         # Clean up cask packages
         if len(self.opt["cask_list"]) > 0:
-            self.print_banner("# Clean up cask packages")
+            self.banner("# Clean up cask packages")
             for p in self.opt["cask_list"]:
                 if p in self.opt["cask_input"]:
                     continue
@@ -782,7 +794,7 @@ class BrewFile:
 
         # Clean up pip packages
         if len(self.opt["pip_list"]) > 0:
-            self.print_banner("# Clean up pip packages")
+            self.banner("# Clean up pip packages")
             for p in self.opt["pip_list"]:
                 if p in self.opt["pip_input"]:
                     continue
@@ -805,7 +817,7 @@ class BrewFile:
 
         # Clean up tap packages
         if len(self.opt["tap_list"]) > 0:
-            self.print_banner("# Clean up tap packages")
+            self.banner("# Clean up tap packages")
             for p in self.opt["tap_list"]:
                 if p in self.opt["tap_input"]:
                     continue
@@ -826,7 +838,7 @@ class BrewFile:
 
         # Clean up brew packages
         if len(self.opt["brew_list"]) > 0:
-            self.print_banner("# Clean up brew packages")
+            self.banner("# Clean up brew packages")
             for p in self.opt["brew_list"]:
                 if p in self.opt["brew_input"]:
                     continue
@@ -848,14 +860,14 @@ class BrewFile:
                     self.proc(cmd, False, True)
 
         # Clean up cashe
-        self.print_banner("# Clean up cache")
+        self.banner("# Clean up cache")
         cmd0 = "brew cleanup --force"
         cmd1 = "rm -rf " + self.opt["cache_dir"]
         if self.opt["dryrun"]:
             print cmd0
             print cmd1
             # Dry run message
-            self.print_banner("# This is dry run.\n"
+            self.banner("# This is dry run.\n"
                               "# If you want to enforce cleanup, use '-C':\n"
                               "#     $ " + __prog__ + " clean -C")
         else:
@@ -904,8 +916,13 @@ class BrewFile:
         for c in self.opt["cmd_input"]:
             self.proc(c)
             if ret != 0:
-                print c + ": returned error:\n\n" + list
+                self.warning(c + ": returned error:\n\n", 0)
                 sys.exit(ret)
+
+        # App Store
+        for p in self.opt["appstore_input"]:
+            if not p in self.opt["appstore_list"]:
+                self.warning("\nPlease install " + p + " from App Store!", 0)
 
         return 0
 
@@ -953,20 +970,19 @@ class BrewFile:
                                 break
                         tap = t
                         name = n
-        if self.opt["verbose"] > 1:
-            if name == "":
-                print "Non Cask app:", app
-            elif installed:
-                print "Installed by Cask:", app, name
-            else:
-                print "Installed directly, instead of by Cask:", app, name
+        if name == "":
+            self.info("Non Cask app: " + app, 2)
+        elif installed:
+            self.info("Installed by Cask:"+ app + name, 2)
+        else:
+            self.info("Installed directly, instead of by Cask:" + app + name, 2)
         return (tap, installed, name)
 
     def check_cask(self):
         """Check applications for Cask"""
         self.check_cask_cmd(True)
 
-        self.print_banner("# Starting to check applications for Cask...")
+        self.banner("# Starting to check applications for Cask...")
 
         # Set cask directories and reset application information list
         taps = filter(lambda t: os.path.isdir(self.get_tap_path(t) + "/Casks"),
@@ -1043,7 +1059,7 @@ class BrewFile:
         out.close()
 
         # Summary
-        self.print_banner("# Summary")
+        self.banner("# Summary")
         if self.opt["verbose"] > 0:
             print "Total:", napps, "apps have been checked."
             print "Apps in", app_dirs
@@ -1089,8 +1105,7 @@ class BrewFile:
                 appdir = os.path.dirname(current)
                 for d in os.listdir(appdir):
                     if d != current.split("/")[-1]:
-                        if self.opt["verbose"] > 0:
-                            print "rm -rf " + appdir + "/" + d
+                        self.infi("rm -rf " + appdir + "/" + d, 1)
                         self.remove(appdir + "/" + d)
 
 
@@ -1192,8 +1207,8 @@ class BrewFile:
             sys.exit(0)
 
         # No command found
-        print "Wrong command: ", self.opt["command"]
-        print "Execute `" + __prog__ + " help` for more information."
+        self.warning("Wrong command: ", self.opt["command"], 0)
+        self.warning("Execute `" + __prog__ + " help` for more information.", 0)
         sys.exit(1)
 
 def main():
