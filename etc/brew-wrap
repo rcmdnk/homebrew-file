@@ -4,7 +4,7 @@ function brew () {
   cmd2=$2
   cmd3=$3
 
-  if type brew-file >/dev/null;then
+  if type -a brew-file >/dev/null 2>&1;then
 
     # brew install/uninstall, pip
     if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
