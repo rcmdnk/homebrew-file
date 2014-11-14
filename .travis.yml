@@ -79,6 +79,7 @@ script:
   - brew noinit install stow
   # Install test
   - brew rm brew-file
+  - type brew-file
   - brew untap rcmdnk/file
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
