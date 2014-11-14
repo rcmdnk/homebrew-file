@@ -131,7 +131,7 @@ class BrewFile:
         self.opt["appstore_input"]  = []
         self.opt["args"] = []
         self.opt["yn"] = False
-        self.opt["verbose"]      = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
+        self.opt["verbose"]     = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
 
         self.int_opts=["verbose"]
         self.float_opts=[]
