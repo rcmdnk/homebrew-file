@@ -774,6 +774,19 @@ class BrewFile:
         # Check up packages in the input file
         self.read_input()
 
+        # Clean up App Store applications
+        if len(self.opt["appstore_list"]) > 0:
+            self.banner("# Clean up App Store applications")
+            for p in self.opt["appstore_list"]:
+                if p in self.opt["appstore_input"]:
+                    continue
+                cmd = "sudo uninstall \"file:///Applications/" + p + "\".app"
+                if self.opt["dryrun"]:
+                    print cmd
+                else:
+                    self.proc(cmd, True, True, False)
+                self.opt["appstore_list"].remove(p)
+
         # Clean up cask packages
         if len(self.opt["cask_list"]) > 0:
             self.banner("# Clean up cask packages")
@@ -781,7 +794,7 @@ class BrewFile:
                 if p in self.opt["cask_input"]:
                     continue
                 self.check_cask_cmd(True)
-                cmd = "$ brew cask uninstall " + p
+                cmd = "brew cask uninstall " + p
                 if self.opt["dryrun"]:
                     print cmd
                 else:
@@ -806,9 +819,9 @@ class BrewFile:
                     print cmd1
                     print cmd2
                 else:
-                    self.proc(cmd0, False, True)
-                    self.proc(cmd1, False, True)
-                    self.proc(cmd2, False, True)
+                    self.proc(cmd0, True, True, False)
+                    self.proc(cmd1, True, True, False)
+                    self.proc(cmd2, True, True, False)
                 self.opt["pip_list"].remove(p)
         # Skip clean up cask at tap/brew if any cask packages exist
         if len(self.opt["pip_list"]) > 0:
@@ -834,7 +847,7 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print cmd
                 else:
-                    self.proc(cmd, False, True)
+                    self.proc(cmd, True, True)
 
         # Clean up brew packages
         if len(self.opt["brew_list"]) > 0:
