@@ -1,9 +1,10 @@
 function brew () {
+  # Arguments
+  cmd=$1
+  cmd2=$2
+  cmd3=$3
+
   if type brew-file >/dev/null;then
-    # Arguments
-    cmd=$1
-    cmd2=$2
-    cmd3=$3
 
     # brew install/uninstall, pip
     if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
@@ -29,5 +30,8 @@ function brew () {
     fi
   fi
 
+  if [ "$1" = "noinit" ];then
+    shift
+  fi
   command brew "$@"
 }

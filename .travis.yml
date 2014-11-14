@@ -72,6 +72,11 @@ script:
   - coverage run --parallel-mode $exe wrongcommand || echo test
   - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe push -V 0
+  # Test with brew-wrap
+  - source $(brew --prefix)/etc/brew-wrap
+  - type brew
+  - brew install hub -V 2
+  - brew noinit install stow -V 2
   # Install test
   - brew rm brew-file
   - brew untap rcmdnk/file
