@@ -236,7 +236,7 @@ but can be managed by Cask under "Apps not installed by Cask, but installed in..
 
 If you want to manage them with Brewfile, just copy above lines w/o "#" for these Apps.
 
-# HELP
+## HELP
 
     Usage: brew file [-increvh][-f <input file>] command ...
 
@@ -284,12 +284,33 @@ More information could be found in [my blog](http://rcmdnk.github.io/blog/2013/0
 
 > [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/)
 
-# brew-wrap
+## brew-wrap
 
 If you want to automatically update Brewfile after `brew install/uninstall`,
 please use `brew-wrap`.
 
-You can use it by set as alias:
+:new:
+
+[homebrew-file/etc/brew-wrap](https://github.com/rcmdnk/homebrew-file/blob/master/etc/brew-wrap)
+has a wrapper function `brew`.
+
+It executes `brew file init` after such `brew install` automatically.
+
+To enable it, just read this file in your `.bashrc` or any of your setup file.
+
+```sh
+if [ -f $(brew --prefix)/etc/brew-wrap ];then
+  source $(brew --prefix)/etc/brew-wrap
+fi
+```
+
+`brew` function in `brew-wrap` executes original `brew`
+if `brew-file` is not included.
+
+Therefore, you can safely uninstall/re-install brew-file
+even if you have already sourced it.
+
+<strike>You can use it by set as alias:
 
     if type brew >& /dev/null && type brew-file >& /dev/null && type brew-wrap >& /dev/null;then
       alias brew="brew-wrap"
@@ -304,3 +325,4 @@ then use `command` like:
 
     $ brew uninstall brew-file
     $ command brew install brew-file --python
+</strike>

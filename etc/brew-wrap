@@ -1,0 +1,33 @@
+function brew () {
+  if type brew-file >/dev/null;then
+    # Arguments
+    cmd=$1
+    cmd2=$2
+    cmd3=$3
+
+    # brew install/uninstall, pip
+    if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
+      || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
+      if [ $# -gt 1 ];then
+        if [ "$cmd2" != "-h" ];then
+          brew-file brew "$@"
+          return $?
+        fi
+      fi
+    fi
+
+    # brew cask install/uninstall
+    if [ "$cmd" = "cask" ];then
+      if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
+        if [ $# -gt 2 ];then
+          if [ "$cmd3" != "-h" ];then
+            brew-file brew "$@"
+            return $?
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  command brew "$@"
+}
