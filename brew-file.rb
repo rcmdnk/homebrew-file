@@ -20,5 +20,6 @@ class BrewFile < Formula
   def install
     prefix.install 'bin'
     (bin+'brew-file').chmod 0755
+    prefix.install 'etc'
   end
 end
