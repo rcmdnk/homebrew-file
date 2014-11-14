@@ -146,6 +146,13 @@ class BrewFile:
         for k in self.float_opts:
             self.opt[k] = float(self.opt[k])
 
+    def verbose(self):
+        try:
+            v = self.opt["verbose"]
+        except:
+            v = 10
+        return v
+
     def proc(self, cmd, print_cmd = True, print_out = True,
              exit_on_error = True, verbose_level = 1):
         """ Get process output."""
@@ -163,9 +170,7 @@ class BrewFile:
         ret = p.wait()
 
         if exit_on_error and ret != 0:
-            if not (print_out and
-                    ((not self.opt.has_key("verbose")) or
-                      self.opt["verbose"] > voerbose_level)):
+            if not (print_out and self.verbose() > verbose_level):
                 print '\n'.join(lines)
             sys.exit(ret)
 
@@ -190,8 +195,7 @@ class BrewFile:
                 yn = raw_input("Answer with yes (y) or no (n): ").lower()
 
     def info(self, text, verbose_level=2):
-        verbose = self.opt["verbose"] if self.opt.has_key("verbose") else 10
-        if verbose < verbose_level:
+        if self.verbose() < verbose_level:
             return
         print text
 
@@ -682,7 +686,7 @@ class BrewFile:
         self.get_list()
 
         # Check list
-        out = Tee(self.opt["brewfile"], sys.stdout, self.opt["verbose"] > 1)
+        out = Tee(self.opt["brewfile"], sys.stdout, self.verbose()  > 1)
 
         # Taps
         if len(self.opt["tap_list"]) > 0:
@@ -1026,7 +1030,7 @@ class BrewFile:
                 napps += 1
 
         # Make list
-        out = Tee("Caskfile", sys.stdout, self.opt["verbose"] > 1)
+        out = Tee("Caskfile", sys.stdout, self.verbose() > 1)
 
         out.writeln("# Cask applications")
         out.writeln("# Please copy these lines to your Brewfile"
@@ -1073,7 +1077,7 @@ class BrewFile:
 
         # Summary
         self.banner("# Summary")
-        if self.opt["verbose"] > 0:
+        if self.verbose() > 0:
             print "Total:", napps, "apps have been checked."
             print "Apps in", app_dirs
             print ""
