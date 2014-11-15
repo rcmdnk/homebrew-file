@@ -19,7 +19,7 @@ __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
-import sys, os, urllib2
+import sys, os
 
 class Tee:
     def __init__(self, out1, out2 = sys.stdout, use2 = True):
@@ -249,7 +249,6 @@ class BrewFile:
     def check_github_repo(self):
         """helper to check and create GitHub repository."""
 
-        import urllib
         import urllib2
 
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
@@ -805,11 +804,11 @@ class BrewFile:
         # Clean up App Store applications
         if len(self.appstore_list) > 0:
             self.banner("# Clean up App Store applications")
-            import urllib
+            import urllib2
             for p in self.appstore_list:
                 if p in self.appstore_input:
                     continue
-                cmd = "sudo uninstall file:///Applications/" + urllib.quote(p) + ".app"
+                cmd = "sudo uninstall file:///Applications/" + urllib2.quote(p) + ".app"
                 if self.opt["dryrun"]:
                     print cmd
                 else:
