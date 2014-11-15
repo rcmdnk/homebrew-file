@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.1.1"
+__version__ = "v3.1.2"
 __date__ = "16/Nov/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -804,16 +804,19 @@ class BrewFile:
         # Clean up App Store applications
         if len(self.appstore_list) > 0:
             self.banner("# Clean up App Store applications")
+            cmd = "sudo uninstall"
+            n_uninstall = 0
             import urllib2
             for p in self.appstore_list:
                 if p in self.appstore_input:
                     continue
-                cmd = "sudo uninstall file:///Applications/" + urllib2.quote(p) + ".app"
+                cmd += " file:///Applications/" + urllib2.quote(p) + ".app"
+                n_uninstall += 1
                 if self.opt["dryrun"]:
                     print cmd
-                else:
-                    self.proc(cmd, True, True, False)
                 self.appstore_list.remove(p)
+            if not self.opt["dryrun"] and n_uninstall > 0:
+                self.proc(cmd, True, True, False)
 
         # Clean up cask packages
         if len(self.cask_list) > 0:
