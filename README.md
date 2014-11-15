@@ -248,7 +248,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
       set_repo (or -s)   : Set BREWFILE repository.
       pull               : Update BREWFILE from the repository.
       push               : Push your BREWFILE to the repository.
-      clean    (or -c)   : Clenup
+      clean    (or -c)   : Cleanup
                                    Uninstall packages not in the list.
                                    Untap packages not in the list.
                                    Cleanup cache (brew cleanup)
