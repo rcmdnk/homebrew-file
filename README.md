@@ -319,3 +319,4 @@ Previously, `brew-wrap` was in `bin/brew-wrap`,
 and it was used like `alias brew="brew-wrap"`.
 
 If you have this obsolete setting, please delete and renew as above.
+
