@@ -174,7 +174,7 @@ class BrewFile:
         ret = p.wait()
 
         if exit_on_error and ret != 0:
-            if not (print_out and self.verbose() > verbose_level):
+            if not (print_out and self.verbose() >= verbose_level):
                 print '\n'.join(lines)
             sys.exit(ret)
 
@@ -714,7 +714,7 @@ class BrewFile:
                 for tp in self.tap_packs:
                     if tp in self.brew_list:
                         opt = self.get_options(tp)
-                        out.writeln("install " + tp + opt)
+                        out.writeln("install " + tp + " " + opt)
                         self.brew_list.remove(tp)
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
@@ -734,7 +734,7 @@ class BrewFile:
             for p in self.pip_list:
                 #opt = self.get_options(p)
                 opt = ""
-                out.writeln("pip " + p + opt)
+                out.writeln("pip " + p + " " + opt)
 
         # Casks
         if len(self.cask_list) > 0:
@@ -742,7 +742,7 @@ class BrewFile:
             for p in self.cask_list:
                 #opt = self.get_options(p)
                 opt = ""
-                out.writeln("cask install " + p + opt)
+                out.writeln("cask install " + p + " " + opt)
 
         # Installed by cask, but cask files were not found...
         if len(self.cask_list_nocask) > 0:
@@ -751,7 +751,7 @@ class BrewFile:
             for p in self.cask_list_nocask:
                 #opt = self.get_options(p)
                 opt = ""
-                out.writeln("#cask  install " + p + opt)
+                out.writeln("#cask  install " + p + " " + opt)
 
         # App Store applications
         if len(self.appstore_list) > 0:
