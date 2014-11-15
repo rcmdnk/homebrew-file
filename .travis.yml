@@ -17,7 +17,7 @@ before_install:
   - chmod 600 ~/.ssh/id_rsa
   - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - version=""
-  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = python ];then version="--python";fi'
+  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
   - brewprefix=$(brew --prefix)
 install:
@@ -44,9 +44,9 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
-  - diff $installed_brew $exe
-  - brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0
-  - brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0
+  - '[ "$version" != "" ] && diff $installed_brew $exe'
+  - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0'
+  - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0'
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe --version
   - coverage run --parallel-mode $exe help
@@ -63,6 +63,7 @@ script:
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - rm -rf $brewprefix/rcmdnk_BrewfileTest
   - coverage run --parallel-mode $exe install -U -V 0
+  #- '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0'
   - coverage run --parallel-mode $exe update -y -U -V 0
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
@@ -71,6 +72,7 @@ script:
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe wrongcommand || echo test
   - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  #- '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0'
   - coverage run --parallel-mode $exe push -V 0
   # Test with brew-wrap
   - source $(brew --prefix)/etc/brew-wrap
