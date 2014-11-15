@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.1.0"
-__date__ = "15/Nov/2014"
+__version__ = "v3.1.1"
+__date__ = "16/Nov/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -805,10 +805,11 @@ class BrewFile:
         # Clean up App Store applications
         if len(self.appstore_list) > 0:
             self.banner("# Clean up App Store applications")
+            import urllib
             for p in self.appstore_list:
                 if p in self.appstore_input:
                     continue
-                cmd = "sudo uninstall \"file:///Applications/" + p + "\".app"
+                cmd = "sudo uninstall file:///Applications/" + urllib.quote(p) + ".app"
                 if self.opt["dryrun"]:
                     print cmd
                 else:
@@ -910,7 +911,7 @@ class BrewFile:
             # Dry run message
             self.banner("# This is dry run.\n"
                               "# If you want to enforce cleanup, use '-C':\n"
-                              "#     $ " + __prog__ + " clean -C")
+                              "#     $ " + __prog__ + " clean -C", 0)
         else:
             self.proc(cmd0, False)
             self.proc(cmd1, False)
