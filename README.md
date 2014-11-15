@@ -278,11 +278,14 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
     For GitHub repository, you can shorten the address like user_name/repo_name.
 
 ## Information
-More information could be found in [my blog](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/).
+More information could be found in
+my blogs: [Japanese](http://rcmdnk.github.io/), [English](http://rcmdnk.github.io/en/)
 
-> [Brewall: brewパッケージを管理する](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/)
+> [Brewall: brewパッケージを管理する](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/) (jp)
 
-> [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/)
+> [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/) (jp)
+
+> [Brew-file: Manager for packages of Homebrew](http://rcmdnk.github.io/en/blog/2014/11/15/computer-mac-homebrew/) (en)
 
 ## brew-wrap
 
