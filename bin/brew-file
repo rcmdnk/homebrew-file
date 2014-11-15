@@ -557,6 +557,7 @@ class BrewFile:
 
             opt = " ".join(args[2:]).strip()
             popt = " ".join(args[1:]).strip()
+            excmd = " ".join(l.split()[1:]).strip()
 
             if cmd == "brew" or cmd == "install":
                 self.brew_input.append(p)
@@ -574,9 +575,9 @@ class BrewFile:
             elif cmd == "appstore":
                 self.appstore_input.append(popt)
             elif cmd == "before":
-                self.before_input.append(popt)
+                self.before_input.append(excmd)
             elif cmd == "after":
-                self.after_input.append(popt)
+                self.after_input.append(excmd)
             else:
                 self.cmd_input.append(l.strip())
                 continue
