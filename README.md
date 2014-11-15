@@ -310,19 +310,9 @@ if `brew-file` is not included.
 Therefore, you can safely uninstall/re-install brew-file
 even if you have already sourced it.
 
-<strike>You can use it by set as alias:
+:warning:
 
-    if type brew >& /dev/null && type brew-file >& /dev/null && type brew-wrap >& /dev/null;then
-      alias brew="brew-wrap"
-    fi
+Previously, `brew-wrap` was in `bin/brew-wrap`,
+and it was used like `alias brew="brew-wrap"`.
 
-Write it in your setting file like `.bashrc`.
-
-When you un-install brew-file, please do `unalias brew`.
-
-If you want to remove it temporarily (to switch branch to python/shell/master),
-then use `command` like:
-
-    $ brew uninstall brew-file
-    $ command brew install brew-file --python
-</strike>
+If you have this obsolete setting, please delete and renew as above.
