@@ -136,6 +136,8 @@ class BrewFile:
         self.cask_input     = []
         self.pip_input      = []
         self.appstore_input = []
+        self.before_input   = []
+        self.after_input    = []
         self.cmd_input      = []
 
     def set_args(self, **kw):
@@ -529,13 +531,15 @@ class BrewFile:
         """Read input file"""
 
         # Check packages in the input file
-        self.brew_input  = []
+        self.brew_input     = []
         self.brew_input_opt = []
-        self.tap_input   = []
-        self.cask_input  = []
-        self.pip_input   = []
-        self.cmd_input   = []
-        self.appstore_input   = []
+        self.tap_input      = []
+        self.cask_input     = []
+        self.pip_input      = []
+        self.before_input   = []
+        self.after_input    = []
+        self.cmd_input      = []
+        self.appstore_input = []
 
         f = open(self.opt["brewfile"], "r")
         lines = f.readlines()
@@ -546,31 +550,33 @@ class BrewFile:
                 continue
             args = l.replace("'","").replace('"',"").split()
             cmd = args[0]
-            if len(args) < 2:
-                self.error("\nWrong line: " + l + "", 0)
-                continue
-            p = args[1]
+            p = args[1] if len(args)>1 else ""
             if len(args) > 2 and p == "install":
                 p = args[2]
-                args.pop(2)
+                args.pop(1)
 
-            opt = " ".join(args[2:])
+            opt = " ".join(args[2:]).strip()
+            popt = " ".join(args[1:]).strip()
 
             if cmd == "brew" or cmd == "install":
                 self.brew_input.append(p)
-                self.brew_input_opt.append((p + " " + opt).strip())
+                self.brew_input_opt.append(popt)
             elif cmd == "tap":
-                self.tap_input.append(p)
+                self.tap_input.append(popt)
             elif cmd == "tapall":
-                self.tap_input.append(p)
-                self.get_tap(p)
+                self.tap_input.append(popt)
+                self.get_tap(popt)
                 self.brew_input += self.tap_packs
             elif cmd == "cask":
-                self.cask_input.append(p)
+                self.cask_input.append(popt)
             elif cmd == "pip":
-                self.pip_input.append(p)
+                self.pip_input.append(popt)
             elif cmd == "appstore":
-                self.appstore_input.append(p)
+                self.appstore_input.append(popt)
+            elif cmd == "before":
+                self.before_input.append(popt)
+            elif cmd == "after":
+                self.after_input.append(popt)
             else:
                 self.cmd_input.append(l.strip())
                 continue
@@ -682,6 +688,9 @@ class BrewFile:
                 else:
                     sys.exit(0)
 
+        if os.path.exists(self.opt["brewfile"]):
+            self.read_input()
+
         self.banner("# Initialize " + self.opt["brewfile"])
 
         # Get installed package list
@@ -689,6 +698,12 @@ class BrewFile:
 
         # Check list
         out = Tee(self.opt["brewfile"], sys.stdout, self.verbose()  > 1)
+
+        # Before commands
+        if len(self.before_input) > 0:
+            out.writeln("\n# Before commands")
+            for p in self.before_input:
+                out.writeln("before " + p)
 
         # Taps
         if len(self.tap_list) > 0:
@@ -738,11 +753,17 @@ class BrewFile:
                 opt = ""
                 out.writeln("#cask  install " + p + opt)
 
-        # Casks
+        # App Store applications
         if len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for p in self.appstore_list:
                 out.writeln("appstore " + p)
+
+        # After commands
+        if len(self.after_input) > 0:
+            out.writeln("\n# After commands")
+            for p in self.before_input:
+                out.writeln("after " + p)
 
         # Close Brewfile
         out.close()
@@ -902,6 +923,10 @@ class BrewFile:
         # Check packages in the input file
         self.read_input()
 
+        # before commands
+        for c in self.before_input:
+            self.proc(c)
+
         # Tap
         for p in self.tap_input:
             if not p in self.tap_list:
@@ -931,17 +956,18 @@ class BrewFile:
                         if self.opt["link"]:
                             self.proc("brew linkapps")
 
-        # Other commands
-        for c in self.cmd_input:
-            self.proc(c)
-            if ret != 0:
-                self.warning(c + ": returned error:\n\n", 0)
-                sys.exit(ret)
-
         # App Store
         for p in self.appstore_input:
             if not p in self.appstore_list:
                 self.warning("\nPlease install " + p + " from App Store!", 0)
+
+        # Other commands
+        for c in self.cmd_input:
+            self.proc(c)
+
+        # after commands
+        for c in self.after_input:
+            self.proc(c)
 
         return 0
 
