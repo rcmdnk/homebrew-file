@@ -238,44 +238,56 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## HELP
 
-    Usage: brew file [-increvh][-f <input file>] command ...
-
-    Commands:
-      install            : Install packages in BREWFILE (do 'brew update', too).
-      brew [command ...] : Execute brew command, and update BREWFILE.
-      init     (or -i)   : Initialize/Update BREWFILE with installed packages.
-      brew noinit [command ...] : Execute brew command, w/o update of BREWFILE.
-      set_repo (or -s)   : Set BREWFILE repository.
-      pull               : Update BREWFILE from the repository.
-      push               : Push your BREWFILE to the repository.
-      clean    (or -c)   : Cleanup
-                                   Uninstall packages not in the list.
-                                   Untap packages not in the list.
-                                   Cleanup cache (brew cleanup)
-                                   By drault, cleanup runs as dry-run.
-                                   If you want to enforce cleanup, use '-C' option.
-      update   (or -u)   : Do pull, install, brew upgrade, push and clean -C.
-                                   pull, push and clean are done only if
-                                   the repository is assigned.
-      edit     (or -e)   : Edit input file.
-      casklist           : Check applications for Cask
-      version  (or -v)   : Show version.
-      help     (or -h)   : Print Help (this message) and exit.
+    usage: brew file [-f INPUT] [-r REPO] [-n] [-C] [-V VERBOSE] [command] ...
     
-    Options:
-          -f  <file> Set input file (current default: ${input})
-                     You can set input file by environmental variable,
-                     HOMEBREW_BREWFILE, like:
-                          export HOMEBREW_BREWFILE=~/.brewfile
-          -n         Don't make links for Apps
-          -C         Run cleanup in non dry-run mode.
-          -r  <repo> Set repository name. Use with set_repo (-s).
+    Brew-file: Manager for packages of Homebrew
+    https://github.com/rcmdnk/homebrew-file
     
-    If you want to use repository's BREWFILE,
-    please prepare a repository which has a file named 'Brewfile'.
-    If you assign the repository which doesn't have 'Brewfile',
-    then Brew-file will try to make 'Brewfile' in the repository.
-    For GitHub repository, you can shorten the address like user_name/repo_name.
+    optional arguments:
+      -f INPUT, --file INPUT
+                            Set input file (default: /usr/local/Library/Brewfile). 
+                            You can set input file by environmental variable,
+                            HOMEBREW_BREWFILE, like:
+                                export HOMEBREW_BREWFILE=~/.brewfile
+      -r REPO, --repo REPO  Set repository name. Use with set_repo.
+      -n, --nolink          Don't make links for Apps.
+      -C                    Run cleanup in non dry-run mode.
+      -V VERBOSE, --verbose VERBOSE
+                            Verbose level 0/1/2
+    
+    subcommands:
+      [command]
+        install             Install packages in BREWFILE.
+                            Use `--preupdate` to execute `brew update` before install.
+        brew                Execute brew command, and update BREWFILE.
+        init                or -i/--init
+                            Initialize/Update BREWFILE with installed packages.
+        set_repo            or -s/--set_repo
+                            Set BREWFILE repository (e.g. rcmdnk/Brewfile).
+        pull                Update BREWFILE from the repository.
+        push                Push your BREWFILE to the repository.
+        clean               or -c/--clean
+                            Cleanup.
+                            Uninstall packages not in the list.
+                            Untap packages not in the list.
+                            Cleanup cache (brew cleanup)
+                            By drault, cleanup runs as dry-run.
+                            If you want to enforce cleanup, use '-C' option.
+        update              or -u/--update
+                            Do pull, install, brew update/upgrade, init,
+                            push and clean -C.
+                            In addition, pull, push and clean
+                            will be done if the repository is assigned.
+        edit                or -e/--edit
+                            Edit input file.
+        casklist            Check applications for Cask.
+        cask_upgrade        Upgrade cask applications.
+                            With -C, old versions will be removed.
+        test                Used for test.
+        version             or -v/--version
+                            Show version.
+        help                or -h/--help
+                            Print Help (this message) and exit.
 
 ## Information
 More information could be found in
