@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.2.0"
-__date__ = "19/Nov/2014"
+__version__ = "v3.2.1"
+__date__ = "12/Dec/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -854,7 +854,7 @@ class BrewFile:
         # Installed by cask, but cask files were not found...
         if len(self.cask_list_nocask) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
-            out.writeln("# but not corresponding casks were found.\n")
+            out.writeln("# but don't not have corresponding casks.\n")
             for p in self.cask_list_nocask:
                 out.writeln("#cask  install " + p)
 
