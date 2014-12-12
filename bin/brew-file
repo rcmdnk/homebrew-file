@@ -854,7 +854,7 @@ class BrewFile:
         # Installed by cask, but cask files were not found...
         if len(self.cask_list_nocask) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
-            out.writeln("but not corresponding casks were found.\n")
+            out.writeln("# but not corresponding casks were found.\n")
             for p in self.cask_list_nocask:
                 out.writeln("#cask  install " + p)
 
