@@ -1095,7 +1095,8 @@ class BrewFile:
         cask_namer = self.get_tap_path(self.opt["cask_repo"])\
                      + "/developer/bin/cask_namer"
         name = ""
-        lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
+        #lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
+        lines = self.proc([cask_namer, '"' + app + '"'] , True, True, False)[1]
         for l in lines:
             if l.find("Proposed Cask name") >= 0:
                 name = l.split()[3]
