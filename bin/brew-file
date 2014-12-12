@@ -1093,7 +1093,7 @@ class BrewFile:
         self.check_cask_cmd(True)
         [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
         cask_namer = self.get_tap_path(self.opt["cask_repo"])\
-                     + "/developer/bin/cask_namer"
+                     + "/Casks"
         name = ""
         lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
         for l in lines:
