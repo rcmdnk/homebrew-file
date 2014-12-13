@@ -64,7 +64,7 @@ script:
   - coverage run --parallel-mode $exe casklist -V 2
   - brew rm brew-cask
   - brew untap caskroom/cask
-  - coverage run --parallel-mode $exe casklist -V 0
+  - coverage run --parallel-mode $exe casklist -V 2
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
