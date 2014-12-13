@@ -443,7 +443,7 @@ class BrewFile:
                     self.brew_input_opt[p] = " " + " ".join(self.opt["args"][2:]).strip()
                 else:
                     self.brew_input_opt[p] = ""
-                self.tap_input.append(psplit[0] + "/" + psplit()[1])
+                self.tap_input.append(psplit[0] + "/" + psplit[1])
                 self.tap_input.sort()
             elif p in self.brew_input:
                 self.warning(p + " is already in Brewfile.")
