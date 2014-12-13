@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.2.1"
-__date__ = "12/Dec/2014"
+__version__ = "v3.3.0"
+__date__ = "13/Dec/2014"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1093,13 +1093,12 @@ class BrewFile:
         self.check_cask_cmd(True)
         [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
         cask_namer = self.get_tap_path(self.opt["cask_repo"])\
-                     + "/developer/bin/cask_namer"
+                     + "/developer/bin/generate_cask_token"
         name = ""
-        #lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
-        lines = self.proc([cask_namer, '"' + app + '"'] , True, True, False)[1]
+        lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
         for l in lines:
-            if l.find("Proposed Cask name") >= 0:
-                name = l.split()[3]
+            if l.find("Proposed token") >= 0:
+                name = l.split()[2]
 
         tap = ""
         installed = False
