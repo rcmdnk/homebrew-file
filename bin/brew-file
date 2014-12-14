@@ -1267,7 +1267,7 @@ class BrewFile:
                 appdir = os.path.dirname(current)
                 for d in os.listdir(appdir):
                     if d != current.split("/")[-1]:
-                        self.infi("rm -rf " + appdir + "/" + d, 1)
+                        self.info("rm -rf " + appdir + "/" + d, 1)
                         self.remove(appdir + "/" + d)
 
 
