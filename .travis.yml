@@ -77,7 +77,7 @@ script:
   # Test with brew-wrap
   - source $(brew --prefix)/etc/brew-wrap
   - type brew
-  - brew install hub -V 2
+  - brew install hub
   - brew noinit install stow
   # Install test
   - brew rm brew-file
