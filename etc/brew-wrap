@@ -1,29 +1,44 @@
 function brew () {
-  # Arguments
-  cmd=$1
-  cmd2=$2
-  cmd3=$3
+  wrap=1
 
-  if type -a brew-file >/dev/null 2>&1;then
-
-    # brew install/uninstall, pip
-    if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
-      || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
-      if [ $# -gt 1 ];then
-        if [ "$cmd2" != "-h" ];then
-          brew-file brew "$@"
-          return $?
-        fi
-      fi
+  # version check
+  v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
+  if [ ${v[0]} -eq 2 ];then
+    if [ ${v[1]} -lt 7 ];then
+      wrap=0
+    elif [ ${v[1]} -eq 7 ] && [ ${v[2]} -le 6 ];then
+      wrap=0
     fi
+  fi
 
-    # brew cask install/uninstall
-    if [ "$cmd" = "cask" ];then
-      if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
-        if [ $# -gt 2 ];then
-          if [ "$cmd3" != "-h" ];then
+  if [ $wrap -eq 1 ];then
+
+    # Arguments
+    cmd=$1
+    cmd2=$2
+    cmd3=$3
+
+    if type -a brew-file >/dev/null 2>&1;then
+
+      # brew install/uninstall, pip
+      if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
+        || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
+        if [ $# -gt 1 ];then
+          if [ "$cmd2" != "-h" ];then
             brew-file brew "$@"
             return $?
+          fi
+        fi
+      fi
+
+      # brew cask install/uninstall
+      if [ "$cmd" = "cask" ];then
+        if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
+          if [ $# -gt 2 ];then
+            if [ "$cmd3" != "-h" ];then
+              brew-file brew "$@"
+              return $?
+            fi
           fi
         fi
       fi
