@@ -10,7 +10,9 @@ tapall rcmdnk/rcmdnkcask
 ## rcmdnk/rcmdnkpac
 tap rcmdnk/rcmdnkpac
 install screenutf8 --HEAD --utf8
-#install linkchecker
+
+## brew command
+install python
 
 ## After commands
 after echo after
