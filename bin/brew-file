@@ -624,14 +624,15 @@ class BrewFile:
         self.cask_list_nocask = []
         if self.check_cask_cmd():
             (ret, lines) = self.proc("brew cask list", False, False)
-            if ret == 0:
-                for p in lines:
-                    if len(p.split()) == 1:
-                        self.cask_list.append(p)
-                    else:
-                        self.warning("The cask file of " + p + " doesn't exist.", 0)
-                        self.warning("Please check later.\n\n", 0)
-                        self.cask_list_nocask.append(p)
+            if ret == 0 and len(lines) > 0:
+                if lines[0].find("nothing to list") == -1:
+                    for p in lines:
+                        if len(p.split()) == 1:
+                            self.cask_list.append(p)
+                        else:
+                            self.warning("The cask file of " + p + " doesn't exist.", 0)
+                            self.warning("Please check later.\n\n", 0)
+                            self.cask_list_nocask.append(p)
 
         # App Store
         import glob
@@ -869,9 +870,9 @@ class BrewFile:
         # Installed by cask, but cask files were not found...
         if len(self.cask_list_nocask) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
-            out.writeln("# but don't not have corresponding casks.\n")
+            out.writeln("# but do not have corresponding casks.\n")
             for p in self.cask_list_nocask:
-                out.writeln("#cask  install " + p)
+                out.writeln("#cask install " + p)
 
         # App Store applications
         if len(self.appstore_list) > 0:
@@ -1265,7 +1266,7 @@ class BrewFile:
         apps = self.proc("brew cask list", False, False)[1]
         for a in apps:
             lines = self.proc("brew cask info " + a, False, False)[1]
-            installed =True
+            installed = True
             for l in lines:
                 if l.find("Not installed") >= 0:
                     installed = False

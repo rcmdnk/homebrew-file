@@ -191,7 +191,14 @@ because it deletes what you installed, but you have not registered in Brewfile.
 If you want to check your Apps in `/Applications`, `/Applications/Utilities` or `~/Applications/`
 for Cask, use:
 
+    $ brew file cask_upgrade
     $ brew file casklist
+
+Although `cask_upgrade` is not mandatory,
+it is better to do it.
+
+If Cask file is updated (with new version number), `brew cask info` shows **Not installed**
+even if the cask is listed in `brew cask list`.
 
 This command makes `Caskfile.txt`, which is like:
 
