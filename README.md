@@ -59,6 +59,14 @@ Then give a name like `rcmdnk/Brewfile`, or `git@github.com:rcmdnk/Brewfile`.
 
 If the repository doesn't exist, it enters a repository creation process.
 
+To create a repository,
+you need [Requests](http://docs.python-requests.org/en/latest/) module.
+
+To install **Requests**, do:
+
+    $ easy_install pip # in case you've not installed pip
+    $ pip install requests
+
 ### Prepare a repository in GitHub or other Git server.
 
 Make GitHub repository named **Brewfile**,

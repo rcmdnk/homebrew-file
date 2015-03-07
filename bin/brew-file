@@ -262,7 +262,7 @@ class BrewFile:
         exist_repo = True
         try:
             urllib2.urlopen(url)
-        except urllib2.HTTPErro:
+        except urllib2.HTTPError:
             exist_repo = False
 
         # Clone if exists
@@ -276,18 +276,35 @@ class BrewFile:
         if not ans:
             exit(0)
 
-        # Check password
-        import getpass
-        password = getpass.getpass("GitHub password: ")
-
         # Try to create w/o two-factor code
-        import requests, json
+        try:
+            import requests
+        except ImportError:
+            print "To create a repository, you need to install 'requests' module."
+            ans = self.ask_yn("Do you want to install now?")
+            if not ans:
+                print "Please prepare Brewfile repository."
+                exit(0)
+            else:
+                ret = self.proc("pip --version", False, False, False)
+                if not ret:
+                    self.proc("easy_install pip")
+                self.proc("pip install requests")
+                print "Now please run `brew file set_repo` again."
+                exit(0)
+
+        import json
         url = "https://api.github.com/user/repos"
         description = "package list for Homebrew"
         data = {"name": repo_name, "description": description,
                 "auto_init": "true"}
         headers = {}
         is_ok = True
+
+        # Check password
+        import getpass
+        password = getpass.getpass("GitHub password: ")
+
         while True:
             r = requests.post(url=url, data=json.dumps(data),
                               auth=(user_name, password), headers=headers)
