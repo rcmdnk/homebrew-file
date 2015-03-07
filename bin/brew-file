@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.3.2"
-__date__ = "25/Dec/2014"
+__version__ = "v3.3.3"
+__date__ = "08/Mar/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -261,8 +261,8 @@ class BrewFile:
         # Check if the repository already exists or not.
         exist_repo = True
         try:
-            check = urllib2.urlopen(url)
-        except urllib2.HTTPError, e:
+            urllib2.urlopen(url)
+        except urllib2.HTTPErro:
             exist_repo = False
 
         # Clone if exists
@@ -284,7 +284,7 @@ class BrewFile:
         import requests, json
         url = "https://api.github.com/user/repos"
         description = "package list for Homebrew"
-        data = {"name": repo_name, "description": "Package list for Homebrew",
+        data = {"name": repo_name, "description": description,
                 "auto_init": "true"}
         headers = {}
         is_ok = True
@@ -328,9 +328,9 @@ class BrewFile:
         f.close()
         open(self.opt["brewfile"], "a").close()
 
-        ret = self.proc("git add -A")[0]
-        ret = self.proc(["git", "commit", "-m", "\"Prepared by " + __prog__ + "\""])[0]
-        ret = self.proc("git push")[0]
+        self.proc("git add -A")[0]
+        self.proc(["git", "commit", "-m", "\"Prepared by " + __prog__ + "\""])[0]
+        self.proc("git push")[0]
 
         ans = self.ask_yn("Do you want to initialize from installed packages?")
         if ans:
@@ -403,14 +403,14 @@ class BrewFile:
         self.info("cd " + os.path.dirname(self.opt["brewfile"]), 1)
         os.chdir(os.path.dirname(self.opt["brewfile"]))
         if pull:
-            ret = self.proc("git pull")[0]
+            self.proc("git pull")[0]
             return
         elif push:
-            ret = self.proc("git add " + self.opt["brewfile"].split("/")[-1])[0]
-            ret = self.proc(
+            self.proc("git add " + self.opt["brewfile"].split("/")[-1])[0]
+            self.proc(
                 ["git", "commit", "-m", "\"Update the package list\""],
                  exit_on_error=False)[0]
-            ret = self.proc("git push")[0]
+            self.proc("git push")[0]
             return
 
     def brew_cmd(self):
@@ -428,10 +428,6 @@ class BrewFile:
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
         if cmd == "install":
-            if len(self.opt["args"]) > 2:
-                opt = " " + " ".join(self.opt["args"][2:]).strip()
-            else:
-                opt = ""
             psplit = p.split("/")
             if len(psplit) > 2:
                 p = psplit[2]
@@ -450,7 +446,7 @@ class BrewFile:
             elif p in self.brew_input:
                 self.warning(p + " is already in Brewfile.")
                 self.warning("Do 'brew file init' to clean up Brwefile")
-                sys.exit(0)
+                sys.exit(1)
             self.brew_input.append(p)
             self.brew_input.sort()
             if len(self.opt["args"]) > 2:
@@ -487,7 +483,7 @@ class BrewFile:
                     sys.exit(0)
                 self.cask_input.append(p)
                 self.cask_input.sort()
-            if cmd == "rm" or cmd == "remove" and cmd == uninstall:
+            if cmd == "rm" or cmd == "remove" and cmd == "uninstall":
                 if not p in self.tap_input:
                     self.warning(p + " is not in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brwefile")
@@ -1449,26 +1445,26 @@ def main():
 
     help="Install packages in BREWFILE.\n"\
          "Use `--preupdate` to execute `brew update` before install."
-    install_parser = subparsers.add_parser("install", description=help, help=help,
+    subparsers.add_parser("install", description=help, help=help,
             **subparser_options)
     help="Execute brew command, and update BREWFILE."
-    brew_parser = subparsers.add_parser("brew", description=help, help=help,
+    subparsers.add_parser("brew", description=help, help=help,
             parents=[file_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -i/--init\nInitialize/Update BREWFILE with installed packages."
-    init_parser = subparsers.add_parser("init", description=help, help=help,
+    subparsers.add_parser("init", description=help, help=help,
             parents=[file_parser, link_parser, yn_parser,
                      noupdate_parser, noupdatedummy_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
-    set_repo_parser = subparsers.add_parser("set_repo", description=help, help=help,
+    subparsers.add_parser("set_repo", description=help, help=help,
             parents=[file_parser, repo_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="Update BREWFILE from the repository."
-    pull_parser = subparsers.add_parser("pull", description=help, help=help,
+    subparsers.add_parser("pull", description=help, help=help,
             **subparser_options)
     help="Push your BREWFILE to the repository."
-    push_parser = subparsers.add_parser("push", description=help, help=help,
+    subparsers.add_parser("push", description=help, help=help,
             **subparser_options)
     help="or -c/--clean\nCleanup.\n"\
          "Uninstall packages not in the list.\n"\
@@ -1476,36 +1472,36 @@ def main():
          "Cleanup cache (brew cleanup)\n"\
          "By drault, cleanup runs as dry-run.\n"\
          "If you want to enforce cleanup, use '-C' option."
-    clean_parser = subparsers.add_parser("clean", description=help, help=help,
+    subparsers.add_parser("clean", description=help, help=help,
             parents=[file_parser, dryrun_parser, yn_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -u/--update\nDo pull, install, brew update/upgrade, init,\n"\
          "push and clean -C.\n"\
          "In addition, pull, push and clean\n"\
          "will be done if the repository is assigned."
-    update_parser = subparsers.add_parser("update", description=help, help=help,
+    subparsers.add_parser("update", description=help, help=help,
             parents=[file_parser, link_parser, yn_parser,
                      noupdate_parser, noupdatedummy_parser, verbose_parser],
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -e/--edit\nEdit input file."
-    edit_parser = subparsers.add_parser("edit", description=help, help=help,
+    subparsers.add_parser("edit", description=help, help=help,
             **subparser_options)
     help="Check applications for Cask."
-    casklist_parser = subparsers.add_parser("casklist", description=help, help=help,
+    subparsers.add_parser("casklist", description=help, help=help,
             formatter_class = argparse.RawTextHelpFormatter)
     help="Upgrade cask applications.\n"\
          "With -C, old versions will be removed."
-    cask_upgrade_parser = subparsers.add_parser("cask_upgrade", description=help,
+    subparsers.add_parser("cask_upgrade", description=help,
             help=help, parents=[dryrun_parser, yn_parser, verbose_parser],
             formatter_class = argparse.RawTextHelpFormatter)
     help="Used for test."
-    test_parser = subparsers.add_parser("test", description=help, help=help,
+    subparsers.add_parser("test", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -v/--version\nShow version."
-    version_parser = subparsers.add_parser("version", description=help, help=help,
+    subparsers.add_parser("version", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
     help="or -h/--help\nPrint Help (this message) and exit."
-    help_parser = subparsers.add_parser("help", description=help, help=help,
+    subparsers.add_parser("help", description=help, help=help,
             formatter_class=argparse.RawTextHelpFormatter)
 
     if len(sys.argv) == 1:
