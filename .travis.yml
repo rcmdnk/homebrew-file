@@ -44,6 +44,7 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
+  - python --version
   - '[ "$version" != "" ] && diff $installed_brew $exe || :'
   - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
   - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
