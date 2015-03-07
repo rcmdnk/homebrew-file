@@ -624,15 +624,15 @@ class BrewFile:
         self.cask_list_nocask = []
         if self.check_cask_cmd():
             (ret, lines) = self.proc("brew cask list", False, False)
-            if ret == 0 and len(lines) > 0:
-                if lines[0].find("nothing to list") == -1:
-                    for p in lines:
-                        if len(p.split()) == 1:
-                            self.cask_list.append(p)
-                        else:
-                            self.warning("The cask file of " + p + " doesn't exist.", 0)
-                            self.warning("Please check later.\n\n", 0)
-                            self.cask_list_nocask.append(p)
+            if ret == 0 and len(lines) > 0\
+                    and lines[0].find("nothing to list") == -1:
+                for p in lines:
+                    if len(p.split()) == 1:
+                        self.cask_list.append(p)
+                    else:
+                        self.warning("The cask file of " + p + " doesn't exist.", 0)
+                        self.warning("Please check later.\n\n", 0)
+                        self.cask_list_nocask.append(p)
 
         # App Store
         import glob
@@ -1112,26 +1112,28 @@ class BrewFile:
                      + "/developer/bin/generate_cask_token"
         name = ""
         lines = self.proc([cask_namer, '"' + app + '"'] , False, False, False)[1]
+        tap = ""
         for l in lines:
             if l.find("Proposed token") >= 0:
                 name = l.split()[2]
+            if l.find("already exists") >= 0:
+                for t in taps:
+                    tname = t.split('/')[0]+"/homebrew-"+t.split('/')[1]
+                    if l.split("'")[1].find(tname) >= 0:
+                        tap = t
+                        break
+        if tap == "":
+            name = ""
 
-        tap = ""
         installed = False
         if name != "":
-            for t in taps:
-                d = self.get_tap_path(t) + "/Casks"
-                if os.path.exists(d + "/" + name + ".rb"):
-                    tap = t
-                    lines = self.proc("brew cask info " + name, False, False)[1]
-                    installed =True
-                    for l in lines:
-                        if l.find("Not installed") >= 0:
-                            installed = False
-                            break
+            lines = self.proc("brew cask info " + name, False, False)[1]
+            installed = True
+            for l in lines:
+                if l.find("Not installed") >= 0:
+                    installed = False
                     break
         if not installed:
-            name = ""
             for t in taps:
                 d = self.get_tap_path(t) + "/Casks"
                 for n in map(lambda x: x.replace(".rb", ""),
@@ -1146,8 +1148,13 @@ class BrewFile:
                             if l.find("Not installed") >= 0:
                                 installed = False
                                 break
-                        tap = t
-                        name = n
+                        if installed or name == "":
+                            tap = t
+                            name = n
+                        if installed:
+                            break
+                if installed:
+                    break
         if name == "":
             self.info("Non Cask app: " + app, 2)
         elif installed:
@@ -1176,17 +1183,53 @@ class BrewFile:
                       "has_cask": dict([d, 0] for d in app_dirs),
                       "no_cask": dict([d, 0] for d in app_dirs)}
 
+        # Get installed app information
+        import re
+        casks = {}
+        (ret, lines) = self.proc("brew cask list", False, False)
+        if ret == 0 and len(lines) > 0\
+                and lines[0].find("nothing to list") == -1:
+            for cask in lines:
+                outs = self.proc("brew cask info " + cask, False, False)[1]
+                tap = ""
+                installed = True
+                for l in outs:
+                    if l.find("Not installed") >= 0:
+                        installed = False
+                    if re.search("^http.*\.rb$",l):
+                        for t in taps:
+                            tname = t.split('/')[0]+"/homebrew-"+t.split('/')[1]
+                            if l.find(tname) >= 0:
+                                tap = t
+                                break
+                    if re.search("^  .*\.app \(app\)$",l):
+                        casks[l.split(' (app)')[0].strip()] = [cask, tap, installed]
+
         # Get applications
         napps = 0
         for d in app_dirs:
             for app in filter(lambda x: x.endswith(".app"), os.listdir(d)):
-                (tap, installed, name) = self.find_app(app, taps)
-                apps[tap][installed].append((name, d + "/" + app))
                 check = "no_cask"
-                if installed:
-                    check = "cask"
-                elif name != "":
-                    check = "has_cask"
+                if app in ['Mail.app', 'Remote Desktop Connection.app',
+                           'Console.app', 'Grab.app', 'Keychain Access.app']:
+                    tap = ""
+                    installed = False
+                    name = ""
+                elif app in casks.keys():
+                    tap = casks[app][1]
+                    installed = casks[app][2]
+                    name = casks[app][0]
+                    if installed:
+                        check = "cask"
+                    elif name != "":
+                        check = "has_cask"
+                else:
+                    (tap, installed, name) = self.find_app(app, taps)
+                    if installed:
+                        check = "cask"
+                    elif name != "":
+                        check = "has_cask"
+                apps[tap][installed].append((name, d + "/" + app))
                 apps_check[check][d] += 1
                 napps += 1
 
@@ -1284,7 +1327,11 @@ class BrewFile:
                 for d in os.listdir(appdir):
                     if d != current.split("/")[-1]:
                         self.info("rm -rf " + appdir + "/" + d, 1)
-                        self.remove(appdir + "/" + d)
+                        try:
+                            self.remove(appdir + "/" + d)
+                        except:
+                            if d != "":
+                                self.proc("sudo rm -rf " + appdir + "/" + d)
 
 
     def my_test(self):
