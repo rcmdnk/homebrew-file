@@ -9,7 +9,7 @@ tapall rcmdnk/rcmdnkcask
 
 ## rcmdnk/rcmdnkpac
 tap rcmdnk/rcmdnkpac
-install screenutf8 --HEAD --utf8
+#install screenutf8 --HEAD --utf8
 
 ## brew command
 install python
