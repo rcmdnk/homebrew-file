@@ -25,6 +25,21 @@ please uninstall, and untap brew-file, and install again:
 
 [Homebrew](https://github.com/mxcl/homebrew)
 
+Although it is not mandatory,
+the latest Python 2.7.X or 3.X is recommended,
+to use `brew file brew` command (and `brew-wrap`).
+
+    $ brew install python
+
+or
+
+    $ brew install python3
+
+
+> [Can’t ignore unknown argument in subparser of ArgumentParser of Python even if parse_known_args is given](/en/blog/2015/03/08/computer-python/)
+
+> [PythonのArgumentParserでsubparserを使うとparse_known_argsでもunknownな引数が無視できないエラーについて](/blog/2014/12/25/computer-python/)
+
 ## Installation
 
 By install script:
