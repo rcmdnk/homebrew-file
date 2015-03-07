@@ -69,8 +69,7 @@ To install **Requests**, do:
 
 ### Prepare a repository in GitHub or other Git server.
 
-Make GitHub repository named **Brewfile**,
-and make one file named **Brewfile** in the repository.
+Make a repository with a file named **Brewfile** in GitHub or other Git server.
 
 You can make the initial Brewfile by yourself,
 or can initialize Brewfile by Brew-file as written below.
