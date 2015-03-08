@@ -19,6 +19,7 @@ before_install:
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   #- brew update >& /dev/null && brew upgrade >& /dev/null # takes too much time... courses fail...
+  - brew update >& /dev/null
   - brewprefix=$(brew --prefix)
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls >/dev/null || :'
