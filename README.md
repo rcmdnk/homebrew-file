@@ -23,7 +23,9 @@ please uninstall, and untap brew-file, and install again:
 
 ## Requirements
 
-[Homebrew](https://github.com/mxcl/homebrew)
+* [Homebrew](https://github.com/mxcl/homebrew)
+
+* Python 2.7.7 or later (optional).
 
 Although it is not mandatory,
 the latest Python 2.7.X or 3.X is recommended,
