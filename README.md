@@ -23,13 +23,19 @@ please uninstall, and untap brew-file, and install again:
 
 ## Requirements
 
-* [Homebrew](https://github.com/mxcl/homebrew)
+* [Homebrew](https://github.com/mxcl/homebrew) (Can be installed by the install script of brew-file, too).
 
 * Python 2.7.7 or later (optional).
 
 Although it is not mandatory,
 the latest Python 2.7.X or 3.X is recommended,
 to use `brew file brew` command (and `brew-wrap`).
+
+If you've not installed, pip, first install pip:
+
+    $ easy_install pip
+
+Then, install python by Homebrew (after installing it):
 
     $ brew install python
 
