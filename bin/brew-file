@@ -122,7 +122,7 @@ class BrewFile:
         self.opt["caskroom"] = cask_opts["--caskroom"] \
             if cask_opts["--caskroom"] != "" \
             else "/opt/homebrew-cask/Caskroom"
-        self.opt["appdir"] = cask_opts["--appdir"]\
+        self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
         self.opt["cask_pack"] = "brew-cask"
@@ -1189,7 +1189,8 @@ class BrewFile:
         cask_namer = self.get_tap_path(self.opt["cask_repo"]) +\
             "/developer/bin/generate_cask_token"
         name = ""
-        lines = self.proc([cask_namer, '"' + app + '"'],
+        lines = self.proc([cask_namer, '"' +
+                           app.split("/")[-1].lower() + '"'],
                           False, False, False)[1]
         tap = ""
         for l in lines:
@@ -1215,7 +1216,7 @@ class BrewFile:
         if not installed:
             for c in [x for x in casks.values() + nonapp_casks +
                       casks_noinst.values() + nonapp_casks_noinst]:
-                if c[4].find(app) >= 0:
+                if c[4].find(app+"'") >= 0 or c[4].find(app+"/") >= 0:
                     if c[2]:
                         installed = True
                     if installed or name == "":
@@ -1261,7 +1262,7 @@ class BrewFile:
                     os.environ["HOME"] + "/Applications",
                     os.environ["HOME"] + "/Applications/Utilities"]
                     if os.path.isdir(d)]
-        if not self.opt["appdir"].rstrip("/") in\
+        if self.opt["appdir"].rstrip("/") not in\
                 ["/Applications", os.environ["HOME"] + "/Applications"]:
             if os.path.isdir(self.opt["appdir"]):
                 app_dirs.append(self.opt["appdir"])
@@ -1302,6 +1303,10 @@ class BrewFile:
                     if re.search("^ *app ", l):
                         cask_apps.append(re.sub("^ *app ", "", l).
                                          strip('"\' ').split('/')[-1])
+                    if re.search("^ *pkg ", l):
+                        cask_apps.append(re.sub("^ *pkg ", "", l).
+                                         strip('"\' ').split('/')[-1].
+                                         replace(".pkg", ""))
                     if not noinst and re.search("^ *version ", l):
                         if os.path.isdir(
                                 self.opt["caskroom"] + "/" + cask + "/" +
@@ -1326,7 +1331,8 @@ class BrewFile:
         # Get applications
         napps = 0
         for d in app_dirs:
-            for app in filter(lambda x: x.endswith(".app"), os.listdir(d)):
+            for app in [x for x in os.listdir(d)
+                        if not x.startswith(".") and x != "Utilities"]:
                 check = "no_cask"
                 if app.rstrip(".app") in self.appstore_list:
                     tap = "appstore"
@@ -1338,22 +1344,27 @@ class BrewFile:
                     tap = ""
                     installed = False
                     name = ""
-                elif app in casks.keys():
-                    tap = casks[app][1]
-                    installed = casks[app][2]
-                    name = casks[app][0]
+                elif app in casks.keys() or\
+                        app.split(".")[0] in casks.keys():
+                    app_key = app if app in casks.keys() else app.split(".")[0]
+                    tap = casks[app_key][1]
+                    installed = casks[app_key][2]
+                    name = casks[app_key][0]
                     for a in filter(lambda k: casks[k][0] == name,
                                     casks.keys()):
                         casks[a][3] = True
-                    casks[app][3] = True
+                    casks[app_key][3] = True
                     if installed:
                         check = "cask"
                     elif name != "":
                         installed = True
                         check = "cask_obsolete"
                 else:
+                    app_find = app
+                    if not app.endswith(".app"):
+                        app_find = d + "/" + app
                     (tap, installed, name) = self.find_app(
-                            app, taps, casks, nonapp_casks,
+                            app_find, taps, casks, nonapp_casks,
                             casks_noinst, nonapp_casks_noinst)
                     for c in filter(lambda x: x[0] == name, nonapp_casks):
                         nonapp_casks.remove(c)
@@ -1421,7 +1432,9 @@ class BrewFile:
             for name in sorted(
                     x[0] for x in casks.values() + nonapp_casks
                     if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
-                out.writeln("cask install " + name)
+                if name not in casks_in_others:
+                    out.writeln("cask install " + name)
+                    casks_in_others.append(name)
             if len([x[0] for x in casks.values() + nonapp_casks
                    if x[1] == self.opt["cask_repo"] and
                    not x[2] and not x[3]]) > 0:
@@ -1487,7 +1500,9 @@ class BrewFile:
                 for name in sorted(x[0]
                                    for x in casks.values() + nonapp_casks
                                    if x[1] == t and x[2] and not x[3]):
-                    out.writeln("cask install " + name)
+                    if name not in casks_in_others:
+                        out.writeln("cask install " + name)
+                        casks_in_others.append(name)
                 if len([x[0] for x in casks.values() + nonapp_casks
                         if x[1] == t and not x[2] and not x[3]]) > 0:
                     out.writeln(
@@ -1496,7 +1511,7 @@ class BrewFile:
                                        for x in casks.values() + nonapp_casks
                                        if x[1] == t and not x[2] and not x[3]):
                         out.writeln("cask install " + name)
-                    out.writeln("")
+                out.writeln("")
 
             if len(apps[t][False]) > 0:
                 out.writeln(

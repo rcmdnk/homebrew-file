@@ -117,7 +117,7 @@ You can also modify the default installation locations of Cask packages.
 To make this settings, it is the same as issuing [How to Use Homebrew-cask#Options](https://github.com/caskroom/homebrew-cask/blob/master/USAGE.md#options).
 you might want to add the following line to your .bash_profile or .zshenv:
 
-    export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom"
+    export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom --appdir=$HOME/MyApplications"
 
 If there is no Brewfile, Brew-file ask you if you want to initialize Brewfile
 with installed packages.
@@ -211,17 +211,9 @@ and want to use `brew file update`.
 Otherwise, please be careful to use `brew file update`,
 because it deletes what you installed, but you have not registered in Brewfile.
 
-If you want to check your Apps in `/Applications`, `/Applications/Utilities` or `~/Applications/`
-for Cask, use:
+If you want to check your Apps for Cask, use:
 
-    $ brew file cask_upgrade -C
     $ brew file casklist
-
-Although `cask_upgrade` is not mandatory,
-it is better to do it.
-
-If Cask file is updated (with new version number), `brew cask info` shows **Not installed**
-even if the cask is listed in `brew cask list`.
 
 This command makes `Caskfile.txt`, which is like:
 
