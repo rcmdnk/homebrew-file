@@ -1529,37 +1529,52 @@ class BrewFile:
             print ""
             maxlen = max(len(x.replace(os.environ["HOME"], "~"))
                          for x in app_dirs)
-            print "Installed by Cask:"
-            for d in app_dirs:
-                print "{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["cask"][d])
-            print ""
-            print "Installed by Cask (New version is availble, " +\
-                "try `brew file cask_upgrade`):"
-            for d in app_dirs:
-                print "{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["cask_obsolete"][d])
-            print ""
-            print "Installed directly, but casks are available:"
-            for d in app_dirs:
-                print "{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["has_cask"][d])
-            print ""
-            print "Installed from Appstore"
-            for d in app_dirs:
-                print "{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["appstore"][d])
-            print ""
-            print "No casks"
-            for d in app_dirs:
-                print "{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["no_cask"][d])
-            print ""
+            if sum(apps_check["cask"].values()) > 0:
+                print "Installed by Cask:"
+                for d in app_dirs:
+                    if apps_check["cask"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["cask"][d])
+                print ""
+            if sum(apps_check["cask_obsolete"].values()) > 0:
+                print "Installed by Cask (New version is availble, " +\
+                    "try `brew file cask_upgrade`):"
+                for d in app_dirs:
+                    if apps_check["cask_obsolete"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["cask_obsolete"][d])
+                print ""
+            if sum(apps_check["has_cask"].values()) > 0:
+                print "Installed directly, but casks are available:"
+                for d in app_dirs:
+                    if apps_check["has_cask"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["has_cask"][d])
+                print ""
+            if sum(apps_check["appstore"].values()) > 0:
+                print "Installed from Appstore"
+                for d in app_dirs:
+                    if apps_check["appstore"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["appstore"][d])
+                print ""
+            if sum(apps_check["no_cask"].values()) > 0:
+                print "No casks"
+                for d in app_dirs:
+                    if apps_check["no_cask"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["no_cask"][d])
+                print ""
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
