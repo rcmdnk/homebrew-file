@@ -1270,6 +1270,7 @@ class BrewFile:
         apps_check = {"cask": dict([d, 0] for d in app_dirs),
                       "has_cask": dict([d, 0] for d in app_dirs),
                       "no_cask": dict([d, 0] for d in app_dirs),
+                      "appstore": dict([d, 0] for d in app_dirs),
                       "cask_obsolete": dict([d, 0] for d in app_dirs)}
 
         # Load casks
@@ -1331,6 +1332,7 @@ class BrewFile:
                     tap = "appstore"
                     installed = False
                     name = ""
+                    check = "appstore"
                 elif app in ['Mail.app', 'Remote Desktop Connection.app',
                              'Console.app', 'Grab.app', 'Keychain Access.app']:
                     tap = ""
@@ -1367,6 +1369,7 @@ class BrewFile:
                 napps += 1
 
         # Make list
+        casks_in_others = []
         out = Tee("Caskfile", sys.stdout, self.verbose() > 1)
 
         out.writeln("# Cask applications")
@@ -1382,8 +1385,16 @@ class BrewFile:
             for (name, app_path, check) in\
                     sorted(x for x in apps[self.opt["cask_repo"]][True]
                            if x[2] != "cask_obsolete"):
-                out.writeln("cask install " + name +
-                            " #" + app_path.replace(os.environ["HOME"], "~"))
+                if name not in casks_in_others:
+                    out.writeln(
+                        "cask install " + name +
+                        " #" + app_path.replace(os.environ["HOME"], "~"))
+                    casks_in_others.append(name)
+                else:
+                    out.writeln(
+                        "#cask install " + name +
+                        " #" + app_path.replace(os.environ["HOME"], "~"))
+
             if len([x for x in apps[self.opt["cask_repo"]][True]
                     if x[2] == "cask_obsolete"]) > 0:
                 out.writeln(
@@ -1391,9 +1402,15 @@ class BrewFile:
                 for (name, app_path, check) in\
                         sorted(x for x in apps[self.opt["cask_repo"]][True]
                                if x[2] == "cask_obsolete"):
-                    out.writeln(
-                        "cask install " + name +
-                        " #" + app_path.replace(os.environ["HOME"], "~"))
+                    if name not in casks_in_others:
+                        out.writeln(
+                            "cask install " + name +
+                            " #" + app_path.replace(os.environ["HOME"], "~"))
+                        casks_in_others.append(name)
+                    else:
+                        out.writeln(
+                            "#cask install " + name +
+                            " #" + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
         if len([x[0] for x in casks.values() + nonapp_casks
@@ -1436,8 +1453,13 @@ class BrewFile:
                 for (name, app_path, check) in\
                         sorted(x for x in apps[t][True]
                                if x[2] != "cask_obsolete"):
-                    out.writeln("cask install " + name + " #" +
-                                app_path.replace(os.environ["HOME"], "~"))
+                    if name not in casks_in_others:
+                        out.writeln("cask install " + name + " #" +
+                                    app_path.replace(os.environ["HOME"], "~"))
+                        casks_in_others.append(name)
+                    else:
+                        out.writeln("#cask install " + name + " #" +
+                                    app_path.replace(os.environ["HOME"], "~"))
 
                 if len([x for x in apps[t][True]
                         if x[2] == "cask_obsolete"]) > 0:
@@ -1446,8 +1468,15 @@ class BrewFile:
                     for (name, app_path, check) in\
                             sorted(x for x in apps[t][True]
                                    if x[2] == "cask_obsolete"):
-                        out.writeln("cask install " + name + " #" +
-                                    app_path.replace(os.environ["HOME"], "~"))
+                        if name not in casks_in_others:
+                            out.writeln(
+                                "cask install " + name + " #" +
+                                app_path.replace(os.environ["HOME"], "~"))
+                            casks_in_others.append(name)
+                        else:
+                            out.writeln(
+                                "#cask install " + name + " #" +
+                                app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
             if len([x[0] for x in casks.values() + nonapp_casks
@@ -1506,7 +1535,8 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["cask"][d])
             print ""
-            print "Installed by Cask (New version is availble):"
+            print "Installed by Cask (New version is availble, " +\
+                "try `brew file cask_upgrade`):"
             for d in app_dirs:
                 print "{0:<{1}s} : {2:d}".format(d.replace(
                         os.environ["HOME"], "~"), maxlen,
@@ -1517,6 +1547,12 @@ class BrewFile:
                 print "{0:<{1}s} : {2:d}".format(d.replace(
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["has_cask"][d])
+            print ""
+            print "Installed from Appstore"
+            for d in app_dirs:
+                print "{0:<{1}s} : {2:d}".format(d.replace(
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["appstore"][d])
             print ""
             print "No casks"
             for d in app_dirs:
