@@ -1104,7 +1104,7 @@ class BrewFile:
 
         return 0
 
-    def find_app(self, app, taps):
+    def find_app(self, app, taps, casks, nonapp_casks, casks_noinst, nonapp_casks_noinst):
         """Helper function for Cask"""
         self.check_cask_cmd(True)
         [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
@@ -1126,33 +1126,21 @@ class BrewFile:
             name = ""
 
         installed = False
+        casks, nonapp_casks, casks_noinst, nonapp_casks_noinst
         if name != "":
-            lines = self.proc("brew cask info " + name, False, False)[1]
-            installed = True
-            for l in lines:
-                if l.find("Not installed") >= 0:
-                    installed = False
-                    break
+            for c in [x for x in casks.values()+nonapp_casks+casks_noinst.values()+nonapp_casks_noinst if x[0] == name]:
+                if c[2]:
+                    installed = True
         if not installed:
-            for t in taps:
-                d = self.get_tap_path(t) + "/Casks"
-                for n in map(lambda x: x.replace(".rb", ""),
-                        filter(lambda y: y.endswith(".rb"), os.listdir(d))):
-                    f = open(d + "/" + n + ".rb", "r")
-                    content = f.read()
-                    f.close()
-                    if content.find(app) >= 0:
-                        lines = self.proc("brew cask info " + n, False, False)[1]
-                        installed =True
-                        for l in lines:
-                            if l.find("Not installed") >= 0:
-                                installed = False
-                                break
-                        if installed or name == "":
-                            tap = t
-                            name = n
-                        if installed:
-                            break
+            for c in [x for x in casks.values()+nonapp_casks+casks_noinst.values()+nonapp_casks_noinst]:
+                if c[4].find(app) >= 0:
+                    if c[2]:
+                        installed = True
+                    if installed or name == "":
+                        tap = c[1]
+                        name = c[0]
+                    if installed:
+                        break
                 if installed:
                     break
         if name == "":
@@ -1164,6 +1152,9 @@ class BrewFile:
         return (tap, installed, name)
 
     def check_cask(self):
+        import re
+        import time # hoge
+        tstart = time.time() # hoge
         """Check applications for Cask"""
         self.check_cask_cmd(True)
 
@@ -1189,28 +1180,56 @@ class BrewFile:
                       "no_cask": dict([d, 0] for d in app_dirs),
                       "cask_obsolete": dict([d, 0] for d in app_dirs)}
 
-        # Get installed app information
-        import re
+        print 'prepare', time.time() - tstart# hoge
+        tstart = time.time() # hoge
+        # Load casks
         casks = {}
+        nonapp_casks = []
+        casks_noinst = {}
+        nonapp_casks_noinst = []
         (ret, lines) = self.proc("brew cask list", False, False)
+        installed_casks = []
         if ret == 0 and len(lines) > 0\
                 and lines[0].find("nothing to list") == -1:
-            for cask in lines:
-                outs = self.proc("brew cask info " + cask, False, False)[1]
-                tap = ""
-                installed = True
-                for l in outs:
-                    if l.find("Not installed") >= 0:
-                        installed = False
-                    if re.search("^http.*\.rb$",l):
-                        for t in taps:
-                            tname = t.split('/')[0]+"/homebrew-"+t.split('/')[1]
-                            if l.find(tname) >= 0:
-                                tap = t
-                                break
-                    if re.search("^  .*\.app \(app\)$",l):
-                        casks[l.split(' (app)')[0].strip()] = [cask, tap, installed]
+            installed_casks = lines
+        for t in taps:
+            d = self.get_tap_path(t) + "/Casks"
+            for cask in map(lambda x: x.replace(".rb", ""),
+                filter(lambda y: y.endswith(".rb"), os.listdir(d))):
+                cask_apps = []
+                installed = False
+                noinst = True
+                if cask in installed_casks:
+                    noinst = False
+                with open(d + "/" + cask + ".rb", "r") as f:
+                    content = f.read()
+                print 'cask', cask
+                for l in content.split('\n'):
+                    if re.search("^ *name ",l):
+                        print 'name', re.sub("^ *name ","",l).strip('"\' ')+".app"
+                        cask_apps.append(re.sub("^ *name ","",l).strip('"\' ')+".app")
+                    if re.search("^ *app ",l):
+                        print 'app', re.sub("^ *app ","",l).strip('"\' ')
+                        cask_apps.append(re.sub("^ *app ","",l).strip('"\' ').split('/')[-1])
+                    if not noinst and re.search("^ *version ",l):
+                        print 'dir', self.opt["caskroom"]+"/"+cask+"/"+re.sub("^ *version ","",l).strip('"\': ')
+                        if os.path.isdir(self.opt["caskroom"]+"/"+cask+"/"+re.sub("^ *version ","",l).strip('"\': ')):
+                            installed = True
+                if noinst:
+                    if len(cask_apps) == 0:
+                        nonapp_casks_noinst.append([cask, t, installed, False, content])
+                    else:
+                        for a in cask_apps:
+                            casks_noinst[a] = [cask, t, installed, False, content]
+                else:
+                    if len(cask_apps) == 0:
+                        nonapp_casks.append([cask, t, installed, False, content])
+                    else:
+                        for a in cask_apps:
+                            casks[a] = [cask, t, installed, False, content]
 
+        print 'get app info', time.time() - tstart# hoge
+        tstart = time.time() # hoge
         # Get applications
         napps = 0
         for d in app_dirs:
@@ -1229,13 +1248,22 @@ class BrewFile:
                     tap = casks[app][1]
                     installed = casks[app][2]
                     name = casks[app][0]
+                    for a in filter(lambda k: casks[k][0] == name, casks.keys()):
+                        casks[a][3] = True
+                    casks[app][3] = True
                     if installed:
                         check = "cask"
                     elif name != "":
                         installed = True
                         check = "cask_obsolete"
                 else:
-                    (tap, installed, name) = self.find_app(app, taps)
+                    (tap, installed, name) = self.find_app(
+                            app, taps, casks, nonapp_casks,
+                            casks_noinst, nonapp_casks_noinst)
+                    for c in filter(lambda x: x[0] == name, nonapp_casks):
+                        nonapp_casks.remove(c)
+                    for a in filter(lambda k: casks[k][0] == name, casks.keys()):
+                        casks[a][3] = True
                     if installed:
                         check = "cask"
                     elif name != "":
@@ -1244,6 +1272,8 @@ class BrewFile:
                 apps_check[check][d] += 1
                 napps += 1
 
+        print 'get app', time.time() - tstart# hoge
+        tstart = time.time() # hoge
         # Make list
         out = Tee("Caskfile", sys.stdout, self.verbose() > 1)
 
@@ -1261,14 +1291,21 @@ class BrewFile:
                            if x[2] != "cask_obsolete"):
                 out.writeln("cask install " + name
                             + " #" + app_path.replace(os.environ["HOME"], "~"))
-            out.writeln("")
             out.writeln("# There are new version for following applications.")
-            out.writeln("# Use `brew file cask_upgrade`.")
             for (name,app_path,check) in\
                     sorted(x for x in apps[self.opt["cask_repo"]][True]
                            if x[2] == "cask_obsolete"):
                 out.writeln("cask install " + name
                         + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+            out.writeln("# Cask is found, but not applications are found.")
+            out.writeln("# Maybe casks for fonts, system settings or applications  installed in other directory.")
+            for name in sorted(x[0] for x in casks.values() + nonapp_casks if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
+                out.writeln("cask install " + name)
+            out.writeln("# There are new version for following applications.")
+            for name in sorted(x[0] for x in casks.values() + nonapp_casks if x[1] == self.opt["cask_repo"] and not x[2] and not x[3]):
+                out.writeln("cask install " + name)
             out.writeln("")
 
             out.writeln("# Apps installed directly instead of by Cask in " + self.opt["cask_pack"])
@@ -1283,9 +1320,24 @@ class BrewFile:
             out.writeln("tap " + t)
             out.writeln("")
             out.writeln("# Apps installed by Cask in " + t)
-            for (name,app_path,check) in apps[t][True]:
-                    out.writeln("cask install " + name
-                                + " #" + app_path.replace(os.environ["HOME"], "~"))
+            for (name,app_path,check) in\
+                    sorted(x for x in apps[t][True] if x[2] != "cask_obsolete"):
+                out.writeln("cask install " + name
+                            + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("# There are new version for following applications.")
+            for (name,app_path,check) in\
+                    sorted(x for x in apps[t][True] if x[2] == "cask_obsolete"):
+                out.writeln("cask install " + name
+                        + " #" + app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
+            out.writeln("# Cask is found, but not applications are found.")
+            out.writeln("# Maybe casks for fonts, system settings or applications  installed in other directory.")
+            for name in sorted(x[0] for x in casks.values() + nonapp_casks if x[1] == t and x[2] and not x[3]):
+                out.writeln("cask install " + name)
+            out.writeln("# There are new version for following applications.")
+            for name in sorted(x[0] for x in casks.values() + nonapp_casks if x[1] == t and not x[2] and not x[3]):
+                out.writeln("cask install " + name)
             out.writeln("")
 
             out.writeln("# Apps installed directly instead of by Cask in " + t)
@@ -1305,12 +1357,14 @@ class BrewFile:
                 out.writeln("#" + app_path)
 
         out.close()
+        print 'make list', time.time() - tstart# hoge
+        tstart = time.time() # hoge
 
         # Summary
         self.banner("# Summary")
         if self.verbose() > 0:
             print "Total:", napps, "apps have been checked."
-            print "Apps in", app_dirs
+            print "Apps in", [d.replace(os.environ["HOME"], "~") for d in app_dirs]
             print ""
             maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
             print "Installed by Cask:"
@@ -1333,6 +1387,9 @@ class BrewFile:
                 print "{0:<{1}s} : {2:d}".format(d.replace(
                         os.environ["HOME"], "~"), maxlen, apps_check["no_cask"][d])
             print ""
+
+        print 'summary', time.time() - tstart# hoge
+        tstart = time.time() # hoge
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
