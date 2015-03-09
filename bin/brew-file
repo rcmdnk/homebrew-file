@@ -1169,10 +1169,15 @@ class BrewFile:
 
         self.banner("# Starting to check applications for Cask...")
 
+        # First, get App Store applications
+        import glob
+        apps = glob.glob('/Applications/*/Contents/_MASReceipt/receipt')
+        self.appstore_list = [x.split("/")[2].split(".app")[0] for x in apps]
+
         # Set cask directories and reset application information list
         taps = filter(lambda t: os.path.isdir(self.get_tap_path(t) + "/Casks"),
                       self.proc("brew tap", False, False)[1])
-        apps = dict([d,{True:[], False:[]}] for d in taps + [""])
+        apps = dict([d,{True:[], False:[]}] for d in taps + ["", "appstore"])
 
         # Set applications directories
         app_dirs = [d for d in ["/Applications", "/Applications/Utilities",
@@ -1209,8 +1214,11 @@ class BrewFile:
         napps = 0
         for d in app_dirs:
             for app in filter(lambda x: x.endswith(".app"), os.listdir(d)):
-                check = "no_cask"
-                if app in ['Mail.app', 'Remote Desktop Connection.app',
+                if app.rstrip(".app") in self.appstore_list:
+                    tap = "appstore"
+                    installed = False
+                    name = ""
+                elif app in ['Mail.app', 'Remote Desktop Connection.app',
                            'Console.app', 'Grab.app', 'Keychain Access.app']:
                     tap = ""
                     installed = False
@@ -1242,8 +1250,7 @@ class BrewFile:
 
         if apps.has_key(self.opt["cask_repo"]):
             out.writeln("# Main tap repository for " + self.opt["cask_pack"])
-            out.writeln("tap " + self.opt["cask_repo"])
-            out.writeln("install " + self.opt["cask_pack"])
+            out.writeln("install " + self.opt["cask_repo"] + "/" + self.opt["cask_pack"])
             out.writeln("")
             out.writeln("# Apps installed by Cask in " + self.opt["cask_pack"])
             for (name,app_path) in apps[self.opt["cask_repo"]][True]:
@@ -1257,7 +1264,7 @@ class BrewFile:
                                 + " #" + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
-        for t in filter(lambda x: x != self.opt["cask_repo"] and x != "", taps):
+        for t in filter(lambda x: x != self.opt["cask_repo"] and x != "" and x!= "appstore", taps):
             out.writeln("# Casks in " + t)
             out.writeln("tap " + t)
             out.writeln("")
@@ -1273,7 +1280,13 @@ class BrewFile:
                                 + " #" + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
+        out.writeln("# Apps installed from AppStore")
+        for (name,app_path) in apps["appstore"][False]:
+                out.writeln("#" + app_path)
+        out.writeln("")
+
         out.writeln("# Apps installed but no casks are available")
+        out.writeln("# (System applications or directory installed.)")
         for (name,app_path) in apps[""][False]:
                 out.writeln("#" + app_path)
 
