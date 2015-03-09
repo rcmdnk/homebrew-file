@@ -79,7 +79,7 @@ class BrewFile:
 
         # Check HOMEBREW_CASK_OPTS
         import re
-        cask_opts = {"--caskroom" : ""}
+        cask_opts = {"--caskroom" : "", "--appdir" : ""}
         env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
         try:
             if env_cask_opts != "":
@@ -107,6 +107,9 @@ class BrewFile:
         self.opt["caskroom"]    = cask_opts["--caskroom"] \
                                   if cask_opts["--caskroom"] != "" \
                                   else "/opt/homebrew-cask/Caskroom"
+        self.opt["appdir"]      = cask_opts["--appdir"] \
+                                  if cask_opts["--appdir"] != "" \
+                                  else os.environ["HOME"]+"/Applications"
         self.opt["cask_pack"]   = "brew-cask"
         self.opt["cask_repo"]   = "caskroom/cask"
         self.opt["pip_pack"]    = "brew-pip"
@@ -1029,6 +1032,9 @@ class BrewFile:
                     #self.remove("/Applications/Utilities/" + app)
                     #self.remove(os.environ["HOME"] + "/Applications/" + app)
                     #self.remove(os.environ["HOME"] + "/Applications/Utilities/" + app)
+                    #if not self.opt["appdir"].rstrip("/") in ["/Applications", os.environ["HOME"] + "/Applications"]:
+                    #    self.remove(self.opt["appdir"] + "/" + app)
+                    #    self.remove(self.opt["appdir"] + "/Utilities" + app)
 
                     self.proc(cmd, False, True)
 
@@ -1175,6 +1181,11 @@ class BrewFile:
                 os.environ["HOME"] + "/Applications",
                 os.environ["HOME"] + "/Applications/Utilities"]
                 if os.path.isdir(d)]
+        if not self.opt["appdir"].rstrip("/") in ["/Applications", os.environ["HOME"] + "/Applications"]:
+            if os.path.isdir(self.opt["appdir"]):
+                app_dirs.append(self.opt["appdir"])
+                if os.path.isdir(self.opt["appdir"]+"/Utilities"):
+                    app_dirs.append(self.opt["appdir"]+"/Utilities")
         apps_check = {"cask": dict([d, 0] for d in app_dirs),
                       "has_cask": dict([d, 0] for d in app_dirs),
                       "no_cask": dict([d, 0] for d in app_dirs),
@@ -1421,7 +1432,6 @@ class BrewFile:
                         except:
                             if d != "":
                                 self.proc("sudo rm -rf " + appdir + "/" + d)
-
 
     def my_test(self):
             out = Tee("test")
