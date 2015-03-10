@@ -1235,6 +1235,28 @@ class BrewFile:
                       app + name, 2)
         return (tap, installed, name)
 
+    def find_brew_app(self, name, tap):
+        """Helper function for Cask to find app installed by brew install"""
+
+        import os
+        check = "has_cask"
+        tap_brew = tap
+        opt = ""
+        if os.path.isfile(self.opt["brew_repo"] +
+                          "/Library/Formula/" + name + ".rb") and\
+                name in self.proc("brew list", False, False)[1]:
+            check = "brew"
+            opt = self.get_options(name)
+            if os.path.islink(self.opt["brew_repo"] +
+                              "/Library/Formula/" + name + ".rb"):
+                link = os.readlink(self.opt["brew_repo"] +
+                                   "/Library/Formula/" + name + ".rb")
+                tap_brew = link.replace("../Taps/","").replace("homebrew-").\
+                    replace("/"+name+".rb")
+            else:
+                tap_brew = ""
+        return (check, tap_brew, opt)
+
     def check_cask(self):
         import os
         import sys
@@ -1256,6 +1278,7 @@ class BrewFile:
                       self.proc("brew tap", False, False)[1])
         apps = dict([d, {True: [], False: []}]
                     for d in taps + ["", "appstore"])
+        brew_apps = {}
 
         # Set applications directories
         app_dirs = [d for d in ["/Applications", "/Applications/Utilities",
@@ -1269,10 +1292,11 @@ class BrewFile:
                 if os.path.isdir(self.opt["appdir"]+"/Utilities"):
                     app_dirs.append(self.opt["appdir"]+"/Utilities")
         apps_check = {"cask": dict([d, 0] for d in app_dirs),
+                      "cask_obsolete": dict([d, 0] for d in app_dirs),
                       "has_cask": dict([d, 0] for d in app_dirs),
-                      "no_cask": dict([d, 0] for d in app_dirs),
+                      "brew": dict([d, 0] for d in app_dirs),
                       "appstore": dict([d, 0] for d in app_dirs),
-                      "cask_obsolete": dict([d, 0] for d in app_dirs)}
+                      "no_cask": dict([d, 0] for d in app_dirs),}
 
         # Load casks
         casks = {}
@@ -1374,8 +1398,13 @@ class BrewFile:
                     if installed:
                         check = "cask"
                     elif name != "":
-                        check = "has_cask"
-                apps[tap][installed].append((name, d + "/" + app, check))
+                        (check, tap, opt) = self.find_brew_app(name, tap)
+                if check != "brew":
+                    apps[tap][installed].append((name, d + "/" + app, check))
+                else:
+                    if not brew_apps.has_key(tap):
+                        brew_apps[tap] = []
+                    brew_apps[tap].append((name, d + "/" + app, opt))
                 apps_check[check][d] += 1
                 napps += 1
 
@@ -1521,6 +1550,19 @@ class BrewFile:
                                     app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
+        if len(brew_apps.keys()) > 0:
+            out.writeln("# Apps installed by brew install command")
+            if brew_apps.has_key(""):
+                for (name, app_path, opt) in brew_apps[""]:
+                    out.writeln("install " + name + " " + opt + " #" +
+                                app_path.replace(os.environ["HOME"], "~"))
+            for tap in [x for x in brew_apps.keys() if x != ""]:
+                out.writeln("tap " + tap)
+                for (name, app_path, opt) in brew_apps[tap]:
+                    out.writeln("install " + name + " " + opt + " #" +
+                                app_path.replace(os.environ["HOME"], "~"))
+            out.writeln("")
+
         if len(apps["appstore"][False]) > 0:
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
@@ -1562,6 +1604,15 @@ class BrewFile:
                     print "{0:<{1}s} : {2:d}".format(d.replace(
                             os.environ["HOME"], "~"), maxlen,
                             apps_check["cask_obsolete"][d])
+                print ""
+            if sum(apps_check["brew"].values()) > 0:
+                print "Installed by brew install command"
+                for d in app_dirs:
+                    if apps_check["brew"][d] == 0:
+                        continue
+                    print "{0:<{1}s} : {2:d}".format(d.replace(
+                            os.environ["HOME"], "~"), maxlen,
+                            apps_check["brew"][d])
                 print ""
             if sum(apps_check["has_cask"].values()) > 0:
                 print "Installed directly, but casks are available:"
