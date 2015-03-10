@@ -1158,7 +1158,9 @@ class BrewFile:
             if p not in self.brew_list:
                 (ret, lines) = self.proc("brew install " + p +
                                          self.brew_input_opt[p])
+                print 'ret =', ret
                 for l in lines:
+                    print l
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
                             self.proc(l)
