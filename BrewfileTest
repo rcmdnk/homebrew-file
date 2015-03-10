@@ -12,7 +12,7 @@ tap rcmdnk/rcmdnkpac
 #install screenutf8 --HEAD --utf8
 
 ## brew command
-install python
+#install python
 
 ## After commands
 after echo after
