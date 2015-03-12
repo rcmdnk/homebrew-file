@@ -206,7 +206,7 @@ class BrewFile:
 
     def ask_yn(self, question):
         """Helper for yes/no."""
-        if self.opt["yn"] == True:
+        if self.opt["yn"]:
             print question + " [y/n]: y"
             return True
 
@@ -406,7 +406,7 @@ class BrewFile:
         lines = f.readlines()
         f.close()
         for l in lines:
-            if re.match(" *git ", l) == None:
+            if re.match(" *git ", l) is None:
                 continue
             git_line = l.split()
             if len(git_line) > 1:
@@ -416,9 +416,9 @@ class BrewFile:
             return
 
         # Check repository name and add git@github.com: if necessary
-        if (re.match("git://", self.opt["repo"]) == None and
-                re.match("git@", self.opt["repo"]) == None and
-                re.match("https?://", self.opt["repo"]) == None):
+        if (re.match("git://", self.opt["repo"]) is None and
+                re.match("git@", self.opt["repo"]) is None and
+                re.match("https?://", self.opt["repo"]) is None):
             self.opt["repo"] = "git@github.com:" + self.opt["repo"]
 
         # Set Brewfile in the repository
@@ -498,7 +498,7 @@ class BrewFile:
                 self.brew_input.sort()
                 if len(self.opt["args"]) > 2:
                     self.brew_input_opt[p] =\
-                            " " + " ".join(self.opt["args"][2:]).strip()
+                        " " + " ".join(self.opt["args"][2:]).strip()
                 else:
                     self.brew_input_opt[p] = ""
                 self.tap_input.append(psplit[0] + "/" + psplit[1])
@@ -511,7 +511,7 @@ class BrewFile:
             self.brew_input.sort()
             if len(self.opt["args"]) > 2:
                 self.brew_input_opt[p] =\
-                        " " + " ".join(self.opt["args"][2:]).strip()
+                    " " + " ".join(self.opt["args"][2:]).strip()
             else:
                 self.brew_input_opt[p] = ""
         elif cmd == "tap":
@@ -538,14 +538,14 @@ class BrewFile:
             cmd = self.opt["args"][1]
             p = self.opt["args"][2]
             if cmd == "install":
-                if p in self.tap_input:
+                if p in self.cask_input:
                     self.warning(p + " is already in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brwefile")
                     sys.exit(0)
                 self.cask_input.append(p)
                 self.cask_input.sort()
             if cmd == "rm" or cmd == "remove" and cmd == "uninstall":
-                if p not in self.tap_input:
+                if p not in self.cask_input:
                     self.warning(p + " is not in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brwefile")
                     sys.exit(0)
@@ -614,7 +614,7 @@ class BrewFile:
             return True
         if force:
             print self.opt["cask_pack"] +\
-                  " has not been installed, install now."
+                " has not been installed, install now."
             ret = self.proc(
                 ["brew", "install",
                  self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
@@ -640,8 +640,8 @@ class BrewFile:
             self.opt["is_pip_cmd"] = True
             return True
         if force:
-            print self.opt["pip_pack"] + \
-                  " has not been installed, install now."
+            print self.opt["pip_pack"] +\
+                " has not been installed, install now."
             ret = self.proc(["brew", "install", self.opt["pip_pack"]],
                             True, True, False)[0]
             if ret != 0:
@@ -712,7 +712,8 @@ class BrewFile:
         f.close()
         import re
         for l in lines:
-            if re.match(" *$", l) != None or re.match(" *#", l) != None:
+            if re.match(" *$", l) is not None or\
+                    re.match(" *#", l) is not None:
                 continue
             args = l.replace("'", "").replace('"', "").split()
             cmd = args[0]
@@ -763,7 +764,7 @@ class BrewFile:
             lines = f.readlines()
             f.close()
             for l in lines:
-                if re.match(" *git ", l) == None:
+                if re.match(" *git ", l) is None:
                     continue
                 git_line = l.split()
                 if len(git_line) > 1:
@@ -772,7 +773,7 @@ class BrewFile:
             print "Input file: " + self.opt["input"] + " is already there."
             if prev_repo != "":
                 print "git repository for Brewfile is already set as " +\
-                       prev_repo
+                    prev_repo
 
             ans = self.ask_yn("Do you want to overwrite it?")
             if ans:
@@ -1251,7 +1252,7 @@ class BrewFile:
                               "/Library/Formula/" + name + ".rb"):
                 link = os.readlink(self.opt["brew_repo"] +
                                    "/Library/Formula/" + name + ".rb")
-                tap_brew = link.replace("../Taps/","").replace("homebrew-").\
+                tap_brew = link.replace("../Taps/", "").replace("homebrew-").\
                     replace("/"+name+".rb")
             else:
                 tap_brew = ""
@@ -1296,7 +1297,7 @@ class BrewFile:
                       "has_cask": dict([d, 0] for d in app_dirs),
                       "brew": dict([d, 0] for d in app_dirs),
                       "appstore": dict([d, 0] for d in app_dirs),
-                      "no_cask": dict([d, 0] for d in app_dirs),}
+                      "no_cask": dict([d, 0] for d in app_dirs)}
 
         # Load casks
         casks = {}
@@ -1388,8 +1389,8 @@ class BrewFile:
                     if not app.endswith(".app"):
                         app_find = d + "/" + app
                     (tap, installed, name) = self.find_app(
-                            app_find, taps, casks, nonapp_casks,
-                            casks_noinst, nonapp_casks_noinst)
+                        app_find, taps, casks, nonapp_casks,
+                        casks_noinst, nonapp_casks_noinst)
                     for c in filter(lambda x: x[0] == name, nonapp_casks):
                         nonapp_casks.remove(c)
                     for a in filter(lambda k: casks[k][0] == name,
@@ -1402,7 +1403,7 @@ class BrewFile:
                 if check != "brew":
                     apps[tap][installed].append((name, d + "/" + app, check))
                 else:
-                    if not brew_apps.has_key(tap):
+                    if tap not in brew_apps:
                         brew_apps[tap] = []
                     brew_apps[tap].append((name, d + "/" + app, opt))
                 apps_check[check][d] += 1
@@ -1552,7 +1553,7 @@ class BrewFile:
 
         if len(brew_apps.keys()) > 0:
             out.writeln("# Apps installed by brew install command")
-            if brew_apps.has_key(""):
+            if "" in brew_apps:
                 for (name, app_path, opt) in brew_apps[""]:
                     out.writeln("install " + name + " " + opt + " #" +
                                 app_path.replace(os.environ["HOME"], "~"))
@@ -1592,8 +1593,8 @@ class BrewFile:
                     if apps_check["cask"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["cask"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["cask"][d])
                 print ""
             if sum(apps_check["cask_obsolete"].values()) > 0:
                 print "Installed by Cask (New version is availble, " +\
@@ -1602,8 +1603,8 @@ class BrewFile:
                     if apps_check["cask_obsolete"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["cask_obsolete"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["cask_obsolete"][d])
                 print ""
             if sum(apps_check["brew"].values()) > 0:
                 print "Installed by brew install command"
@@ -1611,8 +1612,8 @@ class BrewFile:
                     if apps_check["brew"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["brew"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["brew"][d])
                 print ""
             if sum(apps_check["has_cask"].values()) > 0:
                 print "Installed directly, but casks are available:"
@@ -1620,8 +1621,8 @@ class BrewFile:
                     if apps_check["has_cask"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["has_cask"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["has_cask"][d])
                 print ""
             if sum(apps_check["appstore"].values()) > 0:
                 print "Installed from Appstore"
@@ -1629,8 +1630,8 @@ class BrewFile:
                     if apps_check["appstore"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["appstore"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["appstore"][d])
                 print ""
             if sum(apps_check["no_cask"].values()) > 0:
                 print "No casks"
@@ -1638,8 +1639,8 @@ class BrewFile:
                     if apps_check["no_cask"][d] == 0:
                         continue
                     print "{0:<{1}s} : {2:d}".format(d.replace(
-                            os.environ["HOME"], "~"), maxlen,
-                            apps_check["no_cask"][d])
+                        os.environ["HOME"], "~"), maxlen,
+                        apps_check["no_cask"][d])
                 print ""
 
     def cask_upgrade(self):
