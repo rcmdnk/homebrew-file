@@ -1,4 +1,7 @@
 language: objective-c
+branches:
+  except:
+    - /^v[0-9]/
 env:
   global:
     - GIT_COMMITTER_NAME=rcmdnk
