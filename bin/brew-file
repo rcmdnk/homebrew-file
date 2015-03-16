@@ -494,19 +494,19 @@ class BrewFile:
                     self.warning(p + " is already in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brwefile")
                     sys.exit(0)
-                self.brew_input.append(p)
-                self.brew_input.sort()
                 if len(self.opt["args"]) > 2:
                     self.brew_input_opt[p] =\
                         " " + " ".join(self.opt["args"][2:]).strip()
                 else:
                     self.brew_input_opt[p] = ""
-                self.tap_input.append(psplit[0] + "/" + psplit[1])
-                self.tap_input.sort()
+                t = psplit[0] + "/" + psplit[1]
+                if t not in self.tap_input:
+                    self.tap_input.append(psplit[0] + "/" + psplit[1])
+                    self.tap_input.sort()
             elif p in self.brew_input:
                 self.warning(p + " is already in Brewfile.")
                 self.warning("Do 'brew file init' to clean up Brwefile")
-                sys.exit(1)
+                sys.exit(0)
             self.brew_input.append(p)
             self.brew_input.sort()
             if len(self.opt["args"]) > 2:
