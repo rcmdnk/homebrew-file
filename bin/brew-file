@@ -544,7 +544,7 @@ class BrewFile:
                     sys.exit(0)
                 self.cask_input.append(p)
                 self.cask_input.sort()
-            if cmd == "rm" or cmd == "remove" and cmd == "uninstall":
+            if cmd == "rm" or cmd == "remove" or cmd == "uninstall":
                 if p not in self.cask_input:
                     self.warning(p + " is not in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brwefile")
