@@ -4,9 +4,12 @@ Brew-file
 [![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.org/rcmdnk/homebrew-file)
 [![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=master)
 
-Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler).
+Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler)
+(Renamed from brewall).
 
-Renamed from brewall.
+Brewfile dumped by [homebrew-brewdler](https://github.com/Homebrew/homebrew-brewdler)
+can be used as input, too.
+
 
 ## Update
 
@@ -267,6 +270,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## HELP
 
+
     usage: brew file [-f INPUT] [-r REPO] [-n] [-C] [-V VERBOSE] [command] ...
     
     Brew-file: Manager for packages of Homebrew
@@ -274,7 +278,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
     
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /usr/local/Library/Brewfile). 
+                            Set input file (default: /usr/local/Library/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
@@ -289,7 +293,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
         install             Install packages in BREWFILE.
                             Use `--preupdate` to execute `brew update` before install.
         brew                Execute brew command, and update BREWFILE.
-        init                or -i/--init
+        init                or dump/-i/--init
                             Initialize/Update BREWFILE with installed packages.
         set_repo            or -s/--set_repo
                             Set BREWFILE repository (e.g. rcmdnk/Brewfile).
@@ -317,6 +321,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
                             Show version.
         help                or -h/--help
                             Print Help (this message) and exit.
+
 
 ## Information
 More information could be found in
