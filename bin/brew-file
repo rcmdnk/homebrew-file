@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.3.9"
-__date__ = "22/Mar/2015"
+__version__ = "v3.3.10"
+__date__ = "23/Mar/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1953,6 +1953,16 @@ def main():
     (ns, args) = pre_parser.parse_known_args()
     if ns.command is not None:
         args = [ns.command] + args
+
+    if args[0] == 'brew':
+        v = sys.version_info
+        if v.major == 2 and (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
+            print "`brew-file brew ...` is available "\
+                "only with Python 2.7.7 or later.\n"\
+                "(Such Yosemite's default is 2.7.6.)\n"\
+                "You can easily install newer version with Homebrew, like:\n"\
+                "    $ brew install python"
+            sys.exit(1)
 
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
