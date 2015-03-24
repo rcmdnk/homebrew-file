@@ -1980,14 +1980,17 @@ def main():
         args = [ns.command] + args
 
     if args[0] == 'brew':
-        v = sys.version_info
-        if v.major == 2 and (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
-            print "`brew-file brew ...` is available "\
-                "only with Python 2.7.7 or later.\n"\
-                "(Such Yosemite's default is 2.7.6.)\n"\
-                "You can easily install newer version with Homebrew, like:\n"\
-                "    $ brew install python"
-            sys.exit(1)
+        if len([x for x in args if x.startswith("-")]) > 0:
+            v = sys.version_info
+            if v.major == 2 and\
+               (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
+                print "`brew-file brew ...` with option is available "\
+                    "only with Python 2.7.7 or later.\n"\
+                    "(Such Yosemite's default is 2.7.6.)\n"\
+                    "You can easily install newer version with Homebrew, "\
+                    "like:\n"\
+                    "    $ brew install python"
+                sys.exit(1)
 
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
