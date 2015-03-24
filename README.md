@@ -135,17 +135,19 @@ Normally, you don't need to modify anything on Brewdler's Brewfile for Brew-file
 Example:
 
     # Tap repositories and their packages
-    tap 'caskroom/cask'
-    install 'brew-cask'
+    tap caskroom/cask
+    brew 'brew-cask'
+    # install brew-cask # install is same as "brew". Quotes are not mandatory.
     
-    tapall 'rcmdnk/file' # This will trigger `brew install brew-file`, too
+    tapall rcmdnk/file # This will trigger `brew install brew-file`, too
     
     # Cask packages
-    cask install 'firefox'
+    cask firefox
+    #cask install firefox # "cask install" is same as "cask"
     
     # Other Homebrew packages
-    install 'mercurial'
-    install 'macvim --with-lua'
+    brew mercurial
+    brew macvim --with-lua
 
 First column is command: `brew`(or `install`)/`tap`/`tapall`/`cask`(or `cask install`.
 Second to the last columns are package name and options.
@@ -282,6 +284,10 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
+      -F FORMAT, --format FORMAT
+                            Set input file format (default: file).
+                            file:     brew vim --HEAD --with-lua
+                            brewdler: brew 'vim', args: ['with-lua', 'HEAD']
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
       -C                    Run cleanup in non dry-run mode.
