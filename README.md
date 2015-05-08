@@ -350,10 +350,7 @@ has a wrapper function `brew`.
 Features:
 
 * It executes `brew file init` after such `brew install` automatically.
-
-:new: 09/May/2015
-
-* `file` can be skipped for non-conflicted commands with `brew`.
+* `file` can be skipped for non-conflicted commands with `brew`.  :new: 09/May/2015
     * e.g.) `init` command is not in `brew`. Then, you can replace `brew file init` with:
 
             $ brew init
