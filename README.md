@@ -356,8 +356,8 @@ Features:
             $ brew init
 
     * Such `edit` command is also in `brew`. In this case, `brew edit`
-    execute original `brew edit`.
-    * But you can use `brew -e` or `brew --edit` to edit **Brewfile**.
+    executes original `brew edit`.
+        * But you can use `brew -e` or `brew --edit` to edit **Brewfile**.
 
 To enable it, just read this file in your `.bashrc` or any of your setup file.
 
