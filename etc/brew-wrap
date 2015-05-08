@@ -1,7 +1,13 @@
 function brew () {
-  wrap=1
+
+  # No arguments
+  if [ $# -eq 0 ];then
+    command brew
+    return $?
+  fi
 
   # version check
+  wrap=1
   v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
   if [ ${v[0]} -eq 2 ];then
     if [ ${v[1]} -lt 7 ];then
@@ -11,18 +17,18 @@ function brew () {
     fi
   fi
 
+  # Do wrap
   if [ $wrap -eq 1 ];then
-
     # Arguments
     cmd=$1
     cmd2=$2
     cmd3=$3
 
     if type -a brew-file >/dev/null 2>&1;then
-
       # brew install/uninstall, pip
-      if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ]\
-        || [ "$cmd" = "install" ] || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
+      if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ]\
+          || [ "$cmd" = "uninstall" ] || [ "$cmd" = "install" ]\
+          || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
         if [ $# -gt 1 ];then
           if [ "$cmd2" != "-h" ];then
             brew-file brew "$@"
@@ -33,7 +39,8 @@ function brew () {
 
       # brew cask install/uninstall
       if [ "$cmd" = "cask" ];then
-        if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
+        if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ]\
+            || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
           if [ $# -gt 2 ];then
             if [ "$cmd3" != "-h" ];then
               brew-file brew "$@"
@@ -42,11 +49,25 @@ function brew () {
           fi
         fi
       fi
+
+      # Use brew-file directly for brew-file commands
+      if ! echo " $(echo $(command brew commands\
+          |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
+          |grep -q -- " $1 ";then
+        if echo " $(brew-file commands) "|grep -q -- " $1 ";then
+          brew-file "$@"
+          return $?
+        fi
+      fi
     fi
   fi
 
+  # Remove noinit option
   if [ "$1" = "noinit" ];then
     shift
   fi
+
+  # Remaining command
   command brew "$@"
+  return $?
 }

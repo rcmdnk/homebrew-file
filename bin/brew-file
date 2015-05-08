@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.3.10"
-__date__ = "23/Mar/2015"
+__version__ = "v3.4.0"
+__date__ = "09/May/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1818,6 +1818,8 @@ def main():
                        dest="command", const="edit")
     group.add_argument("--test", action="store_const",
                        dest="command", const="test")
+    group.add_argument("--commands", action="store_const",
+                       dest="command", const="commands")
     group.add_argument("-v", "--version", action="store_const",
                        dest="command", const="version")
     group.add_argument("-h", "--help", action="store_const",
@@ -1962,6 +1964,9 @@ def main():
     help = "Used for test."
     subparsers.add_parser("test", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
+    help = "or --commands\nShow commands."
+    subparsers.add_parser("commands", description=help, help=help,
+                          formatter_class=argparse.RawTextHelpFormatter)
     help = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
@@ -2000,6 +2005,16 @@ def main():
 
     if b.opt["command"] == "help":
         parser.print_help()
+        sys.exit(0)
+    if b.opt["command"] == "commands":
+        commands = ['install', 'brew', '-i', '--init', 'init',
+                    '-s', '--set_repo', 'set_repo', 'pull', 'push',
+                    '-c', '--clean', 'clean', '-u', '--update', 'update',
+                    '-e', '--edit', 'casklist', 'cask_upgrade', '--test',
+                    '--commands', '-v', '--version', 'version',
+                    '-h', '--help', 'help', '-f', '--file', '-F', '--format',
+                    '-r', '--repo', '-n', '--nolink', '-C', '-V', '--verbose']
+        print ' '.join(commands)
         sys.exit(0)
     if b.opt["command"] == "version":
         print __prog__ + " " + __version__ + " " + __date__
