@@ -344,10 +344,10 @@ my blogs: [Japanese](http://rcmdnk.github.io/), [English](http://rcmdnk.github.i
 If you want to automatically update Brewfile after `brew install/uninstall`,
 please use `brew-wrap`.
 
-:new:
-
 [homebrew-file/etc/brew-wrap](https://github.com/rcmdnk/homebrew-file/blob/master/etc/brew-wrap)
 has a wrapper function `brew`.
+
+Features:
 
 * It executes `brew file init` after such `brew install` automatically.
 
