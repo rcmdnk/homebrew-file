@@ -1,15 +1,12 @@
-require 'formula'
-
-HOMEBREW_BREW_FILE_VERSION = '3.4.0'
-HOMEBREW_BREW_FILE_BASH_VERSION = '1.1.8'
 class BrewFile < Formula
   homepage 'https://github.com/rcmdnk/homebrew-file/'
-  url 'https://github.com/rcmdnk/homebrew-file.git', :tag => "v#{HOMEBREW_BREW_FILE_VERSION}"
-  version HOMEBREW_BREW_FILE_VERSION
+  url 'https://github.com/rcmdnk/homebrew-file.git',
+    :tag => "v3.4.0",
+    :revision => "90234dda32e09b371ed03804950e99e8de4bf11f"
   head 'https://github.com/rcmdnk/homebrew-file.git', :branch => 'master'
   if build.include? "bash"
     url 'https://github.com/rcmdnk/homebrew-file.git', :branch => 'bash'
-    version HOMEBREW_BREW_FILE_BASH_VERSION
+    version '1.1.8'
   end
 
   option "python", "Use python version (same as default)"
@@ -21,5 +18,9 @@ class BrewFile < Formula
     prefix.install 'bin'
     (bin+'brew-file').chmod 0755
     prefix.install 'etc'
+  end
+
+  test do
+    system "brew", "file", "help"
   end
 end
