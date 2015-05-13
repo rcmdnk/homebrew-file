@@ -1,3 +1,4 @@
+#!/bin/bash
 function brew () {
 
   # No arguments
@@ -71,3 +72,19 @@ function brew () {
   command brew "$@"
   return $?
 }
+
+if (type -a _brew && type -a _brew_file) >/dev/null 2>&1;then
+  function _brew_completion_wrap () {
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    if [ "${COMP_WORDS[1]}" = "file" ];then
+      _brew_file $*
+    else
+      _brew
+      if [ $COMP_CWORD -eq 1 ];then
+        COMPREPLY=($(compgen -W "${COMPREPLY[*]} file" -- "$cur"))
+      fi
+    fi
+  }
+  complete -o bashdefault -o default -F _brew_completion_wrap brew
+fi

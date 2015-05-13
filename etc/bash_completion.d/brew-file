@@ -1,0 +1,78 @@
+#!/bin/bash
+_brew_file_options () {
+  local commands1=(install brew init set_repo pull push clean update edit \
+                  casklist cask_upgrade commands version help)
+  local commands2=(dump -i --init -s --set_repo -c --clean -u --update \
+                   -e --edit --test --commands -v --version -h --help)
+  local options=(-f --file -F --format -r --repo -n --nolink -C \
+                 -V --verbose  -U --noupdate --preupdate -y --yes)
+  if [ "$1" = "1" ] || [ "$1" = "commands1" ];then
+    echo "${commands1[*]}"
+  elif [ "$1" = "2" ] || [ "$1" = "commands2" ];then
+    echo "${commands2[*]}"
+  elif [ "$1" = "options" ];then
+    echo "${options[*]}"
+  elif [ "$1" = "commands" ];then
+    echo "${commands1[*]} ${commands2[*]}"
+  else
+    echo "${commands1[*]} ${commands2[*]} ${options[*]}"
+  fi
+}
+
+_brew_file_check_commands () {
+  for c in ${COMP_WORDS[@]:1};do
+    if echo " $(_brew_file_options commands) "|grep -q " $c ";then
+      echo $c
+      return 0
+    fi
+  done
+  return 1
+}
+
+_brew_file () {
+  if [ $COMP_CWORD -gt 2 ] && [ "$1" = "brew" ] && [ "$2" = "file" ];then
+    local cur=${COMP_WORDS[COMP_CWORD-1]}
+    local prev=${COMP_WORDS[COMP_CWORD-2]}
+  else
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+  fi
+  if [ "$prev" = "-f" ];then
+    COMPREPLY=($(compgen -f "${cur}"))
+  elif [ "$prev" = "-F" ] || [ "$prev" = "--format" ];then
+    COMPREPLY=($(compgen -W "file brewdler" -- "${cur}"))
+  elif [ "$prev" = "-V" ] || [ "$prev" = "--verbose" ];then
+    COMPREPLY=($(compgen -W "0 1 2" -- "${cur}"))
+  elif cmd=$(_brew_file_check_commands);then
+    if [ "${cur:0:1}" = "-" ];then
+      local minopt='-f --file -F --format -y --yes -v --verbose'
+      case $cmd in
+        install|pull|push|edit|-e|--edit)
+          COMPREPLY=($(compgen -W "$minopt --preupdate -U --noupdate" \
+                     -- "${cur}"));;
+        brew)
+          COMPREPLY=($(compgen -W "$minopt" -- "${cur}"));;
+        init|dump|-i|--init|update|-u|--update)
+          COMPREPLY=($(compgen -W "$minopt -n --nolink --preupdate \
+                       -U --noupdate" -- "${cur}"));;
+        set_repo|-s|--set_repo)
+          COMPREPLY=($(compgen -W "$minopt -r --repo" -- "${cur}"));;
+        clean|-c|--clean)
+          COMPREPLY=($(compgen -W "$minopt -C" -- "${cur}"));;
+        cask_upgrade)
+          COMPREPLY=($(compgen -W "-C -y --yes -v --verbose" -- "${cur}"));;
+        #casklist|test|commands|--commands|version|-v|--version|help|-h|--help)
+        *)
+          COMPREPLY=();;
+      esac
+    else
+      COMPREPLY=()
+    fi
+  elif [ "$cur" = "" ];then
+    COMPREPLY=($(compgen -W "$(_brew_file_options 1)"))
+  else
+    COMPREPLY=($(compgen -W "$(_brew_file_options)" -- "${cur}"))
+  fi
+  return 0
+}
+complete -o default -F _brew_file brew-file
