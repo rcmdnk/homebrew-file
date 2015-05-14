@@ -11,13 +11,20 @@ class BrewFile < Formula
 
   option "python", "Use python version (same as default)"
   option "bash", "Use bash version"
+  option "without-completions", "Disable bash/zsh completions"
 
   skip_clean 'bin'
 
   def install
-    prefix.install 'bin'
+    bin.install 'bin/brew-file'
     (bin+'brew-file').chmod 0755
-    prefix.install 'etc'
+    etc.install 'etc/brew-wrap'
+    share.install 'share'
+  end
+
+  if build.with? "completions"
+    bash_completion.install "etc/bash_completion.d/brew-file"
+    zsh_completion.install "share/zsh/site-functions/_brew-file"
   end
 
   test do
