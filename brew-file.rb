@@ -19,10 +19,9 @@ class BrewFile < Formula
     bin.install 'bin/brew-file'
     (bin+'brew-file').chmod 0755
     etc.install 'etc/brew-wrap'
-    share.install 'share'
     if build.with? "completions"
       bash_completion.install "etc/bash_completion.d/brew-file"
-      zsh_completion.install "share/zsh/site-functions/brew-file" => "_brew-file"
+      zsh_completion.install "share/zsh/site-functions/_brew-file"
     end
   end
 
