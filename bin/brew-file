@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.4.7"
+__version__ = "v3.4.8"
 __date__ = "14/May/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1983,11 +1983,8 @@ def main():
         print "Execute `" + __prog__ + " help` for more information."
         sys.exit(1)
 
-    (ns, args) = pre_parser.parse_known_args()
-    if ns.command is not None:
-        args = [ns.command] + args
-
-    if args[0] == 'brew':
+    if sys.argv[1] == 'brew':
+        args = sys.argv[1:]
         if len([x for x in args if x.startswith("-")]) > 0:
             v = sys.version_info
             if v.major == 2 and\
@@ -1999,6 +1996,10 @@ def main():
                     "like:\n"\
                     "    $ brew install python"
                 sys.exit(1)
+    else:
+        (ns, args) = pre_parser.parse_known_args()
+        if ns.command is not None:
+            args = [ns.command] + args
 
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
