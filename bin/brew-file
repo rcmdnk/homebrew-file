@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.4.3"
+__version__ = "v3.4.4"
 __date__ = "14/May/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -187,6 +187,8 @@ class BrewFile:
         import subprocess
         if type(cmd) == str:
             cmd = shlex.split(cmd)
+        if cmd[0] == "brew":
+            cmd = ["command"] + cmd
         if print_cmd:
             self.info('$ ' + ' '.join(cmd), verbose_level)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
