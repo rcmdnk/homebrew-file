@@ -22,7 +22,7 @@ class BrewFile < Formula
     share.install 'share'
     if build.with? "completions"
       bash_completion.install "etc/bash_completion.d/brew-file"
-      zsh_completion.install "share/zsh/site-functions/_brew-file"
+      zsh_completion.install "share/zsh/site-functions/brew-file" => "_brew-file"
     end
   end
 
