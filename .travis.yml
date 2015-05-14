@@ -55,6 +55,7 @@ script:
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe --version
   - coverage run --parallel-mode $exe help
+  - coverage run --parallel-mode $exe commands
   - coverage run --parallel-mode $exe || echo test
   - coverage run --parallel-mode $exe brew list >/dev/null
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
