@@ -373,6 +373,21 @@ if `brew-file` is not included.
 Therefore, you can safely uninstall/re-install brew-file
 even if you have already sourced it.
 
+Some subcommands of `brew-file` can be used
+as a subcommand of `brew`, if the command is not in original brew subcommands.
+
+Such `init` or `casklist` commands can be used like:
+
+    $ brew init # = brew file init
+
+    $ brew casklist # brew file casklist
+
+With completion settings below,
+`file` is included in the completion list of `brew`.
+
+In addition, the completion for `brew file` is also enabled,
+as same as `brew-file` command.
+
 :warning:
 
 Previously, `brew-wrap` was in `bin/brew-wrap`,
@@ -380,3 +395,50 @@ and it was used like `alias brew="brew-wrap"`.
 
 If you have this obsolete setting, please delete and renew as above.
 
+## Completion
+
+Functions for Bash/Zsh completions are also installed.
+
+For Bash, please install
+[Bash-Completion](http://bash-completion.alioth.debian.org/)
+by:
+
+    $ brew install bash-completion
+
+then, add following settings to your **.bashrc**:
+
+```sh
+brew_completion=$(brew --prefix 2>/dev/null)/etc/bash_completion
+if [ $? -eq 0 ] && [ -f "$brew_completion" ];then
+  source $brew_completion
+fi
+```
+
+For Zsh, add following settings in your **.zshrc**:
+
+```sh
+brew_completion=$(brew --prefix 2>/dev/null)/share/zsh/zsh-site-functions
+if [ $? -eq 0 ] && [ -d "$brew_completion" ];then
+  fpath=($brew_completion $fpath)
+fi
+autoload -U compinit
+compinit
+```
+
+In case you have installed [zsh-completions](https://github.com/zsh-users/zsh-completions)
+ (can be installed by brew: `$ brew install zsh-completions`)、
+settings can be like:
+
+```sh
+for d in "/share/zsh-completions" "/share/zsh/zsh-site-functions";do
+  brew_completion=$(brew --prefix 2>/dev/null)$d
+  if [ $? -eq 0 ] && [ -d "$brew_completion" ];then
+    fpath=($brew_completion $fpath)
+  fi
+done
+autoload -U compinit
+compinit
+```
+
+If you are using `brew-wrap`, please write these completion settings
+**BEFORE** `brew-wrap` reading.
