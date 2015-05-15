@@ -1,24 +1,24 @@
 class BrewFile < Formula
-  homepage 'https://github.com/rcmdnk/homebrew-file/'
-  url 'https://github.com/rcmdnk/homebrew-file.git',
+  homepage "https://github.com/rcmdnk/homebrew-file/"
+  url "https://github.com/rcmdnk/homebrew-file.git",
     :tag => "v3.4.8",
     :revision => "821d8d85d3df5b7f247dfad52b4b76f10a7a5e86"
-  head 'https://github.com/rcmdnk/homebrew-file.git', :branch => 'master'
-  if build.include? "bash"
-    url 'https://github.com/rcmdnk/homebrew-file.git', :branch => 'bash'
-    version '1.1.8'
+  head "https://github.com/rcmdnk/homebrew-file.git", :branch => "master"
+  if build.with? "bash"
+    url "https://github.com/rcmdnk/homebrew-file.git", :branch => "bash"
+    version "1.1.8"
   end
 
-  option "python", "Use python version (same as default)"
-  option "bash", "Use bash version"
+  option "with-python", "Use python version (same as default)"
+  option "with-bash", "Use bash version"
   option "without-completions", "Disable bash/zsh completions"
 
-  skip_clean 'bin'
+  skip_clean "bin"
 
   def install
-    bin.install 'bin/brew-file'
-    (bin+'brew-file').chmod 0755
-    (prefix+'etc').install 'etc/brew-wrap'
+    bin.install "bin/brew-file"
+    (bin+"brew-file").chmod 0755
+    (prefix+"etc").install "etc/brew-wrap"
     if build.with? "completions"
       bash_completion.install "etc/bash_completion.d/brew-file"
       zsh_completion.install "share/zsh/site-functions/_brew-file"
