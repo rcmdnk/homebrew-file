@@ -493,7 +493,7 @@ class BrewFile:
                              re.split(r'(?<!\\)\s*', env_cask_opts))))
         except ValueError:
             self.warning("HOMEBREW_CASK_OPTS: " + env_cask_opts +
-                                " is not a proper format.", 0)
+                         " is not a proper format.", 0)
             self.warning("Ignore the value.\n", 0)
         self.opt["caskroom"] = cask_opts["--caskroom"] \
             if cask_opts["--caskroom"] != "" \
@@ -505,8 +505,7 @@ class BrewFile:
         self.int_opts = ["verbose"]
         self.float_opts = []
 
-        self.brewinfo = BrewInfo(self.opt["tap_dir"], self.opt["form"],
-                                 self.opt["input"])
+        self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
 
     def set_args(self, **kw):
@@ -546,17 +545,18 @@ class BrewFile:
 
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_error=True, verbose_level=1):
-        return self.proc(cmd, print_cmd=True, print_out=True,
-                                exit_on_error=True, verbose_level=1)
+        return self.helper.proc(
+            cmd=cmd, print_cmd=print_cmd, print_out=print_out,
+            exit_on_error=exit_on_error, verbose_level=verbose_level)
 
     def info(self, text, verbose_level=2):
-        self.info(text, verbose_level)
+        self.helper.info(text, verbose_level)
 
     def warning(self, text, verbose_level=1):
-        self.warning(text, verbose_level)
+        self.helper.warning(text, verbose_level)
 
     def banner(self, text, verbose_level=2):
-        self.banner(text, verbose_level)
+        self.helper.banner(text, verbose_level)
 
     def remove(self, path):
         """Helper to remove file/directory."""
@@ -596,8 +596,8 @@ class BrewFile:
 
     def clone_repo(self):
         ret = self.proc("git clone " + self.opt["repo"] + " " +
-                               self.brewinfo.get_dir(),
-                               True, True, False)[0]
+                        self.brewinfo.get_dir(),
+                        True, True, False)[0]
         if ret != 0:
             self.warning(
                 "can't clone " + self.opt["repo"] + ".\n"
@@ -1787,8 +1787,7 @@ class BrewFile:
                             self.remove(appdir + "/" + d)
                         except:
                             if d != "":
-                                self.proc("sudo rm -rf " +
-                                                 appdir + "/" + d)
+                                self.proc("sudo rm -rf " + appdir + "/" + d)
 
     def my_test(self):
         out = Tee("test")
