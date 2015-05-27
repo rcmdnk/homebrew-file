@@ -83,7 +83,7 @@ class BrewInfo:
 
     """Homebrew information storage."""
 
-    def __init__(self, tap_dir, filename=''):
+    def __init__(self, tap_dir, form, filename=''):
         self.clear()
         self.list_dic = {
             "brew_input_opt": self.brew_input_opt,
@@ -105,8 +105,9 @@ class BrewInfo:
             "tap_casks": self.tap_casks,
             "cask_list_nocask": self.cask_list_nocask,
         }
-        self.filename = filename
         self.tap_dir = tap_dir
+        self.form = form
+        self.filename = filename
 
     def set_file(self, filename):
         self.filename = filename
@@ -451,7 +452,8 @@ class BrewFile:
         self.int_opts = ["verbose"]
         self.float_opts = []
 
-        self.brewinfo = BrewInfo(self.opt["tap_dir"], self.opt["input"])
+        self.brewinfo = BrewInfo(self.opt["tap_dir"], self.opt["form"],
+                                 self.opt["input"])
         self.brewinfo_ext = []
 
     def set_args(self, **kw):
