@@ -265,7 +265,7 @@ class BrewInfo:
                        os.listdir(tap_path + "/Casks")))
 
     def packout(self, pack):
-        if self.opt["format"] == "brewdler":
+        if self.form == "brewdler":
             return "'" + pack + "'"
         else:
             return pack
@@ -299,7 +299,7 @@ class BrewInfo:
                         if k != "stable":
                             opt += " --" + k
                         break
-        if opt != "" and self.opt["format"] == "brewdler":
+        if opt != "" and self.form == "brewdler":
             import re
             opt = ", args: [" + ", ".join(
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
@@ -368,7 +368,7 @@ class BrewInfo:
         if len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for p in self.appstore_list:
-                if self.opt["format"] == "brewdler":
+                if self.form == "brewdler":
                     out.writeln("#appstore " + self.packout(p))
                 else:
                     out.writeln("appstore " + self.packout(p))
@@ -422,7 +422,7 @@ class BrewFile:
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
                                            self.opt["brew_repo"] +
                                            "/Library/Brewfile")
-        self.opt["format"] = "file"
+        self.opt["form"] = "file"
         self.opt["repo"] = ""
         self.opt["noupdate"] = False
         self.opt["link"] = True
@@ -1898,8 +1898,8 @@ def main():
 
     format_parser = argparse.ArgumentParser(add_help=False)
     format_parser.add_argument(
-        "-F", "--format", action="store", dest="format",
-        default=b.opt["format"],
+        "-F", "--format", "--form", action="store", dest="form",
+        default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
               "file:     brew vim --HEAD --with-lua\n"
               "brewdler: brew 'vim', args: ['with-lua', 'HEAD']\n")
@@ -2076,7 +2076,8 @@ def main():
                     '-e', '--edit', 'update', 'casklist', 'cask_upgrade',
                     '--test', '--commands', 'commands',
                     '-v', '--version', 'version',
-                    '-h', '--help', 'help', '-f', '--file', '-F', '--format',
+                    '-h', '--help', 'help', '-f', '--file',
+                    '-F', '--format', '--form',
                     '-r', '--repo', '-n', '--nolink', '-C', '-V', '--verbose',
                     '-U', '--noupdate', '--preupdate', '-y', '--yes']
         commands.sort()
