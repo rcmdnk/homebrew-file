@@ -929,35 +929,35 @@ class BrewFile:
         self.brewinfo.pip_list = []
         for p in lines:
             if p.startswith("pip-"):
-                self.brewionfo.pip_list.append(p)
+                self.brewinfo.pip_list.append(p)
             else:
-                self.brewionfo.brew_list.append(p)
-                self.brewionfo.brew_list_opt[p] = ""
+                self.brewinfo.brew_list.append(p)
+                self.brewinfo.brew_list_opt[p] = ""
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
-        self.brewionfo.tap_list = lines
+        self.brewinfo.tap_list = lines
 
         # Casks
-        self.brewionfo.cask_list = []
-        self.brewionfo.cask_list_nocask = []
+        self.brewinfo.cask_list = []
+        self.brewinfo.cask_list_nocask = []
         if self.check_cask_cmd():
             (ret, lines) = self.proc("brew cask list", False, False)
             if ret == 0 and len(lines) > 0\
                     and lines[0].find("nothing to list") == -1:
                 for p in lines:
                     if len(p.split()) == 1:
-                        self.brewionfo.cask_list.append(p)
+                        self.brewinfo.cask_list.append(p)
                     else:
                         self.warning("The cask file of " + p +
                                      " doesn't exist.", 0)
                         self.warning("Please check later.\n\n", 0)
-                        self.brewionfo.cask_list_nocask.append(p)
+                        self.brewinfo.cask_list_nocask.append(p)
 
         # App Store
         import glob
         apps = glob.glob('/Applications/*/Contents/_MASReceipt/receipt')
-        self.brewionfo.appstore_list =\
+        self.brewinfo.appstore_list =\
             [x.split("/")[2].split(".app")[0] for x in apps]
 
     def set_brewfile_repo(self):
