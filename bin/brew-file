@@ -1305,7 +1305,7 @@ class BrewFile:
         """Helper function for Cask"""
         self.check_cask_cmd(True)
         [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
-        cask_namer = self.get_tap_path(self.opt["cask_repo"]) +\
+        cask_namer = self.brewinfo.get_tap_path(self.opt["cask_repo"]) +\
             "/developer/bin/generate_cask_token"
         name = ""
         lines = self.proc([cask_namer, '"' + app.split("/")[-1].lower() + '"'],
@@ -1425,7 +1425,7 @@ class BrewFile:
                 and lines[0].find("nothing to list") == -1:
             installed_casks = lines
         for t in taps:
-            d = self.get_tap_path(t) + "/Casks"
+            d = self.brewinfo.get_tap_path(t) + "/Casks"
             for cask in map(
                     lambda x: x.replace(".rb", ""),
                     filter(lambda y: y.endswith(".rb"), os.listdir(d))):
