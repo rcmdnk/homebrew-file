@@ -131,7 +131,31 @@ class BrewInfo:
     """Homebrew information storage."""
 
     def __init__(self, helper, filename=''):
-        self.clear()
+
+        self.brew_input_opt = {}
+
+        self.brew_input = []
+        self.tap_input = []
+        self.cask_input = []
+        self.pip_input = []
+        self.appstore_input = []
+
+        self.before_input = []
+        self.after_input = []
+        self.cmd_input = []
+
+        self.brew_list_opt = {}
+
+        self.brew_list = []
+        self.tap_list = []
+        self.cask_list = []
+        self.pip_list = []
+        self.appstore_list = []
+
+        self.tap_packs = []
+        self.tap_casks = []
+        self.cask_list_nocask = []
+
         self.list_dic = {
             "brew_input_opt": self.brew_input_opt,
             "brew_input": self.brew_input,
@@ -180,39 +204,40 @@ class BrewInfo:
         self.clear_input()
         self.clear_list()
 
+        del self.tap_packs[:]
+        del self.tap_casks[:]
+
     def clear_input(self):
-        self.brew_input_opt = {}
+        self.brew_input_opt.clear()
 
-        self.brew_input = []
-        self.tap_input = []
-        self.cask_input = []
-        self.pip_input = []
-        self.appstore_input = []
+        del self.brew_input[:]
+        del self.tap_input[:]
+        del self.cask_input[:]
+        del self.pip_input[:]
+        del self.appstore_input[:]
 
-        self.before_input = []
-        self.after_input = []
-        self.cmd_input = []
+        del self.before_input[:]
+        del self.after_input[:]
+        del self.cmd_input[:]
 
     def clear_list(self):
-        self.brew_list_opt = {}
+        self.brew_list_opt.clear()
 
-        self.brew_list = []
-        self.tap_list = []
-        self.cask_list = []
-        self.pip_list = []
-        self.appstore_list = []
-
-        self.tap_packs = []
-        self.tap_casks = []
-        self.cask_list_nocask = []
+        del self.brew_list[:]
+        del self.tap_list[:]
+        del self.cask_list[:]
+        del self.cask_list_nocask[:]
+        del self.pip_list[:]
+        del self.appstore_list[:]
 
     def input_to_list(self):
-        self.brew_list = self.brew_input
-        self.brew_list_opt = self.brew_input_opt
-        self.tap_list = self.tap_input
-        self.cask_list = self.cask_input
-        self.pip_list = self.pip_input
-        self.appstore_list = self.appstore_input
+        self.clear_list()
+        self.brew_list.extend(self.brew_input)
+        self.brew_list_opt.update(self.brew_input_opt)
+        self.tap_list.extend(self.tap_input)
+        self.cask_list.extend(self.cask_input)
+        self.pip_list.extend(self.pip_input)
+        self.appstore_list.extend(self.appstore_input)
 
     def get(self, name):
         return self.list_dic[name]
@@ -225,6 +250,20 @@ class BrewInfo:
             self.list_dic[name].remove(package)
         elif type(self.list_dic[name]) == dict:
             del self.list_dic[name][package]
+
+    def set_val(self, name, val):
+        if type(self.list_dic[name]) == list:
+            del self.list_dic[name][:]
+            self.list_dic[name].extend(val)
+        elif type(self.list_dic[name]) == dict:
+            self.list_dic[name].clear()
+            self.list_dic[name].update(val)
+
+    def add(self, name, val):
+        if type(self.list_dic[name]) == list:
+            self.list_dic[name].extend(val)
+        elif type(self.list_dic[name]) == dict:
+            self.list_dic[name].update(val)
 
     def read(self, filename=''):
         try:
@@ -296,21 +335,20 @@ class BrewInfo:
         tap_path = self.get_tap_path(tap)
         if not os.path.isdir(tap_path):
             return
-        self.tap_packs = map(
-            lambda x: x.replace(".rb", ""),
-            filter(lambda y: y.endswith(".rb"), os.listdir(tap_path)))
+        self.set_val("tap_packs", map(lambda x: x.replace(".rb", ""),
+                                      filter(lambda y: y.endswith(".rb"),
+                                             os.listdir(tap_path))))
         path = tap_path + "/Formula"
         if os.path.isdir(path):
-            self.tap_packs += map(
-                lambda x: x.replace(".rb", ""),
-                filter(lambda y: y.endswith(".rb"),
-                       os.listdir(path)))
+            self.add("tap_packs", map(lambda x: x.replace(".rb", ""),
+                                      filter(lambda y: y.endswith(".rb"),
+                                             os.listdir(path))))
         path = tap_path + "/Casks"
         if os.path.isdir(path):
-            self.tap_casks = map(
-                lambda x: x.replace(".rb", ""),
-                filter(lambda y: y.endswith(".rb"),
-                       os.listdir(tap_path + "/Casks")))
+            self.set_val("tap_casks",
+                         map(lambda x: x.replace(".rb", ""),
+                             filter(lambda y: y.endswith(".rb"),
+                                    os.listdir(tap_path + "/Casks"))))
 
     def packout(self, pack):
         if self.helper.opt["form"] == "brewdler":
@@ -961,17 +999,18 @@ class BrewFile:
         import glob
         apps = []
         for d in self.opt["appdirlist"]:
-            apps += [x.split("/")[-4]for x in
+            apps += [x.split("/")[-4].split(".app")[0] for x in
                      glob.glob(d + '/*/Contents/_MASReceipt/receipt')]
         return apps
 
     def get_list(self):
         """Get List"""
 
+        # Clear lists
+        self.brewinfo.clear_list()
+
         # Brew packages
         (ret, lines) = self.proc("brew list", False, False)
-        self.brewinfo.brew_list = []
-        self.brewinfo.pip_list = []
         for p in lines:
             if p.startswith("pip-"):
                 self.brewinfo.pip_list.append(p)
@@ -981,11 +1020,9 @@ class BrewFile:
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
-        self.brewinfo.tap_list = lines
+        self.brewinfo.set_val("tap_list", lines)
 
         # Casks
-        self.brewinfo.cask_list = []
-        self.brewinfo.cask_list_nocask = []
         if self.check_cask_cmd():
             (ret, lines) = self.proc("brew cask list", False, False)
             if ret == 0 and len(lines) > 0\
@@ -1000,7 +1037,7 @@ class BrewFile:
                         self.brewinfo.cask_list_nocask.append(p)
 
         # App Store
-        self.brewinfo.appstore_list = self.get_appstore_list()
+        self.brewinfo.set_val("appstore_list", self.get_appstore_list())
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
@@ -1395,7 +1432,7 @@ class BrewFile:
         self.banner("# Starting to check applications for Cask...")
 
         # First, get App Store applications
-        self.brewinfo.appstore_list = self.get_appstore_list()
+        self.brewinfo.set_val("appstore_list", self.get_appstore_list())
 
         # Set cask directories and reset application information list
         taps = filter(
