@@ -501,6 +501,14 @@ class BrewFile:
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
+        self.opt["appdirlist"] = ["/Applications",
+                                  os.environ["HOME"] + "/Applications"]
+        if self.opt["appdir"].rstrip("/") not in self.opt["appdirlist"]:
+            self.opt["appdirlist"].append(self.opt["appdir"])
+        self.opt["appdirlist"] += [x.rstrip("/") + "/Utilities"
+                                   for x in self.opt["appdirlist"]]
+        self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
+                                  if os.path.isdir(x)]
 
         self.int_opts = ["verbose"]
         self.float_opts = []
@@ -947,6 +955,16 @@ class BrewFile:
             self.opt["is_pip_cmd"] = True
         return self.opt["is_pip_cmd"]
 
+    def get_appstore_list(self):
+        """Get AppStore Application List"""
+
+        import glob
+        apps = []
+        for d in self.opt["appdirlist"]:
+            apps += [x.split("/")[-4]for x in
+                     glob.glob(d + '/*/Contents/_MASReceipt/receipt')]
+        return apps
+
     def get_list(self):
         """Get List"""
 
@@ -982,10 +1000,7 @@ class BrewFile:
                         self.brewinfo.cask_list_nocask.append(p)
 
         # App Store
-        import glob
-        apps = glob.glob('/Applications/*/Contents/_MASReceipt/receipt')
-        self.brewinfo.appstore_list =\
-            [x.split("/")[2].split(".app")[0] for x in apps]
+        self.brewinfo.appstore_list = self.get_appstore_list()
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
@@ -1125,7 +1140,13 @@ class BrewFile:
             for p in self.get("appstore_list"):
                 if p in self.get("appstore_input"):
                     continue
-                cmd += " file:///Applications/" + urllib2.quote(p) + ".app"
+                tmpcmd = cmd
+                for d in self.opt["appdirlist"]:
+                    if os.path.isdir(d + p + ".app"):
+                        cmd += " file:///" + urllib2.quote(d + p + ".app")
+                        continue
+                if cmd == tmpcmd:
+                    continue
                 n_uninstall += 1
                 if self.opt["dryrun"]:
                     print cmd
@@ -1214,16 +1235,8 @@ class BrewFile:
                     #         if len(l.split()) > 2:
                     #             app = l.split()[2]
                     #             break
-                    # self.remove("/Applications/" + app)
-                    # self.remove("/Applications/Utilities/" + app)
-                    # self.remove(os.environ["HOME"] + "/Applications/" + app)
-                    # self.remove(os.environ["HOME"] +\
-                    #             "/Applications/Utilities/" + app)
-                    # if not self.opt["appdir"].rstrip("/") in\
-                    #     ["/Applications",
-                    #      os.environ["HOME"] + "/Applications"]:
-                    #     self.remove(self.opt["appdir"] + "/" + app)
-                    #     self.remove(self.opt["appdir"] + "/Utilities" + app)
+                    # for d in self.opt["appdirlist"]:
+                    #     self.remove(d + app)
 
                     self.proc(cmd, False, True)
 
@@ -1382,11 +1395,7 @@ class BrewFile:
         self.banner("# Starting to check applications for Cask...")
 
         # First, get App Store applications
-        import glob
-        appstore_apps = glob.glob(
-            '/Applications/*/Contents/_MASReceipt/receipt')
-        self.brewinfo.appstore_list = [x.split("/")[2].split(".app")[0]
-                                       for x in appstore_apps]
+        self.brewinfo.appstore_list = self.get_appstore_list()
 
         # Set cask directories and reset application information list
         taps = filter(
@@ -1397,16 +1406,7 @@ class BrewFile:
         brew_apps = {}
 
         # Set applications directories
-        app_dirs = [d for d in ["/Applications", "/Applications/Utilities",
-                    os.environ["HOME"] + "/Applications",
-                    os.environ["HOME"] + "/Applications/Utilities"]
-                    if os.path.isdir(d)]
-        if self.opt["appdir"].rstrip("/") not in\
-                ["/Applications", os.environ["HOME"] + "/Applications"]:
-            if os.path.isdir(self.opt["appdir"]):
-                app_dirs.append(self.opt["appdir"])
-                if os.path.isdir(self.opt["appdir"]+"/Utilities"):
-                    app_dirs.append(self.opt["appdir"]+"/Utilities")
+        app_dirs = self.opt["appdirlist"]
         apps_check = {"cask": dict([d, 0] for d in app_dirs),
                       "cask_obsolete": dict([d, 0] for d in app_dirs),
                       "has_cask": dict([d, 0] for d in app_dirs),
