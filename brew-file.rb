@@ -1,7 +1,6 @@
 class BrewFile < Formula
   homepage "https://github.com/rcmdnk/homebrew-file/"
-  url "https://github.com/rcmdnk/homebrew-file.git",
-    :tag => "v3.4.8",
+  url "https://github.com/rcmdnk/homebrew-file.git", :tag => "v3.4.8",
     :revision => "821d8d85d3df5b7f247dfad52b4b76f10a7a5e86"
   head "https://github.com/rcmdnk/homebrew-file.git", :branch => "master"
   if build.with? "bash"
