@@ -563,7 +563,7 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
-        sel.opt["float_test"]
+        self.opt["float_test"]
 
         self.int_opts = ["verbose"]
         self.float_opts = ["float_test"]
