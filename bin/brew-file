@@ -634,6 +634,7 @@ class BrewFile:
     def read(self, brewinfo):
         brewinfo.read()
         for f in brewinfo.get("file_input"):
+            f = os.path.expanduser(f)
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
             else:
@@ -1080,8 +1081,7 @@ class BrewFile:
 
         # Cleanup extra files
         for b in self.brewinfo_ext:
-            for l in ["brew", "tap", "cask", "cask_nocask", "pip", "appstore",
-                      "file"]:
+            for l in ["brew", "tap", "cask", "pip", "appstore", "file"]:
                 for p in b.get(l+"_input"):
                     if p not in self.brewinfo.get(l+"_list"):
                         b.remove(l+"_input", p)
@@ -1095,7 +1095,11 @@ class BrewFile:
         # Keep it in main list in any case.
         for l in ["brew", "cask", "cask_nocask", "pip", "appstore", "file"]:
             for p in self.brewinfo.get(l+"_list"):
-                if p in self.get(l+"_input"):
+                if l == "cask_nocask":
+                    i = "cask"
+                else:
+                    i = l
+                if p in self.get(i+"_input"):
                     self.brewinfo.remove(l+"_list", p)
 
     def set_brewfile_repo(self):
