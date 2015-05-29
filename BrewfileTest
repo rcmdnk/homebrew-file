@@ -8,11 +8,16 @@ tapall rcmdnk/rcmdnkcask
 
 
 ## rcmdnk/rcmdnkpac
-tap rcmdnk/rcmdnkpac
-install screenutf8 --HEAD --utf8
+tapall rcmdnk/rcmdnkpac
 
-## brew command
-install python --HEAD
+# App Store applications
+appstore Keynote
+
+# File
+file /home/travis/homebrew-file/BrewfileExt
+
+# Other commands
+echo other commands
 
 ## After commands
 after echo after

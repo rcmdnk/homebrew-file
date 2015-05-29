@@ -1,0 +1,9 @@
+## Before commands
+before echo EXT before
+
+## brew command
+install python --HEAD
+
+## After commands
+after echo EXT after
+

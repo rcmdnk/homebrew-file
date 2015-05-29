@@ -249,9 +249,6 @@ class BrewInfo:
     def get(self, name):
         return self.list_dic[name]
 
-    def get_from_dict(self, name, package):
-        return self.list_dic[name][package]
-
     def remove(self, name, package):
         if type(self.list_dic[name]) == list:
             self.list_dic[name].remove(package)
@@ -889,7 +886,7 @@ class BrewFile:
                 (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
             sys.exit(ret)
         if self.brewinfo.check_file():
-            self.read()
+            self.read(self.brewinfo)
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
         if cmd == "install":
@@ -1186,7 +1183,7 @@ class BrewFile:
 
         # Read inputs
         if self.brewinfo.check_file():
-            self.read()
+            self.read(self.brewinfo)
 
         # Remove duplications between brewinfo.list to extra files' input
         self.clean_list()
@@ -1229,7 +1226,7 @@ class BrewFile:
             self.banner("# Dry run")
 
         # Check up packages in the input file
-        self.read()
+        self.read(self.brewinfo)
 
         # Clean up App Store applications
         if len(self.get("appstore_list")) > 0:
@@ -1362,7 +1359,7 @@ class BrewFile:
             self.proc("brew update")
 
         # Check packages in the input file
-        self.read()
+        self.read(self.brewinfo)
 
         # before commands
         for c in self.get("before_input"):
@@ -1901,6 +1898,14 @@ class BrewFile:
         os.mkdir("dir")
         self.remove("dir")
         self.remove("aaa")
+        self.brewfile.read()
+        print 'read input:', len(self.brewfile.brew_input)
+        self.brewfile.clear()
+        print 'read input cleared:', len(self.brewfile.brew_input)
+        self.brewfile.set_file('/test/not/correct/file/path')
+        self.brewfile.read()
+        self.brewfile.check_dir()
+        self.brewfile.set_val('brew_input_opt', {"test_pack": "test opt"})
 
     def execute(self):
         """Main execute function"""
