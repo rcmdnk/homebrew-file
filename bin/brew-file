@@ -156,7 +156,7 @@ class BrewInfo:
 
         self.tap_packs = []
         self.tap_casks = []
-        self.cask_list_nocask = []
+        self.cask_nocask_list = []
 
         self.list_dic = {
             "brew_input_opt": self.brew_input_opt,
@@ -173,7 +173,7 @@ class BrewInfo:
             "brew_list": self.brew_list,
             "tap_list": self.tap_list,
             "cask_list": self.cask_list,
-            "cask_list_nocask": self.cask_list_nocask,
+            "cask_nocask_list": self.cask_nocask_list,
             "pip_list": self.pip_list,
             "appstore_list": self.appstore_list,
             "file_list": self.file_list,
@@ -231,7 +231,7 @@ class BrewInfo:
         del self.brew_list[:]
         del self.tap_list[:]
         del self.cask_list[:]
-        del self.cask_list_nocask[:]
+        del self.cask_nocask_list[:]
         del self.pip_list[:]
         del self.appstore_list[:]
         del self.file_list[:]
@@ -273,6 +273,8 @@ class BrewInfo:
             self.list_dic[name].update(val)
 
     def read(self, filename=''):
+        self.clear_input()
+
         try:
             if filename == '':
                 f = open(self.filename, "r")
@@ -280,8 +282,6 @@ class BrewInfo:
                 f = open(filename, "r")
         except IOError:
             return False
-
-        self.clear_input()
 
         lines = f.readlines()
         f.close()
@@ -401,9 +401,9 @@ class BrewInfo:
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
         return opt
 
-    def write(self, verbose=1, check_opt=True):
+    def write(self, check_opt=True):
         # Prepare output
-        out = Tee(self.get_file(), sys.stdout, verbose > 1)
+        out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
 
         # Before commands
         if len(self.before_input) > 0:
@@ -454,10 +454,10 @@ class BrewInfo:
                 out.writeln("cask " + self.packout(p))
 
         # Installed by cask, but cask files were not found...
-        if len(self.cask_list_nocask) > 0:
+        if len(self.cask_nocask_list) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
-            for p in self.cask_list_nocask:
+            for p in self.cask_nocask_list:
                 out.writeln("#cask " + self.packout(p))
 
         # App Store applications
@@ -631,6 +631,28 @@ class BrewFile:
             shutil.rmtree(path)
         else:
             self.warning("Tried to remove non usual file/directory:" + path, 0)
+
+    def read(self, brewinfo):
+        brewinfo.read()
+        for f in brewinfo.get("file_input"):
+            if os.path.isabs(f):
+                b = BrewInfo(f)
+            else:
+                b = BrewInfo(brewinfo.get_dir() + "/" + f)
+            self.brewinfo_ext.append(b)
+            self.read(b)
+
+    def input_to_list(self):
+        self.brewinfo.input_to_list()
+        for b in self.brewinfo_ext:
+            b.input_to_list()
+
+    def write(self, check_opt=True):
+        self.banner("# Initialize " + self.brewinfo.get_file(), 1)
+        self.brewinfo.write(check_opt=check_opt)
+        for b in self.brewinfo_ext:
+            self.banner("# Initialize " + b.get_file(), 1)
+            b.write(chpt=check_opt)
 
     def get(self, name):
         l = self.brewinfo.get(name)
@@ -867,7 +889,7 @@ class BrewFile:
                 (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
             sys.exit(ret)
         if self.brewinfo.check_file():
-            self.brewinfo.read()
+            self.read()
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
         if cmd == "install":
@@ -938,10 +960,7 @@ class BrewFile:
             # Not install/remove command, no init.
             sys.exit(0)
 
-        self.brewinfo.input_to_list()
-        for b in self.brewinfo_ext:
-            b.input_to_list()
-
+        self.input_to_list()
         self.initialize_write(check_opt=False)
 
     def check_brew_cmd(self):
@@ -1052,10 +1071,33 @@ class BrewFile:
                         self.warning("The cask file of " + p +
                                      " doesn't exist.", 0)
                         self.warning("Please check later.\n\n", 0)
-                        self.brewinfo.cask_list_nocask.append(p)
+                        self.brewinfo.cask_nocask_list.append(p)
 
         # App Store
         self.brewinfo.set_val("appstore_list", self.get_appstore_list())
+
+    def clean_list(self):
+        """Remove duplications between brewinfo.list to extra files' input"""
+
+        # Cleanup extra files
+        for b in self.brewinfo_ext:
+            for l in ["brew", "tap", "cask", "cask_nocask", "pip", "appstore",
+                      "file"]:
+                for p in b.get(l+"_input"):
+                    if p not in self.brewinfo.get(l+"_list"):
+                        b.remove(l+"_input", p)
+
+        # Copy input to list for extra files.
+        for b in self.brewinfo_ext:
+            b.input_to_list()
+
+        # Loop over lists.
+        # tap_list is not checked for overlap removal.
+        # Keep it in main list in any case.
+        for l in ["brew", "cask", "cask_nocask", "pip", "appstore", "file"]:
+            for p in self.brewinfo.get(l+"_list"):
+                if p in self.get(l+"_input"):
+                    self.brewinfo.remove(l+"_list", p)
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
@@ -1142,15 +1184,18 @@ class BrewFile:
         # Get installed package list
         self.get_list()
 
-        if self.brewinfo.check_file():  # for commands
-            self.brewinfo.read()
+        # Read inputs
+        if self.brewinfo.check_file():
+            self.read()
+
+        # Remove duplications between brewinfo.list to extra files' input
+        self.clean_list()
 
         # write out
         self.initialize_write()
 
     def initialize_write(self, check_opt=True):
-        self.banner("# Initialize " + self.brewinfo.get_file(), 1)
-        self.brewinfo.write(check_opt)
+        self.write(check_opt=check_opt)
         self.banner("# You can edit " + self.brewinfo.get_file() + " with:\n"
                     "#     $ " + __prog__ + " edit")
         self.opt["initialized"] = True
@@ -1184,7 +1229,7 @@ class BrewFile:
             self.banner("# Dry run")
 
         # Check up packages in the input file
-        self.brewinfo.read()
+        self.read()
 
         # Clean up App Store applications
         if len(self.get("appstore_list")) > 0:
@@ -1317,7 +1362,7 @@ class BrewFile:
             self.proc("brew update")
 
         # Check packages in the input file
-        self.brewinfo.read()
+        self.read()
 
         # before commands
         for c in self.get("before_input"):
