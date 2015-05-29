@@ -73,7 +73,7 @@ script:
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - rm -rf $brewprefix/rcmdnk_BrewfileTest
-  - rm -f /usr/local/lib/python2.7/site-packages
+  - rm -rf /usr/local/lib/python2.7/site-packages
   - coverage run --parallel-mode $exe brew install python
   - hash -r
   - python --version
