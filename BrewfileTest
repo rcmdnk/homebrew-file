@@ -31,7 +31,7 @@ cask iterm2
 appstore Keynote
 
 # Additional files
-file /home/travis/homebrew-file/BrewfileExt
+file BrewfileExt
 
 # Other commands
 echo other commands
