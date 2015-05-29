@@ -635,9 +635,9 @@ class BrewFile:
         brewinfo.read()
         for f in brewinfo.get("file_input"):
             if os.path.isabs(f):
-                b = BrewInfo(f)
+                b = BrewInfo(self.helper, f)
             else:
-                b = BrewInfo(brewinfo.get_dir() + "/" + f)
+                b = BrewInfo(self.helper, brewinfo.get_dir() + "/" + f)
             self.brewinfo_ext.append(b)
             self.read(b)
 

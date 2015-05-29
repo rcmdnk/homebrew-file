@@ -1,24 +1,40 @@
-## Before commands
+# Before commands
 before echo before
 
-## caskroom/cask
-install caskroom/cask/brew-cask
-cask install iterm2
-tapall rcmdnk/rcmdnkcask
+# tap repositories and their packages
 
+## rcmdnk/rcmdnkcask
+tap rcmdnk/rcmdnkcask
 
 ## rcmdnk/rcmdnkpac
-tapall rcmdnk/rcmdnkpac
+tap rcmdnk/rcmdnkpac
+brew escape_sequence
+brew evernote_mail
+brew gtask
+brew linkchecker
+brew multi_clipboard
+brew parse-plist
+brew rcmdnk-trash
+brew screenutf8
+brew sd_cl
+brew sentaku
+brew stow_reset
+
+# Other Homebrew packages
+brew caskroom/cask/brew-cask
+brew dash
+
+# Cask applications
+cask iterm2
 
 # App Store applications
 appstore Keynote
 
-# File
+# Additional files
 file /home/travis/homebrew-file/BrewfileExt
 
 # Other commands
 echo other commands
 
-## After commands
+# After commands
 after echo after
-
