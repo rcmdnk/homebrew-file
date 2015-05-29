@@ -579,6 +579,8 @@ class BrewFile:
         for k in self.float_opts:
             self.opt[k] = float(self.opt[k])
 
+        self.brewinfo.set_file(self.opt["input"])
+
     def ask_yn(self, question):
         """Helper for yes/no."""
         if self.opt["yn"]:
@@ -2191,6 +2193,12 @@ def main():
         (ns, args) = pre_parser.parse_known_args()
         if ns.command is not None:
             args = [ns.command] + args
+        else:
+            for a in args:
+                if a in subparsers.choices.keys():
+                    args.remove(a)
+                    args = [a] + args
+                    break
 
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
