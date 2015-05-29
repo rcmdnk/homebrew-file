@@ -139,6 +139,7 @@ class BrewInfo:
         self.cask_input = []
         self.pip_input = []
         self.appstore_input = []
+        self.file_input = []
 
         self.before_input = []
         self.after_input = []
@@ -151,6 +152,7 @@ class BrewInfo:
         self.cask_list = []
         self.pip_list = []
         self.appstore_list = []
+        self.file_list = []
 
         self.tap_packs = []
         self.tap_casks = []
@@ -163,6 +165,7 @@ class BrewInfo:
             "cask_input": self.cask_input,
             "pip_input": self.pip_input,
             "appstore_input": self.appstore_input,
+            "file_input": self.file_input,
             "before_input": self.before_input,
             "after_input": self.after_input,
             "cmd_input": self.cmd_input,
@@ -170,11 +173,12 @@ class BrewInfo:
             "brew_list": self.brew_list,
             "tap_list": self.tap_list,
             "cask_list": self.cask_list,
+            "cask_list_nocask": self.cask_list_nocask,
             "pip_list": self.pip_list,
             "appstore_list": self.appstore_list,
+            "file_list": self.file_list,
             "tap_packs": self.tap_packs,
             "tap_casks": self.tap_casks,
-            "cask_list_nocask": self.cask_list_nocask,
         }
         self.filename = filename
         self.helper = helper
@@ -215,6 +219,7 @@ class BrewInfo:
         del self.cask_input[:]
         del self.pip_input[:]
         del self.appstore_input[:]
+        del self.file_input[:]
 
         del self.before_input[:]
         del self.after_input[:]
@@ -229,6 +234,7 @@ class BrewInfo:
         del self.cask_list_nocask[:]
         del self.pip_list[:]
         del self.appstore_list[:]
+        del self.file_list[:]
 
     def input_to_list(self):
         self.clear_list()
@@ -238,6 +244,7 @@ class BrewInfo:
         self.cask_list.extend(self.cask_input)
         self.pip_list.extend(self.pip_input)
         self.appstore_list.extend(self.appstore_input)
+        self.file_list.extend(self.file_input)
 
     def get(self, name):
         return self.list_dic[name]
@@ -316,6 +323,8 @@ class BrewInfo:
                 self.pip_input.append(p)
             elif cmd == "appstore":
                 self.appstore_input.append(p + opt)
+            elif cmd == "file" or cmd.lower() == "brewfile":
+                self.file_input.append(p)
             elif cmd == "before":
                 self.before_input.append(excmd)
             elif cmd == "after":
@@ -459,6 +468,15 @@ class BrewInfo:
                     out.writeln("#appstore " + self.packout(p))
                 else:
                     out.writeln("appstore " + self.packout(p))
+
+        # Additional files
+        if len(self.file_list) > 0:
+            out.writeln("\n# Additional files")
+            for p in self.file_list:
+                if self.helper.opt["form"] == "brewdler":
+                    out.writeln("#file " + self.packout(p))
+                else:
+                    out.writeln("file " + self.packout(p))
 
         # Other commands
         if len(self.cmd_input) > 0:
