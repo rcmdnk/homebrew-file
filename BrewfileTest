@@ -1,31 +1,20 @@
 # Before commands
 before echo before
 
-# tap repositories and their packages
+# brew install with opt
+brew install wget --with-iri --with-debug
 
-## rcmdnk/rcmdnkcask
-tap rcmdnk/rcmdnkcask
-
-## rcmdnk/rcmdnkpac
-tap rcmdnk/rcmdnkpac
-brew escape_sequence
-brew evernote_mail
-brew gtask
-brew linkchecker
-brew multi_clipboard
-brew parse-plist
-brew rcmdnk-trash
-brew screenutf8
-brew sd_cl
-brew sentaku
-brew stow_reset
-
-# Other Homebrew packages
+# caskroom/cask
 brew caskroom/cask/brew-cask
-brew dash
+cask install iterm2
+tapall rcmdnk/rcmdnkcask
 
-# Cask applications
-cask iterm2
+# rcmdnk/rcmdnkpac
+tapall rcmdnk/rcmdnkpac
+
+## pip
+install brew-pip
+brew pip asciinema
 
 # App Store applications
 appstore Keynote

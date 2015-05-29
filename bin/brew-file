@@ -563,8 +563,10 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
+        sel.opt["float_test"]
+
         self.int_opts = ["verbose"]
-        self.float_opts = []
+        self.float_opts = ["float_test"]
 
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
@@ -581,7 +583,7 @@ class BrewFile:
 
         self.brewinfo.set_file(self.opt["input"])
 
-    def ask_yn(self, question):
+    def ask_yn(self, question): # pragma: no cover
         """Helper for yes/no."""
         if self.opt["yn"]:
             print question + " [y/n]: y"
@@ -602,7 +604,7 @@ class BrewFile:
     def verbose(self):
         try:
             v = self.opt["verbose"]
-        except:
+        except: # pragma: no cover
             v = 10
         return v
 
@@ -691,7 +693,7 @@ class BrewFile:
                 "    $ " + __prog__ + " set_repo", 0)
             sys.exit(ret)
 
-    def check_github_repo(self):
+    def check_github_repo(self): # pragma: no cover
         """helper to check and create GitHub repository."""
         import urllib2
 
@@ -963,7 +965,7 @@ class BrewFile:
         self.input_to_list()
         self.initialize_write(check_opt=False)
 
-    def check_brew_cmd(self):
+    def check_brew_cmd(self): # pragma: no cover
         """Check Homebrew"""
         if self.proc("which brew", False, False, False, 0)[0] != 0:
             print "Homebrew has not been installed, install now..."
@@ -996,7 +998,7 @@ class BrewFile:
                 ["brew", "install",
                  self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
                 True, True, False)[0]
-            if ret != 0:
+            if ret != 0: # pragma: no cover
                 self.warning("\nFailed to install " +
                              self.opt["cask_pack"] + "\n", 0)
                 sys.exit(ret)
@@ -1133,7 +1135,7 @@ class BrewFile:
                 sys.exit(0)
 
         # Get repository
-        if self.opt["repo"] == "":
+        if self.opt["repo"] == "": # pragma: no cover
             print "Set repository, \"non\" for local Brewfile,"
             print "<user>/<repo> for github repository,"
             self.opt["repo"] = raw_input("or full path for the repository: ")
@@ -1145,7 +1147,7 @@ class BrewFile:
             self.banner("# Set Brewfile repository as " +
                         self.opt["repo"])
 
-        if self.opt["repo"] == "non":
+        if self.opt["repo"] == "non": # pragma: no cover
             # Reset non repository type Brewfile
             self.initialize(False)
             return
@@ -1912,6 +1914,10 @@ class BrewFile:
         self.brewinfo.read()
         self.brewinfo.check_dir()
         self.brewinfo.set_val('brew_input_opt', {"test_pack": "test opt"})
+        self.brewinfo.add('brew_input_opt', {"test_pack2": "test opt2"})
+        print self.brewinfo.get('brew_input_opt')
+        self.brewinfo.read('testfile')
+        self.brewinfo.get_tap('/aaa/bbb')
 
     def execute(self):
         """Main execute function"""
@@ -1989,6 +1995,7 @@ class BrewFile:
             sys.exit(0)
 
         # No command found
+        # pragma: no cover
         self.warning("Wrong command: ", self.opt["command"], 0)
         self.warning("Execute `" + __prog__ +
                      " help` for more information.", 0)
