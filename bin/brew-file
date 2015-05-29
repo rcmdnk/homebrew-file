@@ -502,7 +502,7 @@ class BrewFile:
         self.opt = {}
 
         # Prepare helper, need verbose first
-        self.opt["verbose"] = os.environ.get("HOMEBREW_FILE_VERBOSE", 1)
+        self.opt["verbose"] = int(os.environ.get("HOMEBREW_FILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
         # First check Homebrew
@@ -563,7 +563,7 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
-        self.opt["float_test"]
+        self.opt["float_test"] = 0.0
 
         self.int_opts = ["verbose"]
         self.float_opts = ["float_test"]
