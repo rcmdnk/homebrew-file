@@ -2,7 +2,7 @@
 before echo EXT before
 
 ## brew command
-install python --HEAD
+brew wget --with-iri --with-debug
 
 ## After commands
 after echo EXT after
