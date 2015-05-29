@@ -74,6 +74,11 @@ script:
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - rm -rf $brewprefix/rcmdnk_BrewfileTest
   - rm -rf /usr/local/lib/python2.7/site-packages
+  - rm -rf /usr/local/bin/easy_install
+  - rm -rf /usr/local/bin/easy_install-2.7
+  - rm -rf /usr/local/bin/pip
+  - rm -rf /usr/local/bin/pip2
+  - rm -rf /usr/local/bin/pip2.7
   - coverage run --parallel-mode $exe brew install python
   - hash -r
   - python --version
