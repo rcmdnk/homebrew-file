@@ -649,7 +649,7 @@ class BrewFile:
         self.brewinfo.write(check_opt=check_opt)
         for b in self.brewinfo_ext:
             self.banner("# Initialize " + b.get_file(), 1)
-            b.write(chpt=check_opt)
+            b.write(check_opt=check_opt)
 
     def get(self, name):
         l = self.brewinfo.get(name)
