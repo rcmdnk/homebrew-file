@@ -14,7 +14,7 @@ tapall rcmdnk/rcmdnkpac
 
 ## pip
 install brew-pip
-brew pip asciinema
+pip asciinema
 
 # App Store applications
 appstore Keynote
