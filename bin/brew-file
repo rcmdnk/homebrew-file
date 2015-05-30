@@ -431,6 +431,8 @@ class BrewInfo:
         # Brew packages
         if len(self.brew_list) > 0:
             out.writeln("\n# Other Homebrew packages")
+            print self.brew_list
+            print self.brew_list_opt
             for p in self.brew_list:
                 if check_opt:
                     pack = self.packout(p) + self.get_options(p)
