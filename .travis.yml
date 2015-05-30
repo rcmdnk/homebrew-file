@@ -105,6 +105,7 @@ script:
   - hash -r
   - which python
   - python --version
+  - /usr/bin/env python
   - coverage run --parallel-mode $exe brew install wget --with-iri
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
@@ -119,9 +120,9 @@ script:
   - coverage run --parallel-mode $exe brew install pow
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
   - coverage run --parallel-mode $exe clean
-  - echo > $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe clean
   - coverage run --parallel-mode $exe clean -C
+  - echo "brew install brew-file $version"> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - coverage run --parallel-mode $exe init -y -V 2
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe wrongcommand || echo test
@@ -135,7 +136,6 @@ script:
   - brew install hub
   - brew noinit install stow
   # Install test
-  - brew rm brew-file
   - brew untap rcmdnk/file
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
