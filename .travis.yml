@@ -99,14 +99,17 @@ script:
   - coverage run --parallel-mode $exe brew install mytest2
   - coverage run --parallel-mode $exe brew install mytest2
   - coverage run --parallel-mode $exe brew rm mytest2
+  - coverage run --parallel-mode $exe brew rm wget
   - which python
   - python --version
-  - coverage run --parallel-mode $exe brew rm wget
+  - hash -r
+  - which python
+  - python --version
   - coverage run --parallel-mode $exe brew install wget --with-iri
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew tap thoughtbot/formulae
-  - coverage run --parallel-mode $exe brew untap rcmdnk/notexist
+  - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
   - coverage run --parallel-mode $exe brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
@@ -126,6 +129,7 @@ script:
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0 || :'
   #- coverage run --parallel-mode $exe push -V 0
   # Test with brew-wrap
+  - brew brew-file $version
   - source $(brew --prefix)/etc/brew-wrap
   - type brew
   - brew install hub
