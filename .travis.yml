@@ -42,6 +42,7 @@ before_script:
   - git config --global push.default simple # to suppress git warning
 script:
   - brew list
+  - brew info wget
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - rm -rf /usr/local/lib/python2.7/site-packages
