@@ -41,7 +41,7 @@ install:
   - cp ../homebrew-file/BrewfileTest ./Brewfile
   - cp ../homebrew-file/BrewfileExt ./BrewfileExt
   - cp ../homebrew-file/BrewfileHome ~/.Brewfile
-  - git commit -a -m "init" && git push -f || echo nothing to be done
+  - git add -A && git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
   - rm -rf ../BrewfileTest
 before_script:
@@ -64,14 +64,17 @@ script:
   - coverage run --parallel-mode $exe install -F brewdler -y -V 2
   - coverage run --parallel-mode $exe init -y -V 2
   - coverage run --parallel-mode $exe update -y -V 0
+  - coverage run --parallel-mode $exe install macvim
   - coverage run --parallel-mode $exe casklist -V 0
   - coverage run --parallel-mode $exe brew rm brew-cask
   - coverage run --parallel-mode $exe brew untap caskroom/cask
   - coverage run --parallel-mode $exe casklist -V 0
   - coverage run --parallel-mode $exe edit
   - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 2 || :'
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 2 || :'
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
+  - ls $brewprefix
   - rm -rf $brewprefix/rcmdnk_BrewfileTest
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
@@ -90,16 +93,31 @@ script:
   - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
   - 'coverage run --parallel-mode $exe cask_upgrade -C -V 0 || :'
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe casklist -V 0
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew install dash
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew install mytest2
+  - coverage run --parallel-mode $exe brew install mytest2
   - coverage run --parallel-mode $exe brew rm mytest2
+  - coverage run --parallel-mode $exe brew rm wget
+  - coverage run --parallel-mode $exe brew install wget --with-iri
+  - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
+  - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
+  - coverage run --parallel-mode $exe brew tap thoughtbot/formulae
+  - coverage run --parallel-mode $exe brew untap rcmdnk/notexist
+  - coverage run --parallel-mode $exe brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - coverage run --parallel-mode $exe brew uninstall pip-asciinema
+  - coverage run --parallel-mode $exe brew help
   - 'coverage run --parallel-mode $exe brew wrong_cd || :'
+  - coverage run --parallel-mode $exe brew install pow
+  - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
   - coverage run --parallel-mode $exe clean
+  - echo > $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - coverage run --parallel-mode $exe clean
+  - coverage run --parallel-mode $exe clean -C
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe wrongcommand || echo test
   - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile

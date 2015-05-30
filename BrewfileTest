@@ -2,19 +2,22 @@
 before echo before
 
 # brew install with opt
-brew install wget --with-iri --with-debug
+brew install emacs --cocoa --with-gnutls
 
 # caskroom/cask
 brew caskroom/cask/brew-cask
 cask install iterm2
-tapall rcmdnk/rcmdnkcask
+tap rcmdnk/rcmdnkcask
+cask install configureapplicationdocktile
+cask install font-migu1m
 
 # rcmdnk/rcmdnkpac
 tapall rcmdnk/rcmdnkpac
 
 ## pip
-install brew-pip
+#install brew-pip
 pip asciinema
+pip gcalcli
 
 # App Store applications
 appstore Keynote
