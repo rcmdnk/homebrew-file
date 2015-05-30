@@ -311,10 +311,7 @@ class BrewInfo:
             elif cmd == "tapall":
                 self.tap_input.append(p)
                 self.get_tap(p)
-                print self.get("tap_packs")
-                print self.tap_packs
                 for tp in self.tap_packs:
-                    print tp
                     self.brew_input.append(tp)
                     self.brew_input_opt[tp] = ""
             elif cmd == "cask":
@@ -342,13 +339,11 @@ class BrewInfo:
     def get_tap(self, tap):
         """Helper for tap configuration file"""
         tap_path = self.get_tap_path(tap)
-        print tap_path
         if not os.path.isdir(tap_path):
             return
         self.set_val("tap_packs", map(lambda x: x.replace(".rb", ""),
                                       filter(lambda y: y.endswith(".rb"),
                                              os.listdir(tap_path))))
-        print self.get("tap_packs")
         path = tap_path + "/Formula"
         if os.path.isdir(path):
             self.add("tap_packs", map(lambda x: x.replace(".rb", ""),
@@ -360,7 +355,6 @@ class BrewInfo:
                          map(lambda x: x.replace(".rb", ""),
                              filter(lambda y: y.endswith(".rb"),
                                     os.listdir(tap_path + "/Casks"))))
-        print self.get("tap_packs")
 
     def packout(self, pack):
         if self.helper.opt["form"] == "brewdler":

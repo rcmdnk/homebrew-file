@@ -100,6 +100,8 @@ script:
   - coverage run --parallel-mode $exe brew install mytest2
   - coverage run --parallel-mode $exe brew install mytest2
   - coverage run --parallel-mode $exe brew rm mytest2
+  - which python
+  - python --version
   - coverage run --parallel-mode $exe brew rm wget
   - coverage run --parallel-mode $exe brew install wget --with-iri
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
