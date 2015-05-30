@@ -431,6 +431,8 @@ class BrewInfo:
         # Brew packages
         if len(self.brew_list) > 0:
             out.writeln("\n# Other Homebrew packages")
+            print self.brew_list
+            print self.brew_list_opt
             for p in self.brew_list:
                 if check_opt:
                     pack = self.packout(p) + self.get_options(p)
@@ -895,6 +897,9 @@ class BrewFile:
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
         if cmd == "install":
+            print 'current inputs'
+            print self.get("brew_input")
+            print self.get("brew_input_opt")
             psplit = p.split("/")
             if len(psplit) > 2:
                 p = psplit[2]
