@@ -897,6 +897,9 @@ class BrewFile:
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
         if cmd == "install":
+            print 'current inputs'
+            print self.get("brew_input")
+            print self.get("brew_input_opt")
             psplit = p.split("/")
             if len(psplit) > 2:
                 p = psplit[2]
