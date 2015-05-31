@@ -105,7 +105,7 @@ script:
   - hash -r
   - which python
   - python --version
-  - /usr/bin/env python
+  - /usr/bin/env python --version
   - coverage run --parallel-mode $exe brew install wget --with-iri
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
