@@ -130,7 +130,6 @@ script:
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0 || :'
   #- coverage run --parallel-mode $exe push -V 0
   # Test with brew-wrap
-  - brew brew-file $version
   - source $(brew --prefix)/etc/brew-wrap
   - type brew
   - brew install hub
