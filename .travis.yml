@@ -106,7 +106,11 @@ script:
   - which python
   - python --version
   - /usr/bin/env python --version
-  - coverage run --parallel-mode $exe brew install wget --with-iri
+  - 'coverage run --parallel-mode $exe brew install wget --with-iri || :'
+  - ./pyvtest.py
+  - ./pyvtest2.py
+  - python pyvtest.py
+  - python pyvtest2.py
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew install thoughtbot/formulae/gitsh
   - coverage run --parallel-mode $exe brew tap thoughtbot/formulae
