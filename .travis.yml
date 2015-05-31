@@ -75,6 +75,10 @@ script:
   - 'brew info wget || :'
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
+  - ./pyvtest.py
+  - ./pyvtest2.py
+  - python pyvtest.py
+  - python pyvtest2.py
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
   - rm -rf /usr/local/bin/easy_install-2.7
