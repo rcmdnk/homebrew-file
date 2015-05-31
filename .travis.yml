@@ -43,7 +43,7 @@ script:
   - rm -rf /usr/local/bin/pip
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
-  - brew file install python
+  - brew install python
   - ./bin/brew-file  brew install wget --with-iri
   - brew rm wget
   - hash -r
