@@ -27,7 +27,7 @@ before_install:
 install:
   - brew install rcmdnk/file/brew-file $version
 script:
-  - touch "$brewprefix/Library/Brewfile"
+  - touch "/usr/local/Library/Brewfile"
   - python --version
   - ./pyvtest.py
   - ./pyvtest2.py
