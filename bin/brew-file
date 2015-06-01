@@ -672,7 +672,7 @@ class BrewFile:
         if package in self.brewinfo.get(name):
             self.brewinfo.remove(name, package)
         else:
-            for b in self.brweinfo_ext:
+            for b in self.brewinfo_ext:
                 if package in b.get(name):
                     b.remove(name, package)
 
@@ -902,7 +902,7 @@ class BrewFile:
                 p = psplit[2]
                 if p in self.get("brew_input"):
                     self.warning(p + " is already in Brewfile.")
-                    self.warning("Do 'brew file init' to clean up Brwefile")
+                    self.warning("Do 'brew file init' to clean up Brewfile")
                     sys.exit(0)
                 if len(self.opt["args"]) > 2:
                     self.brewinfo.brew_input_opt[p] =\
@@ -915,7 +915,7 @@ class BrewFile:
                     self.brewinfo.tap_input.sort()
             elif p in self.get("brew_input"):
                 self.warning(p + " is already in Brewfile.")
-                self.warning("Do 'brew file init' to clean up Brwefile")
+                self.warning("Do 'brew file init' to clean up Brewfile")
                 sys.exit(0)
             self.brewinfo.brew_input.append(p)
             self.brewinfo.brew_input.sort()
@@ -927,21 +927,21 @@ class BrewFile:
         elif cmd == "tap":
             if p in self.get("tap_input"):
                 self.warning(p + " is already in Brewfile.")
-                self.warning("Do 'brew file init' to clean up Brwefile")
+                self.warning("Do 'brew file init' to clean up Brewfile")
                 sys.exit(0)
             self.brewinfo.tap_input.append(p)
             self.brewinfo.tap_input.sort()
         elif cmd == "rm" or cmd == "remove" or cmd == "uninstall":
             if p not in self.get("brew_input"):
                 self.warning(p + " is not in Brewfile.")
-                self.warning("Do 'brew file init' to clean up Brwefile")
+                self.warning("Do 'brew file init' to clean up Brewfile")
                 sys.exit(0)
             self.remove_pack("brew_input", p)
             self.remove_pack("brew_input_opt", p)
         elif cmd == "untap":
             if p not in self.get("tap_input"):
                 self.warning(p + " is not in Brewfile.")
-                self.warning("Do 'brew file init' to clean up Brwefile")
+                self.warning("Do 'brew file init' to clean up Brewfile")
                 sys.exit(0)
             self.remove_pack("tap_input", p)
         elif cmd == "cask":
@@ -950,14 +950,14 @@ class BrewFile:
             if cmd == "install":
                 if p in self.get("cask_input"):
                     self.warning(p + " is already in Brewfile.")
-                    self.warning("Do 'brew file init' to clean up Brwefile")
+                    self.warning("Do 'brew file init' to clean up Brewfile")
                     sys.exit(0)
                 self.brewinfo.cask_input.append(p)
                 self.brewinfo.cask_input.sort()
             if cmd == "rm" or cmd == "remove" or cmd == "uninstall":
                 if p not in self.get("cask_input"):
                     self.warning(p + " is not in Brewfile.")
-                    self.warning("Do 'brew file init' to clean up Brwefile")
+                    self.warning("Do 'brew file init' to clean up Brewfile")
                     sys.exit(0)
                 self.remove_pack("cask_input", p)
         else:
