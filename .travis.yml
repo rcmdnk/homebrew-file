@@ -62,7 +62,7 @@ script:
   - coverage run --parallel-mode $exe brew list >/dev/null
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
   - coverage run --parallel-mode $exe install -F brewdler -y -V 2
-  - coverage run --parallel-mode $exe init -y -V 2
+  - coverage run --parallel-mode $exe init --preupdate -y -V 2
   - coverage run --parallel-mode $exe update -y -V 0
   - coverage run --parallel-mode $exe install macvim
   - coverage run --parallel-mode $exe casklist -V 0
@@ -88,8 +88,10 @@ script:
   - sudo pip install coveralls
   - python --version
   - coverage run --parallel-mode $exe install -V 2
-  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0 || :'
-  #- coverage run --parallel-mode $exe update -y -V 0
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0'
+  - coverage run --parallel-mode $exe uninstall brew-cask
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - coverage run --parallel-mode $exe install brew-cask
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
   - export HOMEBREW_CASK_OPTS="cask_opt_error_test"

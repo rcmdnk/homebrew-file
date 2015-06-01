@@ -1726,7 +1726,7 @@ class BrewFile:
                                     app_path.replace(os.environ["HOME"], "~"))
 
                 if len([x for x in apps[t][True]
-                        if x[2] == "cask_obsolete"]) > 0:
+                        if x[2] == "cask_obsolete"]) > 0: # pragma: no cover
                     out.writeln(
                         "# There are new version for following applications.")
                     for (name, app_path, check) in\
@@ -1785,7 +1785,7 @@ class BrewFile:
                                 app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
-        if len(apps["appstore"][False]) > 0:
+        if len(apps["appstore"][False]) > 0: # pragma: no cover
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
                     out.writeln("#" + app_path)
@@ -1817,7 +1817,8 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["cask"][d])
                 print ""
-            if sum(apps_check["cask_obsolete"].values()) > 0:
+            if sum(apps_check["cask_obsolete"].values())\
+                    > 0: # pragma: no cover
                 print "Installed by Cask (New version is availble, " +\
                     "try `brew file cask_upgrade`):"
                 for d in app_dirs:
@@ -1845,7 +1846,7 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["has_cask"][d])
                 print ""
-            if sum(apps_check["appstore"].values()) > 0:
+            if sum(apps_check["appstore"].values()) > 0: # pragma: no cover
                 print "Installed from Appstore"
                 for d in app_dirs:
                     if apps_check["appstore"][d] == 0:
