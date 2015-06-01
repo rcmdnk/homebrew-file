@@ -149,12 +149,34 @@ Example:
     brew mercurial
     brew macvim --with-lua
 
-First column is command: `brew`(or `install`)/`tap`/`tapall`/`cask`(or `cask install`.
+    # Additional files
+    file ~/.Brwefile
+
+First column is command.
 Second to the last columns are package name and options.
 They are used as arguments for such `brew install`,
 therefore any options of Homebrew can be used.
 
-For example, if you want to build macvim with lua, you can write as above.
+Command|For what? (X is package+options)
+:-:|:-
+brew| `brew install X`
+install| Same as `brew`
+tap| `brew tap X`
+tapall| `brew tap X`, and installs all packages of Formulae in the tap.
+cask|`brew cask install X`. Require [caskroom/homebrew-cask](https://github.com/caskroom/homebrew-cask/). (It will be installed automatically.)
+pip|`brew pip X`. Require [hanxue/brew-pip](https://github.com/hanxue/brew-pip). (It will be installed automatically.)
+appstore| Apps installed from AppStore.
+file| Additional files. A path is a absolute path, or a relative path, relative to the file which calls it.
+brewfile| Same as `file`.
+before| Execute `X` at the beginning of the install.
+after| Execute `X` after all install commands.
+Anything others| Execute the line (first and other columns as one line) before `after` is executed.
+
+If the second column is `install`, it will be ignored.
+
+i.e. `brew install package` is same as `brew package`.
+
+If you want to build macvim with lua option, you can write as above example Brewfile.
 
 If you use `tap`, Brew-file only does `tap` the repository.
 
