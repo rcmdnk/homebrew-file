@@ -89,7 +89,7 @@ script:
   - python --version
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0'
-  - coverage run --parallel-mode $exe uninstall brew-cask
+  - coverage run --parallel-mode $exe brew uninstall brew-cask
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
   - coverage run --parallel-mode $exe install brew-cask
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
