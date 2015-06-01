@@ -132,18 +132,15 @@ script:
   - brew list
   - brew install hub
   - brew noinit install stow
+  # send coverage result to coveralls
+  - coverage combine # should be done before removing brew-file
+  - coveralls
   # Install test
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
   - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
   - brew help
   - brew file help
-  # re-install coverage, as python was uninstalled.
-  - sudo pip uninstall -y coverage
-  - sudo pip install coverage
-after_success:
-  - coverage combine # should be done before removing brew-file
-  - coveralls
 notifications:
   email:
     recipients:
