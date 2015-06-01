@@ -183,6 +183,41 @@ If you use `tap`, Brew-file only does `tap` the repository.
 If you use `tapall`, Brew-file does `brew install` for all Formulae in the repository
 inaddition to do `tap` the repository.
 
+If you want to divide the list into several files.
+If the main Brewfile has `file` or `brewfile` commands,
+then corresponding argument is used as an external file.
+The path can be an absolute or a relative.
+If you use a relative path, like ./Brewfile2,
+then the start directory is the directory
+where the main Brewfile is.
+
+You can use a nest of `file`, too.
+The relative path starts from the parent file's directory.
+
+For the path, such `~` is translated into `$HOME`,
+and any environmental variables can be used.
+
+e.g. 
+
+If you have:
+
+    file ./${HOST}.Brewfile
+
+in main Brewfile, and prepare files like
+
+    Brewfile Host1.Brewfile Host2.Brewfile Host3.Brewfile
+
+in the same directory,
+then `brew-file` picks up **Host1.Brwefile** for Host1,
+and **Host2.Brewfile** for Host2, etc...
+
+Or if you just have
+
+    file ~/.Brewfile
+
+then you can put Host specific packages in **~/.Brewfile**.
+(If the file doesn't exist, `brew-file` just ignores it.)
+
 You don't need to `brew install` by hand.
 As written above, `tap 'caskroom/cask'` is can be dropped
 because `cask 'firefox'` triggers it.
