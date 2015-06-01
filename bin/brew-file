@@ -644,8 +644,9 @@ class BrewFile:
             self.brewinfo_ext.append(b)
             self.read(b)
 
-    def input_to_list(self):
-        self.brewinfo.input_to_list()
+    def input_to_list(self, only_ext=False):
+        if not only_ext:
+            self.brewinfo.input_to_list()
         for b in self.brewinfo_ext:
             b.input_to_list()
 
@@ -657,7 +658,8 @@ class BrewFile:
             b.write(check_opt=check_opt)
 
     def get(self, name):
-        l = self.brewinfo.get(name)
+        import copy
+        l = copy.deepcopy(self.brewinfo.get(name))
         if type(l) == list:
             for b in self.brewinfo_ext:
                 l += b.get(name)
@@ -1089,19 +1091,19 @@ class BrewFile:
                         b.remove(l+"_input", p)
 
         # Copy input to list for extra files.
-        for b in self.brewinfo_ext:
-            b.input_to_list()
+        self.input_to_list(only_ext=True)
 
-        # Loop over lists.
+        # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
         # Keep it in main list in any case.
         for l in ["brew", "cask", "cask_nocask", "pip", "appstore", "file"]:
+            if l == "cask_nocask":
+                i = "cask"
+            else:
+                i = l
             for p in self.brewinfo.get(l+"_list"):
-                if l == "cask_nocask":
-                    i = "cask"
-                else:
-                    i = l
-                if p in self.get(i+"_input"):
+                if p not in self.brewinfo.get(i+"_input") and\
+                        p in self.get(i+"_input"):
                     self.brewinfo.remove(l+"_list", p)
 
     def set_brewfile_repo(self):
