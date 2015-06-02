@@ -44,6 +44,7 @@ install:
   - git add -A && git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
   - rm -rf ../BrewfileTest
+  - mkdir -p ~/Libraryy/LaunchAgents # for emacs install
 before_script:
   - touch "$brewprefix/Library/Brewfile"
   - installed_brew=$(which brew-file)
