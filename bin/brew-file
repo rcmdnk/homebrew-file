@@ -2234,9 +2234,9 @@ def main():
         options = ['-f', '--file', '-F', '--format', '--form', '-U',
                    '--noupdate', '--preupdate', '-r', '--repo', '-n',
                    '--nolink', '-C', '-y', '--yes', '-V', '--verbose']
-        print 'commands', ' '.join(commands)
-        print 'commands_hyphen', ' '.join(commands_hyphen)
-        print 'options', ' '.join(options)
+        print 'commands:', ' '.join(commands)
+        print 'commands_hyphen:', ' '.join(commands_hyphen)
+        print 'options:', ' '.join(options)
         sys.exit(0)
     if b.opt["command"] == "version":
         print __prog__ + " " + __version__ + " " + __date__

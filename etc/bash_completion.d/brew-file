@@ -1,10 +1,10 @@
 #!/bin/sh
 _brew_file_options () {
   local val=$(brew file commands)
-  local commands=$(echo $val|grep 'commands '|sed 's/commands //')
-  local commands_hyphen=$(echo $val|grep 'commands_hyphen '|
-                          sed 's/commands_hyphen //')
-  local commands=$(echo $val|grep 'options '|sed 's/options //')
+  local commands=$(echo $val|grep 'commands: '|sed 's/commands: //')
+  local commands_hyphen=$(echo $val|grep 'commands_hyphen: '|
+                          sed 's/commands_hyphen: //')
+  local commands=$(echo $val|grep 'options: '|sed 's/options: //')
   if [ "$1" = "commands" ];then
     echo $commands1
   elif [ "$1" = "commands_hypen" ];then
