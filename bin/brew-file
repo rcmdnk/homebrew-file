@@ -2225,18 +2225,18 @@ def main():
         parser.print_help()
         sys.exit(0)
     if b.opt["command"] == "commands":
-        commands = ['install', 'brew', '-i', '--init', 'init', 'dump'
-                    '-s', '--set_repo', 'set_repo', 'pull', 'push',
-                    '-c', '--clean', 'clean', '-u', '--update', 'update',
-                    '-e', '--edit', 'update', 'casklist', 'cask_upgrade',
-                    '--test', '--commands', 'commands',
-                    '-v', '--version', 'version',
-                    '-h', '--help', 'help', '-f', '--file',
-                    '-F', '--format', '--form',
-                    '-r', '--repo', '-n', '--nolink', '-C', '-V', '--verbose',
-                    '-U', '--noupdate', '--preupdate', '-y', '--yes']
-        commands.sort()
-        print ' '.join(commands)
+        commands = ['install', 'brew', 'init', 'dump', 'set_repo', 'pull',
+                    'push', 'clean', 'update', 'edit', 'casklist',
+                    'cask_upgrade', 'test', 'commands', 'version', 'help']
+        commands_hyphen ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
+                         '-u', '--update', '-e', '--edit', '--test',
+                         '--commands', '-v', '--version', '-h', '--help']
+        options = ['-f', '--file', '-F', '--format', '--form', '-U',
+                   '--noupdate', '--preupdate', '-r', '--repo', '-n',
+                   '--nolink', '-C', '-y', '--yes', '-V', '--verbose']
+        print 'commands', ' '.join(commands)
+        print 'commands_hyphen', ' '.join(commands_hyphen)
+        print 'options', ' '.join(options)
         sys.exit(0)
     if b.opt["command"] == "version":
         print __prog__ + " " + __version__ + " " + __date__

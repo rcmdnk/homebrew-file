@@ -1,18 +1,17 @@
 #!/bin/sh
 _brew_file_options () {
-  local commands1="install brew init set_repo pull push clean update edit \
-                  casklist cask_upgrade commands version help"
-  local commands2="dump -i --init -s --set_repo -c --clean -u --update \
-                   -e --edit --test --commands -v --version -h --help"
-  local options="-f --file -F --format -r --repo -n --nolink -C \
-                 -V --verbose  -U --noupdate --preupdate -y --yes"
-  if [ "$1" = "1" ] || [ "$1" = "commands1" ];then
+  local val=$(brew file commands)
+  local commands=$(echo $val|grep 'commands '|sed 's/commands //')
+  local commands_hyphen=$(echo $val|grep 'commands_hyphen '|
+                          sed 's/commands_hyphen //')
+  local commands=$(echo $val|grep 'options '|sed 's/options //')
+  if [ "$1" = "commands" ];then
     echo $commands1
-  elif [ "$1" = "2" ] || [ "$1" = "commands2" ];then
+  elif [ "$1" = "commands_hypen" ];then
     echo $commands
   elif [ "$1" = "options" ];then
     echo $options
-  elif [ "$1" = "commands" ];then
+  elif [ "$1" = "all_commands" ];then
     echo $commands1 $commands2
   else
     echo $commands1 $commands2 $options
@@ -27,7 +26,7 @@ _brew_file_check_commands () {
     local w=("${COMP_WORDS[@]:1}")
   fi
   local cmds
-  cmds=($(_brew_file_options commands))
+  cmds=($(_brew_file_options all_commands))
   local c
   for c in "${w[@]}";do
     if echo " ${cmds[*]} "|grep -q " $c ";then
@@ -95,7 +94,7 @@ _brew_file () {
         complist=""
       fi
     else
-      complist="$(_brew_file_options 1)"
+      complist="$(_brew_file_options commands)"
     fi
     if [ "$ZSH_VERSION" != "" ];then
       compadd $(echo $complist)
