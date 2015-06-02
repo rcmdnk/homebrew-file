@@ -6,26 +6,22 @@ _brew_file_options () {
   #local commands_hyphen=$(echo $val|grep 'commands_hyphen: '|
   #                        sed 's/commands_hyphen: //')
   #local commands=$(echo $val|grep 'options: '|sed 's/options: //')
-  local commands = ['install', 'brew', 'init', 'dump', 'set_repo', 'pull',
-                    'push', 'clean', 'update', 'edit', 'casklist',
-                    'cask_upgrade', 'test', 'get_files',
-                    'commands', 'version', 'help']
-  local commands_hyphen = ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
-                    '-u', '--update', '-e', '--edit', '--test',
-                    '--commands', '-v', '--version', '-h', '--help']
-  local options = ['-f', '--file', '-F', '--format', '--form', '-U',
-                   '--noupdate', '--preupdate', '-r', '--repo', '-n',
-                   '--nolink', '-C', '-y', '--yes', '-V', '--verbose']
+  local commands="install brew init dump set_repo pull push clean update edit \
+    casklist cask_upgrade test get_files commands version help"
+  local commands_hyphen="-i --init -s --set_repo -c --clean -u --update -e \
+    --edit --test --commands -v --version -h --help"
+  local options="-f --file -F --format --form -U --noupdate --preupdate -r \
+    --repo -n --nolink -C -y --yes -V --verbose"
   if [ "$1" = "commands" ];then
-    echo $commands1
-  elif [ "$1" = "commands_hypen" ];then
     echo $commands
+  elif [ "$1" = "commands_hyphen" ];then
+    echo $commands_hyphen
   elif [ "$1" = "options" ];then
     echo $options
   elif [ "$1" = "all_commands" ];then
-    echo $commands1 $commands2
+    echo $commands $commands_hyphen
   else
-    echo $commands1 $commands2 $options
+    echo $commands $commands_hyphen $options
   fi
 }
 
