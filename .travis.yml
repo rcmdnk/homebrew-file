@@ -84,9 +84,9 @@ script:
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
   - coverage run --parallel-mode $exe -V 2 brew install python
-  - pip uninstall -y coveralls
-  - pip uninstall -y coverage
-  - pip install coveralls
+  - sudo pip uninstall -y coveralls
+  - sudo pip uninstall -y coverage
+  - sudo pip install coveralls
   - hash -r
   - python --version
   - ls ~/Library/LaunchAgents
