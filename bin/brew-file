@@ -1399,6 +1399,8 @@ class BrewFile:
                 for l in lines:
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
+                            self.proc('ls -l ~/Library/')
+                            self.proc('ls -l ~/Library/LaunchAgents')
                             self.proc(l)
                     if l.find("brew linkapps") >= 0:
                         if self.opt["link"]:
