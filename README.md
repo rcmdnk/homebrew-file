@@ -329,8 +329,9 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## HELP
 
-
-    usage: brew file [-f INPUT] [-r REPO] [-n] [-C] [-V VERBOSE] [command] ...
+    usage: brew file [-f INPUT] [-F FORM] [-U] [--preupdate] [-r REPO] [-n] [-C]
+                     [-y] [-V VERBOSE]
+                     [command] ...
     
     Brew-file: Manager for packages of Homebrew
     https://github.com/rcmdnk/homebrew-file
@@ -341,13 +342,16 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
-      -F FORMAT, --format FORMAT
+      -F FORM, --format FORM, --form FORM
                             Set input file format (default: file).
                             file:     brew vim --HEAD --with-lua
                             brewdler: brew 'vim', args: ['with-lua', 'HEAD']
+      -U, --noupdate        Do not execute `brew update` before install or other commands.
+      --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
       -C                    Run cleanup in non dry-run mode.
+      -y, --yes             Answer yes to all yes/no questions.
       -V VERBOSE, --verbose VERBOSE
                             Verbose level 0/1/2
     
@@ -380,6 +384,9 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
         cask_upgrade        Upgrade cask applications.
                             With -C, old versions will be removed.
         test                Used for test.
+        get_files           Get Brewfile's full path, including additional files.
+        commands            or --commands
+                            Show commands.
         version             or -v/--version
                             Show version.
         help                or -h/--help
@@ -388,10 +395,10 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## Information
 More information could be found in
-my blogs: [Japanese](http://rcmdnk.github.io/), [English](http://rcmdnk.github.io/en/)
+my blogs: [Japanese](http://rcmdnk.github.io/blog/tags/brew-file/), [English](http://rcmdnk.github.io/en/blog/tags/brew-file/)
 
 > [Brewall: brewパッケージを管理する](http://rcmdnk.github.io/blog/2013/09/13/computer-mac-install-homebrew/) (jp)
-
+,i
 > [brew-file: Brewfileを扱うbrewallを改名した](http://rcmdnk.github.io/blog/2014/08/26/computer-mac-homebrew/) (jp)
 
 > [Brew-file: Manager for packages of Homebrew](http://rcmdnk.github.io/en/blog/2014/11/15/computer-mac-homebrew/) (en)
