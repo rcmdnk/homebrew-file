@@ -158,7 +158,7 @@ They are used as arguments for such `brew install`,
 therefore any options of Homebrew can be used.
 
 Command|For what? (X is package+options)
-:-:|:-
+:--:|:--
 brew| `brew install X`
 install| Same as `brew`
 tap| `brew tap X`
