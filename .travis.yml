@@ -30,8 +30,8 @@ install:
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file $version
   #- brew install vim --with-lua --HEAD # for option check test
-  - brew install tig --HEAD --with-docs
-  - brew info tig
+  #- brew install tig --HEAD --with-docs
+  #- brew info tig
   - brew install caskroom/cask/brew-cask
   - brew cask install firefox # for brew cask list test
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
