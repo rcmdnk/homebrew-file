@@ -84,10 +84,12 @@ script:
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
   - coverage run --parallel-mode $exe -V 2 brew install python
-  - sudo pip uninstall -y coveralls
-  - sudo pip uninstall -y coverage
-  - sudo pip install coveralls
+  - pip uninstall -y coveralls
+  - pip uninstall -y coverage
+  - pip install coveralls
+  - hash -r
   - python --version
+  - ls ~/Library/LaunchAgents
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0'
   - coverage run --parallel-mode $exe brew uninstall brew-cask
