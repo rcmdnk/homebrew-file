@@ -1399,12 +1399,14 @@ class BrewFile:
                 for l in lines:
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
-                            self.proc('echo ~', exit_on_error=False)
-                            self.proc('ls -l ~', exit_on_error=False)
-                            self.proc('ls -l ~/Library/LaunchAgents', exit_on_error=False)
-                            self.proc('mkdir -p ~/Library/LaunchAgents', exit_on_error=False)
-                            self.proc('ls -l ~/Library/LaunchAgents', exit_on_error=False)
-                            self.proc(l)
+                            cmdtmp = l.split()
+                            cmd = []
+                            for c in cmdtmp:
+                                if c.startswith('~/'):
+                                    cmd.append(os.path.expanduser(c))
+                                else:
+                                    cmd.append(c)
+                            self.proc(cmd)
                     if l.find("brew linkapps") >= 0:
                         if self.opt["link"]:
                             self.proc("brew linkapps")

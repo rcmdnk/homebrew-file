@@ -44,7 +44,6 @@ install:
   - git add -A && git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
   - rm -rf ../BrewfileTest
-  - mkdir -p ~/Libraryy/LaunchAgents # for emacs install
 before_script:
   - touch "$brewprefix/Library/Brewfile"
   - installed_brew=$(which brew-file)
@@ -89,7 +88,6 @@ script:
   - sudo pip install coveralls
   - hash -r
   - python --version
-  - ls ~/Library/LaunchAgents
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 0'
   - coverage run --parallel-mode $exe brew uninstall brew-cask
