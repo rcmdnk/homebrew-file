@@ -1229,10 +1229,18 @@ class BrewFile:
                 self.warning("    $ " + __prog__ + " init", 0)
                 sys.exit(1)
 
+    def get_files(self, is_print=False):
+        """Get Brewfiles"""
+        self.read(self.brewinfo)
+        files = [x.get_file() for x in [self.brewinfo] + self.brewinfo_ext]
+        if is_print:
+            print '\n'.join(files)
+        return files
+
     def edit_brewfile(self):
         """Edit brewfile"""
         import subprocess
-        subprocess.call([self.opt["my_editor"], self.brewinfo.get_file()])
+        subprocess.call([self.opt["my_editor"]] + self.get_files())
 
     def cleanup(self):
         """Clean up."""
@@ -1976,6 +1984,11 @@ class BrewFile:
             self.edit_brewfile()
             sys.exit(0)
 
+        # Get files
+        if self.opt["command"] == "get_files":
+            self.get_files(is_print=True)
+            sys.exit(0)
+
         # Get list for cleanup/install
         self.get_list()
 
@@ -2001,12 +2014,6 @@ class BrewFile:
                 self.repomgr("push")
                 self.opt["dryrun"] = False
                 self.cleanup()
-            sys.exit(0)
-
-        # Get files
-        if self.opt["command"] == "get_files":
-            for b in [self.brewinfo] + self.brewinfo_ext:
-                print b.get_file()
             sys.exit(0)
 
         # test

@@ -73,8 +73,8 @@ script:
   - coverage run --parallel-mode $exe commands
   - coverage run --parallel-mode $exe || echo test
   - coverage run --parallel-mode $exe brew list >/dev/null
-  - coverage run --parallel-mode $exe init --preupdate -y -V 2
-  - coverage run --parallel-mode $exe update -y -V 2
+  - coverage run --parallel-mode $exe init --preupdate -y
+  - coverage run --parallel-mode $exe update -y
   - coverage run --parallel-mode $exe test -V 2
   # Cask tests
   - coverage run --parallel-mode $exe cask install firefox
@@ -108,8 +108,13 @@ script:
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
+  - cd $brewprefix/Library/rcmdnk_BrewfileTest/
+  - git status
+  - cat *
+  - git pull
+  - cat *
+  - cd -
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
-  - coverage run --parallel-mode $exe init --preupdate -y
   # Other sanity checks
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew list
