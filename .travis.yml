@@ -114,7 +114,7 @@ script:
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe brew uninstall lastpass-cli
-  - coverage run --parallel-mode $exe brew install --with-doc
+  - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
   - coverage run --parallel-mode $exe brew install dash
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew install mytest2
