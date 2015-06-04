@@ -997,23 +997,29 @@ class BrewFile:
         if self.proc("brew cask", False, False, False)[0] == 0:
             self.opt["is_cask_cmd"] = True
             return True
-        if force:
-            print self.opt["cask_pack"] +\
-                " has not been installed, install now."
-            ret = self.proc(
-                ["brew", "install",
-                 self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
-                True, True, False)[0]
-            if ret != 0:  # pragma: no cover
-                self.warning("\nFailed to install " +
-                             self.opt["cask_pack"] + "\n", 0)
-                sys.exit(ret)
-            if not self.opt["cask_repo"] in self.get("tap_list"):
-                self.brewinfo.tap_list.append(self.opt["cask_repo"])
-            if not self.opt["cask_pack"] in self.get("brew_list"):
-                self.brewinfo.brew_list.append(self.opt["cask_pack"])
-                self.brewinfo.brew_list_opt[self.opt["cask_pack"]] = ""
-            self.opt["is_cask_cmd"] = True
+        self.info(self.opt["cask_pack"] + " has not been installed.")
+        if not force:
+            ans = self.ask_yn("Do you want to install %s" %
+                              self.opt["cask_pack"])
+            if not ans:
+                self.warning("If you need it, please do:")
+                self.warning("    $ brew install %s/%s" %
+                             (self.opt["cask_repo"], self.opt["cask_pack"]))
+                return self.opt["is_cask_cmd"]
+        ret = self.proc(
+            ["brew", "install",
+             self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
+            True, True, False)[0]
+        if ret != 0:  # pragma: no cover
+            self.warning("\nFailed to install " +
+                         self.opt["cask_pack"] + "\n", 0)
+            sys.exit(ret)
+        if not self.opt["cask_repo"] in self.get("tap_list"):
+            self.brewinfo.tap_list.append(self.opt["cask_repo"])
+        if not self.opt["cask_pack"] in self.get("brew_list"):
+            self.brewinfo.brew_list.append(self.opt["cask_pack"])
+            self.brewinfo.brew_list_opt[self.opt["cask_pack"]] = ""
+        self.opt["is_cask_cmd"] = True
         return self.opt["is_cask_cmd"]
 
     def check_pip_cmd(self, force=False):
@@ -1112,6 +1118,7 @@ class BrewFile:
 
         # Keep file in main Brewfile
         self.brewinfo.file_list.extend(self.brewinfo.file_input)
+        self.input_to_list(only_ext=True)
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
@@ -1140,7 +1147,7 @@ class BrewFile:
                 os.rename(self.opt["input"], self.opt["input"] + ".bak")
                 self.info("Ok, old input file was moved to " +
                           self.opt["input"] + ".bak.", 1)
-            else:
+            else:  # pragma: no cover
                 sys.exit(0)
 
         # Get repository
