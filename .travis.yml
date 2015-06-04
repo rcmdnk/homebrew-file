@@ -100,6 +100,7 @@ script:
   # Use test repository
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - coverage run --parallel-mode $exe get_files
+  - cat $($exe get_files)
   - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
