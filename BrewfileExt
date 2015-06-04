@@ -2,7 +2,7 @@
 before echo EXT before
 
 ## brew command
-brew wget --with-iri --with-debug
+brew lastpass-cli --with-doc
 
 ## After commands
 after echo EXT after
