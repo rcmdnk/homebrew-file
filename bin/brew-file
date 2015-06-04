@@ -797,10 +797,10 @@ class BrewFile:
         f.close()
         open(self.brewinfo.get_file(), "a").close()
 
-        self.proc("git add -A")[0]
+        self.proc("git add -A")
         self.proc(["git", "commit", "-m",
-                   "\"Prepared by " + __prog__ + "\""])[0]
-        self.proc("git push")[0]
+                   "\"Prepared by " + __prog__ + "\""])
+        self.proc("git push")
 
         ans = self.ask_yn("Do you want to initialize from installed packages?")
         if ans:
@@ -861,7 +861,7 @@ class BrewFile:
         # Check the repository
         if self.opt["repo"] == "":
             self.warning("Please set a repository, or reset with:", 0)
-            self.warning("    $ " + __prog__ + "set_repo\n", 0)
+            self.warning("    $ " + __prog__ + " set_repo\n", 0)
             sys.exit(1)
 
         # Clone if it doesn't exist
@@ -872,13 +872,13 @@ class BrewFile:
         self.info("cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
         if pull:
-            self.proc("git pull")[0]
+            self.proc("git pull")
             return
         elif push:
-            self.proc("git add " + self.brewinfo.get_file().split("/")[-1])[0]
+            self.proc("git add -A")
             self.proc(["git", "commit", "-m", "\"Update the package list\""],
-                      exit_on_error=False)[0]
-            self.proc("git push")[0]
+                      exit_on_error=False)
+            self.proc("git push")
             return
 
     def brew_cmd(self):
@@ -1089,7 +1089,7 @@ class BrewFile:
 
         # Cleanup extra files
         for b in self.brewinfo_ext:
-            for l in ["brew", "tap", "cask", "pip", "appstore", "file"]:
+            for l in ["brew", "tap", "cask", "pip", "appstore"]:
                 for p in b.get(l+"_input"):
                     if p not in self.brewinfo.get(l+"_list"):
                         b.remove(l+"_input", p)
@@ -1100,7 +1100,7 @@ class BrewFile:
         # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
         # Keep it in main list in any case.
-        for l in ["brew", "cask", "cask_nocask", "pip", "appstore", "file"]:
+        for l in ["brew", "cask", "cask_nocask", "pip", "appstore"]:
             if l == "cask_nocask":
                 i = "cask"
             else:
@@ -1109,6 +1109,9 @@ class BrewFile:
                 if p not in self.brewinfo.get(i+"_input") and\
                         p in self.get(i+"_input"):
                     self.brewinfo.remove(l+"_list", p)
+
+        # Keep file in main Brewfile
+        self.brewinfo.file_list.extend(self.brewinfo.file_input)
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
