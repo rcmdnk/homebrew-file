@@ -146,7 +146,7 @@ script:
   - echo "brew brew-file $version" > $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - echo "brew python" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
   - echo "file BrewfileExt" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-  - echo "brew not_used_package" >> $brewprefix/Library/rcmdnk_BrewfileTest/BrewfileExt
+  - echo "brew bash" >> $brewprefix/Library/rcmdnk_BrewfileTest/BrewfileExt
   - while read p;do echo "brew $p" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile;done < brewlist.orig
   - coverage run --parallel-mode $exe clean
   - coverage run --parallel-mode $exe clean -C
