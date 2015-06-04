@@ -583,7 +583,7 @@ class BrewFile:
 
         self.brewinfo.set_file(self.opt["input"])
 
-    def ask_yn(self, question): # pragma: no cover
+    def ask_yn(self, question):  # pragma: no cover
         """Helper for yes/no."""
         if self.opt["yn"]:
             print question + " [y/n]: y"
@@ -604,7 +604,7 @@ class BrewFile:
     def verbose(self):
         try:
             v = self.opt["verbose"]
-        except: # pragma: no cover
+        except:  # pragma: no cover
             v = 10
         return v
 
@@ -688,14 +688,14 @@ class BrewFile:
         ret = self.proc("git clone " + self.opt["repo"] + " " +
                         self.brewinfo.get_dir(),
                         True, True, False)[0]
-        if ret != 0: # pragma: no cover
+        if ret != 0:  # pragma: no cover
             self.warning(
                 "can't clone " + self.opt["repo"] + ".\n"
                 "please check the repository, or reset with\n"
                 "    $ " + __prog__ + " set_repo", 0)
             sys.exit(ret)
 
-    def check_github_repo(self): # pragma: no cover
+    def check_github_repo(self):  # pragma: no cover
         """helper to check and create GitHub repository."""
         import urllib2
 
@@ -892,10 +892,17 @@ class BrewFile:
         if ret != 0 or noinit or len(self.opt["args"]) < 2 or\
                 (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
             sys.exit(ret)
-        if self.brewinfo.check_file():
-            self.read(self.brewinfo)
+
         cmd = self.opt["args"][0]
         p = self.opt["args"][1]
+
+        if cmd not in ["install", "tap", "rm", "remove", "uninstall", "untap",
+                       "cask"]:
+            # Not install/remove command, no init.
+            sys.exit(0)
+
+        if self.brewinfo.check_file():
+            self.read(self.brewinfo)
         if cmd == "install":
             psplit = p.split("/")
             if len(psplit) > 2:
@@ -960,14 +967,11 @@ class BrewFile:
                     self.warning("Do 'brew file init' to clean up Brewfile")
                     sys.exit(0)
                 self.remove_pack("cask_input", p)
-        else:
-            # Not install/remove command, no init.
-            sys.exit(0)
 
         self.input_to_list()
         self.initialize_write(check_opt=False)
 
-    def check_brew_cmd(self): # pragma: no cover
+    def check_brew_cmd(self):  # pragma: no cover
         """Check Homebrew"""
         if self.proc("which brew", False, False, False, 0)[0] != 0:
             print "Homebrew has not been installed, install now..."
@@ -1000,7 +1004,7 @@ class BrewFile:
                 ["brew", "install",
                  self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
                 True, True, False)[0]
-            if ret != 0: # pragma: no cover
+            if ret != 0:  # pragma: no cover
                 self.warning("\nFailed to install " +
                              self.opt["cask_pack"] + "\n", 0)
                 sys.exit(ret)
@@ -1024,7 +1028,7 @@ class BrewFile:
                 " has not been installed, install now."
             ret = self.proc(["brew", "install", self.opt["pip_pack"]],
                             True, True, False)[0]
-            if ret != 0: # pragma: no cover
+            if ret != 0:  # pragma: no cover
                 self.warning("\nFailed to install " +
                              self.opt["pip_pack"] + "\n", 0)
                 sys.exit(ret)
@@ -1137,7 +1141,7 @@ class BrewFile:
                 sys.exit(0)
 
         # Get repository
-        if self.opt["repo"] == "": # pragma: no cover
+        if self.opt["repo"] == "":  # pragma: no cover
             print "Set repository, \"non\" for local Brewfile,"
             print "<user>/<repo> for github repository,"
             self.opt["repo"] = raw_input("or full path for the repository: ")
@@ -1149,7 +1153,7 @@ class BrewFile:
             self.banner("# Set Brewfile repository as " +
                         self.opt["repo"])
 
-        if self.opt["repo"] == "non": # pragma: no cover
+        if self.opt["repo"] == "non":  # pragma: no cover
             # Reset non repository type Brewfile
             self.initialize(False)
             return
@@ -1185,7 +1189,7 @@ class BrewFile:
                                   self.opt["input"] + ".bak")
                         self.info("Ok, old input file was moved to " +
                                   self.opt["input"] + ".bak.", 1)
-                else:
+                else:  # pragma: no cover
                     sys.exit(0)
 
         # Get installed package list
@@ -1218,7 +1222,7 @@ class BrewFile:
             if ans:
                 self.initialize(False)
                 return
-            else:
+            else:  # pragma: no cover
                 self.warning("Ok, please prepare brewfile", 0)
                 self.warning("or you can initialize " +
                              self.brewinfo.get_file() + " with:", 0)
@@ -1239,7 +1243,7 @@ class BrewFile:
         self.read(self.brewinfo)
 
         # Clean up App Store applications
-        if len(self.get("appstore_list")) > 0: # pragma: no cover
+        if len(self.get("appstore_list")) > 0:  # pragma: no cover
             self.banner("# Clean up App Store applications")
             cmd = "sudo uninstall"
             n_uninstall = 0
@@ -1733,7 +1737,7 @@ class BrewFile:
                                     app_path.replace(os.environ["HOME"], "~"))
 
                 if len([x for x in apps[t][True]
-                        if x[2] == "cask_obsolete"]) > 0: # pragma: no cover
+                        if x[2] == "cask_obsolete"]) > 0:  # pragma: no cover
                     out.writeln(
                         "# There are new version for following applications.")
                     for (name, app_path, check) in\
@@ -1792,7 +1796,7 @@ class BrewFile:
                                 app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
-        if len(apps["appstore"][False]) > 0: # pragma: no cover
+        if len(apps["appstore"][False]) > 0:  # pragma: no cover
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
                     out.writeln("#" + app_path)
@@ -1825,7 +1829,7 @@ class BrewFile:
                         apps_check["cask"][d])
                 print ""
             if sum(apps_check["cask_obsolete"].values())\
-                    > 0: # pragma: no cover
+                    > 0:  # pragma: no cover
                 print "Installed by Cask (New version is availble, " +\
                     "try `brew file cask_upgrade`):"
                 for d in app_dirs:
@@ -1853,7 +1857,7 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["has_cask"][d])
                 print ""
-            if sum(apps_check["appstore"].values()) > 0: # pragma: no cover
+            if sum(apps_check["appstore"].values()) > 0:  # pragma: no cover
                 print "Installed from Appstore"
                 for d in app_dirs:
                     if apps_check["appstore"][d] == 0:
@@ -2012,10 +2016,10 @@ class BrewFile:
 
         # No command found
         self.warning("Wrong command: " + self.opt["command"],
-                     0) # pragma: no cover
+                     0)  # pragma: no cover
         self.warning("Execute `" + __prog__ +
-                     " help` for more information.", 0) # pragma: no cover
-        sys.exit(1) # pragma: no cover
+                     " help` for more information.", 0)  # pragma: no cover
+        sys.exit(1)  # pragma: no cover
 
 
 def main():
@@ -2246,8 +2250,8 @@ def main():
                     'cask_upgrade', 'test', 'get_files', 'commands', 'version',
                     'help']
         commands_hyphen = ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
-                         '-u', '--update', '-e', '--edit', '--test',
-                         '--commands', '-v', '--version', '-h', '--help']
+                           '-u', '--update', '-e', '--edit', '--test',
+                           '--commands', '-v', '--version', '-h', '--help']
         options = ['-f', '--file', '-F', '--format', '--form', '-U',
                    '--noupdate', '--preupdate', '-r', '--repo', '-n',
                    '--nolink', '-C', '-y', '--yes', '-V', '--verbose']
