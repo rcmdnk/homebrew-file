@@ -897,7 +897,9 @@ class BrewFile:
         p = self.opt["args"][1]
 
         if cmd not in ["install", "tap", "rm", "remove", "uninstall", "untap",
-                       "cask"]:
+                       "cask"] or \
+                cmd == "cask" and \
+                p not in ["install", "rm", "remove", "uninstall"]:
             # Not install/remove command, no init.
             sys.exit(0)
 
