@@ -1,2 +1,2 @@
-language: python
+language: objective-c
 script: echo hoge
