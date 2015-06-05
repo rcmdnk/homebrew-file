@@ -1056,6 +1056,18 @@ class BrewFile:
                      glob.glob(d + '/*/Contents/_MASReceipt/receipt')]
         return apps
 
+    def get_cask_list(self, force=False):
+        """Get Cask List"""
+
+        if not self.check_cask_cmd(force):
+            return (False, [])
+        (ret, lines) = self.proc("brew cask list", False, False)
+        if ret != 0 or len(lines) == 0:
+            return (False, [])
+        if lines[0].find("Warning: nothing to list") == -1:
+            lines = []
+        return (True, lines)
+
     def get_list(self):
         """Get List"""
 
@@ -1076,18 +1088,14 @@ class BrewFile:
         self.brewinfo.set_val("tap_list", lines)
 
         # Casks
-        if self.check_cask_cmd():
-            (ret, lines) = self.proc("brew cask list", False, False)
-            if ret == 0 and len(lines) > 0\
-                    and lines[0].find("nothing to list") == -1:
-                for p in lines:
-                    if len(p.split()) == 1:
-                        self.brewinfo.cask_list.append(p)
-                    else:
-                        self.warning("The cask file of " + p +
-                                     " doesn't exist.", 0)
-                        self.warning("Please check later.\n\n", 0)
-                        self.brewinfo.cask_nocask_list.append(p)
+        for p in self.get_cask_list()[1]:
+            if len(p.split()) == 1:
+                self.brewinfo.cask_list.append(p)
+            else:
+                self.warning("The cask file of " + p +
+                             " doesn't exist.", 0)
+                self.warning("Please check later.\n\n", 0)
+                self.brewinfo.cask_nocask_list.append(p)
 
         # App Store
         self.brewinfo.set_val("appstore_list", self.get_appstore_list())
@@ -1525,10 +1533,8 @@ class BrewFile:
         return (check, tap_brew, opt)
 
     def check_cask(self):
-        import re
         """Check applications for Cask"""
-        self.check_cask_cmd(True)
-
+        import re
         self.banner("# Starting to check applications for Cask...")
 
         # First, get App Store applications
@@ -1556,11 +1562,7 @@ class BrewFile:
         nonapp_casks = []
         casks_noinst = {}
         nonapp_casks_noinst = []
-        (ret, lines) = self.proc("brew cask list", False, False)
-        installed_casks = []
-        if ret == 0 and len(lines) > 0\
-                and lines[0].find("nothing to list") == -1:
-            installed_casks = lines
+        (ret, installed_casks) = self.get_cask_list(True)
         for t in taps:
             d = self.brewinfo.get_tap_path(t) + "/Casks"
             for cask in map(
@@ -1898,10 +1900,7 @@ class BrewFile:
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
-        if not self.check_cask_cmd():
-            return
-        apps = self.proc("brew cask list", False, False)[1]
-        for a in apps:
+        for a in self.get_cask_list()[1]:
             lines = self.proc("brew cask info " + a, False, False)[1]
             installed = True
             for l in lines:
