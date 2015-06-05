@@ -110,9 +110,9 @@ script:
   - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y -V 2
   - rm -rf $brewprefix/Library/rcmdnk_BrewfileTest
   - coverage run --parallel-mode $exe pull
-  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
+  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
   - coverage run --parallel-mode $exe init -r rcmdnk/BrewfileTest -y -V 2
-  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
+  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
   - coverage run --parallel-mode $exe get_files
