@@ -1064,7 +1064,7 @@ class BrewFile:
         (ret, lines) = self.proc("brew cask list", False, False)
         if ret != 0 or len(lines) == 0:
             return (False, [])
-        if lines[0].find("Warning: nothing to list") == -1:
+        if lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
 
@@ -1540,6 +1540,10 @@ class BrewFile:
         # First, get App Store applications
         self.brewinfo.set_val("appstore_list", self.get_appstore_list())
 
+        # Get cask list, force to install brew-cask
+        # if it has not been installed.
+        (ret, installed_casks) = self.get_cask_list(True)
+
         # Set cask directories and reset application information list
         taps = filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
@@ -1562,7 +1566,6 @@ class BrewFile:
         nonapp_casks = []
         casks_noinst = {}
         nonapp_casks_noinst = []
-        (ret, installed_casks) = self.get_cask_list(True)
         for t in taps:
             d = self.brewinfo.get_tap_path(t) + "/Casks"
             for cask in map(
