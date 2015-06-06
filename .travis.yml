@@ -25,9 +25,8 @@ before_install:
   #- brew update >& /dev/null # even this make timeout, at brew-file update
   - brewprefix=$(brew --prefix)
 install:
-  - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls'
-
-  - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors'
+  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
+  - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file $version
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
