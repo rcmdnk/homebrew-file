@@ -46,7 +46,7 @@ before_script:
   - testrepo=$testaccount/$testreponame
   - testrepodir=${testaccount}_${testreponame}
   - testrepofulldir=$brewprefix/Library/$testrepodir
-  - testfile=$testrepodir/Brewfile
+  - testfile=$testrepofulldir/Brewfile
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
@@ -84,6 +84,8 @@ script:
   - coverage run --parallel-mode $exe install --preupdate -y
   - rm $brewfile
   - coverage run --parallel-mode $exe update -y
+  # brew command checks
+  - coverage run --parallel-mode $exe brew help
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew info bash
   - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
@@ -108,9 +110,10 @@ script:
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - command brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
-  - coverage run --parallel-mode $exe brew install pip-asciinema
+  - coverage run --parallel-mode $exe brew install brew-pip
+  - coverage run --parallel-mode $exe brew install pip asciinema
   - coverage run --parallel-mode $exe brew uninstall pip-asciinema
-  - coverage run --parallel-mode $exe brew help
+  - coverage run --parallel-mode $exe brew rm brew-pip
   - 'coverage run --parallel-mode $exe brew wrong_cmd || :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox
