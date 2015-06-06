@@ -98,7 +98,8 @@ script:
   - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew rm mytest2
-  - cat $brewfile |grep -v mytest > $brewfile
+  - cat $brewfile |grep -v mytest > ${brewfile}.tmp
+  - mv ${brewfile}{.tmp,}
   - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
   - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
@@ -107,6 +108,7 @@ script:
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - command brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - coverage run --parallel-mode $exe brew install pip-asciinema
   - coverage run --parallel-mode $exe brew uninstall pip-asciinema
   - coverage run --parallel-mode $exe brew help
   - 'coverage run --parallel-mode $exe brew wrong_cmd || :'
@@ -146,25 +148,25 @@ script:
   - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
   - coverage run --parallel-mode $exe get_files
   - coverage run --parallel-mode $exe edit
-  - cp $brewfile .
+  - cp $testfile .
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
   - coverage run --parallel-mode $exe casklist -V 2
-  - cp Brewfile $brewfile
+  - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
   # brewdler format tests
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
   - coverage run --parallel-mode $exe install -F brewdler
-  - echo "appstore 'KeyNotes'" >> $brewfile
-  - echo "file 'BrewfileExt'" >> $brewfile
+  - echo "appstore 'KeyNotes'" >> $testfile
+  - echo "file 'BrewfileExt'" >> $testfile
   - coverage run --parallel-mode $exe -F brewdler brew rm lastpass-cli
   # Clean up tests
-  - echo "brew brew-file $version" > $brewfile
-  - echo "brew python" >> $brewfile
-  - echo "file BrewfileExt" >> $brewfile
-  - echo "brew bash" >> $brewfile
-  - while read p;do echo "brew $p" >> $brewfile;done < brewlist.orig
+  - echo "brew brew-file $version" > $testfile
+  - echo "brew python" >> $testfile
+  - echo "file BrewfileExt" >> $testfile
+  - echo "brew bash" >> $testfile
+  - while read p;do echo "brew $p" >> $testfile;done < brewlist.orig
   - coverage run --parallel-mode $exe clean
   - coverage run --parallel-mode $exe brew cask list
   - $exe get_files
@@ -174,10 +176,10 @@ script:
   - coverage run --parallel-mode $exe brew cask install firefox
   - coverage run --parallel-mode $exe clean -C
   # Wrong command test
-  - echo "wrong command" > $brewfile
+  - echo "wrong command" > $testfile
   - 'coverage run --parallel-mode $exe install | :'
   # Push current Brewfile in homebrew-file to BrewfileTest
-  - cp Brewfile $brewfile
+  - cp Brewfile $testfile
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0'
   # Test with brew-wrap
   - source $(brew --prefix)/etc/brew-wrap
