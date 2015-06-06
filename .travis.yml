@@ -65,135 +65,135 @@ script:
   - brew install python
   - pip install --upgrade pip
   - pip install coveralls
-    #  - python --version
-    #  - hash -r
-    #  - python --version
-    #  # Sanity checks
-    #  - coverage run --parallel-mode $exe version
-    #  - coverage run --parallel-mode $exe --version
-    #  - coverage run --parallel-mode $exe help
-    #  - coverage run --parallel-mode $exe commands
-    #  - 'coverage run --parallel-mode $exe || :'
-    #  - coverage run --parallel-mode $exe brew list >/dev/null
-    #  - coverage run --parallel-mode $exe init --preupdate -y
-    #  - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
-    #  - coverage run --parallel-mode $exe test -V 2
-    #  # Cask tests
-    #  - coverage run --parallel-mode $exe brew cask install firefox
-    #  - coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
-    #  - coverage run --parallel-mode $exe brew cask list
-    #  - coverage run --parallel-mode $exe casklist
-    #  - coverage run --parallel-mode $exe brew cask list
-    #  - coverage run --parallel-mode $exe brew rm brew-cask
-    #  - coverage run --parallel-mode $exe brew untap caskroom/cask
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-    #  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-    #  - coverage run --parallel-mode $exe cask_upgrade -V 0
-    #  - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
-    #  - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
-    #  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  # Wrong file/command tests
-    #  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
-    #  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
-    #  - 'coverage run --parallel-mode $exe wrongcommand || :'
-    #  # Wrong command test (test proc)
-    #  - echo 'ls wrong_file' > $brewprefix/Library/Brewfile
-    #  - 'coverage run --parallel-mode $exe install || :'
-    #  # Use test repository
-    #  - coverage run --parallel-mode $exe set_repo -r git://github.com/rcmdnk/BrewfileTest -y -V 2
-    #  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
-    #  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
-    #  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
-    #  - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y -V 2
-    #  - rm -rf $brewprefix/Library/rcmdnk_BrewfileTest
-    #  - coverage run --parallel-mode $exe pull
-    #  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
-    #  - coverage run --parallel-mode $exe init -r rcmdnk/BrewfileTest -y -V 2
-    #  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
-    #  - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
-    #  - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
-    #  - coverage run --parallel-mode $exe get_files
-    #  - coverage run --parallel-mode $exe edit
-    #  - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
-    #  - coverage run --parallel-mode $exe install -V 2
-    #  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
-    #  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
-    #  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  # Other sanity checks
-    #  - coverage run --parallel-mode $exe brew noinit list
-    #  - coverage run --parallel-mode $exe brew info bash
-    #  - coverage run --parallel-mode $exe brew uninstall lastpass-cli
-    #  - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
-    #  - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
-    #  - coverage run --parallel-mode $exe brew install dash
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install mytest2
-    #  - coverage run --parallel-mode $exe brew install mytest2
-    #  - coverage run --parallel-mode $exe brew rm mytest2
-    #  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew rm mytest2
-    #  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
-    #  - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
-    #  - coverage run --parallel-mode $exe brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask rm appcleaner
-    #  - command brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask rm appcleaner
-    #  - coverage run --parallel-mode $exe brew uninstall pip-asciinema
-    #  - coverage run --parallel-mode $exe brew help
-    #  - 'coverage run --parallel-mode $exe brew wrong_cmd || :'
-    #  - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
-    #  # brewdler format tests
-    #  - coverage run --parallel-mode $exe init -F brewdler -y -V 2
-    #  - coverage run --parallel-mode $exe install -F brewdler
-    #  - echo "appstore 'KeyNotes'" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - echo "file 'BrewfileExt'" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - coverage run --parallel-mode $exe -F brewdler brew rm lastpass-cli
-    #  # Clean up tests
-    #  - echo "brew brew-file $version" > $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - echo "brew python" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - echo "file BrewfileExt" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - echo "brew bash" >> $brewprefix/Library/rcmdnk_BrewfileTest/BrewfileExt
-    #  - while read p;do echo "brew $p" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile;done < brewlist.orig
-    #  - coverage run --parallel-mode $exe clean
-    #  - coverage run --parallel-mode $exe brew cask list
-    #  - $exe get_files
-    #  - cat $($exe get_files)
-    #  - coverage run --parallel-mode $exe clean -C
-    #  - coverage run --parallel-mode $exe init -y -V 2
-    #  - coverage run --parallel-mode $exe brew install firefox
-    #  - coverage run --parallel-mode $exe clean -C
-    #  # Wrong command test
-    #  - echo "wrong command" > Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - 'coverage run --parallel-mode $exe install | :'
-    #  # Push current Brwefile in homebrew-file to BrwefileTest
-    #  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
-    #  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0'
-    #  # Test with brew-wrap
-    #  - source $(brew --prefix)/etc/brew-wrap
-    #  - type brew
-    #  - brew list
-    #  - brew install hub
-    #  - brew noinit install stow
-    #  # send coverage result to coveralls
-    #  - coverage combine # should be done before removing brew-file
-    #  - coveralls
-    #  # Install test
-    #  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
-    #  - rm -rf $brewprefix/.git*
-    #  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
-    #  - brew help
-    #  - brew file help
-    #notifications:
-    #  email:
-    #    recipients:
-    #      - rcmdnk@gmail.com
-    #    on_success: change
-    #    on_failure: always
-    #
+  - python --version
+  - hash -r
+  - python --version
+  # Sanity checks
+  - coverage run --parallel-mode $exe version
+  - coverage run --parallel-mode $exe --version
+  - coverage run --parallel-mode $exe help
+  - coverage run --parallel-mode $exe commands
+  - 'coverage run --parallel-mode $exe || :'
+  - coverage run --parallel-mode $exe brew list >/dev/null
+  - coverage run --parallel-mode $exe init --preupdate -y
+  - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
+  - coverage run --parallel-mode $exe test -V 2
+  # Cask tests
+  - coverage run --parallel-mode $exe brew cask install firefox
+  - coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
+  - coverage run --parallel-mode $exe brew cask list
+  - coverage run --parallel-mode $exe casklist
+  - coverage run --parallel-mode $exe brew cask list
+  - coverage run --parallel-mode $exe brew rm brew-cask
+  - coverage run --parallel-mode $exe brew untap caskroom/cask
+  - coverage run --parallel-mode $exe casklist -V 0
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe cask_upgrade -V 0
+  - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
+  - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe casklist -V 0
+  # Wrong file/command tests
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe wrongcommand || :'
+  # Wrong command test (test proc)
+  - echo 'ls wrong_file' > $brewprefix/Library/Brewfile
+  - 'coverage run --parallel-mode $exe install || :'
+  # Use test repository
+  - coverage run --parallel-mode $exe set_repo -r git://github.com/rcmdnk/BrewfileTest -y -V 2
+  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
+  - coverage run --parallel-mode $exe set_repo -r git@github.com:rcmdnk/BrewfileTest -y -V 2
+  - rm -rf $brewprefix/Library/{Brewfile, rcmdnk_BrewfileTest}
+  - coverage run --parallel-mode $exe set_repo -r https://github.com/rcmdnk/BrewfileTest -y -V 2
+  - rm -rf $brewprefix/Library/rcmdnk_BrewfileTest
+  - coverage run --parallel-mode $exe pull
+  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
+  - coverage run --parallel-mode $exe init -r rcmdnk/BrewfileTest -y -V 2
+  - rm -rf $brewprefix/Library/{Brewfile,rcmdnk_BrewfileTest}
+  - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
+  - coverage run --parallel-mode $exe set_repo -r rcmdnk/BrewfileTest -y -V 2
+  - coverage run --parallel-mode $exe get_files
+  - coverage run --parallel-mode $exe edit
+  - cp $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile .
+  - coverage run --parallel-mode $exe install -V 2
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
+  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  # Other sanity checks
+  - coverage run --parallel-mode $exe brew noinit list
+  - coverage run --parallel-mode $exe brew info bash
+  - coverage run --parallel-mode $exe brew uninstall lastpass-cli
+  - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
+  - coverage run --parallel-mode $exe brew install lastpass-cli --with-doc
+  - coverage run --parallel-mode $exe brew install dash
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install mytest2
+  - coverage run --parallel-mode $exe brew install mytest2
+  - coverage run --parallel-mode $exe brew rm mytest2
+  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew rm mytest2
+  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
+  - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
+  - coverage run --parallel-mode $exe brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - command brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - coverage run --parallel-mode $exe brew uninstall pip-asciinema
+  - coverage run --parallel-mode $exe brew help
+  - 'coverage run --parallel-mode $exe brew wrong_cmd || :'
+  - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
+  # brewdler format tests
+  - coverage run --parallel-mode $exe init -F brewdler -y -V 2
+  - coverage run --parallel-mode $exe install -F brewdler
+  - echo "appstore 'KeyNotes'" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - echo "file 'BrewfileExt'" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - coverage run --parallel-mode $exe -F brewdler brew rm lastpass-cli
+  # Clean up tests
+  - echo "brew brew-file $version" > $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - echo "brew python" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - echo "file BrewfileExt" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - echo "brew bash" >> $brewprefix/Library/rcmdnk_BrewfileTest/BrewfileExt
+  - while read p;do echo "brew $p" >> $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile;done < brewlist.orig
+  - coverage run --parallel-mode $exe clean
+  - coverage run --parallel-mode $exe brew cask list
+  - $exe get_files
+  - cat $($exe get_files)
+  - coverage run --parallel-mode $exe clean -C
+  - coverage run --parallel-mode $exe init -y -V 2
+  - coverage run --parallel-mode $exe brew install firefox
+  - coverage run --parallel-mode $exe clean -C
+  # Wrong command test
+  - echo "wrong command" > Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - 'coverage run --parallel-mode $exe install | :'
+  # Push current Brwefile in homebrew-file to BrwefileTest
+  - cp Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0'
+  # Test with brew-wrap
+  - source $(brew --prefix)/etc/brew-wrap
+  - type brew
+  - brew list
+  - brew install hub
+  - brew noinit install stow
+  # send coverage result to coveralls
+  - coverage combine # should be done before removing brew-file
+  - coveralls
+  # Install test
+  - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
+  - rm -rf $brewprefix/.git*
+  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
+  - brew help
+  - brew file help
+notifications:
+  email:
+    recipients:
+      - rcmdnk@gmail.com
+    on_success: change
+    on_failure: always
+
