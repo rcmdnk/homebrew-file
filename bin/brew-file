@@ -1003,7 +1003,7 @@ class BrewFile:
         if not force:
             ans = self.ask_yn("Do you want to install %s" %
                               self.opt["cask_pack"])
-            if not ans:
+            if not ans:  # pragma: no cover
                 self.warning("If you need it, please do:")
                 self.warning("    $ brew install %s/%s" %
                              (self.opt["cask_repo"], self.opt["cask_pack"]))
@@ -1062,8 +1062,6 @@ class BrewFile:
         if not self.check_cask_cmd(force):
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False)
-        if ret != 0 or len(lines) == 0:
-            return (False, [])
         if lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
@@ -1616,7 +1614,8 @@ class BrewFile:
             for app in [x for x in os.listdir(d)
                         if not x.startswith(".") and x != "Utilities"]:
                 check = "no_cask"
-                if app.rstrip(".app") in self.get("appstore_list"):
+                if app.rstrip(".app")\
+                        in self.get("appstore_list"):  # pragma: no cover
                     tap = "appstore"
                     installed = False
                     name = ""
