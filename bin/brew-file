@@ -844,7 +844,7 @@ class BrewFile:
         # Check and prepare repository
         if self.opt["repo"].find("github") >= 0:
             self.check_github_repo()
-        else:
+        else:  # pragma: no cover
             self.clone_repo()
 
     def repomgr(self, cmd=""):
@@ -865,7 +865,7 @@ class BrewFile:
             sys.exit(1)
 
         # Clone if it doesn't exist
-        if not self.brewinfo.check_dir():
+        if not self.brewinfo.check_dir():  # pragma: no cover
             self.clone_repo()
 
         # pull/push
@@ -1059,7 +1059,7 @@ class BrewFile:
     def get_cask_list(self, force=False):
         """Get Cask List"""
 
-        if not self.check_cask_cmd(force):
+        if not self.check_cask_cmd(force):  # pragma: no cover
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False)
         if lines[0].find("Warning: nothing to list") != -1:
@@ -1480,16 +1480,16 @@ class BrewFile:
             name = ""
 
         installed = False
-        casks, nonapp_casks, casks_noinst, nonapp_casks_noinst
+        clist = casks.values() + nonapp_casks + casks_noinst.values() +\
+            nonapp_casks_noinst
         if name != "":
-            for c in [x for x in casks.values() + nonapp_casks +
-                      casks_noinst.values() + nonapp_casks_noinst
-                      if x[0] == name]:
+            for c in clist:
+                if c[0] == name:
+                    continue
                 if c[2]:
                     installed = True
         if not installed:
-            for c in [x for x in casks.values() + nonapp_casks +
-                      casks_noinst.values() + nonapp_casks_noinst]:
+            for c in clist:
                 if c[4].find(app+"'") >= 0 or c[4].find(app+"/") >= 0:
                     if c[2]:
                         installed = True
@@ -2231,7 +2231,6 @@ def main():
         args = sys.argv[1:]
         if len([x for x in args if x.startswith("-")]) > 0:
             v = sys.version_info
-            print 'version =', v
             if v.major == 2 and\
                (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
                 print "`brew-file brew ...` with option is available "\
