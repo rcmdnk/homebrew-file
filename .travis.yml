@@ -54,16 +54,16 @@ script:
   - 'coverage run --parallel-mode $exe brew install tig --HEAD --with-docs | :' # old version can't use hyphen options at brew file brew.
   # Install the latest version of Python
   # Need to delete pip staffs to avoid conflicts.
+  - pip uninstall -y coveralls
+  - pip uninstall -y coverage
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
   - rm -rf /usr/local/bin/easy_install-2.7
   - rm -rf /usr/local/bin/pip
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
-  - coverage run --parallel-mode $exe -V 2 brew install python
-  - pip uninstall -y coveralls
+  - brew install python
   - pip install --upgrade pip
-  - pip uninstall -y coverage
   - pip install coveralls
     #  - python --version
     #  - hash -r
