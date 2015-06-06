@@ -26,6 +26,7 @@ before_install:
   - brewprefix=$(brew --prefix)
 install:
   - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls'
+
   - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors'
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file $version
