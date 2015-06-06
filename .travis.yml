@@ -150,6 +150,7 @@ script:
   - coverage run --parallel-mode $exe install -V 2
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
+  - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $brewfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
   # brewdler format tests
