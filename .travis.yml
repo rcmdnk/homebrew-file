@@ -167,7 +167,7 @@ script:
   - cat $($exe get_files)
   - coverage run --parallel-mode $exe clean -C
   - coverage run --parallel-mode $exe init -y -V 2
-  - coverage run --parallel-mode $exe brew install firefox
+  - coverage run --parallel-mode $exe brew cask install firefox
   - coverage run --parallel-mode $exe clean -C
   # Wrong command test
   - echo "wrong command" > Brewfile $brewprefix/Library/rcmdnk_BrewfileTest/Brewfile
