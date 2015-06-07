@@ -1963,6 +1963,7 @@ class BrewFile:
         """Main execute function"""
         # Cask list check
         if self.opt["command"] == "casklist":
+            print 'test', self.opt['verbose']
             self.check_cask()
             sys.exit(0)
 
@@ -2204,15 +2205,17 @@ def main():
                           **subparser_options)
     help = "Check applications for Cask."
     subparsers.add_parser("casklist", description=help, help=help,
+                          parents=[verbose_parser],
                           formatter_class=argparse.RawTextHelpFormatter)
     help = "Upgrade cask applications.\n"\
            "With -C, old versions will be removed."
     subparsers.add_parser(
         "cask_upgrade", description=help,
-        help=help, parents=[dryrun_parser, yn_parser, verbose_parser],
+        help=help, parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "Used for test."
     subparsers.add_parser("test", description=help, help=help,
+                          parents=min_parsers,
                           formatter_class=argparse.RawTextHelpFormatter)
     help = "Get Brewfile's full path, including additional files."
     subparsers.add_parser("get_files", description=help, help=help,

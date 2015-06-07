@@ -128,6 +128,11 @@ script:
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
   - command brew cask rm firefox
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - command brew cask install firefox
+  - mv /Applications/Firefox.app .
+  - command brew cask rm firefox
+  - mv Firefox.app /Applications/
+  - coverage run --parallel-mode $exe casklist -V 0
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe cask_upgrade -V 0
   - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
@@ -157,6 +162,7 @@ script:
   - cp $testfile .
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe install -V 2
+  - coverage run --parallel-mode $exe casklist -V 0
   - command brew rm emacs
   - coverage run --parallel-mode $exe init -y -V 0
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
@@ -166,6 +172,7 @@ script:
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
+  - coverage run --parallel-mode $exe casklist -V 0
   # brewdler format tests
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
   - coverage run --parallel-mode $exe install -F brewdler
