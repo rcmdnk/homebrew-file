@@ -1,9 +1,6 @@
 # Before commands
 before echo before
 
-# brew install with opt
-brew install emacs --cocoa --with-gnutls
-
 # caskroom/cask
 brew caskroom/cask/brew-cask
 cask install iterm2

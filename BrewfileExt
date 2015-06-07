@@ -1,8 +1,9 @@
 ## Before commands
 before echo EXT before
 
-## brew command
+# brew install with opt
 brew lastpass-cli --with-doc
+brew install emacs --cocoa --with-gnutls
 
 ## After commands
 after echo EXT after
