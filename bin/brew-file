@@ -95,14 +95,20 @@ class BrewHelper:
             cmd = ["command"] + cmd
         if print_cmd:
             self.info('$ ' + ' '.join(cmd), verbose_level)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
-        lines = []
-        for l in iter(p.stdout.readline, ''):
-            lines.append(l.rstrip())
+        try:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+            lines = []
+            for l in iter(p.stdout.readline, ''):
+                lines.append(l.rstrip())
+                if print_out:
+                    self.info(l.strip(), verbose_level)
+            ret = p.wait()
+        except OSError, e:
+            lines = [' '.join(cmd) + ': ' + str(e)]
             if print_out:
-                self.info(l.strip(), verbose_level)
-        ret = p.wait()
+                self.info(lines[0].strip(), verbose_level)
+            ret = -1
 
         if exit_on_error and ret != 0:
             if not (print_out and self.opt["verbose"] >= verbose_level):
