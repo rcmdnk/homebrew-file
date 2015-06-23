@@ -34,9 +34,9 @@ if [ -f $(brew --prefix)/etc/brew-wrap ];then
 fi
 ```
 
-**brew-wrap** wraps original `brew` command
+**brew-wrap** wraps the original `brew` command
 for an automatic update of **Brewfile** when you execute
-such `brew install` or `brew uninstall`.
+such a `brew install` or `brew uninstall`.
 
 ## Use local Brewfile
 
@@ -57,7 +57,7 @@ and install packages listed in **Brewfile** by:
     $ brew file install
 
 After that, you need to do only normal `brew` commands, like `brew install` or `brew uninstall`.
-After each commands, **Brewfile** is updated automatically
+After each command, **Brewfile** is updated automatically
 if you set `brew-wrap` as above.
 
 When you get new Mac, copy 
@@ -70,11 +70,11 @@ and just do:
 
 ### Set Brewfile place
 
-You can set the place of Brewfile by using environment variable like:
+You can set the place of Brewfile by using the environment variable like:
 
     export HOMEBREW_BREWFILE=~/Dropbox/Brewfile
 
-Then, you can use Brewfile as same as original Brewfile place.
+Then, you can use Brewfile as same as the original Brewfile place.
 
 In this case, when you have new Mac,
 set `HOMEBREW_BREWFILE` and synchronize the file with a online storage service,
@@ -87,19 +87,19 @@ it is good to have a cron job like
 
     30 12 * * * brew file update
 
-This command installs new package which was installed in another Mac
+This command installs new packages which were installed in another Mac
 at a lunch time (12:30) every day.
 
 This command also does `brew update && brew upgrade`,
 and removes packages not listed in `Brewfile`.
 
-If you want to do only installing new package, then set as:
+If you want to do only installing new packages, then set as:
 
     30 12 * * * brew file install
 
 ## Use GitHub (or any git repository) for Brewfile management
 
-### Setup a repository
+### Set up a repository
 
 First, create a repository with a file named **Brwefile**.
 
@@ -118,7 +118,7 @@ Then, initialize **Brewfile**:
 
     $ brew file init
 
-### Setup new Mac with your Brewfile in the repository
+### Set up new Mac with your Brewfile in the repository
 
 Do:
 
@@ -139,9 +139,9 @@ To update the repository, do:
 If you have set the repository,
 this command does `git pull` and `git push`
 in addition to such brew's `install`, `update`, `updgrade` and removing packages
-described in online storages section.
+described in online storages section above.
 
-It is good if you have such cron job like:
+It is good if you have such a cron job like:
 
     30 12 * * * brew file update
 
