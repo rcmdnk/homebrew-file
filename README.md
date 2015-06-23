@@ -35,30 +35,67 @@ fi
 ```
 
 **brew-wrap** wraps original `brew` command
-for an automatic update of Brewfile when you execute
+for an automatic update of **Brewfile** when you execute
 such `brew install` or `brew uninstall`.
 
-## Simple Usage
+## Use local Brewfile
 
-* If you don't have Brewfile
+By default, **Brewfile** is **/usr/local/Library/Brewfile**.
 
-Initialize your Brewfile by:
+If you don't have **Brewfile**, first do:
 
     $ brew file init
 
-You can see your Brewfile by:
+You can check your package list by:
 
-    $ cat /usr/local/Library/Brewfile
+    $ brew file edit
 
-* If you already have Brewfile
-
-Copy your Brewfile to /usr/local/Library/Brewfile, and do:
+If you already have **Brewfile**, then copy it to 
+**/usr/local/Library/Brewfile**
+and install packages listed in **Brewfile** by:
 
     $ brew file install
 
+After that, you need to do only normal `brew` commands, like `brew install` or `brew uninstall`.
+After each commands, **Brewfile** is updated automatically
+if you set `brew-wrap` as above.
+
+When you get new Mac, copy 
+**/usr/local/Library/Brewfile** to new Mac
+and just do:
+
+    $ brew file install
+
+## use Dropbox (or any online storage) for Brewfile management
+
+### Set Brewfile place
+
+You can set the place of Brewfile by using environment variable like:
+
+    export HOMEBREW_BREWFILE=~/Dropbox/Brewfile
+
+Then, you can use Brewfile as same as original Brewfile place.
+
+In this case, when you have new Mac,
+set `HOMEBREW_BREWFILE` and synchronize the file with a online storage service,
+then do:
+
+    $ brew file install
+
+If you are using multiple Mac in the same time,
+it is good to have a cron job like
+
+    30 12 * * * brew file install
+
+This command installs new package which was installed in another Mac.
+
 ## Use GitHub (or any git repository) for Brewfile management
 
-Set a git repository by:
+### Setup a repository
+
+First create the repository with file named **Brwefile**.
+
+If you use GitHub, you can make it with brew-file:
 
     $ brew file set_repo
 
@@ -66,35 +103,37 @@ Set a git repository by:
     <user>/<repo> for GitHub repository,
     or full path for the repository: 
 
-Then give a name like `rcmdnk/Brewfile`, or `git@github.com:rcmdnk/Brewfile`.
+Give a name like `rcmdnk/Brewfile` (will be recognized as a GitHub repository),
+or such `git@github.com:rcmdnk/Brewfile`.
 
-* If the repository doesn't exist
-
-It enters a repository creation process (only for GitHub case).
-
-To create a repository,
-you need [Requests](http://docs.python-requests.org/en/latest/) module.
-
-To install **Requests**, do:
-
-    $ easy_install pip # in case you've not installed pip
-    $ pip install requests
-
-Once you created the repository,
-do the first initialization by:
+Then, initialize **Brewfile**:
 
     $ brew file init
 
-* If the repository exists
 
-If the repository already have Brewfile, then do:
+### Brewfile management
+
+To update the repository, do:
+
+    $ brew file update
+
+It is good if you have such cron job like:
+
+    30 12 * * * brew file update
+
+The repository is updated at lunch time every day.
+
+### Setup new Mac with your Brewfile in the repository
+
+Do:
+
+    $ brew file set_repo
+
+and give your repository name.
+
+And install packages listed in **Brewfile** like:
 
     $ brew file install
-
-Otherwise initialize it:
-
-    $ brew file init
-
 
 ## More details
 
