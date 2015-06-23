@@ -42,7 +42,7 @@ such `brew install` or `brew uninstall`.
 
 By default, **Brewfile** is **/usr/local/Library/Brewfile**.
 
-If you don't have **Brewfile**, first do:
+If you don't have **Brewfile**, first, do:
 
     $ brew file init
 
@@ -66,7 +66,7 @@ and just do:
 
     $ brew file install
 
-## use Dropbox (or any online storage) for Brewfile management
+## use Dropbox (or any online storages) for Brewfile management
 
 ### Set Brewfile place
 
@@ -85,15 +85,23 @@ then do:
 If you are using multiple Mac in the same time,
 it is good to have a cron job like
 
-    30 12 * * * brew file install
+    30 12 * * * brew file update
 
-This command installs new package which was installed in another Mac.
+This command installs new package which was installed in another Mac
+at a lunch time (12:30) every day.
+
+This command also does `brew update && brew upgrade`,
+and removes packages not listed in `Brewfile`.
+
+If you want to do only installing new package, then set as:
+
+    30 12 * * * brew file install
 
 ## Use GitHub (or any git repository) for Brewfile management
 
 ### Setup a repository
 
-First create the repository with file named **Brwefile**.
+First, create a repository with a file named **Brwefile**.
 
 If you use GitHub, you can make it with brew-file:
 
@@ -110,19 +118,6 @@ Then, initialize **Brewfile**:
 
     $ brew file init
 
-
-### Brewfile management
-
-To update the repository, do:
-
-    $ brew file update
-
-It is good if you have such cron job like:
-
-    30 12 * * * brew file update
-
-The repository is updated at lunch time every day.
-
 ### Setup new Mac with your Brewfile in the repository
 
 Do:
@@ -134,6 +129,23 @@ and give your repository name.
 And install packages listed in **Brewfile** like:
 
     $ brew file install
+
+### Brewfile management
+
+To update the repository, do:
+
+    $ brew file update
+
+If you have set the repository,
+this command does `git pull` and `git push`
+in addition to such brew's `install`, `update`, `updgrade` and removing packages
+described in online storages section.
+
+It is good if you have such cron job like:
+
+    30 12 * * * brew file update
+
+The repository is updated at lunch time every day.
 
 ## More details
 
