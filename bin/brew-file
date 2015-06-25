@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.5.8"
+__version__ = "v3.5.9"
 __date__ = "25/Jun/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1262,9 +1262,14 @@ class BrewFile:
         return files
 
     def edit_brewfile(self):
-        """Edit brewfile"""
+        """Edit brewfiles"""
         import subprocess
         subprocess.call([self.opt["my_editor"]] + self.get_files())
+
+    def cat_brewfile(self):
+        """Cat brewfiles"""
+        import subprocess
+        subprocess.call(['cat'] + self.get_files())
 
     def cleanup(self):
         """Clean up."""
@@ -2004,6 +2009,11 @@ class BrewFile:
             self.edit_brewfile()
             sys.exit(0)
 
+        # Cat
+        if self.opt["command"] == "cat":
+            self.cat_brewfile()
+            sys.exit(0)
+
         # Get files
         if self.opt["command"] == "get_files":
             self.get_files(is_print=True)
@@ -2069,6 +2079,8 @@ def main():
                        dest="command", const="update")
     group.add_argument("-e", "--edit", action="store_const",
                        dest="command", const="edit")
+    group.add_argument("--cat", action="store_const",
+                       dest="command", const="cat")
     group.add_argument("--test", action="store_const",
                        dest="command", const="test")
     group.add_argument("--commands", action="store_const",
@@ -2200,8 +2212,11 @@ def main():
         parents=min_parsers+[link_parser, noupdate_parser,
                              noupdatedummy_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -e/--edit\nEdit input file."
+    help = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help, help=help,
+                          **subparser_options)
+    help = "or --cat\nShow contents of input files."
+    subparsers.add_parser("cat", description=help, help=help,
                           **subparser_options)
     help = "Check applications for Cask."
     subparsers.add_parser("casklist", description=help, help=help,
@@ -2271,11 +2286,11 @@ def main():
         sys.exit(0)
     if b.opt["command"] == "commands":
         commands = ['install', 'brew', 'init', 'dump', 'set_repo', 'pull',
-                    'push', 'clean', 'update', 'edit', 'casklist',
+                    'push', 'clean', 'update', 'edit', 'cat', 'casklist',
                     'cask_upgrade', 'test', 'get_files', 'commands', 'version',
                     'help']
         commands_hyphen = ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
-                           '-u', '--update', '-e', '--edit', '--test',
+                           '-u', '--update', '-e', '--edit', '--cat', '--test',
                            '--commands', '-v', '--version', '-h', '--help']
         options = ['-f', '--file', '-F', '--format', '--form', '-U',
                    '--noupdate', '--preupdate', '-r', '--repo', '-n',
