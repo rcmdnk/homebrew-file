@@ -44,11 +44,17 @@ By default, **Brewfile** is **/usr/local/Library/Brewfile**.
 
 If you don't have **Brewfile**, first, do:
 
-    $ brew file init
+    $ brew init
+
+`brew init` is same as `brew file init`, if you setup `brew-wrap` as above.
+
+Note: In below, such `cat` and `set_repo` command can be used directly after `brew`,
+but `install` or `update` need to use with `brew file` because
+`brew` command has own `install` or `update` commands.
 
 You can check your package list by:
 
-    $ brew file edit
+    $ brew cat
 
 If you already have **Brewfile**, then copy it to 
 **/usr/local/Library/Brewfile**
@@ -105,7 +111,7 @@ First, create a repository with a file named **Brwefile**.
 
 If you use GitHub, you can make it with brew-file:
 
-    $ brew file set_repo
+    $ brew set_repo
 
     Set repository, "non" for local Brewfile.
     <user>/<repo> for GitHub repository,
@@ -116,13 +122,13 @@ or such `git@github.com:rcmdnk/Brewfile`.
 
 Then, initialize **Brewfile**:
 
-    $ brew file init
+    $ brew init
 
 ### Set up new Mac with your Brewfile in the repository
 
 Do:
 
-    $ brew file set_repo
+    $ brew set_repo
 
 and give your repository name.
 
