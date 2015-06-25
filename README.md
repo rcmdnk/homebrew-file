@@ -138,7 +138,7 @@ To update the repository, do:
 
 If you have set the repository,
 this command does `git pull` and `git push`
-in addition to such brew's `install`, `update`, `updgrade` and removing packages
+in addition to such brew's `install`, `clean`, `update`, `updgrade` and removing packages
 described in online storages section above.
 
 It is good if you have such a cron job like:
