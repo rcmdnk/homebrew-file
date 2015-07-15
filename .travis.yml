@@ -21,11 +21,11 @@ before_install:
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config || :'
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
+  - brew update
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew list > brewlist.orig
-  - brew install a2ps
   - brew install rcmdnk/file/brew-file $version
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - cd ../
