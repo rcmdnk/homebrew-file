@@ -4,8 +4,8 @@ Brew-file
 [![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.org/rcmdnk/homebrew-file)
 [![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=master)
 
-Manager for packages of Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler)
-(Renamed from brewall).
+Brwefile manager for Homebrew, inspired by [Brewdler](https://github.com/andrew/brewdler)
+(Brew-file was Renamed from brewall).
 
 Brewfile dumped by [homebrew-brewdler](https://github.com/Homebrew/homebrew-brewdler)
 can be used as input, too.
