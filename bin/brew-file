@@ -253,7 +253,8 @@ class BrewInfo:
         self.file_list.extend(self.file_input)
 
     def get(self, name):
-        return self.list_dic[name]
+        import copy
+        return copy.deepcopy(self.list_dic[name])
 
     def remove(self, name, package):
         if type(self.list_dic[name]) == list:
@@ -667,13 +668,16 @@ class BrewFile:
             self.banner("# Initialize " + b.get_file(), 1)
             b.write(check_opt=check_opt)
 
-    def get(self, name):
-        import copy
-        l = copy.deepcopy(self.brewinfo.get(name))
+    def get(self, name, only_ext=False):
+        l = self.brewinfo.get(name)
         if type(l) == list:
+            if only_ext:
+                del l[:]
             for b in self.brewinfo_ext:
                 l += b.get(name)
         elif type(l) == dict:
+            if only_ext:
+                l.clear()
             for b in self.brewinfo_ext:
                 l.update(b.get(name))
         return l
@@ -1130,8 +1134,7 @@ class BrewFile:
             else:
                 i = l
             for p in self.brewinfo.get(l+"_list"):
-                if p not in self.brewinfo.get(i+"_input") and\
-                        p in self.get(i+"_input"):
+                if p in self.get(i+"_input", True):
                     self.brewinfo.remove(l+"_list", p)
 
         # Keep file in main Brewfile
