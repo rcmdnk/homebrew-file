@@ -465,7 +465,7 @@ class BrewInfo:
                 out.writeln("#cask " + self.packout(p))
 
         # App Store applications
-        if len(self.appstore_list) > 0:
+        if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for p in self.appstore_list:
                 if self.helper.opt["form"] == "brewdler":
@@ -528,6 +528,7 @@ class BrewFile:
         self.opt["noupdate"] = True
         self.opt["noupdateatupdate"] = False
         self.opt["link"] = True
+        self.opt["appstore"] = True
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
         self.opt["tap_dir"] = self.opt["brew_repo"] + "/Library/Taps"
@@ -1111,7 +1112,8 @@ class BrewFile:
                 self.brewinfo.cask_nocask_list.append(p)
 
         # App Store
-        self.brewinfo.set_val("appstore_list", self.get_appstore_list())
+        if self.opt["appstore"]:
+            self.brewinfo.set_val("appstore_list", self.get_appstore_list())
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input"""
@@ -1288,7 +1290,8 @@ class BrewFile:
         self.read_all()
 
         # Clean up App Store applications
-        if len(self.get("appstore_list")) > 0:  # pragma: no cover
+        if self.opt["appstore"] and \
+                len(self.get("appstore_list")) > 0:  # pragma: no cover
             self.banner("# Clean up App Store applications")
             cmd = "sudo uninstall"
             n_uninstall = 0
@@ -1461,9 +1464,11 @@ class BrewFile:
                             self.proc("brew linkapps")
 
         # App Store
-        for p in self.get("appstore_input"):
-            if p not in self.get("appstore_list"):
-                self.warning("\nPlease install " + p + " from App Store!", 0)
+        if self.opt["appstore"]:
+            for p in self.get("appstore_input"):
+                if p not in self.get("appstore_list"):
+                    self.warning("\nPlease install " +
+                                 p + " from App Store!", 0)
 
         # Other commands
         for c in self.get("cmd_input"):
@@ -2140,6 +2145,12 @@ def main():
         "-n", "--nolink", action="store_false", default=True,
         dest="link", help="Don't make links for Apps.")
 
+    appstore_parser = argparse.ArgumentParser(add_help=False)
+    appstore_parser.add_argument(
+        "--no_appstore", action="store_false", default=True,
+        dest="appstore", help="Don't check AppStore applications.\n"
+             "(For other than casklist command)")
+
     dryrun_parser = argparse.ArgumentParser(add_help=False)
     dryrun_parser.add_argument(
         "-C", action="store_false", default=True,
@@ -2154,16 +2165,17 @@ def main():
     verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
                                 dest="verbose", help="Verbose level 0/1/2")
 
-    min_parsers = [file_parser, format_parser, yn_parser, verbose_parser]
+    min_parsers = [file_parser, format_parser,
+                   appstore_parser, yn_parser, verbose_parser]
     subparser_options = {
-        "parents": min_parsers + [noupdate_parser, noupdateatupdate_parser],
+        "parents": min_parsers + [noupdate_parser],
         "formatter_class": argparse.RawTextHelpFormatter}
 
     # Main parser
     parser = argparse.ArgumentParser(
         add_help=False, prog=__prog__,
         parents=[file_parser, format_parser, noupdateatupdate_parser,
-                 noupdate_parser, repo_parser, link_parser,
+                 noupdate_parser, repo_parser, link_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description="Brew-file: Manager for packages of Homebrew\n"
@@ -2184,13 +2196,11 @@ def main():
         "with installed packages."
     subparsers.add_parser(
         "init", description=help, help=help,
-        parents=min_parsers+[link_parser, repo_parser, noupdate_parser,
-                             noupdateatupdate_parser],
+        parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     subparsers.add_parser(
         "dump", add_help=False,
-        parents=min_parsers+[link_parser, noupdate_parser,
-                             noupdateatupdate_parser],
+        parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
     subparsers.add_parser(
@@ -2219,8 +2229,7 @@ def main():
            "will be done if the repository is assigned."
     subparsers.add_parser(
         "update", description=help, help=help,
-        parents=min_parsers+[link_parser, noupdate_parser,
-                             noupdateatupdate_parser],
+        parents=min_parsers+[link_parser, noupdateatupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help, help=help,
