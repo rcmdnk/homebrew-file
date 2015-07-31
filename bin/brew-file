@@ -525,7 +525,8 @@ class BrewFile:
                                            "/Library/Brewfile")
         self.opt["form"] = "file"
         self.opt["repo"] = ""
-        self.opt["noupdate"] = False
+        self.opt["noupdate"] = True
+        self.opt["noupdateatupdate"] = False
         self.opt["link"] = True
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
@@ -2046,8 +2047,9 @@ class BrewFile:
             self.install()
             self.opt["dryrun"] = False
             self.cleanup()
-            self.proc("brew update")
-            self.proc("brew upgrade --all")
+            if not self.opt["noupdateatupdate"]:
+                self.proc("brew update")
+                self.proc("brew upgrade --all")
             self.initialize(False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
@@ -2115,11 +2117,12 @@ def main():
               "file:     brew vim --HEAD --with-lua\n"
               "brewdler: brew 'vim', args: ['with-lua', 'HEAD']\n")
 
-    noupdatedummy_parser = argparse.ArgumentParser(add_help=False)
-    noupdatedummy_parser.add_argument(
+    noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
+    noupdateatupdate_parser.add_argument(
         "-U", "--noupdate", action="store_true",
-        default=False, dest="noupdatedummy",
-        help="Do not execute `brew update` before install or other commands.")
+        default=False, dest="noupdateatupdate",
+        help="Do not execute `brew update/brew upgrade`"
+             " at `brew file update`.")
 
     noupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdate_parser.add_argument(
@@ -2153,13 +2156,13 @@ def main():
 
     min_parsers = [file_parser, format_parser, yn_parser, verbose_parser]
     subparser_options = {
-        "parents": min_parsers + [noupdate_parser, noupdatedummy_parser],
+        "parents": min_parsers + [noupdate_parser, noupdateatupdate_parser],
         "formatter_class": argparse.RawTextHelpFormatter}
 
     # Main parser
     parser = argparse.ArgumentParser(
         add_help=False, prog=__prog__,
-        parents=[file_parser, format_parser, noupdatedummy_parser,
+        parents=[file_parser, format_parser, noupdateatupdate_parser,
                  noupdate_parser, repo_parser, link_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
@@ -2182,12 +2185,12 @@ def main():
     subparsers.add_parser(
         "init", description=help, help=help,
         parents=min_parsers+[link_parser, repo_parser, noupdate_parser,
-                             noupdatedummy_parser],
+                             noupdateatupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     subparsers.add_parser(
         "dump", add_help=False,
         parents=min_parsers+[link_parser, noupdate_parser,
-                             noupdatedummy_parser],
+                             noupdateatupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
     subparsers.add_parser(
@@ -2217,7 +2220,7 @@ def main():
     subparsers.add_parser(
         "update", description=help, help=help,
         parents=min_parsers+[link_parser, noupdate_parser,
-                             noupdatedummy_parser],
+                             noupdateatupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help, help=help,

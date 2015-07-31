@@ -218,6 +218,8 @@ Or if you just have
 then you can put Host specific packages in **~/.Brewfile**.
 (If the file doesn't exist, `brew-file` just ignores it.)
 
+Other example: [Add an option to ignore appstore apps · Issue #22 · rcmdnk/homebrew-file](https://github.com/rcmdnk/homebrew-file/issues/22)
+
 You don't need to `brew install` by hand.
 As written above, `tap 'caskroom/cask'` is can be dropped
 because `cask 'firefox'` triggers it.
