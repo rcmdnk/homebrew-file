@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.5.9"
-__date__ = "25/Jun/2015"
+__version__ = "v3.5.10"
+__date__ = "31/Jul/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -639,6 +639,10 @@ class BrewFile:
         else:
             self.warning("Tried to remove non usual file/directory:" + path, 0)
 
+    def read_all(self):
+        del self.brewinfo_ext[:]
+        self.read(self.brewinfo)
+
     def read(self, brewinfo):
         brewinfo.read()
         for f in brewinfo.get("file_input"):
@@ -910,7 +914,7 @@ class BrewFile:
             sys.exit(0)
 
         if self.brewinfo.check_file():
-            self.read(self.brewinfo)
+            self.read_all()
         if cmd == "install":
             psplit = p.split("/")
             if len(psplit) > 2:
@@ -1221,7 +1225,7 @@ class BrewFile:
 
         # Read inputs
         if self.brewinfo.check_file():
-            self.read(self.brewinfo)
+            self.read_all()
 
         # Remove duplications between brewinfo.list to extra files' input
         self.clean_list()
@@ -1255,7 +1259,7 @@ class BrewFile:
 
     def get_files(self, is_print=False):
         """Get Brewfiles"""
-        self.read(self.brewinfo)
+        self.read_all()
         files = [x.get_file() for x in [self.brewinfo] + self.brewinfo_ext]
         if is_print:
             print '\n'.join(files)
@@ -1277,7 +1281,7 @@ class BrewFile:
             self.banner("# Dry run")
 
         # Check up packages in the input file
-        self.read(self.brewinfo)
+        self.read_all()
 
         # Clean up App Store applications
         if len(self.get("appstore_list")) > 0:  # pragma: no cover
@@ -1409,7 +1413,7 @@ class BrewFile:
             self.proc("brew update")
 
         # Check packages in the input file
-        self.read(self.brewinfo)
+        self.read_all()
 
         # before commands
         for c in self.get("before_input"):
@@ -2039,8 +2043,9 @@ class BrewFile:
             self.install()
             self.opt["dryrun"] = False
             self.cleanup()
-            self.proc("brew update")
-            self.proc("brew upgrade --all")
+            if not self.opt["noupdate"]:
+                self.proc("brew update")
+                self.proc("brew upgrade --all")
             self.initialize(False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
