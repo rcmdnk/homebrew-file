@@ -1934,18 +1934,26 @@ class BrewFile:
                     installed = False
                     break
             if not installed:
-                self.proc(["brew", "cask", "install", a])
-            if not self.opt["dryrun"]:
-                current = ""
-                for l in lines:
-                    if l.startswith(self.opt["caskroom"]):
-                        current = l.split()[0]
-                if current == "":
-                    continue
-                appdir = os.path.dirname(current)
-                for d in os.listdir(appdir):
-                    if d != current.split("/")[-1]:
-                        self.info("rm -rf " + appdir + "/" + d, 1)
+                self.info(a + " was installed by cask, but it may have newer"
+                          " version, might be removed"
+                          " or overwritten by direct installation.\n"
+                          "Install it by cask.", 1)
+                if not self.opt["dryrun"]:
+                    self.proc(["brew", "cask", "install", a])
+
+            lines = self.proc("brew cask info " + a, False, False)[1]
+            current = ""
+            for l in lines:
+                if l.startswith(self.opt["caskroom"]):
+                    current = l.split()[0]
+            if current == "":
+                continue
+            appdir = os.path.dirname(current)
+            for d in os.listdir(appdir):
+                if d != current.split("/")[-1] and d != ".metadata" and \
+                        d != ".DS_Store":
+                    self.info("Remove older version: " + appdir + "/" + d, 1)
+                    if not self.opt["dryrun"]:
                         try:
                             self.remove(appdir + "/" + d)
                         except:
