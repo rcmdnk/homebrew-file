@@ -41,7 +41,6 @@ before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
   - brewfile=$brewprefix/Library/Brewfile
-  - touch "$brewfile"
   - testaccount=rcmdnk
   - testreponame=BrewfileTest
   - testrepo=$testaccount/$testreponame
