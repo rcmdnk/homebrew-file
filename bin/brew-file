@@ -536,9 +536,9 @@ class BrewInfo:
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
-            sys.chmod(self.get_file(), 755)
+            os.chmod(self.get_file(), 755)
         else:
-            sys.chmod(self.get_file(), 644)
+            os.chmod(self.get_file(), 644)
 
 class BrewFile:
 
