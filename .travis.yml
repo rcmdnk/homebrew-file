@@ -39,9 +39,13 @@ install:
   - rm -rf ../BrewfileTest
 before_script:
   - touch "$brewprefix/Library/Brewfile"
+  - ls "$brewprefix/Library/Brewfile"
+  - ls "$brewprefix/Library/Brewfile"
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
   - brewfile=$brewprefix/Library/Brewfile
+  - ls "$brewprefix/Library/Brewfile"
+  - ls "$brewprefix"
   - testaccount=rcmdnk
   - testreponame=BrewfileTest
   - testrepo=$testaccount/$testreponame
@@ -51,6 +55,7 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
+  - ls "$brewprefix/Library/Brewfile"
   # Check differences between checked out's version and brew installed version
   - '[ "$version" != "" ] && diff $installed_brew $exe || :'
   - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
