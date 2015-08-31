@@ -79,7 +79,7 @@ script:
   - coverage run --parallel-mode $exe help
   - coverage run --parallel-mode $exe commands
   - 'coverage run --parallel-mode $exe || :'
-  - coverage run --parallel-mode $exe brew list >/dev/null
+  - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe install --preupdate -y
