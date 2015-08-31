@@ -298,9 +298,14 @@ class BrewInfo:
                 replace(",", " ").replace("[", "").replace("]", "").split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
-            if len(args) > 2 and p == "install":
-                p = args[2]
-                args.pop(1)
+            if len(args) > 2 and cmd in ["tap", "cask", "pip"]:
+                    args.pop(0)
+                    cmd = args[0]
+                    p = args[1]
+            if len(args) > 2 and cmd in ["brew", "cask"] and p == "install":
+                    args.pop(1)
+                    p = args[1]
+
             if len(args) > 2:
                 if args[2] == "args:":
                     opt = " " + " ".join(["--" + x for x in args[3:]]).strip()
@@ -364,7 +369,7 @@ class BrewInfo:
                                     os.listdir(tap_path + "/Casks"))))
 
     def packout(self, pack):
-        if self.helper.opt["form"] == "brewdler":
+        if self.helper.opt["form"] in ["brewdler", "bundle"]:
             return "'" + pack + "'"
         else:
             return pack
@@ -399,7 +404,7 @@ class BrewInfo:
                         if k != "stable":
                             opt += " --" + k
                         break
-        if opt != "" and self.helper.opt["form"] == "brewdler":
+        if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
             import re
             opt = ", args: [" + ", ".join(
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
@@ -409,30 +414,68 @@ class BrewInfo:
         # Prepare output
         out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
 
+        # commands for each format
+        if self.helper.opt["form"] == "file":
+            cmd_before = "before "
+            cmd_after = "after "
+            cmd_other = ""
+            cmd_install = "brew "
+            cmd_tap = "tap "
+            cmd_cask = "cask "
+            cmd_pip = "pip "
+            cmd_cask_nocask = "#cask "
+            cmd_appstore = "appstore "
+            cmd_file = "file "
+        elif self.helper.opt["form"] in ["brewdler", "bundle"]:
+            cmd_before = "#before "
+            cmd_after = "#after "
+            cmd_other = "#"
+            cmd_install = "brew "
+            cmd_tap = "tap "
+            cmd_cask = "cask "
+            cmd_pip = "#pip "
+            cmd_cask_nocask = "#cask "
+            cmd_appstore = "#appstore "
+            cmd_file = "#file "
+        elif self.helper.opt["form"] in ["command", "cmd"]:
+            # Shebang for command format
+            out.writeln("#!/usr/bin/env bash\n")
+
+            cmd_before = ""
+            cmd_after = ""
+            cmd_other = ""
+            cmd_install = "brew install "
+            cmd_tap = "brew tap "
+            cmd_cask = "brew cask install "
+            cmd_pip = "brew pip "
+            cmd_cask_nocask = "#brew cask install "
+            cmd_appstore = "#appstore "
+            cmd_file = "#file "
+
         # Before commands
         if len(self.before_input) > 0:
             out.writeln("# Before commands")
             for p in self.before_input:
-                out.writeln("before " + p)
+                out.writeln(cmd_before + p)
 
         # Taps
         if len(self.tap_list) > 0:
             out.writeln("\n# tap repositories and their packages")
             for p in self.tap_list:
                 self.get_tap(p)
-                out.writeln("\n## " + p + "\ntap " + self.packout(p))
+                out.writeln("\n## " + p + "\n" + cmd_tap + self.packout(p))
                 for tp in self.tap_packs:
                     if tp in self.brew_list:
                         if check_opt:
                             pack = self.packout(tp) + self.get_options(tp)
                         else:
                             pack = self.packout(tp) + self.brew_list_opt[tp]
-                        out.writeln("brew " + pack)
+                        out.writeln(cmd_install + pack)
                         self.brew_list.remove(tp)
                         del self.brew_list_opt[tp]
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
-                        out.writeln("cask " + self.packout(tc))
+                        out.writeln(cmd_cask + self.packout(tc))
                         self.cask_list.remove(tc)
 
         # Brew packages
@@ -443,60 +486,59 @@ class BrewInfo:
                     pack = self.packout(p) + self.get_options(p)
                 else:
                     pack = self.packout(p) + self.brew_list_opt[p]
-                out.writeln("brew " + pack)
+                out.writeln(cmd_install + pack)
 
         # pip packages
         if len(self.pip_list) > 0:
             out.writeln("\n# pip packages")
             for p in self.pip_list:
-                out.writeln("pip " + self.packout(p))
+                out.writeln(cmd_pip + self.packout(p))
 
         # Casks
         if len(self.cask_list) > 0:
             out.writeln("\n# Cask applications")
             for p in self.cask_list:
-                out.writeln("cask " + self.packout(p))
+                out.writeln(cmd_cask + self.packout(p))
 
         # Installed by cask, but cask files were not found...
         if len(self.cask_nocask_list) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
             for p in self.cask_nocask_list:
-                out.writeln("#cask " + self.packout(p))
+                out.writeln(cmd_cask_nocask + self.packout(p))
 
         # App Store applications
         if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for p in self.appstore_list:
-                if self.helper.opt["form"] == "brewdler":
-                    out.writeln("#appstore " + self.packout(p))
-                else:
-                    out.writeln("appstore " + self.packout(p))
+                out.writeln(cmd_appstore + self.packout(p))
 
         # Additional files
         if len(self.file_list) > 0:
             out.writeln("\n# Additional files")
             for p in self.file_list:
-                if self.helper.opt["form"] == "brewdler":
-                    out.writeln("#file " + self.packout(p))
-                else:
-                    out.writeln("file " + self.packout(p))
+                out.writeln(cmd_file + self.packout(p))
 
         # Other commands
         if len(self.cmd_input) > 0:
             out.writeln("\n# Other commands")
             for p in self.cmd_input:
-                out.writeln(p)
+                out.writeln(cmd_other + p)
 
         # After commands
         if len(self.after_input) > 0:
             out.writeln("\n# After commands")
             for p in self.after_input:
-                out.writeln("after " + p)
+                out.writeln(cmd_after + p)
 
         # Close Brewfile
         out.close()
 
+        # Change permission for exe/normal file
+        if self.helper.opt["form"] in ["command", "cmd"]:
+            sys.chmod(self.get_file(), 755)
+        else:
+            sys.chmod(self.get_file(), 644)
 
 class BrewFile:
 
@@ -2127,8 +2169,13 @@ def main():
         "-F", "--format", "--form", action="store", dest="form",
         default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
-              "file:     brew vim --HEAD --with-lua\n"
-              "brewdler: brew 'vim', args: ['with-lua', 'HEAD']\n")
+              "file             : brew vim --HEAD --with-lua\n"
+              "brewdler or budle: brew 'vim', args: ['with-lua', 'HEAD']\n"
+              "  Compatible with "
+              "[homebrew-bundle]"
+              "(https://github.com/Homebrew/homebrew-bundle).\n"
+              "command or cmd   :  brew install vim --HEAD --with-lua\n"
+              "  Can be used as a shell script.\n")
 
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdateatupdate_parser.add_argument(

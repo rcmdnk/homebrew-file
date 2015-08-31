@@ -180,6 +180,9 @@ script:
   - echo "appstore 'KeyNotes'" >> $testfile
   - echo "file 'BrewfileExt'" >> $testfile
   - coverage run --parallel-mode $exe -F brewdler brew cask uninstall google-chrome
+  # command format tests
+  - coverage run --parallel-mode $exe init -F command -y -V 2
+  - coverage run --parallel-mode $exe install -F command
   # Clean up tests
   - echo "brew brew-file $version" > $testfile
   - echo "brew python" >> $testfile
