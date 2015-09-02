@@ -298,7 +298,7 @@ class BrewInfo:
                 replace(",", " ").replace("[", "").replace("]", "").split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
-            if len(args) > 2 and cmd in ["tap", "cask", "pip"]:
+            if len(args) > 2 and p in ["tap", "cask", "pip"]:
                     args.pop(0)
                     cmd = args[0]
                     p = args[1]
