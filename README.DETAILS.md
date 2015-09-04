@@ -331,8 +331,8 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## HELP
 
-    usage: brew file [-f INPUT] [-F FORM] [-U] [--preupdate] [-r REPO] [-n] [-C]
-                     [-y] [-V VERBOSE]
+    usage: brew file [-f INPUT] [-F FORM] [-U] [--preupdate] [-r REPO] [-n]
+                     [--no_appstore] [-C] [-y] [-V VERBOSE]
                      [command] ...
     
     Brew-file: Manager for packages of Homebrew
@@ -340,18 +340,23 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
     
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /usr/local/Library/Brewfile).
+                            Set input file (default: /usr/local/Library/Brewfile). 
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
       -F FORM, --format FORM, --form FORM
-                            Set input file format (default: file).
-                            file:     brew vim --HEAD --with-lua
-                            brewdler: brew 'vim', args: ['with-lua', 'HEAD']
-      -U, --noupdate        Do not execute `brew update` before install or other commands.
+                            Set input file format (default: file). 
+                            file             : brew vim --HEAD --with-lua
+                            brewdler or budle: brew 'vim', args: ['with-lua', 'HEAD']
+                              Compatible with [homebrew-bundle](https://github.com/Homebrew/homebrew-bundle).
+                            command or cmd   :  brew install vim --HEAD --with-lua
+                              Can be used as a shell script.
+      -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
       --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
+      --no_appstore         Don't check AppStore applications.
+                            (For other than casklist command)
       -C                    Run cleanup in non dry-run mode.
       -y, --yes             Answer yes to all yes/no questions.
       -V VERBOSE, --verbose VERBOSE
@@ -376,12 +381,14 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
                             By drault, cleanup runs as dry-run.
                             If you want to enforce cleanup, use '-C' option.
         update              or -u/--update
-                            Do pull, install, brew update/upgrade, init,
-                            push and clean -C.
-                            In addition, pull, push and clean
+                            Do pull, install, clean, brew update/upgrade,
+                            init and push.
+                            In addition, pull and push
                             will be done if the repository is assigned.
         edit                or -e/--edit
-                            Edit input file.
+                            Edit input files.
+        cat                 or --cat
+                            Show contents of input files.
         casklist            Check applications for Cask.
         cask_upgrade        Upgrade cask applications.
                             With -C, old versions will be removed.

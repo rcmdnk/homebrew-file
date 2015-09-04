@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.6.0"
-__date__ = "1/Sep/2015"
+__version__ = "v3.6.1"
+__date__ = "4/Sep/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2169,12 +2169,12 @@ def main():
         "-F", "--format", "--form", action="store", dest="form",
         default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
-              "file             : brew vim --HEAD --with-lua\n"
-              "brewdler or budle: brew 'vim', args: ['with-lua', 'HEAD']\n"
+              "file              : brew vim --HEAD --with-lua\n"
+              "brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']\n"
               "  Compatible with "
               "[homebrew-bundle]"
               "(https://github.com/Homebrew/homebrew-bundle).\n"
-              "command or cmd   :  brew install vim --HEAD --with-lua\n"
+              "command or cmd    : brew install vim --HEAD --with-lua\n"
               "  Can be used as a shell script.\n")
 
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
