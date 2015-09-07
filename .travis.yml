@@ -216,7 +216,7 @@ script:
   # Install test
   - rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
   - rm -rf $brewprefix/.git*
-  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
+  - curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh >/dev/null
   - brew help
   - brew file help
 notifications:
