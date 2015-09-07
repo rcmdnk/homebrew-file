@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.6.1"
-__date__ = "4/Sep/2015"
+__version__ = "v3.6.2"
+__date__ = "7/Sep/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -440,6 +440,14 @@ class BrewInfo:
         elif self.helper.opt["form"] in ["command", "cmd"]:
             # Shebang for command format
             out.writeln("#!/usr/bin/env bash\n")
+            out.writeln("if ! which brew >& /dev/null;then")
+            out.writeln("  brew_installed=0")
+            out.writeln("  echo Homebrew is not installed!")
+            out.writeln("  echo Install now...")
+            out.writeln('  echo ruby -e \\"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install\)\\"')
+            out.writeln('  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+            out.writeln("  echo")
+            out.writeln("fi")
 
             cmd_before = ""
             cmd_after = ""
@@ -539,6 +547,7 @@ class BrewInfo:
             os.chmod(self.get_file(), 0755)
         else:
             os.chmod(self.get_file(), 0644)
+
 
 class BrewFile:
 
