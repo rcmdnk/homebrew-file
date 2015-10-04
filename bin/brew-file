@@ -1509,7 +1509,7 @@ class BrewFile:
 
         # Tap
         for p in self.get("tap_input"):
-            if p not in self.get("tap_list"):
+            if p not in self.get("tap_list") and p != "direct":
                 self.proc("brew tap " + p)
 
         # Cask
@@ -1529,6 +1529,12 @@ class BrewFile:
             if p not in self.get("brew_list"):
                 (ret, lines) = self.proc("brew install " + p +
                                          self.get("brew_input_opt")[p])
+                if ret != 0:
+                    self.warning("Can not install " + p + "."
+                                 "Please check the package name.\n"
+                                 "" + p + " may be installed "
+                                 "by using web direct formula.", 0)
+                    continue
                 for l in lines:
                     if l.find("ln -s") >= 0:
                         if self.opt["link"]:
