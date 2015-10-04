@@ -13,7 +13,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.6.4"
+__version__ = "v3.6.5"
 __date__ = "5/Oct/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -291,6 +291,7 @@ class BrewInfo:
         f.close()
         import re
         is_ignore = False
+        self.tap_input.append("direct")
         for l in lines:
             if re.match("# *BREWFILE_ENDIGNORE", l):
                 is_ignore = False
@@ -350,6 +351,9 @@ class BrewInfo:
 
     def get_tap_path(self, tap):
         """Get tap path"""
+        if tap == "direct":
+            return self.helper.opt["cache_dir"] + "/Formula"
+
         tap_user = os.path.dirname(tap)
         tap_repo = os.path.basename(tap)
         return self.helper.opt["tap_dir"] + "/" +\
@@ -478,18 +482,31 @@ class BrewInfo:
         # Taps
         if len(self.tap_list) > 0:
             out.writeln("\n# tap repositories and their packages")
+            print self.tap_list
             for p in self.tap_list:
                 self.get_tap(p)
-                out.writeln("\n## " + p + "\n" + cmd_tap + self.packout(p))
+                direct_first = False
+                if p == "direct":
+                    print "direct"
+                    print self.tap_packs
+                    direct_first = True
+                else:
+                    out.writeln("\n## " + p + "\n" + cmd_tap + self.packout(p))
                 for tp in self.tap_packs:
-                    if tp in self.brew_list:
-                        if check_opt:
-                            pack = self.packout(tp) + self.get_options(tp)
-                        else:
-                            pack = self.packout(tp) + self.brew_list_opt[tp]
-                        out.writeln(cmd_install + pack)
-                        self.brew_list.remove(tp)
-                        del self.brew_list_opt[tp]
+                    for p_in_t in self.brew_list:
+                        if tp == p_in_t.split("/")[-1].rstrip(".rb"):
+                            if direct_first:
+                                direct_first = False
+                                out.writeln("\n## " + "Direct install")
+                            if check_opt:
+                                pack = self.packout(p_in_t) +\
+                                    self.get_options(p_in_t)
+                            else:
+                                pack = self.packout(p_in_t) +\
+                                    self.brew_list_opt[p_in_t]
+                            out.writeln(cmd_install + pack)
+                            self.brew_list.remove(p_in_t)
+                            del self.brew_list_opt[p_in_t]
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
                         out.writeln(cmd_cask + self.packout(tc))
@@ -983,20 +1000,24 @@ class BrewFile:
             self.read_all()
         if cmd == "install":
             psplit = p.split("/")
+            t = ""
             if len(psplit) > 0:
-                p = psplit[-1].rstrip(".rb")
                 if len(psplit) == 3 and not p.startswith("http") and\
                         not p.startswith("ftp") and not p.startswith("/"):
+                    p = psplit[-1]
                     t = "/".join(psplit[:-1])
-                    if t not in self.get("tap_input"):
-                        self.brewinfo.tap_input.append(t)
-                        self.brewinfo.tap_input.sort()
-            if p in self.get("brew_input"):
+                else:
+                    t = "direct"
+            if p in self.get("brew_input") or\
+                    p.split("/")[-1].rstrip(".rb") in self.get("brew_input"):
                 self.warning(p + " is already in Brewfile.")
                 self.warning("Do 'brew file init' to clean up Brewfile")
                 sys.exit(0)
             self.brewinfo.brew_input.append(p)
             self.brewinfo.brew_input.sort()
+            if t != "" and t not in self.get("tap_input"):
+                self.brewinfo.tap_input.append(t)
+                self.brewinfo.tap_input.sort()
             if len(self.opt["args"]) > 2:
                 self.brewinfo.brew_input_opt[p] =\
                     " " + " ".join(self.opt["args"][2:]).strip()
@@ -1153,6 +1174,7 @@ class BrewFile:
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
         self.brewinfo.set_val("tap_list", lines)
+        self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
         for p in self.get_cask_list()[1]:
@@ -1280,16 +1302,20 @@ class BrewFile:
                     sys.exit(0)
 
         # Get installed package list
+        print "get_list()"
         self.get_list()
 
         # Read inputs
         if self.brewinfo.check_file():
+            print "read_all()"
             self.read_all()
 
         # Remove duplications between brewinfo.list to extra files' input
+        print "clean_list()()"
         self.clean_list()
 
         # write out
+        print "initialize_write()"
         self.initialize_write()
 
     def initialize_write(self, check_opt=True):
