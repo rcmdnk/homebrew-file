@@ -1806,7 +1806,7 @@ class BrewFile:
             if len([x for x in apps[self.opt["cask_repo"]][True]
                     if x[2] == "cask_obsolete"]) > 0:
                 out.writeln(
-                    "# There are new version for following applications.")
+                    "\n# There are new version for following applications.")
                 for (name, app_path, check) in\
                         sorted(x for x in apps[self.opt["cask_repo"]][True]
                                if x[2] == "cask_obsolete"):
@@ -1825,7 +1825,7 @@ class BrewFile:
                 if x[1] == self.opt["cask_repo"] and not x[3]]) > 0:
             out.writeln("# Cask is found, but no applications are found " +
                         "(could be fonts, system settins, " +
-                        "or installed in other directory.")
+                        "or installed in other directory.)")
             for name in sorted(
                     x[0] for x in casks.values() + nonapp_casks
                     if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
@@ -1836,7 +1836,7 @@ class BrewFile:
                    if x[1] == self.opt["cask_repo"] and
                    not x[2] and not x[3]]) > 0:
                 out.writeln(
-                    "# There are new version for following applications.")
+                    "\n# There are new version for following applications.")
                 for name in sorted(
                         x[0] for x in casks.values() + nonapp_casks
                         if x[1] == self.opt["cask_repo"] and
