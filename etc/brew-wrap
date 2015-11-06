@@ -36,30 +36,29 @@ brew () {
     cmd3=$3
 
     if type -a brew-file >/dev/null 2>&1;then
-      # brew install/uninstall, pip
-      if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ]\
-          || [ "$cmd" = "uninstall" ] || [ "$cmd" = "install" ]\
-          || [ "$cmd" = "tap" ] || [ "$cmd" = "untap" ];then
-        if [ $# -gt 1 ];then
-          if [ "$cmd2" != "-h" ];then
-            brew-file brew "$@"
-            return $?
-          fi
-        fi
-      fi
-
-      # brew cask install/uninstall
-      if [ "$cmd" = "cask" ];then
-        if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ]\
-            || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
-          if [ $# -gt 2 ];then
-            if [ "$cmd3" != "-h" ];then
+      case "$cmd" in
+        # brew install/uninstall/tap/pip
+        install|reinstall|tap|pip|rm|remove|uninstall|untap)
+          if [ $# -gt 1 ];then
+            if [ "$cmd2" != "-h" ];then
               brew-file brew "$@"
               return $?
             fi
           fi
-        fi
-      fi
+          ;;
+        # brew cask install/uninstall
+        cask)
+          if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ]\
+              || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
+            if [ $# -gt 2 ];then
+              if [ "$cmd3" != "-h" ];then
+                brew-file brew "$@"
+                return $?
+              fi
+            fi
+          fi
+          ;;
+      esac
 
       # Use brew-file directly for brew-file commands
       if ! echo " $(echo $(command brew commands\
