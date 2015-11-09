@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.7.0"
-__date__ = "6/Nov/2015"
+__version__ = "v3.7.1"
+__date__ = "9/Nov/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -394,7 +394,12 @@ class BrewInfo:
         versions = {"stable": "", "devel": "", "HEAD": ""}
         v_tmp = map(lambda x: x.strip().split(),
                     lines[0].split(":")[1].split(","))
+        if len(v_tmp) == 1 and len(v_tmp[0]) == 0:
+            for l in lines:
+                self.warning(l, 0)
         for v in v_tmp:
+            if len(v) < 2:
+                continue
             if v[0] == "stable":
                 versions["stable"] = v[1]
             elif v[0] == "devel":
