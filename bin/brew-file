@@ -1381,8 +1381,9 @@ class BrewFile:
 
     def edit_brewfile(self):
         """Edit brewfiles"""
-        import subprocess
-        subprocess.call([self.opt["my_editor"]] + self.get_files())
+        import shlex, subprocess
+        self.editor = shlex.split(self.opt["my_editor"])
+        subprocess.call(self.editor + self.get_files())
 
     def cat_brewfile(self):
         """Cat brewfiles"""
