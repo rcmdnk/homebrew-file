@@ -13,8 +13,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.7.1"
-__date__ = "9/Nov/2015"
+__version__ = "v3.7.2"
+__date__ = "15/Nov/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -602,6 +602,7 @@ class BrewFile:
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
                                            self.opt["brew_repo"] +
                                            "/Library/Brewfile")
+        self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["form"] = "file"
         self.opt["repo"] = ""
         self.opt["noupdate"] = True
@@ -1276,9 +1277,10 @@ class BrewFile:
 
             ans = self.ask_yn("Do you want to overwrite it?")
             if ans:
-                os.rename(self.opt["input"], self.opt["input"] + ".bak")
-                self.info("Ok, old input file was moved to " +
-                          self.opt["input"] + ".bak.", 1)
+                if self.opt["backup"] != "":
+                    os.rename(self.opt["input"], self.opt["backup"])
+                    self.info("Ok, old input file was moved to " +
+                              self.opt["backup"], 1)
             else:  # pragma: no cover
                 sys.exit(0)
 
@@ -1326,11 +1328,10 @@ class BrewFile:
 
                 ans = self.ask_yn("Do you want to overwrite it?")
                 if ans:
-                    if self.opt["repo"] == "":
-                        os.rename(self.opt["input"],
-                                  self.opt["input"] + ".bak")
+                    if self.opt["repo"] == "" and self.opt["backup"] != "":
+                        os.rename(self.opt["input"], self.opt["backup"])
                         self.info("Ok, old input file was moved to " +
-                                  self.opt["input"] + ".bak.", 1)
+                                  self.opt["backup"], 1)
                 else:  # pragma: no cover
                     sys.exit(0)
 
@@ -2239,6 +2240,14 @@ def main():
               "HOMEBREW_BREWFILE, like:\n"
               "    export HOMEBREW_BREWFILE=~/.brewfile")
 
+    backup_parser = argparse.ArgumentParser(add_help=False)
+    backup_parser.add_argument(
+        "-b", "--backup", action="store", dest="backup",
+        default=b.opt["backup"],
+        help="Set backup file (default: %(default)s). \n"
+              "You can set input file by environmental variable,"
+              " HOMEBREW_BREWFILE_BACKUP.")
+
     format_parser = argparse.ArgumentParser(add_help=False)
     format_parser.add_argument(
         "-F", "--format", "--form", action="store", dest="form",
@@ -2295,7 +2304,7 @@ def main():
     verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
                                 dest="verbose", help="Verbose level 0/1/2")
 
-    min_parsers = [file_parser, format_parser,
+    min_parsers = [file_parser, backup_parser, format_parser,
                    appstore_parser, yn_parser, verbose_parser]
     subparser_options = {
         "parents": min_parsers + [noupdate_parser],
@@ -2304,8 +2313,9 @@ def main():
     # Main parser
     parser = argparse.ArgumentParser(
         add_help=False, prog=__prog__,
-        parents=[file_parser, format_parser, noupdateatupdate_parser,
-                 noupdate_parser, repo_parser, link_parser, appstore_parser,
+        parents=[file_parser, backup_parser, format_parser,
+                 noupdateatupdate_parser, noupdate_parser, repo_parser,
+                 link_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description="Brew-file: Manager for packages of Homebrew\n"
