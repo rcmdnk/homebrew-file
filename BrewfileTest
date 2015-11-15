@@ -28,3 +28,4 @@ echo other commands
 
 # After commands
 after echo after
+
