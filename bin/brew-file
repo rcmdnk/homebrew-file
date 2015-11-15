@@ -461,8 +461,12 @@ class BrewInfo:
             out.writeln("  brew_installed=0")
             out.writeln("  echo Homebrew is not installed!")
             out.writeln("  echo Install now...")
-            out.writeln('  echo ruby -e \\"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install\)\\"')
-            out.writeln('  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+            out.writeln('  echo ruby -e \\"\$\(curl -fsSL '
+                        'https://raw.githubusercontent.com/Homebrew/'
+                        'install/master/install\)\\"')
+            out.writeln('  ruby -e "$(curl -fsSL '
+                        'https://raw.githubusercontent.com/Homebrew/'
+                        'install/master/install)"')
             out.writeln("  echo")
             out.writeln("fi")
             out.writeln("#BREWFILE_ENDIGNORE")
@@ -1275,14 +1279,14 @@ class BrewFile:
                 print "git repository for Brewfile is already set as " +\
                     prev_repo
 
-            ans = self.ask_yn("Do you want to overwrite it?")
-            if ans:
-                if self.opt["backup"] != "":
+            if self.opt["backup"] != "":
+                ans = self.ask_yn("Do you want to overwrite it?")
+                if ans:
                     os.rename(self.opt["input"], self.opt["backup"])
                     self.info("Ok, old input file was moved to " +
                               self.opt["backup"], 1)
-            else:  # pragma: no cover
-                sys.exit(0)
+                else:  # pragma: no cover
+                    sys.exit(0)
 
         # Get repository
         if self.opt["repo"] == "":  # pragma: no cover
@@ -1326,14 +1330,14 @@ class BrewFile:
                 else:
                     print self.opt["input"] + " is already there."
 
-                ans = self.ask_yn("Do you want to overwrite it?")
-                if ans:
-                    if self.opt["repo"] == "" and self.opt["backup"] != "":
-                        os.rename(self.opt["input"], self.opt["backup"])
-                        self.info("Ok, old input file was moved to " +
-                                  self.opt["backup"], 1)
-                else:  # pragma: no cover
-                    sys.exit(0)
+                if self.opt["repo"] == "" and self.opt["backup"] != "":
+                    ans = self.ask_yn("Do you want to overwrite it?")
+                    if ans:
+                            os.rename(self.opt["input"], self.opt["backup"])
+                            self.info("Ok, old input file was moved to " +
+                                      self.opt["backup"], 1)
+                    else:  # pragma: no cover
+                        sys.exit(0)
 
         # Get installed package list
         self.get_list()
@@ -1382,7 +1386,8 @@ class BrewFile:
 
     def edit_brewfile(self):
         """Edit brewfiles"""
-        import shlex, subprocess
+        import shlex
+        import subprocess
         self.editor = shlex.split(self.opt["my_editor"])
         subprocess.call(self.editor + self.get_files())
 
