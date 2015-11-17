@@ -7,8 +7,11 @@ https://github.com/rcmdnk/homebrew-file
 
 requirement: Python 2.7 or later
 """
+import os
+import sys
 
-__prog__ = "brew file"
+__prog__ = os.path.basename(__file__)
+__description__ = __doc__
 __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
@@ -18,9 +21,6 @@ __date__ = "16/Nov/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
-
-import os
-import sys
 
 
 class Tee:
@@ -2324,8 +2324,7 @@ def main():
                  link_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Brew-file: Manager for packages of Homebrew\n"
-                    "https://github.com/rcmdnk/homebrew-file")
+        description=__description__)
 
     subparsers = parser.add_subparsers(
         title="subcommands", metavar="[command]", help="", dest="command")
