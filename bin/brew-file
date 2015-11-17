@@ -16,8 +16,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.7.3"
-__date__ = "16/Nov/2015"
+__version__ = "v3.7.4"
+__date__ = "17/Nov/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1090,14 +1090,6 @@ class BrewFile:
                     self.warning(p + " is not in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brewfile")
                 self.remove_pack("tap_input", p)
-        elif cmd == "cask":
-            if subcmd in ["rm", "remove", "uninstall"]:
-                for p in packages:
-                    if p not in self.get("cask_input"):
-                        self.warning(p + " is not in Brewfile.")
-                        self.warning("Do 'brew file init'"
-                                     " to clean up Brewfile")
-                    self.remove_pack("cask_input", p)
 
         self.input_to_list()
         self.initialize_write(check_opt=False)
