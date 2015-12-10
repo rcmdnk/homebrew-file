@@ -664,6 +664,9 @@ class BrewFile:
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
 
+        self.pack_deps = {}
+        self.top_packs = []
+
     def set_args(self, **kw):
         """Set arguments."""
         for k, v in kw.items():
@@ -2076,6 +2079,33 @@ class BrewFile:
                             if d != "":
                                 self.proc("sudo rm -rf " + appdir + "/" + d)
 
+    def make_pack_deps(self):
+        """Make package dependencies"""
+        packs = self.get("brew_list")
+        self.pack_deps = {}
+        for p in packs:
+            deps = self.proc("brew deps --1 " + p, False, False)[1]
+            self.pack_deps[p] = []
+            for d in deps:
+                if d in packs:
+                    self.pack_deps[p].append(d)
+        dep_packs = []
+        for v in self.pack_deps.values():
+            dep_packs.extend(v)
+        self.top_packs = [x for x in packs if x not in dep_packs]
+        if self.opt['verbose'] > 1:
+            def print_dep(p, depth=0):
+                if depth != 0:
+                    print '#',
+                    for i in xrange(depth-2):
+                        print '',
+                print p
+                for deps in self.pack_deps[p]:
+                    print_dep(deps, depth+2)
+            for p in packs:
+                if p not in dep_packs:
+                    print_dep(p)
+
     def my_test(self):
         out = Tee("test")
         out.write("test\n")
@@ -2100,6 +2130,8 @@ class BrewFile:
         print self.brewinfo.get('brew_input_opt')
         self.brewinfo.read('testfile')
         self.brewinfo.get_tap('/aaa/bbb')
+
+        self.make_pack_deps()
 
     def execute(self):
         """Main execute function"""
