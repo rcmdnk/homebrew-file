@@ -40,12 +40,12 @@ install:
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
-  - brewfile=$brewprefix/Library/Brewfile
+  - brewfile=$HOME/.brewfile/Brewfile
   - testaccount=rcmdnk
   - testreponame=BrewfileTest
   - testrepo=$testaccount/$testreponame
   - testrepodir=${testaccount}_${testreponame}
-  - testrepofulldir=$brewprefix/Library/$testrepodir
+  - testrepofulldir=$HOME/.brewfile/$testrepodir
   - testfile=$testrepofulldir/Brewfile
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
@@ -146,7 +146,7 @@ script:
   - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
   - 'coverage run --parallel-mode $exe wrongcommand || :'
   # Wrong command test (test proc)
-  - echo 'ls wrong_file' > $brewprefix/Library/Brewfile
+  - echo 'ls wrong_file' > $brewfile
   - 'coverage run --parallel-mode $exe install || :'
   # Use test repository
   - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
@@ -214,7 +214,7 @@ script:
   - coverage combine # should be done before removing brew-file
   - coveralls
   # Install test
-  #- rm -rf $brewprefix/bin/brew $brewprefix/Library $brewprefix/Cellar
+  #- rm -rf $brewprefix/bin/brew $HOME/.brewfile $brewprefix/Cellar
   #- rm -rf $brewprefix/.git*
   #- curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh >&/dev/null
   #- brew help
