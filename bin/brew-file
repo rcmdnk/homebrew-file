@@ -16,11 +16,17 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.7.4"
-__date__ = "17/Nov/2015"
+__version__ = "v3.7.5"
+__date__ = "17/Dec/2015"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
+
+
+def open_output_file(name, mode="w"):
+    if not os.path.exists(os.path.dirname(name)):
+        os.makedirs(os.path.dirname(name))
+    return open(name, mode)
 
 
 class Tee:
@@ -67,12 +73,11 @@ class Tee:
 
     def close(self):
         if self.out1name != "":
-            f = open(self.out1name, "w")
+            f = open_output_file(self.out1name, "w")
             f.write(self.out1.getvalue())
             f.close()
         if self.use2:
             if self.out2name != "":
-                f = open(self.out2name, "w")
                 f.write(self.out2.getvalue())
                 f.close()
         self.__del__()
@@ -604,8 +609,8 @@ class BrewFile:
             self.proc(
                 "brew --prefix", False, False, True, 0)[1][0]
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
-                                           self.opt["brew_repo"] +
-                                           "/Library/Brewfile")
+                                           os.environ["HOME"] +
+                                           "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["form"] = "file"
         self.opt["repo"] = ""
@@ -784,7 +789,7 @@ class BrewFile:
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
         user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
         input = self.opt["input"].split("/")[-1]
-        return self.opt["brew_repo"] + "/Library/" + user_name + "_" +\
+        return os.path.dirname(self.opt["input"]) + "/" + user_name + "_" +\
             repo_name + "/" + input
 
     def clone_repo(self):
@@ -1303,7 +1308,7 @@ class BrewFile:
             return
         else:
             # Write repository to the input file
-            f = open(self.opt["input"], "w")
+            f = open_output_file(self.opt["input"], "w")
             f.write("git " + self.opt["repo"])
             f.close()
             self.check_repo()

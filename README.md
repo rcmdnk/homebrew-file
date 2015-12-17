@@ -10,6 +10,39 @@ Brewfile manager for Homebrew, inspired by [Brewdler](https://github.com/andrew/
 Brewfile dumped by [homebrew-brewdler](https://github.com/Homebrew/homebrew-brewdler)
 can be used as input, too.
 
+## Note
+
+17/Dec/2015 update:
+
+The default place of Brewfile has been changed from:
+
+    /usr/local/Library/Brewfile
+
+to
+
+    ~/.brewfile/Brewfile
+
+because Homebrew deletes files under **/usr/local** other than
+Homebrew's one when such `brew update` is executed.
+(Homebrew checkout its repository as **/usr/local**.)
+
+If you used default settings, you may lose Brewfile.
+
+In such case, please try `brew file init` and chose local Brewfile, which makes
+new file **~/.brewfile/Brewfile**.
+
+If you used git repository, you might see a output when you executed `brew update`:
+
+    $ brew update
+    Ignoring path Library/rcmdnk_Brewfile/
+    To restore the stashed changes to /usr/local run:
+      `cd /usr/local && git stash pop`
+      Already up-to-date.
+
+In this case, please delete **/usr/local/Library/<your_git_account>_Brewfile**,
+then do `brew file init` and set repository.
+
+New repository will be checked out to **~/.brewfile/<your_git_account>_Brewfile**.
 
 ## Installation
 
@@ -40,7 +73,7 @@ such a `brew install` or `brew uninstall`.
 
 ## Use local Brewfile
 
-By default, **Brewfile** is **/usr/local/Library/Brewfile**.
+By default, **Brewfile** is **~/.brewfile/Brewfile**.
 
 If you don't have **Brewfile**, first, do:
 
@@ -57,7 +90,7 @@ You can check your package list by:
     $ brew cat
 
 If you already have **Brewfile**, then copy it to 
-**/usr/local/Library/Brewfile**
+**~/.brewfile/Brewfile**
 and install packages listed in **Brewfile** by:
 
     $ brew file install
@@ -67,7 +100,7 @@ After each command, **Brewfile** is updated automatically
 if you set `brew-wrap` as above.
 
 When you get new Mac, copy 
-**/usr/local/Library/Brewfile** to new Mac
+**~/.brewfile** to new Mac
 and just do:
 
     $ brew file install

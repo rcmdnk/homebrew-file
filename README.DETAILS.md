@@ -106,7 +106,7 @@ Brwe-file manages pakcages installed by Homebrew.
 It also supports [brew-tap](https://github.com/mxcl/homebrew/wiki/brew-tap)
 and [brew-cask](https://github.com/phinze/homebrew-cask).
 
-It uses input file. By default, the file is `/usr/local/Library/Brewfile`.
+It uses input file. By default, the file is `~/.brewfile/Brewfile`.
 You can reuse `Brewfile` for Brewdler, too.
 
 If you want to specify input file, use `-f` option.
@@ -247,8 +247,8 @@ Then, set the repository by:
 
 It will clone the repository.
 If the repository has a file named "Brewfile", the file will be used instead of 
-`/usr/local/Library/Brewfile`.
-(then `/usr/local/Library/Brewfile` will have this repository informatoin.)
+`~/.brewfile/Brewfile`.
+(then `~/.brewfile/Brewfile` will have this repository informatoin.)
 
 `repository` should be like [rcmdnk/Brewfile](https://github.com/rcmdnk/Brewfile) in GitHub,
 which should have "Brewfile" (different file name can be used by `-f`).
