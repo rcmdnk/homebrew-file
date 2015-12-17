@@ -21,7 +21,7 @@ appstore Keynote
 
 # Additional files
 file BrewfileExt
-brewfile ~/.Brewfile
+brewfile ~/BrewfileHome
 
 # Other commands
 echo other commands

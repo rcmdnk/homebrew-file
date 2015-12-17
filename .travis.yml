@@ -33,7 +33,7 @@ install:
   - cd BrewfileTest
   - cp ../homebrew-file/BrewfileTest ./Brewfile
   - cp ../homebrew-file/BrewfileExt ./BrewfileExt
-  - cp ../homebrew-file/BrewfileHome ~/.Brewfile
+  - cp ../homebrew-file/BrewfileHome ~/BrewfileHome
   - git add -A && git commit -a -m "init" && git push -f || echo nothing to be done
   - cd ../homebrew-file
   - rm -rf ../BrewfileTest
