@@ -79,6 +79,7 @@ class Tee:
             f.close()
         if self.use2:
             if self.out2name != "":
+                f = open(self.out2name, "w")
                 f.write(self.out2.getvalue())
                 f.close()
         self.__del__()
