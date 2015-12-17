@@ -24,7 +24,8 @@ __status__ = "Prototype"
 
 
 def open_output_file(name, mode="w"):
-    if not os.path.exists(os.path.dirname(name)):
+    if os.path.dirname(name) != '' and \
+            not os.path.exists(os.path.dirname(name)):
         os.makedirs(os.path.dirname(name))
     return open(name, mode)
 
