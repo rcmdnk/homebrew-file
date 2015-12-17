@@ -79,9 +79,7 @@ script:
   - coverage run --parallel-mode $exe commands
   - 'coverage run --parallel-mode $exe || :'
   - coverage run --parallel-mode $exe brew list >/dev/null
-  - mkdir -p $(basename "$brewfile")
-  - echo $(basename "$brewfile")
-  - ls -l $(basename $(basename "$brewfile"))
+  - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
