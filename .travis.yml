@@ -9,7 +9,7 @@ env:
     - GIT_AUTHOR_NAME=rcmdnk
     - GIT_AUTHOR_EMAIL=rcmdnk@gmail.com
     - PAGER=cat
-    - EDITOR=cat # for brew-file edit test
+    - EDITOR=cat # for brew file edit test
     - VISUAL=cat
   matrix:
     - coveralls=coveralls-python
@@ -19,14 +19,12 @@ before_install:
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && cp .travis_rsa ~/.ssh/id_rsa || :'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && chmod 600 ~/.ssh/id_rsa || :'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config || :'
-  - version=""
-  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   - brew update
 install:
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew list > brewlist.orig
-  - brew install rcmdnk/file/brew-file $version
+  - brew tap rcmdnk/file
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - cd ../
   - git clone git@github.com:rcmdnk/BrewfileTest
@@ -38,8 +36,8 @@ install:
   - cd ../homebrew-file
   - rm -rf ../BrewfileTest
 before_script:
-  - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
+  - installed_brew=${brewprefix}/Library/Taps/rcmdnk/homebrew-file/cmd/brew-file
   - brewfile=$HOME/.brewfile/Brewfile
   - testaccount=rcmdnk
   - testreponame=BrewfileTest
@@ -47,13 +45,13 @@ before_script:
   - testrepodir=${testaccount}_${testreponame}
   - testrepofulldir=$HOME/.brewfile/$testrepodir
   - testfile=$testrepofulldir/Brewfile
-  - exe=$(pwd)/bin/brew-file
+  - exe=$(pwd)/cmd/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
   # Check differences between checked out's version and brew installed version
-  - '[ "$version" != "" ] && diff $installed_brew $exe || :'
-  - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
-  - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
+#  - 'diff $installed_brew $exe || :'
+  - 'brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
+  - 'brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
   # Check with old Python (expect 2.7.5)
   - python --version
   - 'coverage run --parallel-mode $exe brew install tig --HEAD --with-docs | :' # old version can't use hyphen options at brew file brew.
@@ -185,7 +183,7 @@ script:
   - coverage run --parallel-mode $exe init -F command -y -V 2
   - coverage run --parallel-mode $exe install -F command
   # Clean up tests
-  - echo "brew brew-file $version" > $testfile
+  - echo "tap rcmdnk/file" > $testfile
   - echo "brew python" >> $testfile
   - echo "file BrewfileExt" >> $testfile
   - echo "brew bash" >> $testfile
