@@ -625,7 +625,6 @@ class BrewFile:
         self.opt["tap_dir"] = self.opt["brew_repo"] + "/Library/Taps"
         self.opt["cache_dir"] = self.proc(
             "brew --cache", False, False, True, 0)[1][0]
-        self.opt["cask_pack"] = "brew-cask"
         self.opt["cask_repo"] = "caskroom/cask"
         self.opt["pip_pack"] = "brew-pip"
         self.opt["my_editor"] = os.environ.get("EDITOR", "vim")
@@ -1130,28 +1129,23 @@ class BrewFile:
         if self.proc("brew cask", False, False, False)[0] == 0:
             self.opt["is_cask_cmd"] = True
             return True
-        self.info(self.opt["cask_pack"] + " has not been installed.")
+        self.info(self.opt["cask_repo"] + " has not been installed.")
         if not force:
             ans = self.ask_yn("Do you want to install %s" %
-                              self.opt["cask_pack"])
+                              self.opt["cask_repo"])
             if not ans:  # pragma: no cover
                 self.warning("If you need it, please do:")
-                self.warning("    $ brew install %s/%s" %
-                             (self.opt["cask_repo"], self.opt["cask_pack"]))
+                self.warning("    $ brew tap %s" % (self.opt["cask_repo"]))
                 return self.opt["is_cask_cmd"]
         ret = self.proc(
-            ["brew", "install",
-             self.opt["cask_repo"] + "/" + self.opt["cask_pack"]],
+            ["brew", "taop", self.opt["cask_repo"]],
             True, True, False)[0]
         if ret != 0:  # pragma: no cover
             self.warning("\nFailed to install " +
-                         self.opt["cask_pack"] + "\n", 0)
+                         self.opt["cask_repo"] + "\n", 0)
             sys.exit(ret)
         if not self.opt["cask_repo"] in self.get("tap_list"):
             self.brewinfo.tap_list.append(self.opt["cask_repo"])
-        if not self.opt["cask_pack"] in self.get("brew_list"):
-            self.brewinfo.brew_list.append(self.opt["cask_pack"])
-            self.brewinfo.brew_list_opt[self.opt["cask_pack"]] = ""
         self.opt["is_cask_cmd"] = True
         return self.opt["is_cask_cmd"]
 
@@ -1448,8 +1442,6 @@ class BrewFile:
         # Skip clean up cask at tap/brew if any cask packages exist
         if len(self.get("cask_list")) > 0:
             self.remove_pack("tap_list", self.opt["cask_repo"])
-            self.remove_pack("brew_list", self.opt["cask_pack"])
-            self.remove_pack("brew_list_opt", self.opt["cask_pack"])
 
         # Clean up pip packages
         if len(self.get("pip_list")) > 0:
@@ -1821,12 +1813,11 @@ class BrewFile:
         out.writeln("# Please copy these lines to your Brewfile"
                     " and use with `" + __prog__ + " install`.\n")
 
-        out.writeln("# Main tap repository for " + self.opt["cask_pack"])
-        out.writeln("install " + self.opt["cask_repo"] +
-                    "/" + self.opt["cask_pack"])
+        out.writeln("# Main tap repository for " + self.opt["cask_repo"])
+        out.writeln("tap " + self.opt["cask_repo"])
         out.writeln("")
         if len(apps[self.opt["cask_repo"]][True]) > 0:
-            out.writeln("# Apps installed by Cask in " + self.opt["cask_pack"])
+            out.writeln("# Apps installed by Cask in " + self.opt["cask_repo"])
             for (name, app_path, check) in\
                     sorted(x for x in apps[self.opt["cask_repo"]][True]
                            if x[2] != "cask_obsolete"):
@@ -1883,7 +1874,7 @@ class BrewFile:
 
         if len(apps[self.opt["cask_repo"]][False]) > 0:
             out.writeln("# Apps installed directly instead of by Cask in " +
-                        self.opt["cask_pack"])
+                        self.opt["cask_repo"])
             for (name, app_path, check) in\
                     sorted(x for x in apps[self.opt["cask_repo"]][False]):
                 out.writeln("#cask install " + name +

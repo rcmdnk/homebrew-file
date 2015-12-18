@@ -2,7 +2,7 @@
 before echo before
 
 # caskroom/cask
-brew caskroom/cask/brew-cask
+tap caskroom/cask
 cask install iterm2
 tap rcmdnk/rcmdnkcask
 cask install configureapplicationdocktile
