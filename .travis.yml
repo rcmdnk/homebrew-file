@@ -125,7 +125,6 @@ script:
   - coverage run --parallel-mode $exe brew cask list
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
-  - coverage run --parallel-mode $exe brew rm brew-cask
   - coverage run --parallel-mode $exe brew untap caskroom/cask
   - coverage run --parallel-mode $exe casklist -V 0
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
