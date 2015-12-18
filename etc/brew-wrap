@@ -35,13 +35,13 @@ brew () {
     cmd2=$2
     cmd3=$3
 
-    if type -a brew-file >/dev/null 2>&1;then
+    if brew tap|grep -q "rcmdnk/file";then
       case "$cmd" in
         # brew install/uninstall/tap/pip
         install|reinstall|tap|pip|rm|remove|uninstall|untap)
           if [ $# -gt 1 ];then
             if [ "$cmd2" != "-h" ];then
-              brew-file brew "$@"
+              command brew file brew "$@"
               return $?
             fi
           fi
@@ -52,7 +52,7 @@ brew () {
               || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
             if [ $# -gt 2 ];then
               if [ "$cmd3" != "-h" ];then
-                brew-file brew "$@"
+                command brew file brew "$@"
                 return $?
               fi
             fi
@@ -60,12 +60,12 @@ brew () {
           ;;
       esac
 
-      # Use brew-file directly for brew-file commands
+      # Use brew file directly for brew file commands
       if ! echo " $(echo $(command brew commands\
           |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
           |grep -q -- " $1 ";then
-        if echo " $(brew-file commands) "|grep -q -- " $1 ";then
-          brew-file "$@"
+        if echo " $(command brew file commands) "|grep -q -- " $1 ";then
+          command brew file "$@"
           return $?
         fi
       fi

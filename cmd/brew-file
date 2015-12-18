@@ -2443,7 +2443,7 @@ def main():
             v = sys.version_info
             if v.major == 2 and\
                (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
-                print "`brew-file brew ...` with option is available "\
+                print "`brew file brew ...` with option is available "\
                     "only with Python 2.7.7 or later.\n"\
                     "(Such Yosemite's default is 2.7.6.)\n"\
                     "You can easily install newer version with Homebrew, "\
