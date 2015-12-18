@@ -22,3 +22,4 @@ class BrewFile < Formula
     system "brew", "file", "help"
   end
 end
+
