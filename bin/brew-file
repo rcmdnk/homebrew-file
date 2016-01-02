@@ -1646,7 +1646,7 @@ class BrewFile:
             self.info("Installed by Cask:" + app + name, 2)
         else:
             self.info("Installed directly, instead of by Cask:" +
-                      app + name, 2)
+                      app + ", " + name, 2)
         return (tap, installed, name)
 
     def find_brew_app(self, name, tap):
