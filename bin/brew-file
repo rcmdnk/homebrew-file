@@ -1876,7 +1876,9 @@ class BrewFile:
                         x[0] for x in casks.values() + nonapp_casks
                         if x[1] == self.opt["cask_repo"] and
                         not x[2] and not x[3]):
-                    out.writeln("cask install " + name)
+                    if name not in casks_in_others:
+                        out.writeln("cask install " + name)
+                        casks_in_others.append(name)
             out.writeln("")
 
         if len(apps[self.opt["cask_repo"]][False]) > 0:
@@ -1942,7 +1944,9 @@ class BrewFile:
                     for name in sorted(x[0]
                                        for x in casks.values() + nonapp_casks
                                        if x[1] == t and not x[2] and not x[3]):
-                        out.writeln("cask install " + name)
+                        if name not in casks_in_others:
+                            out.writeln("cask install " + name)
+                            casks_in_others.append(name)
                 out.writeln("")
 
             if len(apps[t][False]) > 0:
