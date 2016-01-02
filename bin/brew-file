@@ -2135,7 +2135,6 @@ class BrewFile:
         """Main execute function"""
         # Cask list check
         if self.opt["command"] == "casklist":
-            print 'test', self.opt['verbose']
             self.check_cask()
             sys.exit(0)
 
