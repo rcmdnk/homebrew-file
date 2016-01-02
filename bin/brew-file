@@ -1630,7 +1630,7 @@ class BrewFile:
                     break
         if not installed:
             for c in clist:
-                if c[4].find(app+"'") >= 0 or c[4].find(app+"/") >= 0:
+                if app in c[5]:
                     if c[2]:
                         installed = True
                     if installed or name == "":
@@ -1717,16 +1717,22 @@ class BrewFile:
                 with open(d + "/" + cask + ".rb", "r") as f:
                     content = f.read()
                 for l in content.split('\n'):
+                    cask_app = ""
                     if re.search("^ *name ", l):
-                        cask_apps.append(
-                            re.sub("^ *name ", "", l).strip('"\' ')+".app")
-                    if re.search("^ *app ", l):
-                        cask_apps.append(re.sub("^ *app ", "", l).
-                                         strip('"\' ').split('/')[-1])
-                    if re.search("^ *pkg ", l):
-                        cask_apps.append(re.sub("^ *pkg ", "", l).
-                                         strip('"\' ').split('/')[-1].
-                                         replace(".pkg", ""))
+                        cask_app = re.sub("^ *name ", "",
+                                          l).strip('"\' ') + ".app"
+                    elif re.search("^ *app ", l):
+                        cask_app = re.sub("^ *app ", "",
+                                          l).strip('"\' ').split('/')[-1]
+                    elif re.search("\.app", l):
+                        cask_app = l.split(".app")[0].split("/")[-1].\
+                            split("'")[-1].split('"')[-1]
+                    elif re.search("^ *pkg ", l):
+                        cask_app = re.sub("^ *pkg ", "", l).strip('"\' ').\
+                            split('/')[-1].replace(".pkg", "")
+                    if cask_app != "" and cask_app not in cask_apps:
+                        cask_apps.append(cask_app)
+
                     if not noinst and re.search("^ *version ", l):
                         if os.path.isdir(
                                 self.opt["caskroom"] + "/" + cask + "/" +
@@ -1735,18 +1741,19 @@ class BrewFile:
                 if noinst:
                     if len(cask_apps) == 0:
                         nonapp_casks_noinst.append([cask, t, installed,
-                                                    False, content])
+                                                    False, content, cask_apps])
                     else:
                         for a in cask_apps:
                             casks_noinst[a] = [cask, t, installed,
-                                               False, content]
+                                               False, content, cask_apps]
                 else:
                     if len(cask_apps) == 0:
                         nonapp_casks.append([cask, t, installed,
-                                             False, content])
+                                             False, content, cask_apps])
                     else:
                         for a in cask_apps:
-                            casks[a] = [cask, t, installed, False, content]
+                            casks[a] = [cask, t, installed, False, content,
+                                        cask_apps]
 
         # Get applications
         napps = 0
