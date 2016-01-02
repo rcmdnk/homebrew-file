@@ -1625,9 +1625,9 @@ class BrewFile:
         if name != "":
             for c in clist:
                 if c[0] == name:
-                    continue
-                if c[2]:
-                    installed = True
+                    if c[2]:
+                        installed = True
+                    break
         if not installed:
             for c in clist:
                 if c[4].find(app+"'") >= 0 or c[4].find(app+"/") >= 0:
