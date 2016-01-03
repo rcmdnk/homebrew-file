@@ -5,7 +5,6 @@ before echo before
 tap caskroom/cask
 cask install iterm2
 tap rcmdnk/rcmdnkcask
-cask install configureapplicationdocktile
 cask install font-migu1m
 
 # rcmdnk/rcmdnkpac
