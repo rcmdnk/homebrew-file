@@ -83,93 +83,93 @@ script:
   - touch "$brewfile"
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
-    #  - coverage run --parallel-mode $exe test -V 2
-    #  - coverage run --parallel-mode $exe install --preupdate -y
-    #  - rm $brewfile
-    #  - coverage run --parallel-mode $exe update -y
-    #  # brew command checks
-    #  - coverage run --parallel-mode $exe brew help
-    #  - coverage run --parallel-mode $exe brew noinit list
-    #  - coverage run --parallel-mode $exe brew info bash
-    #  - coverage run --parallel-mode $exe brew install vim --HEAD --with-lua
-    #  - coverage run --parallel-mode $exe init -y -V 0
-    #  - coverage run --parallel-mode $exe brew uninstall vim
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install mytest2
-    #  - coverage run --parallel-mode $exe brew install mytest2
-    #  - coverage run --parallel-mode $exe brew rm mytest2
-    #  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
-    #  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew rm mytest2
-    #  - cat $brewfile |grep -v mytest > ${brewfile}.tmp
-    #  - mv ${brewfile}{.tmp,}
-    #  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
-    #  - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
-    #  - coverage run --parallel-mode $exe brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask rm appcleaner
-    #  - command brew cask install appcleaner
-    #  - coverage run --parallel-mode $exe brew cask rm appcleaner
-    #  - coverage run --parallel-mode $exe brew install brew-pip
-    #  - coverage run --parallel-mode $exe brew pip asciinema
-    #  - coverage run --parallel-mode $exe brew uninstall pip-asciinema
-    #  - coverage run --parallel-mode $exe brew rm brew-pip
-    #  - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
-    #  # Cask tests
-    #  - coverage run --parallel-mode $exe brew cask install firefox
-    #  - coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
-    #  - coverage run --parallel-mode $exe brew cask list
-    #  - coverage run --parallel-mode $exe edit
-    #  - coverage run --parallel-mode $exe casklist -V 2
-    #  - coverage run --parallel-mode $exe brew untap caskroom/cask
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-    #  - command brew cask rm firefox
-    #  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-    #  - command brew cask install firefox
-    #  - mv /Applications/Firefox.app .
-    #  - command brew cask rm firefox
-    #  - mv Firefox.app /Applications/
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-    #  - coverage run --parallel-mode $exe cask_upgrade -V 0
-    #  - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
-    #  - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
-    #  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  # Wrong file/command tests
-    #  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
-    #  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
-    #  - 'coverage run --parallel-mode $exe wrongcommand || :'
-    #  # Wrong command test (test proc)
-    #  - echo 'ls wrong_file' > $brewfile
-    #  - 'coverage run --parallel-mode $exe install || :'
-    #  # Use test repository
-    #  - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
-    #  - rm -rf $brewfile $testrepofulldir
-    #  - coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2
-    #  - rm -rf $brewfile $testrepofulldir
-    #  - coverage run --parallel-mode $exe set_repo -r https://github.com/$testrepo -y -V 2
-    #  - rm -rf $brewfile $testrepofulldir
-    #  - coverage run --parallel-mode $exe init -r $testrepo -y -V 2
-    #  - rm -rf $brewfile $testrepofulldir
-    #  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
-    #  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
-    #  - coverage run --parallel-mode $exe get_files
-    #  - coverage run --parallel-mode $exe edit
-    #  - cp $testfile .
-    #  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-    #  - coverage run --parallel-mode $exe install -V 2
-    #  - coverage run --parallel-mode $exe casklist -V 0
-    #  - command brew rm emacs
-    #  - coverage run --parallel-mode $exe init -y -V 0
-    #  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
-    #  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
-    #  - coverage run --parallel-mode $exe brew rm vim
+  - coverage run --parallel-mode $exe test -V 2
+  - coverage run --parallel-mode $exe install --preupdate -y
+  - rm $brewfile
+  - coverage run --parallel-mode $exe update -y
+  # brew command checks
+  - coverage run --parallel-mode $exe brew help
+  - coverage run --parallel-mode $exe brew noinit list
+  - coverage run --parallel-mode $exe brew info bash
+  - coverage run --parallel-mode $exe brew install vim --HEAD --with-lua
+  - coverage run --parallel-mode $exe init -y -V 0
+  - coverage run --parallel-mode $exe brew uninstall vim
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install mytest2
+  - coverage run --parallel-mode $exe brew install mytest2
+  - coverage run --parallel-mode $exe brew rm mytest2
+  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
+  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew rm mytest2
+  - cat $brewfile |grep -v mytest > ${brewfile}.tmp
+  - mv ${brewfile}{.tmp,}
+  - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
+  - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
+  - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
+  - coverage run --parallel-mode $exe brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - command brew cask install appcleaner
+  - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - coverage run --parallel-mode $exe brew install brew-pip
+  - coverage run --parallel-mode $exe brew pip asciinema
+  - coverage run --parallel-mode $exe brew uninstall pip-asciinema
+  - coverage run --parallel-mode $exe brew rm brew-pip
+  - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
+  # Cask tests
+  - coverage run --parallel-mode $exe brew cask install firefox
+  - coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
+  - coverage run --parallel-mode $exe brew cask list
+  - coverage run --parallel-mode $exe edit
+  - coverage run --parallel-mode $exe casklist -V 2
+  - coverage run --parallel-mode $exe brew untap caskroom/cask
+  - coverage run --parallel-mode $exe casklist -V 0
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - command brew cask rm firefox
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - command brew cask install firefox
+  - mv /Applications/Firefox.app .
+  - command brew cask rm firefox
+  - mv Firefox.app /Applications/
+  - coverage run --parallel-mode $exe casklist -V 0
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe cask_upgrade -V 0
+  - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
+  - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - coverage run --parallel-mode $exe casklist -V 0
+  # Wrong file/command tests
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe wrongcommand || :'
+  # Wrong command test (test proc)
+  - echo 'ls wrong_file' > $brewfile
+  - 'coverage run --parallel-mode $exe install || :'
+  # Use test repository
+  - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
+  - rm -rf $brewfile $testrepofulldir
+  - coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2
+  - rm -rf $brewfile $testrepofulldir
+  - coverage run --parallel-mode $exe set_repo -r https://github.com/$testrepo -y -V 2
+  - rm -rf $brewfile $testrepofulldir
+  - coverage run --parallel-mode $exe init -r $testrepo -y -V 2
+  - rm -rf $brewfile $testrepofulldir
+  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
+  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
+  - coverage run --parallel-mode $exe get_files
+  - coverage run --parallel-mode $exe edit
+  - cp $testfile .
+  - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
+  - coverage run --parallel-mode $exe install -V 2
+  - coverage run --parallel-mode $exe casklist -V 0
+  - command brew rm emacs
+  - coverage run --parallel-mode $exe init -y -V 0
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y -U -V 2'
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe update -y'
+  - coverage run --parallel-mode $exe brew rm vim
   - command brew cask install google-chrome
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
