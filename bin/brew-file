@@ -1760,7 +1760,8 @@ class BrewFile:
         napps = 0
         for d in app_dirs:
             for app in [x for x in os.listdir(d)
-                        if not x.startswith(".") and x != "Utilities"]:
+                        if not x.startswith(".") and x != "Utilities"
+                        and os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
                 if app.rstrip(".app")\
                         in self.get("appstore_list"):  # pragma: no cover
