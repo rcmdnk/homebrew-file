@@ -300,8 +300,6 @@ class BrewInfo:
         is_ignore = False
         self.tap_input.append("direct")
         for l in lines:
-            if self.helper.opt['form'] == 'command':
-                print l
             if re.match("# *BREWFILE_ENDIGNORE", l):
                 is_ignore = False
             if re.match("# *BREWFILE_IGNORE", l):
@@ -1606,51 +1604,47 @@ class BrewFile:
         [cask_user, cask_repo_name] = self.opt["cask_repo"].split("/")
         cask_namer = self.brewinfo.get_tap_path(self.opt["cask_repo"]) +\
             "/developer/bin/generate_cask_token"
-        name = ""
+        tap_cands = []
+        name_cands = []
         lines = self.proc([cask_namer, '"' + app.split("/")[-1].lower() + '"'],
                           False, False, False)[1]
-        tap = ""
         for l in lines:
             if l.find("Proposed token") >= 0:
-                name = l.split()[2]
+                name_cands.append(l.split()[2])
             if l.find("already exists") >= 0:
                 for t in taps:
                     tname = t.split('/')[0]+"/homebrew-"+t.split('/')[1]
                     if l.split("'")[1].find(tname) >= 0:
-                        tap = t
+                        tap_cands.append(t)
                         break
-        if tap == "":
-            name = ""
+        if len(tap_cands) == 0:
+            del name_cands[:]
 
         installed = False
-        clist = casks.values() + nonapp_casks + casks_noinst.values() +\
+        clist = casks.values() + nonapp_casks +\
+            [x for x_list in casks_noinst.values() for x in x_list] +\
             nonapp_casks_noinst
-        if name != "":
-            for c in clist:
-                if c[0] == name:
-                    if c[2]:
-                        installed = True
+        if len(name_cands) > 0 and\
+                len([x for x in clist if x[0] == name_cands[0] and x[2]]) > 0:
+            installed = True
+        else:
+            for c in [x for x in clist if app in x[5]]:
+                if c[2]:
+                    installed = True
+                    tap_cands = [c[1]]
+                    name_cands = [c[0]]
                     break
-        if not installed:
-            for c in clist:
-                if app in c[5]:
-                    if c[2]:
-                        installed = True
-                    if installed or name == "":
-                        tap = c[1]
-                        name = c[0]
-                    if installed:
-                        break
-                if installed:
-                    break
-        if name == "":
+                if c[0] not in name_cands:
+                    tap_cands.append(c[1])
+                    name_cands.append(c[0])
+        if len(name_cands) == 0:
             self.info("Non Cask app: " + app, 2)
         elif installed:
-            self.info("Installed by Cask:" + app + name, 2)
+            self.info("Installed by Cask:" + app + name_cands[0], 2)
         else:
             self.info("Installed directly, instead of by Cask:" +
-                      app + ", " + name, 2)
-        return (tap, installed, name)
+                      app + ", Cask candidates: " + ", ".join(name_cands), 2)
+        return (tap_cands, installed, name_cands)
 
     def find_brew_app(self, name, tap):
         """Helper function for Cask to find app installed by brew install"""
@@ -1747,16 +1741,21 @@ class BrewFile:
                                                     False, content, cask_apps])
                     else:
                         for a in cask_apps:
-                            casks_noinst[a] = [cask, t, installed,
-                                               False, content, cask_apps]
+                            if a in casks_noinst:
+                                casks_noinst[a].append(
+                                    [cask, t, installed, False,
+                                     content, cask_apps])
+                            else:
+                                casks_noinst[a] = [[cask, t, installed,
+                                                    False, content, cask_apps]]
                 else:
                     if len(cask_apps) == 0:
                         nonapp_casks.append([cask, t, installed,
                                              False, content, cask_apps])
                     else:
                         for a in cask_apps:
-                            casks[a] = [cask, t, installed, False, content,
-                                        cask_apps]
+                            casks[a] = [cask, t, installed, False,
+                                        content, cask_apps]
 
         # Get applications
         napps = 0
@@ -1790,24 +1789,44 @@ class BrewFile:
                     app_find = app
                     if not app.endswith(".app"):
                         app_find = d + "/" + app
-                    (tap, installed, name) = self.find_app(
+                    (tap_cands, installed, name_cands) = self.find_app(
                         app_find, taps, casks, nonapp_casks,
                         casks_noinst, nonapp_casks_noinst)
-                    for c in filter(lambda x: x[0] == name, nonapp_casks):
-                        nonapp_casks.remove(c)
-                    for a in filter(lambda k: casks[k][0] == name,
-                                    casks.keys()):
-                        casks[a][3] = True
+                    if len(name_cands) > 0:
+                        for name in name_cands:
+                            for c in filter(lambda x: x[0] == name,
+                                            nonapp_casks):
+                                nonapp_casks.remove(c)
+                            for a in filter(lambda k: casks[k][0] == name,
+                                            casks.keys()):
+                                casks[a][3] = True
+                    name = ""
                     if installed:
                         check = "cask"
-                    elif name != "":
-                        (check, tap, opt) = self.find_brew_app(name, tap)
-                if check != "brew":
-                    apps[tap][installed].append((name, d + "/" + app, check))
-                else:
-                    if tap not in brew_apps:
-                        brew_apps[tap] = []
-                    brew_apps[tap].append((name, d + "/" + app, opt))
+                        name = name_cands[0]
+                        tap = tap_cands[0]
+                    elif len(name_cands) > 0:
+                        for i in xrange(len(tap_cands)):
+                            (check, tap, opt) =\
+                                self.find_brew_app(name_cands[i], tap_cands[i])
+                            if check == "brew":
+                                name = name_cands[i]
+                                break
+                    if name == "":
+                        if len(tap_cands) > 0:
+                            for i in xrange(len(tap_cands)):
+                                apps[tap_cands[i]][installed].append(
+                                    (name_cands[i], d + "/" + app, check))
+                        else:
+                            name = tap = ""
+                if check != "has_cask":
+                    if check != "brew":
+                        apps[tap][installed].append(
+                            (name, d + "/" + app, check))
+                    else:
+                        if tap not in brew_apps:
+                            brew_apps[tap] = []
+                        brew_apps[tap].append((name, d + "/" + app, opt))
                 apps_check[check][d] += 1
                 napps += 1
 
