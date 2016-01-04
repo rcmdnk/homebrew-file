@@ -1768,11 +1768,6 @@ class BrewFile:
                     installed = False
                     name = ""
                     check = "appstore"
-                elif app in ['Mail.app', 'Remote Desktop Connection.app',
-                             'Console.app', 'Grab.app', 'Keychain Access.app']:
-                    tap = ""
-                    installed = False
-                    name = ""
                 elif app in casks.keys() or\
                         app.split(".")[0] in casks.keys():
                     app_key = app if app in casks.keys() else app.split(".")[0]
