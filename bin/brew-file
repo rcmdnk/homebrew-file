@@ -300,6 +300,7 @@ class BrewInfo:
         is_ignore = False
         self.tap_input.append("direct")
         for l in lines:
+            self.info(l, 1)
             if re.match("# *BREWFILE_ENDIGNORE", l):
                 is_ignore = False
             if re.match("# *BREWFILE_IGNORE", l):
