@@ -347,7 +347,7 @@ class BrewInfo:
                 self.pip_input.append(p)
             elif cmd == "appstore":
                 self.appstore_input.append(re.sub("^ *appstore *", "", l).
-                                           strip("'").strip('"'))
+                                           strip().strip("'").strip('"'))
             elif cmd == "file" or cmd.lower() == "brewfile":
                 self.file_input.append(p)
             elif cmd == "before":
