@@ -16,7 +16,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.7.9"
+__version__ = "v3.8.1"
 __date__ = "5/Jan/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -506,36 +506,55 @@ class BrewInfo:
 
         # Taps
         if len(self.tap_list) > 0:
-            out.writeln("\n# tap repositories and their packages")
+            isfirst = True
+
+            def first_tap_write(out, isfirst):
+                if isfirst:
+                    out.writeln("\n# tap repositories and their packages")
+
+            def first_tap_pack_write(out, isfirst, direct_first, isfirst_pack,
+                                     p, cmd_tap):
+                first_tap_write(out, isfirst)
+                if not direct_first and isfirst_pack:
+                    out.writeln("\n" +
+                                cmd_tap + self.packout(p))
+
             for p in self.tap_list:
+                isfirst_pack = True
                 self.get_tap(p)
                 direct_first = False
                 if p == "direct":
                     direct_first = True
-                else:
-                    out.writeln("\n## " + p + "\n" + cmd_tap + self.packout(p))
-                for tp in self.tap_packs:
-                    for p_in_t in self.brew_list:
-                        if tp == p_in_t.split("/")[-1].rstrip(".rb"):
-                            if direct_first:
-                                direct_first = False
-                                out.writeln("\n## " + "Direct install")
-                            if check_opt:
-                                pack = self.packout(p_in_t) +\
-                                    self.get_options(p_in_t)
-                            else:
-                                pack = self.packout(p_in_t) +\
-                                    self.brew_list_opt[p_in_t]
-                            out.writeln(cmd_install + pack)
-                            self.brew_list.remove(p_in_t)
-                            del self.brew_list_opt[p_in_t]
+
+                if not self.helper.opt["caskonly"]:
+                    first_tap_pack_write(out, isfirst, direct_first,
+                                         isfirst_pack, p, cmd_tap)
+                    isfirst = isfirst_pack = False
+                    for tp in self.tap_packs:
+                        for p_in_t in self.brew_list:
+                            if tp == p_in_t.split("/")[-1].rstrip(".rb"):
+                                if direct_first:
+                                    direct_first = False
+                                    out.writeln("\n## " + "Direct install")
+                                if check_opt:
+                                    pack = self.packout(p_in_t) +\
+                                        self.get_options(p_in_t)
+                                else:
+                                    pack = self.packout(p_in_t) +\
+                                        self.brew_list_opt[p_in_t]
+                                out.writeln(cmd_install + pack)
+                                self.brew_list.remove(p_in_t)
+                                del self.brew_list_opt[p_in_t]
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
+                        first_tap_pack_write(out, isfirst, False,
+                                             isfirst_pack, p, cmd_tap)
+                        isfirst = isfirst_pack = False
                         out.writeln(cmd_cask + self.packout(tc))
                         self.cask_list.remove(tc)
 
         # Brew packages
-        if len(self.brew_list) > 0:
+        if not self.helper.opt["caskonly"] and len(self.brew_list) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.brew_list:
                 if check_opt:
@@ -545,7 +564,7 @@ class BrewInfo:
                 out.writeln(cmd_install + pack)
 
         # pip packages
-        if len(self.pip_list) > 0:
+        if not self.helper.opt["caskonly"] and len(self.pip_list) > 0:
             out.writeln("\n# pip packages")
             for p in self.pip_list:
                 pack = self.packout(p) + self.pip_list_opt[p]
@@ -629,6 +648,7 @@ class BrewFile:
         self.opt["noupdate"] = True
         self.opt["noupdateatupdate"] = False
         self.opt["link"] = True
+        self.opt["caskonly"] = False
         self.opt["appstore"] = True
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
@@ -1251,14 +1271,15 @@ class BrewFile:
 
         # Brew packages
         (ret, lines) = self.proc("brew list", False, False)
-        for p in lines:
-            if p.startswith("pip-"):
-                package = p.replace("pip-", "")
-                self.brewinfo.pip_list.append(package)
-                self.brewinfo.pip_list_opt[package] = ""
-            else:
-                self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = ""
+        if not self.opt["caskonly"]:
+            for p in lines:
+                if p.startswith("pip-"):
+                    package = p.replace("pip-", "")
+                    self.brewinfo.pip_list.append(package)
+                    self.brewinfo.pip_list_opt[package] = ""
+                else:
+                    self.brewinfo.brew_list.append(p)
+                    self.brewinfo.brew_list_opt[p] = ""
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
@@ -1602,37 +1623,38 @@ class BrewFile:
                 self.check_cask_cmd(True)
                 self.proc("brew cask install " + p)
 
-        # pip
-        for p in self.get("pip_input"):
-            if p not in self.get("pip_list"):
-                self.check_pip_cmd(True)
-                self.proc("brew pip " + p + self.get("pip_input_opt")[p])
+        if not self.opt["caskonly"]:
+            # pip
+            for p in self.get("pip_input"):
+                if p not in self.get("pip_list"):
+                    self.check_pip_cmd(True)
+                    self.proc("brew pip " + p + self.get("pip_input_opt")[p])
 
-        # Brew
-        for p in self.get("brew_input"):
-            if p not in self.get("brew_list"):
-                (ret, lines) = self.proc("brew install " + p +
-                                         self.get("brew_input_opt")[p])
-                if ret != 0:
-                    self.warning("Can not install " + p + "."
-                                 "Please check the package name.\n"
-                                 "" + p + " may be installed "
-                                 "by using web direct formula.", 0)
-                    continue
-                for l in lines:
-                    if l.find("ln -s") >= 0:
-                        if self.opt["link"]:
-                            cmdtmp = l.split()
-                            cmd = []
-                            for c in cmdtmp:
-                                if c.startswith('~/'):
-                                    cmd.append(os.path.expanduser(c))
-                                else:
-                                    cmd.append(c)
-                            self.proc(cmd)
-                    if l.find("brew linkapps") >= 0:
-                        if self.opt["link"]:
-                            self.proc("brew linkapps")
+            # Brew
+            for p in self.get("brew_input"):
+                if p not in self.get("brew_list"):
+                    (ret, lines) = self.proc("brew install " + p +
+                                             self.get("brew_input_opt")[p])
+                    if ret != 0:
+                        self.warning("Can not install " + p + "."
+                                     "Please check the package name.\n"
+                                     "" + p + " may be installed "
+                                     "by using web direct formula.", 0)
+                        continue
+                    for l in lines:
+                        if l.find("ln -s") >= 0:
+                            if self.opt["link"]:
+                                cmdtmp = l.split()
+                                cmd = []
+                                for c in cmdtmp:
+                                    if c.startswith('~/'):
+                                        cmd.append(os.path.expanduser(c))
+                                    else:
+                                        cmd.append(c)
+                                self.proc(cmd)
+                        if l.find("brew linkapps") >= 0:
+                            if self.opt["link"]:
+                                self.proc("brew linkapps")
 
         # App Store
         if self.opt["appstore"]:
@@ -2394,6 +2416,11 @@ def main():
         "-n", "--nolink", action="store_false", default=True,
         dest="link", help="Don't make links for Apps.")
 
+    caskonly_parser = argparse.ArgumentParser(add_help=False)
+    caskonly_parser.add_argument(
+        "--caskonly", action="store_true", default=False,
+        dest="caskonly", help="Write out only cask related packages")
+
     appstore_parser = argparse.ArgumentParser(add_help=False)
     appstore_parser.add_argument(
         "--no_appstore", action="store_false", default=True,
@@ -2415,7 +2442,7 @@ def main():
                                 dest="verbose", help="Verbose level 0/1/2")
 
     min_parsers = [file_parser, backup_parser, format_parser,
-                   appstore_parser, yn_parser, verbose_parser]
+                   appstore_parser, caskonly_parser, yn_parser, verbose_parser]
     subparser_options = {
         "parents": min_parsers + [noupdate_parser],
         "formatter_class": argparse.RawTextHelpFormatter}
@@ -2425,7 +2452,7 @@ def main():
         add_help=False, prog=__prog__,
         parents=[file_parser, backup_parser, format_parser,
                  noupdateatupdate_parser, noupdate_parser, repo_parser,
-                 link_parser, appstore_parser,
+                 link_parser, caskonly_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description=__description__)
@@ -2562,7 +2589,8 @@ def main():
                            '--commands', '-v', '--version', '-h', '--help']
         options = ['-f', '--file', '-F', '--format', '--form', '-U',
                    '--noupdate', '--preupdate', '-r', '--repo', '-n',
-                   '--nolink', '-C', '-y', '--yes', '-V', '--verbose']
+                   '--nolink', '--caskonly', '-C', '-y', '--yes',
+                   '-V', '--verbose']
         print 'commands:', ' '.join(commands)
         print 'commands_hyphen:', ' '.join(commands_hyphen)
         print 'options:', ' '.join(options)

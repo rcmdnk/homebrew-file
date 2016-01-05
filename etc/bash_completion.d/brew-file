@@ -9,9 +9,9 @@ _brew_file_options () {
   local commands="install brew init dump set_repo pull push clean update edit \
     casklist cask_upgrade test get_files commands version help"
   local commands_hyphen="-i --init -s --set_repo -c --clean -u --update -e \
-    --edit --test --commands -v --version -h --help"
+    --edit --cat --test --commands -v --version -h --help"
   local options="-f --file -F --format --form -U --noupdate --preupdate -r \
-    --repo -n --nolink -C -y --yes -V --verbose"
+    --repo -n --nolink --caskonly -C -y --yes -V --verbose"
   if [ "$1" = "commands" ];then
     echo $commands
   elif [ "$1" = "commands_hyphen" ];then
@@ -86,7 +86,7 @@ _brew_file () {
           brew)
             complist="$minopt";;
           init|dump|-i|--init|update|-u|--update)
-            complist="$minopt -n --nolink --preupdate -U --noupdate";;
+            complist="$minopt -n --nolink --caskonly --preupdate -U --noupdate";;
           set_repo|-s|--set_repo)
             complist="$minopt -r --repo";;
           clean|-c|--clean)
