@@ -1253,8 +1253,9 @@ class BrewFile:
         (ret, lines) = self.proc("brew list", False, False)
         for p in lines:
             if p.startswith("pip-"):
-                self.brewinfo.pip_list.append(p.replace("pip-", ""))
-                self.brewinfo.pip_list_opt[p] = ""
+                package = p.replace("pip-", "")
+                self.brewinfo.pip_list.append(package)
+                self.brewinfo.pip_list_opt[package] = ""
             else:
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ""
