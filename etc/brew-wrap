@@ -37,8 +37,8 @@ brew () {
 
     if type -a brew-file >/dev/null 2>&1;then
       case "$cmd" in
-        # brew install/uninstall/tap/pip
-        install|reinstall|tap|pip|rm|remove|uninstall|untap)
+        # brew install/uninstall/tap/pip/gem
+        install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
           if [ $# -gt 1 ];then
             if [ "$cmd2" != "-h" ];then
               brew-file brew "$@"
