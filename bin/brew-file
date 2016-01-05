@@ -1033,13 +1033,12 @@ class BrewFile:
         if cmd in ["rm", "remove", "uninstall", "reinstall"] or\
                 (cmd == "cask" and subcmd in ["rm", "remove", "uninstall"]):
             for p in packages:
+                input_list = "brew_input"
                 if cmd == "cask":
                     input_list = "cask_input"
                 elif p.startswith("pip-"):
                     input_list = "pip_input"
                     p = p.replace("pip-", "")
-                else:
-                    "brew_input"
                 is_removed = False
                 for bi in self.get(input_list):
                     if p == bi or p == bi.split("/")[-1].rstrip(".rb"):
