@@ -1597,17 +1597,11 @@ class BrewFile:
             for p in self.get("pip_list"):
                 if p in self.get("pip_input"):
                     continue
-                cmd0 = "pip uninstall -y " + p
-                cmd1 = "brew uninstall " + p
-                cmd2 = "brew uninstall pip-" + p
+                cmd = "brew uninstall pip-" + p
                 if self.opt["dryrun"]:
-                    print cmd0
-                    print cmd1
-                    print cmd2
+                    print cmd
                 else:
-                    self.proc(cmd0, True, True, False)
-                    self.proc(cmd1, True, True, False)
-                    self.proc(cmd2, True, True, False)
+                    self.proc(cmd, True, True, False)
                 self.remove_pack("pip_list", p)
                 self.remove_pack("pip_list_opt", p)
         # Skip clean up cask at tap/brew if any cask packages exist
