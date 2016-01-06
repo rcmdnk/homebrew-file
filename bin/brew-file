@@ -1621,17 +1621,11 @@ class BrewFile:
             for p in self.get("gem_list"):
                 if p in self.get("gem_input"):
                     continue
-                cmd0 = "gem uninstall -y " + p
-                cmd1 = "brew uninstall " + p
-                cmd2 = "brew uninstall gem-" + p
+                cmd = "brew gem uninstall " + p
                 if self.opt["dryrun"]:
-                    print cmd0
-                    print cmd1
-                    print cmd2
+                    print cmd
                 else:
-                    self.proc(cmd0, True, True, False)
-                    self.proc(cmd1, True, True, False)
-                    self.proc(cmd2, True, True, False)
+                    self.proc(cmd, True, True, False)
                 self.remove_pack("gem_list", p)
                 self.remove_pack("gem_list_opt", p)
         # Skip clean up cask at tap/brew if any cask packages exist
@@ -1731,7 +1725,8 @@ class BrewFile:
             for p in self.get("gem_input"):
                 if p not in self.get("gem_list"):
                     self.check_gem_cmd(True)
-                    self.proc("brew gem " + p + self.get("gem_input_opt")[p])
+                    self.proc("brew gem install " + p +
+                              self.get("gem_input_opt")[p])
 
             # Brew
             for p in self.get("brew_input"):
