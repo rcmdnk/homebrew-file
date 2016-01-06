@@ -119,6 +119,11 @@ script:
   - coverage run --parallel-mode $exe brew uninstall pip-asciinema
   - coverage run --parallel-mode $exe brew pip -u django==1.2
   - coverage run --parallel-mode $exe brew rm brew-pip
+  - coverage run --parallel-mode $exe brew install brew-gem
+  - coverage run --parallel-mode $exe brew gem install heroku
+  - coverage run --parallel-mode $exe brew gem uninstall heroku
+  - coverage run --parallel-mode $exe brew gem install heroku 3.8.3
+  - coverage run --parallel-mode $exe brew gem uninstall heroku
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox

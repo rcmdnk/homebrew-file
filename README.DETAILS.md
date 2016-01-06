@@ -79,7 +79,7 @@ You can create a repository with brew-file command:
 
     Set repository, "non" for local Brewfile.
     <user>/<repo> for GitHub repository,
-    or full path for the repository: 
+    or full path for the repository:
 
 Then give a name like `rcmdnk/Brewfile`, or `git@github.com:rcmdnk/Brewfile`.
 
@@ -138,13 +138,13 @@ Example:
     tap caskroom/cask
     brew 'brew-cask'
     # install brew-cask # install is same as "brew". Quotes are not mandatory.
-    
+
     tapall rcmdnk/file # This will trigger `brew install brew-file`, too
-    
+
     # Cask packages
     cask firefox
     #cask install firefox # "cask install" is same as "cask"
-    
+
     # Other Homebrew packages
     brew mercurial
     brew macvim --with-lua
@@ -165,6 +165,7 @@ tap| `brew tap X`
 tapall| `brew tap X`, and installs all packages of Formulae in the tap.
 cask|`brew cask install X`. Require [caskroom/homebrew-cask](https://github.com/caskroom/homebrew-cask/). (It will be installed automatically.)
 pip|`brew pip X`. Require [hanxue/brew-pip](https://github.com/hanxue/brew-pip). (It will be installed automatically.)
+gem|`brew gem install X`. Require [sportngin/brew-gem](https://github.com/sportngin/brew-gem). (It will be installed automatically.)
 appstore| Apps installed from AppStore.
 file| Additional files. A path is a absolute path, or a relative path, relative to the file which calls it.
 brewfile| Same as `file`.
@@ -197,7 +198,7 @@ The relative path starts from the parent file's directory.
 For the path, such `~` is translated into `$HOME`,
 and any environmental variables can be used.
 
-e.g. 
+e.g.
 
 If you have:
 
@@ -246,7 +247,7 @@ Then, set the repository by:
     $ brew file set_repo -r <repository>
 
 It will clone the repository.
-If the repository has a file named "Brewfile", the file will be used instead of 
+If the repository has a file named "Brewfile", the file will be used instead of
 `~/.brewfile/Brewfile`.
 (then `~/.brewfile/Brewfile` will have this repository informatoin.)
 
@@ -283,45 +284,45 @@ This command makes `Caskfile.txt`, which is like:
 
     ### Cask applications
     ### Please copy these lines to your Brewfile and use with `brew bundle`.
-    
+
     ### tap and install Cask (remove comment if necessary).
     #tap caskroom/cask
     #install brew-cask
-    
+
     ### Apps installed by Cask in /Applications
     cask install adobe-reader # /Applications/Adobe Reader.app
     cask install xtrafinder # /Applications/XtraFinder.app
-    
+
     ### Apps installed by Cask in /Applications/Utilities:
     cask install xquartz # /Applications/Utilities/XQuartz.app
-    
+
     ### Apps installed by Cask in ~/Applications.
     cask install bettertouchtool.rb # ~/Applications/BetterTouchTool.app
-    
+
     #############################
-    
+
     ### Apps not installed by Cask, but installed in /Applications.
     ### If you want to install them with Cask, remove comments.
     #cask install keyremap4macbook # /Applications/KeyRemap4MacBook.app
-    
+
     ### Apps not installed by Cask, but installed in /Applications/Utilities:
     ### If you want to install them with Cask, remove comments.
 
     ### Apps not installed by Cask, but installed in ~/Applications.
     ### If you want to install them with Cask, remove comments.
     #cask install copy.rb # ~/Applications/Copy.app
-    
-    
+
+
     #############################
-    
+
     ### Apps not registered in Cask, but installed in /Applications.
     # /Applications/App Store.app
     # /Applications/Calendar.app
     ...
-    
+
     ### Apps not registered in Cask, but installed in /Applications/Utilities:
     ...
-    
+
     ### Apps not registered in Cask, but installed in ~/Applications.
 
 You can find applications which were installed manually,
@@ -331,37 +332,43 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
 ## HELP
 
-    usage: brew file [-f INPUT] [-F FORM] [-U] [--preupdate] [-r REPO] [-n]
-                     [--no_appstore] [-C] [-y] [-V VERBOSE]
+    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [-U] [--preupdate] [-r REPO]
+                     [-n] [--caskonly] [--no_appstore] [-C] [-y] [-V VERBOSE]
                      [command] ...
-    
+
     Brew-file: Manager for packages of Homebrew
     https://github.com/rcmdnk/homebrew-file
-    
+
+    requirement: Python 2.7 or later
+
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /usr/local/Library/Brewfile). 
+                            Set input file (default: /Users/kaneda/.brewfile/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
+      -b BACKUP, --backup BACKUP
+                            Set backup file (default: ).
+                            You can set input file by environmental variable, HOMEBREW_BREWFILE_BACKUP.
       -F FORM, --format FORM, --form FORM
-                            Set input file format (default: file). 
-                            file             : brew vim --HEAD --with-lua
-                            brewdler or budle: brew 'vim', args: ['with-lua', 'HEAD']
+                            Set input file format (default: file).
+                            file              : brew vim --HEAD --with-lua
+                            brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']
                               Compatible with [homebrew-bundle](https://github.com/Homebrew/homebrew-bundle).
-                            command or cmd   :  brew install vim --HEAD --with-lua
+                            command or cmd    : brew install vim --HEAD --with-lua
                               Can be used as a shell script.
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
       --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
+      --caskonly            Write out only cask related packages
       --no_appstore         Don't check AppStore applications.
                             (For other than casklist command)
       -C                    Run cleanup in non dry-run mode.
       -y, --yes             Answer yes to all yes/no questions.
       -V VERBOSE, --verbose VERBOSE
                             Verbose level 0/1/2
-    
+
     subcommands:
       [command]
         install             Install packages in BREWFILE.
@@ -400,7 +407,6 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
                             Show version.
         help                or -h/--help
                             Print Help (this message) and exit.
-
 
 ## Information
 More information could be found in

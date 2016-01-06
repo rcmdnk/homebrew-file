@@ -16,8 +16,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.8.1"
-__date__ = "5/Jan/2016"
+__version__ = "v3.9.0"
+__date__ = "6/Jan/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -147,11 +147,13 @@ class BrewInfo:
 
         self.brew_input_opt = {}
         self.pip_input_opt = {}
+        self.gem_input_opt = {}
 
         self.brew_input = []
         self.tap_input = []
         self.cask_input = []
         self.pip_input = []
+        self.gem_input = []
         self.appstore_input = []
         self.file_input = []
 
@@ -161,11 +163,13 @@ class BrewInfo:
 
         self.brew_list_opt = {}
         self.pip_list_opt = {}
+        self.gem_list_opt = {}
 
         self.brew_list = []
         self.tap_list = []
         self.cask_list = []
         self.pip_list = []
+        self.gem_list = []
         self.appstore_list = []
         self.file_list = []
 
@@ -176,10 +180,12 @@ class BrewInfo:
         self.list_dic = {
             "brew_input_opt": self.brew_input_opt,
             "pip_input_opt": self.pip_input_opt,
+            "gem_input_opt": self.gem_input_opt,
             "brew_input": self.brew_input,
             "tap_input": self.tap_input,
             "cask_input": self.cask_input,
             "pip_input": self.pip_input,
+            "gem_input": self.gem_input,
             "appstore_input": self.appstore_input,
             "file_input": self.file_input,
             "before_input": self.before_input,
@@ -187,11 +193,13 @@ class BrewInfo:
             "cmd_input": self.cmd_input,
             "brew_list_opt": self.brew_list_opt,
             "pip_list_opt": self.pip_list_opt,
+            "gem_list_opt": self.gem_list_opt,
             "brew_list": self.brew_list,
             "tap_list": self.tap_list,
             "cask_list": self.cask_list,
             "cask_nocask_list": self.cask_nocask_list,
             "pip_list": self.pip_list,
+            "gem_list": self.gem_list,
             "appstore_list": self.appstore_list,
             "file_list": self.file_list,
             "tap_packs": self.tap_packs,
@@ -231,11 +239,13 @@ class BrewInfo:
     def clear_input(self):
         self.brew_input_opt.clear()
         self.pip_input_opt.clear()
+        self.gem_input_opt.clear()
 
         del self.brew_input[:]
         del self.tap_input[:]
         del self.cask_input[:]
         del self.pip_input[:]
+        del self.gem_input[:]
         del self.appstore_input[:]
         del self.file_input[:]
 
@@ -246,12 +256,14 @@ class BrewInfo:
     def clear_list(self):
         self.brew_list_opt.clear()
         self.pip_list_opt.clear()
+        self.gem_list_opt.clear()
 
         del self.brew_list[:]
         del self.tap_list[:]
         del self.cask_list[:]
         del self.cask_nocask_list[:]
         del self.pip_list[:]
+        del self.gem_list[:]
         del self.appstore_list[:]
         del self.file_list[:]
 
@@ -260,9 +272,11 @@ class BrewInfo:
         self.brew_list.extend(self.brew_input)
         self.brew_list_opt.update(self.brew_input_opt)
         self.pip_list_opt.update(self.pip_input_opt)
+        self.gem_list_opt.update(self.gem_input_opt)
         self.tap_list.extend(self.tap_input)
         self.cask_list.extend(self.cask_input)
         self.pip_list.extend(self.pip_input)
+        self.gem_list.extend(self.gem_input)
         self.appstore_list.extend(self.appstore_input)
         self.file_list.extend(self.file_input)
 
@@ -320,13 +334,14 @@ class BrewInfo:
                 replace(",", " ").replace("[", "").replace("]", "").split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
-            if len(args) > 2 and p in ["tap", "cask", "pip"]:
-                    args.pop(0)
-                    cmd = args[0]
-                    p = args[1]
-            if len(args) > 2 and cmd in ["brew", "cask"] and p == "install":
-                    args.pop(1)
-                    p = args[1]
+            if len(args) > 2 and p in ["tap", "cask", "pip", "gem"]:
+                args.pop(0)
+                cmd = args[0]
+                p = args[1]
+            if len(args) > 2 and cmd in ["brew", "cask", "gem"] and \
+                    p == "install":
+                args.pop(1)
+                p = args[1]
 
             if len(args) > 2:
                 if args[2] == "args:":
@@ -353,6 +368,9 @@ class BrewInfo:
             elif cmd == "pip":
                 self.pip_input.append(p)
                 self.pip_input_opt[p] = (opt)
+            elif cmd == "gem":
+                self.gem_input.append(p)
+                self.gem_input_opt[p] = (opt)
             elif cmd == "appstore":
                 self.appstore_input.append(re.sub("^ *appstore *", "", l).
                                            strip().strip("'").strip('"'))
@@ -455,6 +473,7 @@ class BrewInfo:
             cmd_tap = "tap "
             cmd_cask = "cask "
             cmd_pip = "pip "
+            cmd_gem = "gem "
             cmd_cask_nocask = "#cask "
             cmd_appstore = "appstore "
             cmd_file = "file "
@@ -466,6 +485,7 @@ class BrewInfo:
             cmd_tap = "tap "
             cmd_cask = "cask "
             cmd_pip = "#pip "
+            cmd_gem = "#gem "
             cmd_cask_nocask = "#cask "
             cmd_appstore = "#appstore "
             cmd_file = "#file "
@@ -494,6 +514,7 @@ class BrewInfo:
             cmd_tap = "brew tap "
             cmd_cask = "brew cask install "
             cmd_pip = "brew pip "
+            cmd_gem = "brew gem install "
             cmd_cask_nocask = "#brew cask install "
             cmd_appstore = "#appstore "
             cmd_file = "#file "
@@ -567,8 +588,17 @@ class BrewInfo:
         if not self.helper.opt["caskonly"] and len(self.pip_list) > 0:
             out.writeln("\n# pip packages")
             for p in self.pip_list:
-                pack = self.packout(p) + self.pip_list_opt[p]
+                pack = self.packout(p)
+                if len(self.pip_list_opt[p]) == 1:
+                    pack = pack + "=" + self.pip_list_opt[p][0].strip()
                 out.writeln(cmd_pip + pack)
+
+        # gem packages
+        if not self.helper.opt["caskonly"] and len(self.gem_list) > 0:
+            out.writeln("\n# gem packages")
+            for p in self.gem_list:
+                pack = self.packout(p) + self.gem_list_opt[p]
+                out.writeln(cmd_gem + pack)
 
         # Casks
         if len(self.cask_list) > 0:
@@ -657,10 +687,12 @@ class BrewFile:
             "brew --cache", False, False, True, 0)[1][0]
         self.opt["cask_repo"] = "caskroom/cask"
         self.opt["pip_pack"] = "brew-pip"
+        self.opt["gem_pack"] = "brew-gem"
         self.opt["my_editor"] = os.environ.get("EDITOR", "vim")
         self.opt["is_brew_cmd"] = False
         self.opt["is_cask_cmd"] = False
         self.opt["is_pip_cmd"] = False
+        self.opt["is_gem_cmd"] = False
         self.opt["args"] = []
         self.opt["yn"] = False
 
@@ -1087,10 +1119,10 @@ class BrewFile:
         if self.brewinfo.check_file():
             self.read_all()
 
-        if cmd in ["rm", "remove", "uninstall", "reinstall"] or\
-                (cmd == "cask" and subcmd in ["rm", "remove", "uninstall"]) or\
-                (cmd == "pip" and pip_upgrade) or\
-                (cmd == "gem" and subcmd in ["uninstall"]):
+        if (cmd in ["rm", "remove", "uninstall", "reinstall"] or
+                (cmd == "cask" and subcmd in ["rm", "remove", "uninstall"]) or
+                (cmd == "pip" and pip_upgrade) or
+                (cmd == "gem" and subcmd in ["uninstall"])):
             for p in packages:
                 input_list = "brew_input"
                 if cmd == "cask":
@@ -1098,27 +1130,34 @@ class BrewFile:
                 elif p.startswith("pip-") or cmd == "pip":
                     input_list = "pip_input"
                     p = p.replace("pip-", "")
+                elif p.startswith("gem-") or cmd == "gem":
+                    input_list = "gem_input"
+                    p = p.replace("gem-", "")
                 is_removed = False
                 for bi in self.get(input_list):
                     if p == bi or p == bi.split("/")[-1].rstrip(".rb"):
                         self.remove_pack(input_list, bi)
                         if input_list == "brew_input":
                             self.remove_pack("brew_input_opt", bi)
-                        if input_list == "pip_input":
+                        elif input_list == "pip_input":
                             self.remove_pack("pip_input_opt", bi)
+                        elif input_list == "gem_input":
+                            self.remove_pack("gem_input_opt", bi)
                         is_removed = True
                         break
                 if cmd not in ["reinstall", "pip"] and not is_removed:
                     self.warning(p + " is not in Brewfile.")
                     self.warning("Try 'brew file init' to clean up Brewfile")
-        if cmd in ["install", "reinstall", "pip"]\
-                or (cmd == "cask" and subcmd == "install")\
-                or (cmd == "gem" and subcmd == "install"):
+        if (cmd in ["install", "reinstall", "pip"] or
+                (cmd == "cask" and subcmd == "install") or
+                (cmd == "gem" and subcmd == "install")):
             input_list = "brew_input"
             if cmd == "cask":
                 input_list = "cask_input"
             elif cmd == "pip":
                 input_list = "pip_input"
+            elif cmd == "gem":
+                input_list = "gem_input"
             for p in packages:
                 porig = p
                 psplit = p.split("/")
@@ -1147,6 +1186,14 @@ class BrewFile:
                             " " + " ".join(opts[porig]).strip()
                     else:
                         self.brewinfo.pip_input_opt[p] = ""
+                elif cmd == "gem":
+                    self.brewinfo.gem_input.append(p)
+                    self.brewinfo.gem_input.sort()
+                    if len(opts[porig]) > 0:
+                        self.brewinfo.gem_input_opt[p] =\
+                            " " + " ".join(opts[porig]).strip()
+                    else:
+                        self.brewinfo.gem_input_opt[p] = ""
                 else:
                     self.brewinfo.brew_input.append(p)
                     self.brewinfo.brew_input.sort()
@@ -1243,6 +1290,28 @@ class BrewFile:
             self.opt["is_pip_cmd"] = True
         return self.opt["is_pip_cmd"]
 
+    def check_gem_cmd(self, force=False):
+        """Check gem is installed or not"""
+        if self.opt["is_gem_cmd"]:
+            return True
+        if self.proc("brew gem -h", False, False, False)[0] == 0:
+            self.opt["is_gem_cmd"] = True
+            return True
+        if force:
+            print self.opt["gem_pack"] +\
+                " has not been installed, install now."
+            ret = self.proc(["brew", "install", self.opt["gem_pack"]],
+                            True, True, False)[0]
+            if ret != 0:  # pragma: no cover
+                self.warning("\nFailed to install " +
+                             self.opt["gem_pack"] + "\n", 0)
+                sys.exit(ret)
+            if not self.opt["gem_pack"] in self.get("brew_list"):
+                self.brewinfo.brew_list.append(self.opt["gem_pack"])
+                self.brewinfo.brew_list_opt[self.opt["gem_pack"]] = ""
+            self.opt["is_gem_cmd"] = True
+        return self.opt["is_gem_cmd"]
+
     def get_appstore_list(self):
         """Get AppStore Application List"""
 
@@ -1277,6 +1346,10 @@ class BrewFile:
                     package = p.replace("pip-", "")
                     self.brewinfo.pip_list.append(package)
                     self.brewinfo.pip_list_opt[package] = ""
+                elif p.startswith("gem-"):
+                    package = p.replace("gem-", "")
+                    self.brewinfo.gem_list.append(package)
+                    self.brewinfo.gem_list_opt[package] = ""
                 else:
                     self.brewinfo.brew_list.append(p)
                     self.brewinfo.brew_list_opt[p] = ""
@@ -1305,7 +1378,7 @@ class BrewFile:
 
         # Cleanup extra files
         for b in self.brewinfo_ext:
-            for l in ["brew", "tap", "cask", "pip", "appstore"]:
+            for l in ["brew", "tap", "cask", "pip", "gem", "appstore"]:
                 for p in b.get(l+"_input"):
                     if p not in self.brewinfo.get(l+"_list"):
                         b.remove(l+"_input", p)
@@ -1316,7 +1389,7 @@ class BrewFile:
         # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
         # Keep it in main list in any case.
-        for l in ["brew", "cask", "cask_nocask", "pip", "appstore"]:
+        for l in ["brew", "cask", "cask_nocask", "pip", "gem", "appstore"]:
             if l == "cask_nocask":
                 i = "cask"
             else:
@@ -1542,6 +1615,30 @@ class BrewFile:
             self.remove_pack("brew_list", self.opt["pip_pack"])
             self.remove_pack("brew_list_opt", self.opt["pip_pack"])
 
+        # Clean up gem packages
+        if len(self.get("gem_list")) > 0:
+            self.banner("# Clean up gem packages")
+            for p in self.get("gem_list"):
+                if p in self.get("gem_input"):
+                    continue
+                cmd0 = "gem uninstall -y " + p
+                cmd1 = "brew uninstall " + p
+                cmd2 = "brew uninstall gem-" + p
+                if self.opt["dryrun"]:
+                    print cmd0
+                    print cmd1
+                    print cmd2
+                else:
+                    self.proc(cmd0, True, True, False)
+                    self.proc(cmd1, True, True, False)
+                    self.proc(cmd2, True, True, False)
+                self.remove_pack("gem_list", p)
+                self.remove_pack("gem_list_opt", p)
+        # Skip clean up cask at tap/brew if any cask packages exist
+        if len(self.get("gem_list")) > 0:
+            self.remove_pack("brew_list", self.opt["gem_pack"])
+            self.remove_pack("brew_list_opt", self.opt["gem_pack"])
+
         # Clean up tap packages
         if len(self.get("tap_list")) > 0:
             self.banner("# Clean up tap packages")
@@ -1629,6 +1726,12 @@ class BrewFile:
                 if p not in self.get("pip_list"):
                     self.check_pip_cmd(True)
                     self.proc("brew pip " + p + self.get("pip_input_opt")[p])
+
+            # gem
+            for p in self.get("gem_input"):
+                if p not in self.get("gem_list"):
+                    self.check_gem_cmd(True)
+                    self.proc("brew gem " + p + self.get("gem_input_opt")[p])
 
             # Brew
             for p in self.get("brew_input"):

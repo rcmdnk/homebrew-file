@@ -15,6 +15,10 @@ tapall rcmdnk/rcmdnkpac
 pip asciinema
 pip gcalcli
 
+## gem
+#install brew-gem
+gem heroku
+
 # App Store applications
 appstore Keynote
 
