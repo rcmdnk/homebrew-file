@@ -38,7 +38,7 @@ brew () {
     if type -a brew-file >/dev/null 2>&1;then
       case "$cmd" in
         # brew install/uninstall/tap/pip/gem
-        install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
+        instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
           if [ $# -gt 1 ];then
             if [ "$cmd2" != "-h" ];then
               brew-file brew "$@"
@@ -48,8 +48,9 @@ brew () {
           ;;
         # brew cask install/uninstall
         cask)
-          if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ]\
-              || [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ];then
+          if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || \
+              [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ] || \
+              [ "$cmd2" = "instal" ];then
             if [ $# -gt 2 ];then
               if [ "$cmd3" != "-h" ];then
                 brew-file brew "$@"
