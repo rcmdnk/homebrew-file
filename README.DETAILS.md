@@ -343,7 +343,7 @@ If you want to manage them with Brewfile, just copy above lines w/o "#" for thes
 
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /Users/kaneda/.brewfile/Brewfile).
+                            Set input file (default: /Users/user/.brewfile/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
