@@ -88,8 +88,12 @@ if ! type -a _brew >& /dev/null;then
   return
 elif [ "$ZSH_VERSION" = "" ] && ! type -a _brew_file >& /dev/null;then
   return
-elif [ "$ZSH_VERSION" != "" ] && ! grep brew-file ~/.zcompdump >& /dev/null;then
-  return
+elif [ "$ZSH_VERSION" != "" ];then
+  if ! grep brew-file ~/.zcompdump >& /dev/null;then
+    return
+  fi
+  autoload -U _brew-file
+  _brew-file
 fi
 
 _brew_completion_wrap () {
