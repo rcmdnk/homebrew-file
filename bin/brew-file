@@ -2617,7 +2617,7 @@ def main():
         "cask_upgrade", description=help,
         help=help, parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "Used for test."
+    help = "or --tes. Used for test."
     subparsers.add_parser("test", description=help, help=help,
                           parents=min_parsers,
                           formatter_class=argparse.RawTextHelpFormatter)
@@ -2681,9 +2681,10 @@ def main():
         commands_hyphen = ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
                            '-u', '--update', '-e', '--edit', '--cat', '--test',
                            '--commands', '-v', '--version', '-h', '--help']
-        options = ['-f', '--file', '-F', '--format', '--form', '-U',
-                   '--noupdate', '--preupdate', '-r', '--repo', '-n',
-                   '--nolink', '--caskonly', '-C', '-y', '--yes',
+        options = ['-f', '--file', '-b', '--backup',
+                   '-F', '--format', '--form', '-U', '--noupdate',
+                   '--preupdate', '-r', '--repo', '-n', '--nolink',
+                   '--caskonly', '--no_appstore', '-C', '-y', '--yes',
                    '-V', '--verbose']
         print 'commands:', ' '.join(commands)
         print 'commands_hyphen:', ' '.join(commands_hyphen)
