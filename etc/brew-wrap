@@ -88,7 +88,7 @@ if ! type -a _brew >& /dev/null;then
   return
 elif [ "$ZSH_VERSION" = "" ] && ! type -a _brew_file >& /dev/null;then
   return
-elif [ "$ZSH_VERSION" != "" ] && ! grep _brew_file ~/.zcompdump >& /dev/null;then
+elif [ "$ZSH_VERSION" != "" ] && ! grep brew-file ~/.zcompdump >& /dev/null;then
   return
 fi
 
