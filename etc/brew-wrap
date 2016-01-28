@@ -17,10 +17,10 @@ brew () {
   fi
   wrap=1
   v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
-  if [ ${v[0]} -eq 2 ];then
-    if [ ${v[1]} -lt 7 ];then
+  if [ "${v[0]}" -eq 2 ];then
+    if [ "${v[1]}" -lt 7 ];then
       wrap=0
-    elif [ ${v[1]} -eq 7 ] && [ ${v[2]} -le 6 ];then
+    elif [ "${v[1]}" -eq 7 ] && [ "${v[2]}" -le 6 ];then
       wrap=0
     fi
   fi
@@ -84,44 +84,49 @@ brew () {
 }
 
 # Wrap the brew command completion, to use the completion on `brew file`.
-if (type -a _brew && type -a _brew_file) >/dev/null 2>&1;then
-  _brew_completion_wrap () {
-    if [ "$ZSH_VERSION" != "" ];then
-      local isksharrays=0
-      if ! setopt|grep -q ksharrays;then
-        isksharrays=1
-        setopt ksharrays
-      fi
-      local cword=$((CURRENT-1))
-      local w
-      w=("${words[@]}")
-    else
-      local cword=$((COMP_CWORD))
-      local w=("${COMP_WORDS[@]}")
-    fi
-    local cur=${w[cword]}
-    local first=${w[1]}
-    if [ "$ZSH_VERSION" != "" ] && [ $isksharrays -eq 1 ];then
-      unsetopt ksharrays
-    fi
-    if [ "$first" = "file" ];then
-      _brew_file $*
-    else
-      _brew
-      if [ $cword -eq 1 ];then
-        if [ "$ZSH_VERSION" != "" ];then
-          # Use longest brew's subcommand 'reinstall' to align with other brew commands.
-          _values 'brew subcommand' 'file[manage Brewfile]' 'reinstall[install a formula anew; re-using its current options]'
-        else
-          COMPREPLY=($(compgen -W "${COMPREPLY[*]} file" -- "$cur"))
-        fi
-      fi
-    fi
-  }
+if ! type -a _brew >& /dev/null;then
+  return
+elif [ "$ZSH_VERSION" = "" ] && ! type -a _brew_file >& /dev/null;then
+  return
+elif [ "$ZSH_VERSION" != "" ] && ! grep _brew_file ~/.zcompdump >& /dev/null;then
+  return
+fi
+
+_brew_completion_wrap () {
   if [ "$ZSH_VERSION" != "" ];then
-    compdef _brew_completion_wrap brew
-    echo _brew_completion_wrap loaded
+    local isksharrays=0
+    if ! setopt|grep -q ksharrays;then
+      isksharrays=1
+      setopt ksharrays
+    fi
+    local cword=$((CURRENT-1))
+    local w
+    w=("${words[@]}")
   else
-    complete -o bashdefault -o default -F _brew_completion_wrap brew
+    local cword=$((COMP_CWORD))
+    local w=("${COMP_WORDS[@]}")
   fi
+  local cur=${w[cword]}
+  local first=${w[1]}
+  if [ "$ZSH_VERSION" != "" ] && [ $isksharrays -eq 1 ];then
+    unsetopt ksharrays
+  fi
+  if [ "$first" = "file" ];then
+    _brew_file "$@"
+  else
+    _brew
+    if [ $cword -eq 1 ];then
+      if [ "$ZSH_VERSION" != "" ];then
+        # Use longest brew's subcommand 'reinstall' to align with other brew commands.
+        _values 'brew subcommand' 'file[manage Brewfile]' 'reinstall[install a formula anew; re-using its current options]'
+      else
+        COMPREPLY=($(compgen -W "${COMPREPLY[*]} file" -- "$cur"))
+      fi
+    fi
+  fi
+}
+if [ "$ZSH_VERSION" != "" ];then
+  compdef _brew_completion_wrap brew
+else
+  complete -o bashdefault -o default -F _brew_completion_wrap brew
 fi

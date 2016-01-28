@@ -1,4 +1,4 @@
-#!/bin/sh
+#compdef brew-file
 _brew_file_options () {
   # Using brew commands make it slow...
   #local val=$(brew file commands)
