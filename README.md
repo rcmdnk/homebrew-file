@@ -188,4 +188,4 @@ The repository is updated at lunch time every day.
 
 ## More details
 
-[README.DETAILS.md](README.DETAILS.md)
+[README.MORE.md](README.MORE.md)
