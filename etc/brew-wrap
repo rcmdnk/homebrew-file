@@ -89,10 +89,9 @@ if ! type -a _brew >& /dev/null;then
 elif [ "$ZSH_VERSION" = "" ] && ! type -a _brew_file >& /dev/null;then
   return
 elif [ "$ZSH_VERSION" != "" ];then
-  if ! grep brew-file ~/.zcompdump >& /dev/null;then
+  if ! type -a _brew-file >& /dev/null;then
     return
   fi
-  autoload -U _brew-file
   _brew-file
 fi
 
@@ -122,7 +121,7 @@ _brew_completion_wrap () {
     if [ $cword -eq 1 ];then
       if [ "$ZSH_VERSION" != "" ];then
         # Use longest brew's subcommand 'reinstall' to align with other brew commands.
-        _values 'brew subcommand' 'file[manage Brewfile]' 'reinstall[install a formula anew; re-using its current options]'
+        _values 'Subcommands' 'file[manage Brewfile]'
       else
         COMPREPLY=($(compgen -W "${COMPREPLY[*]} file" -- "$cur"))
       fi
