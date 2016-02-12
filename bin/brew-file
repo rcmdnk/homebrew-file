@@ -16,7 +16,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.10.0"
+__version__ = "v3.10.1"
 __date__ = "13/Feb/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1640,7 +1640,24 @@ class BrewFile:
             n_uninstall = 0
             import urllib2
             for p in self.get("appstore_list"):
-                if p in self.get("appstore_input"):
+                identifier = p.split()[0]
+                if identifier.isdigit() and len(identifier) == 9:
+                    package = ' '.join(p.split()[1:])
+                else:
+                    identifier = ""
+                    package = p
+                isinput = False
+                for pi in self.get("appstore_input"):
+                    i_identifier = pi.split()[0]
+                    if i_identifier.isdigit() and len(i_identifier) == 9:
+                        i_package = ' '.join(pi.split()[1:])
+                    else:
+                        i_identifier = ""
+                        i_package = pi
+                    if package == i_package:
+                        isinput = True
+                        break
+                if isinput:
                     continue
                 tmpcmd = cmd
                 package = ' '.join(p.split()[1:])
@@ -1839,12 +1856,36 @@ class BrewFile:
         # App Store
         if self.opt["appstore"]:
             for p in self.get("appstore_input"):
-                if p not in self.get("appstore_list"):
+                identifier = p.split()[0]
+                if identifier.isdigit() and len(identifier) == 9:
+                    package = ' '.join(p.split()[1:])
+                else:
+                    identifier = ""
+                    package = p
+                islist = False
+                for pl in self.get("appstore_list"):
+                    l_identifier = pl.split()[0]
+                    if l_identifier.isdigit() and len(l_identifier) == 9:
+                        l_package = ' '.join(pl.split()[1:])
+                    else:
+                        l_identifier = ""
+                        l_package = pl
+                    if package == l_package:
+                        islist = True
+                        break
+                if islist:
+                    continue
+                if Identifier != "":
                     self.check_mas_cmd(True)
                     identifier = p.split()[0]
                     package = ' '.join(p.split()[1:])
                     self.info("Installing " + package)
                     self.proc("mas install " + identifier)
+                else:
+                    self.warning("App Store applicaton must be"
+                                 "listed with identifier.\n"
+                                 "Please try:\n"
+                                 "    $ brew file init")
 
         # Other commands
         for c in self.get("cmd_input"):
