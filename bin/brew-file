@@ -16,7 +16,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.9.8"
+__version__ = "v3.9.9"
 __date__ = "12/Feb/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -905,7 +905,7 @@ class BrewFile:
                 exit(0)
             else:
                 ret = self.proc("pip --version", False, False, False)
-                if not ret:
+                if ret != 0:
                     self.proc("easy_install pip")
                 self.proc("pip install requests")
                 print "Now please run `brew file set_repo` again."
@@ -1555,8 +1555,13 @@ class BrewFile:
         if self.opt["appstore"] and \
                 len(self.get("appstore_list")) > 0:  # pragma: no cover
             self.banner("# Clean up App Store applications")
-            cmd = "sudo rm -rf"
+            uninstall = self.proc("type uninstall", False, False, False)
+            if uninstall == 0:
+                cmd = "sudo uninstall"
+            else:
+                cmd = "sudo rm -rf"
             n_uninstall = 0
+            import urllib2
             for p in self.get("appstore_list"):
                 if p in self.get("appstore_input"):
                     continue
@@ -1564,7 +1569,10 @@ class BrewFile:
                 for d in self.opt["appdirlist"]:
                     a = "%s/%s.app" % (d, p)
                     if os.path.isdir(a):
-                        cmd += " '%s'" % a
+                        if uninstall == 0:
+                            cmd += " file:///" + urllib2.quote(a)
+                        else:
+                            cmd += " '%s'" % a
                         continue
                 if cmd == tmpcmd:
                     continue
