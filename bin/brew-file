@@ -16,8 +16,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.9.7"
-__date__ = "1/Feb/2016"
+__version__ = "v3.9.8"
+__date__ = "12/Feb/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1555,16 +1555,16 @@ class BrewFile:
         if self.opt["appstore"] and \
                 len(self.get("appstore_list")) > 0:  # pragma: no cover
             self.banner("# Clean up App Store applications")
-            cmd = "sudo uninstall"
+            cmd = "sudo rm -rf"
             n_uninstall = 0
-            import urllib2
             for p in self.get("appstore_list"):
                 if p in self.get("appstore_input"):
                     continue
                 tmpcmd = cmd
                 for d in self.opt["appdirlist"]:
-                    if os.path.isdir(d + p + ".app"):
-                        cmd += " file:///" + urllib2.quote(d + p + ".app")
+                    a = "%s/%s.app" % (d, p)
+                    if os.path.isdir(a):
+                        cmd += " '%s'" % a
                         continue
                 if cmd == tmpcmd:
                     continue
