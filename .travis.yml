@@ -23,6 +23,7 @@ before_install:
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   - brew update
 install:
+  - sw_vers
   - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew list > brewlist.orig
@@ -82,9 +83,6 @@ script:
   - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
   - coverage run --parallel-mode $exe init -y
-  - mas
-  - mas help
-  - mas version
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe install --preupdate -y
