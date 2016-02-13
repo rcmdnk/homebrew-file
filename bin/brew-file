@@ -16,7 +16,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.10.4"
+__version__ = "v3.10.5"
 __date__ = "13/Feb/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1306,33 +1306,34 @@ class BrewFile:
     def check_mas_cmd(self, force=False):
         """Check mas is installed or not"""
         if self.opt["is_mas_cmd"]:
-            return True
-        if self.proc("type mas", False, False, False)[0] == 0:
+            return self.opt["is_mas_cmd"]
+        if self.proc("type mas", False, False, False)[0] != 0:
+            self.info(self.opt["mas_formula"] + " has not been installed.")
+            if not force:
+                ans = self.ask_yn("Do you want to install %s?" %
+                                  self.opt["mas_formula"])
+                if not ans:  # pragma: no cover
+                    self.warning("If you need it, please do:")
+                    self.warning("    $ brew install %s"
+                                 % (self.opt["mas_formula"]))
+                    return self.opt["is_mas_cmd"]
+            ret = self.proc(["brew", "install", self.opt["mas_formula"]],
+                            True, True, False)[0]
+            if ret != 0:  # pragma: no cover
+                self.warning("\nFailed to install " +
+                             self.opt["mas_formula"] + "\n", 0)
+                sys.exit(ret)
+            if not self.opt["mas_repo"] in self.get("tap_list"):
+                self.brewinfo.tap_list.append(self.opt["mas_repo"])
+            p = os.path.basename(self.opt["mas_formula"])
+            if p not in self.get("brew_list"):
+                self.brewinfo.brew_list.append(p)
+                self.brewinfo.brew_list_opt[p] = ""
             self.opt["is_mas_cmd"] = True
-            return True
-        self.info(self.opt["mas_formula"] + " has not been installed.")
-        if not force:
-            ans = self.ask_yn("Do you want to install %s?" %
-                              self.opt["mas_formula"])
-            if not ans:  # pragma: no cover
-                self.warning("If you need it, please do:")
-                self.warning("    $ brew install %s"
-                             % (self.opt["mas_formula"]))
-                return self.opt["is_mas_cmd"]
-        ret = self.proc(["brew", "install", self.opt["mas_formula"]],
-                        True, True, False)[0]
-        if ret != 0:  # pragma: no cover
-            self.warning("\nFailed to install " +
-                         self.opt["mas_formula"] + "\n", 0)
-            sys.exit(ret)
-        if not self.opt["mas_repo"] in self.get("tap_list"):
-            self.brewinfo.tap_list.append(self.opt["mas_repo"])
-        p = os.path.basename(self.opt["mas_formula"])
-        if p not in self.get("brew_list"):
-            self.brewinfo.brew_list.append(p)
-            self.brewinfo.brew_list_opt[p] = ""
-        self.opt["is_mas_cmd"] = True
-        self.opt["mas_cmd_installed"] = True
+            self.opt["mas_cmd_installed"] = True
+        if self.proc("mas", False, False, False)[0] != 0:
+            # mas can not be used in older os x?
+            self.opt["is_mas_cmd"] = "NOTAVAILABLE"
         return self.opt["is_mas_cmd"]
 
     def check_pip_cmd(self, force=False):
@@ -1397,10 +1398,18 @@ class BrewFile:
     def get_appstore_list(self):
         """Get AppStore Application List"""
 
-        self.check_mas_cmd(True)
-        (ret, lines) = self.proc("mas list", False, False)
-        lines = sorted(lines, key=lambda x:x.split()[1:])
-        return lines
+        apps = []
+
+        ret = self.check_mas_cmd(True)
+        if ret and ret != "NOTAVAILABLE":
+            (ret, lines) = self.proc("mas list", False, False)
+            apps = sorted(lines, key=lambda x: x.split()[1:])
+        elif ret:
+            import glob
+            for d in self.opt["appdirlist"]:
+                apps += [x.split("/")[-4].split(".app")[0] for x in
+                         glob.glob(d + '/*/Contents/_MASReceipt/receipt')]
+        return apps
 
     def get_cask_list(self, force=False):
         """Get Cask List"""
@@ -1876,17 +1885,13 @@ class BrewFile:
                         break
                 if islist:
                     continue
-                if Identifier != "":
-                    self.check_mas_cmd(True)
-                    identifier = p.split()[0]
-                    package = ' '.join(p.split()[1:])
+                ret = self.check_mas_cmd(True)
+                if identifier != "" and ret and ret != "NOTAVAILABLE":
                     self.info("Installing " + package)
                     self.proc("mas install " + identifier)
                 else:
-                    self.warning("App Store application must be"
-                                 "listed with identifier.\n"
-                                 "Please try:\n"
-                                 "    $ brew file init")
+                    self.warning("\nPlease install " +
+                                 package + " from App Store!", 0)
 
         # Other commands
         for c in self.get("cmd_input"):
