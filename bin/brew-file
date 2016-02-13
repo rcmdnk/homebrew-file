@@ -615,7 +615,7 @@ class BrewInfo:
 
         # App Store applications
         if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
-            out.writeln("\n# App Store applications (Identifier, App Name)")
+            out.writeln("\n# App Store applications")
             for p in self.appstore_list:
                 out.writeln(cmd_appstore + self.packout(p))
 
