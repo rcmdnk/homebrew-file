@@ -85,7 +85,7 @@ script:
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - coverage run --parallel-mode $exe test -V 2
-  - coverage run --parallel-mode $exe install --preupdate -y
+  - coverage run --parallel-mode $exe install --no_appstore --preupdate -y
   - rm $brewfile
   - coverage run --parallel-mode $exe update -y
   # brew command checks
@@ -150,11 +150,11 @@ script:
   - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
   - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
-  - 'coverage run --parallel-mode $exe -f BrewfileWrong install -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong --no_appstore install -y -V 0 || :'
   - 'coverage run --parallel-mode $exe wrongcommand || :'
   # Wrong command test (test proc)
   - echo 'ls wrong_file' > $brewfile
-  - 'coverage run --parallel-mode $exe install || :'
+  - 'coverage run --parallel-mode $exe install --no_appstore || :'
   # Use test repository
   - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
   - rm -rf $brewfile $testrepofulldir
@@ -170,7 +170,7 @@ script:
   - coverage run --parallel-mode $exe edit
   - cp $testfile .
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-  - coverage run --parallel-mode $exe install -V 2
+  - coverage run --parallel-mode $exe --no_appstore install -V 2
   - coverage run --parallel-mode $exe casklist -V 0
   - command brew rm emacs
   - coverage run --parallel-mode $exe init -y -V 0
@@ -184,14 +184,14 @@ script:
   - coverage run --parallel-mode $exe casklist -V 0
   # brewdler format tests
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
-  - coverage run --parallel-mode $exe install -F brewdler
+  - coverage run --parallel-mode $exe install --no_appstore -F brewdler
   - echo "appstore 'KeyNotes'" >> $testfile
   - echo "file 'BrewfileExt'" >> $testfile
   - coverage run --parallel-mode $exe -F brewdler brew cask uninstall google-chrome
   - cat /Users/travis/.brewfile/rcmdnk_BrewfileTest/Brewfile
   # command format tests
   - coverage run --parallel-mode $exe init -F command -y -V 2
-  - coverage run --parallel-mode $exe install -F command
+  - coverage run --parallel-mode $exe install --no_appstore -F command
   # Clean up tests
   - echo "brew brew-file $version" > $testfile
   - echo "brew python" >> $testfile
@@ -208,7 +208,7 @@ script:
   - coverage run --parallel-mode $exe clean -C
   # Wrong command test
   - echo "wrong command" > $testfile
-  - 'coverage run --parallel-mode $exe install | :'
+  - 'coverage run --parallel-mode $exe install --no_appstore | :'
   # Push current Brewfile in homebrew-file to BrewfileTest
   - cp Brewfile $testfile
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && coverage run --parallel-mode $exe push -V 0'
