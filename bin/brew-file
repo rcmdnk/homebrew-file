@@ -16,8 +16,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.10.8"
-__date__ = "23/Feb/2016"
+__version__ = "v3.10.9"
+__date__ = "10/Mar/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1333,7 +1333,7 @@ class BrewFile:
             self.opt["mas_cmd_installed"] = True
         if self.proc("mas", False, False, False)[0] != 0:
             # mas can not be used in older os x?
-            self.opt["is_mas_cmd"] = "NOTAVAILABLE"
+            self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
         else:
             self.opt["is_mas_cmd"] = True
         return self.opt["is_mas_cmd"]
@@ -1403,7 +1403,7 @@ class BrewFile:
         apps = []
 
         ret = self.check_mas_cmd(True)
-        if ret and ret != "NOTAVAILABLE":
+        if ret and ret != "MASNOTAVAILABLE":
             (ret, lines) = self.proc("mas list", False, False)
             apps = sorted(lines, key=lambda x: x.split()[1:])
         elif ret:
@@ -2006,7 +2006,15 @@ class BrewFile:
         self.banner("# Starting to check applications for Cask...")
 
         # First, get App Store applications
-        self.brewinfo.set_val("appstore_list", self.get_appstore_list())
+        appstore_list = {}
+        for p in self.get_appstore_list():
+            identifier = p.split()[0]
+            if identifier.isdigit() and len(identifier) == 9:
+                package = ' '.join(p.split()[1:])
+            else:
+                identifier = ""
+                package = p
+            appstore_list[package] = identifier
 
         # Get cask list, force to install brew-cask
         # if it has not been installed.
@@ -2098,10 +2106,10 @@ class BrewFile:
                         and os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
                 if app.rstrip(".app")\
-                        in self.get("appstore_list"):  # pragma: no cover
+                        in appstore_list.keys():  # pragma: no cover
                     tap = "appstore"
                     installed = False
-                    name = ""
+                    name = appstore_list[app.rstrip(".app")]
                     check = "appstore"
                 elif app in casks.keys() or\
                         app.split(".")[0] in casks.keys():
@@ -2279,9 +2287,9 @@ class BrewFile:
 
             if len([x[0] for x in casks.values() + nonapp_casks
                     if x[1] == t and not x[3]]) > 0:
-                out.writeln(
-                    "# Cask is found, but no applications are found " +
-                    "(fonts, system settins, or installed in other directory.")
+                out.writeln("# Cask is found, but no applications are found.\n"
+                            "# (fonts, system settins, "
+                            "or installed in other directory.)")
                 for name in sorted(x[0]
                                    for x in casks.values() + nonapp_casks
                                    if x[1] == t and x[2] and not x[3]):
@@ -2324,7 +2332,12 @@ class BrewFile:
         if len(apps["appstore"][False]) > 0:  # pragma: no cover
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
-                    out.writeln("#" + app_path)
+                p = app_path.split("/")[-1].rstrip(".app")
+                if name != '':
+                    line = "%s %s #%s" % (name, p, app_path)
+                else:
+                    line = "%s #%s" % (p, app_path)
+                out.writeln(line)
             out.writeln("")
 
         if len(apps[""][False]) > 0:
