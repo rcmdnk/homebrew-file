@@ -1312,6 +1312,11 @@ class BrewFile:
         if self.opt["is_mas_cmd"]:
             return self.opt["is_mas_cmd"]
         if self.proc("type mas", False, False, False)[0] != 0:
+            sw_vers = self.proc("sw_vers", False, False, False)[1].split(".")
+            if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10 and
+                                        int(sw_vers[1] < 10)):
+                self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
+                return self.opt["is_mas_cmd"]
             self.info(self.opt["mas_formula"] + " has not been installed.")
             if not force:
                 ans = self.ask_yn("Do you want to install %s?" %
@@ -1336,7 +1341,7 @@ class BrewFile:
             self.opt["is_mas_cmd"] = True
             self.opt["mas_cmd_installed"] = True
         if self.proc("mas", False, False, False)[0] != 0:
-            # mas can not be used in older os x?
+            # fail?
             self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
         else:
             self.opt["is_mas_cmd"] = True
