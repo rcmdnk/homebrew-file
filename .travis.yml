@@ -74,6 +74,7 @@ script:
   - rm -rf /usr/local/bin/pip2.7
   - brew install $PYTHON_VERSION
   - '[ "$PYTHON_VERSION" = "python3" ] && alias python=python3 || :'
+  - '[ "$PYTHON_VERSION" = "python3" ] && alias pip=pip3 || :'
   - pip install --upgrade pip
   - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
