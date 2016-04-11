@@ -26,6 +26,23 @@ __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
 
+is_python3 = -1
+
+
+def my_decode(word):
+    global is_python3
+    if is_python3 == -1:
+        try:
+            unicode
+            is_python3 = 0
+        except:
+            is_python3 = 1
+    if is_python3 == 0:
+        return word
+    else:
+        return word.decode()
+
+
 def open_output_file(name, mode="w"):
     if os.path.dirname(name) != '' and \
             not os.path.exists(os.path.dirname(name)):
@@ -37,7 +54,10 @@ class Tee:
     """Module to write out in two ways at once."""
 
     def __init__(self, out1, out2=sys.stdout, use2=True):
-        from io import StringIO
+        try:
+            from cStringIO import StringIO
+        except ImportError:
+            from io import StringIO
         if type(out1) == str:
             self.out1name = out1
             self.out1 = StringIO()
@@ -110,7 +130,7 @@ class BrewHelper:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT)
             for line in p.stdout:
-                l = line.decode('utf-8').rstrip()
+                l = my_decode(line).rstrip()
                 lines.append(l)
                 if print_out:
                     self.info(l, verbose_level)
@@ -403,20 +423,20 @@ class BrewInfo:
         tap_path = self.get_tap_path(tap)
         if not os.path.isdir(tap_path):
             return
-        self.set_val("tap_packs", map(lambda x: x.replace(".rb", ""),
-                                      filter(lambda y: y.endswith(".rb"),
-                                             os.listdir(tap_path))))
+        self.set_val("tap_packs", list(map(lambda x: x.replace(".rb", ""),
+                                           filter(lambda y: y.endswith(".rb"),
+                                                  os.listdir(tap_path)))))
         path = tap_path + "/Formula"
         if os.path.isdir(path):
-            self.add("tap_packs", map(lambda x: x.replace(".rb", ""),
-                                      filter(lambda y: y.endswith(".rb"),
-                                             os.listdir(path))))
+            self.add("tap_packs", list(map(lambda x: x.replace(".rb", ""),
+                                           filter(lambda y: y.endswith(".rb"),
+                                                  os.listdir(path)))))
         path = tap_path + "/Casks"
         if os.path.isdir(path):
             self.set_val("tap_casks",
-                         map(lambda x: x.replace(".rb", ""),
-                             filter(lambda y: y.endswith(".rb"),
-                                    os.listdir(tap_path + "/Casks"))))
+                         list(map(lambda x: x.replace(".rb", ""),
+                                  filter(lambda y: y.endswith(".rb"),
+                                         os.listdir(tap_path + "/Casks")))))
 
     def packout(self, pack):
         if self.helper.opt["form"] in ["brewdler", "bundle"]:
@@ -431,8 +451,8 @@ class BrewInfo:
         # Get options for build
         (ret, lines) = self.helper.proc("brew info " + package, False, False)
         versions = {"stable": "", "devel": "", "HEAD": ""}
-        v_tmp = map(lambda x: x.strip().split(),
-                    lines[0].split(":")[1].split(","))
+        v_tmp = list(map(lambda x: x.strip().split(),
+                         lines[0].split(":")[1].split(",")))
         if len(v_tmp) == 1 and len(v_tmp[0]) == 0:
             for l in lines:
                 self.warning(l, 0)
@@ -647,9 +667,9 @@ class BrewInfo:
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
-            self.proc("chmod 755 %s" % self.get_file(), False, False, False)
+            self.helper.proc("chmod 755 %s" % self.get_file(), False, False, False)
         else:
-            self.proc("chmod 655 %s" % self.get_file(), False, False, False)
+            self.helper.proc("chmod 655 %s" % self.get_file(), False, False, False)
 
 
 class BrewFile:
@@ -2060,9 +2080,9 @@ class BrewFile:
         nonapp_casks_noinst = []
         for t in taps:
             d = self.brewinfo.get_tap_path(t) + "/Casks"
-            for cask in map(
+            for cask in list(map(
                     lambda x: x.replace(".rb", ""),
-                    filter(lambda y: y.endswith(".rb"), os.listdir(d))):
+                    filter(lambda y: y.endswith(".rb"), os.listdir(d)))):
                 cask_apps = []
                 installed = False
                 noinst = True
