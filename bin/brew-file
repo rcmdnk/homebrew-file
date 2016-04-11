@@ -1314,9 +1314,9 @@ class BrewFile:
         if self.proc("type mas", False, False, False)[0] != 0:
             sw_vers = self.proc("sw_vers -productVersion",
                                 False, False, False)[1][0].split(".")
-            print "sw_vers", sw_vers
             if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10 and
-                                        int(sw_vers[1] < 10)):
+                                        int(sw_vers[1]) < 10):
+                self.warning("You are using older OS X. mas is not used.")
                 self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
                 return self.opt["is_mas_cmd"]
             self.info(self.opt["mas_formula"] + " has not been installed.")
