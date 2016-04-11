@@ -1,5 +1,5 @@
-language: python
-#language: objective-c
+language: objective-c
+#language: python
 os: osx
 # Python version is not available for OSX
 # [Python runtime is not yet available on OS X · Issue #2312 · travis-ci/travis-ci](https://github.com/travis-ci/travis-ci/issues/2312)
