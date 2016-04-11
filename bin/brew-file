@@ -37,7 +37,7 @@ class Tee:
     """Module to write out in two ways at once."""
 
     def __init__(self, out1, out2=sys.stdout, use2=True):
-        from cStringIO import StringIO
+        from io import StringIO
         if type(out1) == str:
             self.out1name = out1
             self.out1 = StringIO()
@@ -115,10 +115,12 @@ class BrewHelper:
                 if print_out:
                     self.info(l, verbose_level)
             ret = p.wait()
-        except OSError:
+        except OSError as e:
             if print_out:
-                self.info("ERROR at " + cmd, verbose_level)
+                lines = [' '.join(cmd) + ': ' + str(e)]
+                self.info(lines[0].strip(), verbose_level)
             ret = -1
+
 
         if exit_on_error and ret != 0:
             if not (print_out and self.opt["verbose"] >= verbose_level):
