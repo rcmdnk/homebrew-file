@@ -111,10 +111,9 @@ class BrewHelper:
                 if print_out:
                     self.info(l.strip(), verbose_level)
             ret = p.wait()
-        except OSError, e:
-            lines = [' '.join(cmd) + ': ' + str(e)]
+        except OSError:
             if print_out:
-                self.info(lines[0].strip(), verbose_level)
+                self.info("ERROR at " + cmd, verbose_level)
             ret = -1
 
         if exit_on_error and ret != 0:
