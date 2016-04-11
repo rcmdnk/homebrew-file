@@ -1,9 +1,11 @@
-os: osx
-#language: objective-c
 language: python
-python:
-  - "2.7"
-  - "3.5"
+#language: objective-c
+os: osx
+# Python version is not available for OSX
+# [Python runtime is not yet available on OS X · Issue #2312 · travis-ci/travis-ci](https://github.com/travis-ci/travis-ci/issues/2312)
+#python:
+#  - "2.7"
+#  - "3.5"
 branches:
   except:
     - /^v[0-9]/
@@ -16,9 +18,11 @@ env:
     - PAGER=cat
     - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
-  matrix:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
+  matrix:
+    - PYTHON_VERSION="python"
+    - PYTHON_VERSION="python3"
 before_install:
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d || :'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && cp .travis_rsa ~/.ssh/id_rsa || :'
@@ -29,8 +33,6 @@ before_install:
   - brew update
 install:
   - sw_vers
-  - '[ "$coveralls" = "coveralls-python" ] && sudo pip install coveralls || :'
-  - '[ "$coveralls" = "python-coveralls" ] && sudo pip -e . --use-mirrors || :'
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file $version
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
@@ -64,18 +66,17 @@ script:
   - python --version
   - 'coverage run --parallel-mode $exe brew install tig --HEAD --with-docs | :' # old version can't use hyphen options at brew file brew.
   # Install the latest version of Python
-  # Need to delete pip staffs to avoid conflicts.
-  - sudo pip uninstall -y coveralls
-  - sudo pip uninstall -y coverage
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
   - rm -rf /usr/local/bin/easy_install-2.7
   - rm -rf /usr/local/bin/pip
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
-  - brew install python
+  - brew install $PYTHON_VERSION
+  - '[ "$PYTHON_VERSION" = "python3" ] && alias python=python3 || :'
   - pip install --upgrade pip
-  - pip install coveralls
+  - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls || :'
+  - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
   - python --version
   - hash -r
   - python --version
