@@ -75,16 +75,20 @@ script:
   - brew install $PYTHON_VERSION
     #  - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python && ln -s /usr/local/bin/python3 /usr/local/bin/python || :'
     #  - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip && ln -s /usr/local/bin/pip3 /usr/local/bin/pip || :'
+  - which python
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python'
   - '[ "$PYTHON_VERSION" = "python3" ] && ln -s /usr/local/bin/python3 /usr/local/bin/python'
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip'
   - '[ "$PYTHON_VERSION" = "python3" ] && ln -s /usr/local/bin/pip3 /usr/local/bin/pip'
-  - pip install --upgrade pip
-  - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls || :'
-  - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
   - python --version
   - hash -r
   - python --version
+  - which python
+  - which pip
+  - type pip
+  - pip install --upgrade pip
+  - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls || :'
+  - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
   # Sanity checks
   - coverage run --parallel-mode $exe version
   - coverage run --parallel-mode $exe help
