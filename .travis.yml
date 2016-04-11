@@ -1,4 +1,8 @@
-language: objective-c
+os: osx
+#language: objective-c
+language: python
+  - "2.7"
+  - "3.5"
 branches:
   except:
     - /^v[0-9]/
