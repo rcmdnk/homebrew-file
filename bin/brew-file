@@ -105,10 +105,10 @@ class BrewHelper:
             cmd = ["command"] + cmd
         if print_cmd:
             self.info('$ ' + ' '.join(cmd), verbose_level)
+        lines = []
         try:
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT)
-            lines = []
             for line in p.stdout:
                 l = line.decode('utf-8').rstrip()
                 lines.append(l)
