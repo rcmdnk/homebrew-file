@@ -1312,7 +1312,7 @@ class BrewFile:
         if self.opt["is_mas_cmd"]:
             return self.opt["is_mas_cmd"]
         if self.proc("type mas", False, False, False)[0] != 0:
-            sw_vers = self.proc("sw_vers", False, False, False)[1].split(".")
+            sw_vers = self.proc("sw_vers", False, False, False)[1][0].split(".")
             if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10 and
                                         int(sw_vers[1] < 10)):
                 self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
