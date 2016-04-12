@@ -917,7 +917,11 @@ class BrewFile:
 
     def check_github_repo(self):  # pragma: no cover
         """helper to check and create GitHub repository."""
-        import urllib2
+        try:
+            from urllib2 import urlopen, HTTPError
+        except:
+            from urllib.requests import urlopen
+            from urllib.error import HTTPError
 
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
         user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
@@ -926,8 +930,8 @@ class BrewFile:
         # Check if the repository already exists or not.
         exist_repo = True
         try:
-            urllib2.urlopen(url)
-        except urllib2.HTTPError:
+            urlopen(url)
+        except HTTPError:
             exist_repo = False
 
         # Clone if exists
@@ -1699,7 +1703,11 @@ class BrewFile:
             else:
                 cmd = "sudo rm -rf"
             n_uninstall = 0
-            import urllib2
+            try:
+                from urllib2 import quote
+            except:
+                from urllib.parse import quote
+
             for p in self.get("appstore_list"):
                 identifier = p.split()[0]
                 if identifier.isdigit() and len(identifier) == 9:
@@ -1726,7 +1734,7 @@ class BrewFile:
                     a = "%s/%s.app" % (d, package)
                     if os.path.isdir(a):
                         if uninstall == 0:
-                            cmd += " file:///" + urllib2.quote(a)
+                            cmd += " file:///" + quote(a)
                         else:
                             cmd += " '%s'" % a
                         continue
@@ -1990,7 +1998,7 @@ class BrewFile:
             del name_cands[:]
 
         installed = False
-        clist = casks.values() + nonapp_casks +\
+        clist = list(casks.values()) + nonapp_casks +\
             [x for x_list in casks_noinst.values() for x in x_list] +\
             nonapp_casks_noinst
         if len(name_cands) > 0 and\
@@ -2057,9 +2065,9 @@ class BrewFile:
         (ret, installed_casks) = self.get_cask_list(True)
 
         # Set cask directories and reset application information list
-        taps = filter(
+        taps = list(filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
-            self.proc("brew tap", False, False)[1])
+            self.proc("brew tap", False, False)[1]))
         apps = dict([d, {True: [], False: []}]
                     for d in taps + ["", "appstore"])
         brew_apps = {}
@@ -2183,7 +2191,7 @@ class BrewFile:
                         name = name_cands[0]
                         tap = tap_cands[0]
                     elif len(name_cands) > 0:
-                        for i in xrange(len(tap_cands)):
+                        for i in range(len(tap_cands)):
                             (check, tap, opt) =\
                                 self.find_brew_app(name_cands[i], tap_cands[i])
                             if check == "brew":
@@ -2191,7 +2199,7 @@ class BrewFile:
                                 break
                     if name == "":
                         if len(tap_cands) > 0:
-                            for i in xrange(len(tap_cands)):
+                            for i in range(len(tap_cands)):
                                 apps[tap_cands[i]][installed].append(
                                     (name_cands[i], d + "/" + app, check))
                         else:
@@ -2251,24 +2259,24 @@ class BrewFile:
                             " #" + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
-        if len([x[0] for x in casks.values() + nonapp_casks
+        if len([x[0] for x in list(casks.values()) + nonapp_casks
                 if x[1] == self.opt["cask_repo"] and not x[3]]) > 0:
             out.writeln("# Cask is found, but no applications are found " +
                         "(could be fonts, system settins, " +
                         "or installed in other directory.)")
             for name in sorted(
-                    x[0] for x in casks.values() + nonapp_casks
+                    x[0] for x in list(casks.values()) + nonapp_casks
                     if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
                 if name not in casks_in_others:
                     out.writeln("cask install " + name)
                     casks_in_others.append(name)
-            if len([x[0] for x in casks.values() + nonapp_casks
+            if len([x[0] for x in list(casks.values()) + nonapp_casks
                    if x[1] == self.opt["cask_repo"] and
                    not x[2] and not x[3]]) > 0:
                 out.writeln(
                     "\n# There are new version for following applications.")
                 for name in sorted(
-                        x[0] for x in casks.values() + nonapp_casks
+                        x[0] for x in list(casks.values()) + nonapp_casks
                         if x[1] == self.opt["cask_repo"] and
                         not x[2] and not x[3]):
                     if name not in casks_in_others:
@@ -2321,23 +2329,24 @@ class BrewFile:
                                 app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
-            if len([x[0] for x in casks.values() + nonapp_casks
+            if len([x[0] for x in list(casks.values()) + nonapp_casks
                     if x[1] == t and not x[3]]) > 0:
                 out.writeln("# Cask is found, but no applications are found.\n"
                             "# (fonts, system settins, "
                             "or installed in other directory.)")
                 for name in sorted(x[0]
-                                   for x in casks.values() + nonapp_casks
+                                   for x in list(casks.values()) + nonapp_casks
                                    if x[1] == t and x[2] and not x[3]):
                     if name not in casks_in_others:
                         out.writeln("cask install " + name)
                         casks_in_others.append(name)
-                if len([x[0] for x in casks.values() + nonapp_casks
+                if len([x[0] for x in list(casks.values()) + nonapp_casks
                         if x[1] == t and not x[2] and not x[3]]) > 0:
                     out.writeln(
                         "# There are new version for following applications.")
                     for name in sorted(x[0]
-                                       for x in casks.values() + nonapp_casks
+                                       for x in list(casks.values()) +
+                                       nonapp_casks
                                        if x[1] == t and not x[2] and not x[3]):
                         if name not in casks_in_others:
                             out.writeln("cask install " + name)
@@ -2505,7 +2514,7 @@ class BrewFile:
             def print_dep(p, depth=0):
                 if depth != 0:
                     print('#', end="")
-                    for i in xrange(depth-2):
+                    for i in range(depth-2):
                         print(' ', end="")
                 print(p)
                 for deps in self.pack_deps[p]:
