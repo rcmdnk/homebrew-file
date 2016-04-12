@@ -735,6 +735,8 @@ class BrewFile:
             if env_cask_opts != "":
                 for o in env_cask_opts.split():
                     oo = o.split("=")
+                    if len(oo) == 0:
+                        oo.append("")
                     cask_opts.update({oo[0]: oo[1]})
         except ValueError:
             self.warning("HOMEBREW_CASK_OPTS: " + env_cask_opts +
@@ -920,7 +922,7 @@ class BrewFile:
         try:
             from urllib2 import urlopen, HTTPError
         except:
-            from urllib.requests import urlopen
+            from urllib.request import urlopen
             from urllib.error import HTTPError
 
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
