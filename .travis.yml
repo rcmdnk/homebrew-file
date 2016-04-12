@@ -24,8 +24,10 @@ env:
     - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
 before_install:
-  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d || :'
-  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && cp .travis_rsa ~/.ssh/id_rsa || :'
+  #- '[ "$TRAVIS_PULL_REQUEST" = "false" ] && openssl aes-256-cbc -K $encrypted_43fa9741277b_key -iv $encrypted_43fa9741277b_iv -in .travis_rsa.enc -out .travis_rsa -d || :'
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$PYTHON_VERSION" = "python" ] && openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa_$PYTHON_VERSION.enc -out .travis_rsa_$PYTHON_VERSION -d || :'
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$PYTHON_VERSION" = "python3" ] && openssl aes-256-cbc -K $encrypted_d679fce5eb37_key -iv $encrypted_d679fce5eb37_iv -in .travis_rsa_$PYTHON_VERSION.enc -out .travis_rsa_$PYTHON_VERSION -d || :'
+  - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa || :'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && chmod 600 ~/.ssh/id_rsa || :'
   - '[ "$TRAVIS_PULL_REQUEST" = "false" ] && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config || :'
   - version=""
