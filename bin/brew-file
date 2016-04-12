@@ -735,7 +735,7 @@ class BrewFile:
             if env_cask_opts != "":
                 for o in env_cask_opts.split():
                     oo = o.split("=")
-                    if len(oo) == 0:
+                    if len(oo) == 1:
                         oo.append("")
                     cask_opts.update({oo[0]: oo[1]})
         except ValueError:

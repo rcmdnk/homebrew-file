@@ -2,8 +2,8 @@
 before echo EXT before
 
 # brew install with opt
-brew vim --HEAD --with-lua
-brew install emacs --cocoa --with-gnutls
+brew wget --with-iri --with-debug
+brew install emacs --HEAD --cocoa --with-gnutls
 
 ## After commands
 after echo EXT after
