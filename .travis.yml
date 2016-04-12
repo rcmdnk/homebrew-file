@@ -140,7 +140,8 @@ script:
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox
-  - coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
+  # can't use for python3...?
+  #- coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
   - coverage run --parallel-mode $exe brew cask list
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
