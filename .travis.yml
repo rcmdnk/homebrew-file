@@ -21,7 +21,7 @@ env:
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
   matrix:
-    - PYTHON_VERSION="python"
+    #    - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
 before_install:
   #- '[ "$TRAVIS_PULL_REQUEST" = "false" ] && openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.enc -out .travis_rsa -d || :'
