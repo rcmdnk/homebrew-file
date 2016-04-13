@@ -232,8 +232,8 @@ script:
   - brew install hub
   - brew noinit install stow
   # send coverage result to coveralls
-  - coverage combine # should be done before removing brew-file
-  - coveralls
+  - '[ "$PYTHON_VERSION" = "python" ] &&  coverage combine|| :'
+  - '[ "$PYTHON_VERSION" = "python" ] &&  coveralls || :'
   # Install test
   #- rm -rf $brewprefix/bin/brew $HOME/.brewfile $brewprefix/Cellar
   #- rm -rf $brewprefix/.git*
