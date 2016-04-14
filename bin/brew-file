@@ -55,9 +55,9 @@ class Tee:
 
     def __init__(self, out1, out2=sys.stdout, use2=True):
         try:
-            from io import StringIO
-        except ImportError:
             from cStringIO import StringIO
+        except ImportError:
+            from io import StringIO
         if type(out1) == str:
             self.out1name = out1
             self.out1 = StringIO()
@@ -140,7 +140,6 @@ class BrewHelper:
                 lines = [' '.join(cmd) + ': ' + str(e)]
                 self.info(lines[0].strip(), verbose_level)
             ret = -1
-
 
         if exit_on_error and ret != 0:
             if not (print_out and self.opt["verbose"] >= verbose_level):
@@ -667,9 +666,11 @@ class BrewInfo:
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
-            self.helper.proc("chmod 755 %s" % self.get_file(), False, False, False)
+            self.helper.proc("chmod 755 %s" % self.get_file(), False, False,
+                             False)
         else:
-            self.helper.proc("chmod 655 %s" % self.get_file(), False, False, False)
+            self.helper.proc("chmod 655 %s" % self.get_file(), False, False,
+                             False)
 
 
 class BrewFile:
@@ -920,10 +921,10 @@ class BrewFile:
     def check_github_repo(self):  # pragma: no cover
         """helper to check and create GitHub repository."""
         try:
+            from urllib2 import urlopen, HTTPError
+        except:
             from urllib.request import urlopen
             from urllib.error import HTTPError
-        except:
-            from urllib2 import urlopen, HTTPError
 
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
         user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
@@ -1706,9 +1707,9 @@ class BrewFile:
                 cmd = "sudo rm -rf"
             n_uninstall = 0
             try:
-                from urllib.parse import quote
-            except:
                 from urllib2 import quote
+            except:
+                from urllib.parse import quote
 
             for p in self.get("appstore_list"):
                 identifier = p.split()[0]
