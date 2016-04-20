@@ -81,13 +81,13 @@ If you don't have **Brewfile**, first, do:
 
 `brew init` is same as `brew file init`, if you setup `brew-wrap` as above.
 
-Note: In below, such `cat` and `set_repo` command can be used directly after `brew`,
+Note: In below, `set_repo` command can be used directly after `brew`,
 but `install` or `update` need to use with `brew file` because
 `brew` command has own `install` or `update` commands.
 
 You can check your package list by:
 
-    $ brew cat
+    $ brew file cat
 
 If you already have **Brewfile**, then copy it to 
 **~/.brewfile/Brewfile**
