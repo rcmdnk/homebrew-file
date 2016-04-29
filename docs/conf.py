@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# homebrew-file documentation build configuration file, created by
-# sphinx-quickstart on Fri Apr 29 05:37:28 2016.
+# Brew-file documentation build configuration file, created by
+# sphinx-quickstart on Sat Apr 30 05:59:29 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -19,7 +19,6 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../bin'))
 
 # -- General configuration ------------------------------------------------
 
@@ -29,7 +28,9 @@ sys.path.insert(0, os.path.abspath('../bin'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'homebrew-file'
+project = u'Brew-file'
 copyright = u'2016, rcmdnk'
 author = u'rcmdnk'
 
@@ -121,7 +122,7 @@ html_theme = 'alabaster'
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-#html_title = u'homebrew-file v3.11.1'
+#html_title = u'Brew-file v3.11.1'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -203,7 +204,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'homebrew-filedoc'
+htmlhelp_basename = 'Brew-filedoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -225,7 +226,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'homebrew-file.tex', u'homebrew-file Documentation',
+    (master_doc, 'Brew-file.tex', u'Brew-file Documentation',
      u'rcmdnk', 'manual'),
 ]
 
@@ -255,7 +256,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'homebrew-file', u'homebrew-file Documentation',
+    (master_doc, 'brew-file', u'Brew-file Documentation',
      [author], 1)
 ]
 
@@ -269,8 +270,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'homebrew-file', u'homebrew-file Documentation',
-     author, 'homebrew-file', 'One line description of project.',
+    (master_doc, 'Brew-file', u'Brew-file Documentation',
+     author, 'Brew-file', 'One line description of project.',
      'Miscellaneous'),
 ]
 
