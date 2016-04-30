@@ -1,5 +1,5 @@
 Homebrew-file
 =============
 
-.. automodule:: homebrew-file
+.. automodule:: brewFile
    :members:
