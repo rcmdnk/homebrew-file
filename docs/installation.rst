@@ -11,15 +11,15 @@ or you can use install script::
 
 which installs Homebrew itself, too, if it is not installed.
 
-Then, add following lines in you **.bashrc** or **.zshrc** to wrap `brew` command::
+Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` command::
 
     if [ -f $(brew --prefix)/etc/brew-wrap ];then
       source $(brew --prefix)/etc/brew-wrap
     fi
 
-**brew-wrap** wraps the original `brew` command
+**brew-wrap** wraps the original ``brew`` command
 for an automatic update of **Brewfile** when you execute
-such a `brew install` or `brew uninstall`.
+such a ``brew install`` or ``brew uninstall``.
 
 .. note::
 
@@ -34,15 +34,15 @@ such a `brew install` or `brew uninstall`.
       ~/.brewfile/Brewfile
   
   because Homebrew deletes files under **/usr/local** other than
-  Homebrew's one when such `brew update` is executed.
+  Homebrew's one when such ``brew update`` is executed.
   (Homebrew checkout its repository as **/usr/local**.)
   
   If you used an old default setting (**/usr/local/Library/Brewfile**), you might lose Brewfile.
   
-  In such case, please try `brew file init` and chose local Brewfile, which makes
+  In such case, please try ``brew file init`` and chose local Brewfile, which makes
   new file **~/.brewfile/Brewfile**.
   
-  If you used git repository, you might see a output when you executed `brew update`::
+  If you used git repository, you might see a output when you executed ``brew update``::
   
       $ brew update
       Ignoring path Library/rcmdnk_Brewfile/
@@ -51,6 +51,6 @@ such a `brew install` or `brew uninstall`.
         Already up-to-date.
   
   In this case, please delete **/usr/local/Library/<your_git_account>_Brewfile**,
-  then do `brew file set_repo`.
+  then do ``brew file set_repo``.
   
   New repository will be checked out to **~/.brewfile/<your_git_account>_Brewfile**.

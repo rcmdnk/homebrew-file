@@ -32,4 +32,8 @@ Contents:
    installation
    requirements
    getting_started
+   usage
+   brew-wrap
+   completion
+   help
    homebrew-file
