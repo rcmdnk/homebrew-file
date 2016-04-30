@@ -29,7 +29,7 @@ such a `brew install` or `brew uninstall`.
   
       /usr/local/Library/Brewfile
   
-  to
+  to::
   
       ~/.brewfile/Brewfile
   
@@ -37,7 +37,7 @@ such a `brew install` or `brew uninstall`.
   Homebrew's one when such `brew update` is executed.
   (Homebrew checkout its repository as **/usr/local**.)
   
-  If you used default settings, you may lose Brewfile.
+  If you used an old default setting (**/usr/local/Library/Brewfile**), you might lose Brewfile.
   
   In such case, please try `brew file init` and chose local Brewfile, which makes
   new file **~/.brewfile/Brewfile**.
@@ -51,6 +51,6 @@ such a `brew install` or `brew uninstall`.
         Already up-to-date.
   
   In this case, please delete **/usr/local/Library/<your_git_account>_Brewfile**,
-  then do `brew file init` and set repository.
+  then do `brew file set_repo`.
   
   New repository will be checked out to **~/.brewfile/<your_git_account>_Brewfile**.
