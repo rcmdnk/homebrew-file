@@ -6,7 +6,7 @@ Use local Brewfile
 
 By default, **Brewfile** is **~/.brewfile/Brewfile**.
 
-If you don't have **Brewfile**, first, do:
+If you don't have **Brewfile**, first, do::
 
     $ brew init
 
@@ -22,7 +22,7 @@ You can check your package list by::
 
 If you already have **Brewfile**, then copy it to
 **~/.brewfile/Brewfile**
-and install packages listed in **Brewfile** by:
+and install packages listed in **Brewfile** by::
 
     $ brew file install
 
@@ -101,7 +101,7 @@ Do::
 
 and give your repository name.
 
-And install packages listed in **Brewfile** like:
+And install packages listed in **Brewfile** like::
 
     $ brew file install
 
