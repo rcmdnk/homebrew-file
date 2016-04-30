@@ -5,7 +5,7 @@ Homebrew-file module descriptions
    :members:
 
 ..
-  .. autoclass:: brewFile.Brew-file
+  .. autoclass:: brewFile.Brewfile
      :members:
   
   .. autoclass:: brewFile.BrewInfo
