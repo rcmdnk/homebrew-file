@@ -30,6 +30,7 @@ Contents:
    :maxdepth: 2
 
    installation
+   requirements
    getting_started
    homebrew-file
 
