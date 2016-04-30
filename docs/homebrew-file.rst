@@ -3,6 +3,8 @@ Homebrew-file module descriptions
 
 .. automodule:: brewFile
    :members:
+   :private-members:
+   :special-members:
 
 ..
   .. autoclass:: brewFile.Brewfile
