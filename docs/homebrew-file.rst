@@ -1,4 +1,4 @@
-Homebrew-file module descriptions
+Homebrew-file module index
 =================================
 
 .. automodule:: BrewFile

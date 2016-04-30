@@ -33,11 +33,3 @@ Contents:
    requirements
    getting_started
    homebrew-file
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
