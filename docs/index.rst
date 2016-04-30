@@ -8,14 +8,14 @@ Welcome to homebrew-file's documentation!
 
 |BuildStatus|_ |CoverageStatus|_ |DocumentationStatus|_
 
-.. |BUiuldStatus| image:: https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master
+.. |BuildStatus| image:: https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master
 .. _BuildStatus: https://travis-ci.org/rcmdnk/homebrew-file
 
 .. |CoverageStatus| image:: https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master
 .. _CoverageStatus: https://coveralls.io/r/rcmdnk/homebrew-file?branch=master
 
 .. |DocumentationStatus| image:: https://readthedocs.org/projects/homebrew-file/badge/?version=latest
-.. _DocumetationStatus: http://homebrew-file.readthedocs.io/en/latest/?badge=latest
+.. _DocumentationStatus: http://homebrew-file.readthedocs.io/en/latest/?badge=latest
 
 Manager for packages of Homebrew, inspired by `Brewdler <https://github.com/andrew/brewdler>`_.
 
