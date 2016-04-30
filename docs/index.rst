@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 2
 
    getting_started
-   introduction
+   installation
    homebrew-file
 
 
