@@ -17,12 +17,7 @@ Welcome to homebrew-file's documentation!
 .. |DocumentationStatus| image:: https://readthedocs.org/projects/homebrew-file/badge/?version=latest
 .. _DocumentationStatus: http://homebrew-file.readthedocs.io/en/latest/?badge=latest
 
-Manager for packages of Homebrew, inspired by `Brewdler <https://github.com/andrew/brewdler>`_.
-
-Brewfile dumped by `homebrew-brewdler <https://github.com/Homebrew/homebrew-brewdler>`_.
-can be used as input, too.
-
-
+Brewfile manager for `Homebrew <http://brew.sh/>`_ at OS X.
 
 Contents:
 

@@ -7,7 +7,4 @@ Brew-file
 
 Brewfile manager for [Homebrew](http://brew.sh/) at OS X.
 
-Brewfile dumped by [homebrew-brewdler](https://github.com/Homebrew/homebrew-brewdler)
-can be used as input, too.
-
 See more details in [the Documentation](http://homebrew-file.readthedocs.io).

@@ -1,8 +1,6 @@
 Homebrew-file module index
-=================================
+==========================
 
-..
-  .. automodule:: BrewFile
-     :members:
-     :private-members:
-     :special-members:
+.. automodule:: BrewFile
+   :members:
+   :private-members:
