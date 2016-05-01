@@ -10,13 +10,15 @@ has a wrapper function ``brew``.
 Features:
 
 * It executes ``brew file init`` after such ``brew install`` automatically.
-* ``file`` can be skipped for non-conflicted commands with ``brew``.  :new: 09/May/2015
+* ``file`` can be skipped for non-conflicted commands with ``brew``.
+
   * e.g.) ``init`` command is not in ``brew``. Then, you can replace ``brew file init`` with::
 
       $ brew init
 
   * Such ``edit`` command is also in ``brew``. In this case, ``brew edit``
     executes original ``brew edit``.
+
     * But you can use ``brew -e`` or ``brew --edit`` to edit **Brewfile**.
 
 To enable it, just read this file in your ``.bashrc`` or any of your setup file:
