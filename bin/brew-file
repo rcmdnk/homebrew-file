@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.11.1"
-__date__ = "13/Apr/2016"
+__version__ = "v3.12.1"
+__date__ = "8/May/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -463,36 +463,21 @@ class BrewInfo:
 
         opt = ""
         # Get options for build
-        (ret, lines) = self.helper.proc("brew info " + package, False, False)
-        versions = {"stable": "", "devel": "", "HEAD": ""}
-        v_tmp = list(map(lambda x: x.strip().split(),
-                         lines[0].split(":")[1].split(",")))
-        if len(v_tmp) == 1 and len(v_tmp[0]) == 0:
-            for l in lines:
-                self.warning(l, 0)
-        for v in v_tmp:
-            if len(v) < 2:
-                continue
-            if v[0] == "stable":
-                versions["stable"] = v[1]
-            elif v[0] == "devel":
-                versions["devel"] = v[1]
-            elif v[0] == "HEAD":
-                versions["HEAD"] = "HEAD"
-        cellar = self.helper.proc("brew --cellar " + package,
-                                  False, False)[1][0]
-        for l in lines:
-            ltmp = l.split("Built from source with: ")
-            if len(ltmp) > 1:
-                opt += " " + ltmp[1].replace(",", "")
-                continue
-            if l.startswith(cellar):
-                v = l.split()[0].split("/")[-1]
-                for k in versions.keys():
-                    if v == versions[k]:
-                        if k != "stable":
+        (ret, lines) = self.helper.proc("brew info --json=v1 " + package,
+                                        False, False)
+        import json
+        j = json.loads(lines[0])[0]
+        for i in j["installed"]:
+            if i["version"] == j["linked_keg"]:
+                if len(i["used_options"]) > 0:
+                    opt = " " + " ".join(i["used_options"])
+                for k, v in j["versions"].items():
+                    if i["version"] == v and k != "stable":
+                        if k == "head":
+                            opt += " --HEAD"
+                        else:
                             opt += " --" + k
-                        break
+
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
             import re
             opt = ", args: [" + ", ".join(
