@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.1"
-__date__ = "8/May/2016"
+__version__ = "v3.12.2"
+__date__ = "9/May/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -134,7 +134,7 @@ class BrewHelper:
         """ Get process output."""
         import shlex
         import subprocess
-        if type(cmd) == str:
+        if type(cmd) != list:
             cmd = shlex.split(cmd)
         if cmd[0] == "brew":
             cmd = ["command"] + cmd
@@ -458,20 +458,22 @@ class BrewInfo:
         else:
             return pack
 
-    def get_options(self, package):
+    def get_options(self, package, package_info=""):
         """get install options from brew info"""
 
-        opt = ""
         # Get options for build
-        (ret, lines) = self.helper.proc("brew info --json=v1 " + package,
-                                        False, False)
-        import json
-        j = json.loads(lines[0])[0]
-        for i in j["installed"]:
-            if i["version"] == j["linked_keg"]:
+        if type(package_info) != dict:
+            import json
+            package_info = json.loads(self.helper.proc(
+                "brew info --json=v1 " + package,
+                False, False)[1][0])[0]
+
+        opt = ""
+        for i in package_info["installed"]:
+            if i["version"] == package_info["linked_keg"]:
                 if len(i["used_options"]) > 0:
                     opt = " " + " ".join(i["used_options"])
-                for k, v in j["versions"].items():
+                for k, v in package_info["versions"].items():
                     if i["version"] == v and k != "stable":
                         if k == "head":
                             opt += " --HEAD"
@@ -484,7 +486,7 @@ class BrewInfo:
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
         return opt
 
-    def write(self, check_opt=True):
+    def write(self):
         # Prepare output
         out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
 
@@ -581,12 +583,8 @@ class BrewInfo:
                                 if direct_first:
                                     direct_first = False
                                     out.writeln("\n## " + "Direct install")
-                                if check_opt:
-                                    pack = self.packout(p_in_t) +\
-                                        self.get_options(p_in_t)
-                                else:
-                                    pack = self.packout(p_in_t) +\
-                                        self.brew_list_opt[p_in_t]
+                                pack = self.packout(p_in_t) +\
+                                    self.brew_list_opt[p_in_t]
                                 out.writeln(cmd_install + pack)
                                 self.brew_list.remove(p_in_t)
                                 del self.brew_list_opt[p_in_t]
@@ -602,10 +600,7 @@ class BrewInfo:
         if not self.helper.opt["caskonly"] and len(self.brew_list) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.brew_list:
-                if check_opt:
-                    pack = self.packout(p) + self.get_options(p)
-                else:
-                    pack = self.packout(p) + self.brew_list_opt[p]
+                pack = self.packout(p) + self.brew_list_opt[p]
                 out.writeln(cmd_install + pack)
 
         # pip packages
@@ -727,8 +722,8 @@ class BrewFile:
         self.opt["gem_cmd_installed"] = False
         self.opt["args"] = []
         self.opt["yn"] = False
+        self.opt["brew_packages"] = ""
 
-        # Check HOMEBREW_CASK_OPTS
         cask_opts = {"--caskroom": "", "--appdir": ""}
         env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
         try:
@@ -742,6 +737,7 @@ class BrewFile:
             self.warning("HOMEBREW_CASK_OPTS: " + env_cask_opts +
                          " is not a proper format.", 0)
             self.warning("Ignore the value.\n", 0)
+
         self.opt["caskroom"] = cask_opts["--caskroom"] \
             if cask_opts["--caskroom"] != "" \
             else "/opt/homebrew-cask/Caskroom"
@@ -878,12 +874,12 @@ class BrewFile:
         for b in self.brewinfo_ext:
             b.input_to_list()
 
-    def write(self, check_opt=True):
+    def write(self):
         self.banner("# Initialize " + self.brewinfo.get_file(), 1)
-        self.brewinfo.write(check_opt=check_opt)
+        self.brewinfo.write()
         for b in self.brewinfo_ext:
             self.banner("# Initialize " + b.get_file(), 1)
-            b.write(check_opt=check_opt)
+            b.write()
 
     def get(self, name, only_ext=False):
         l = self.brewinfo.get(name)
@@ -1298,7 +1294,7 @@ class BrewFile:
                 self.remove_pack("tap_input", p)
 
         self.input_to_list()
-        self.initialize_write(check_opt=False)
+        self.initialize_write()
 
     def check_brew_cmd(self):  # pragma: no cover
         """Check Homebrew"""
@@ -1493,8 +1489,17 @@ class BrewFile:
         self.brewinfo.clear_list()
 
         # Brew packages
-        (ret, lines) = self.proc("brew list", False, False)
         if not self.opt["caskonly"]:
+            (ret, lines) = self.proc("brew info --json=v1 --installed",
+                                     False, False)
+            import json
+            for p in json.loads(lines[0]):
+                self.brewinfo.brew_list.append(p["name"])
+                self.brewinfo.brew_list_opt[p["name"]] =\
+                    self.brewinfo.get_options(p["name"], p)
+
+            # pip/gem
+            (ret, lines) = self.proc("brew list", False, False)
             for p in lines:
                 if p.startswith("pip-"):
                     package = p.replace("pip-", "")
@@ -1504,9 +1509,6 @@ class BrewFile:
                     package = p.replace("gem-", "")
                     self.brewinfo.gem_list.append(package)
                     self.brewinfo.gem_list_opt[package] = ""
-                else:
-                    self.brewinfo.brew_list.append(p)
-                    self.brewinfo.brew_list_opt[p] = ""
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
@@ -1652,8 +1654,8 @@ class BrewFile:
         # write out
         self.initialize_write()
 
-    def initialize_write(self, check_opt=True):
-        self.write(check_opt=check_opt)
+    def initialize_write(self):
+        self.write()
         self.banner("# You can edit " + self.brewinfo.get_file() + " with:\n"
                     "#     $ " + __prog__ + " edit")
         self.opt["initialized"] = True
@@ -1982,7 +1984,7 @@ class BrewFile:
                 self.opt["pip_cmd_installed"] =\
                 self.opt["gem_cmd_installed"] = False
             self.input_to_list()
-            self.initialize_write(check_opt=False)
+            self.initialize_write()
         return 0
 
     def find_app(self, app, taps, casks, nonapp_casks,
@@ -2041,18 +2043,21 @@ class BrewFile:
         tap_brew = tap
         opt = ""
         if os.path.isfile(self.opt["brew_repo"] +
-                          "/Library/Formula/" + name + ".rb") and\
-                name in self.proc("brew list", False, False)[1]:
-            check = "brew"
-            opt = self.brewinfo.get_options(name)
-            if os.path.islink(self.opt["brew_repo"] +
-                              "/Library/Formula/" + name + ".rb"):
-                link = os.readlink(self.opt["brew_repo"] +
-                                   "/Library/Formula/" + name + ".rb")
-                tap_brew = link.replace("../Taps/", "").replace("homebrew-").\
-                    replace("/"+name+".rb")
-            else:
-                tap_brew = ""
+                          "/Library/Formula/" + name + ".rb"):
+            if type(self.opt["brew_packages"]) == str:
+                self.opt["brew_packages"] = self.proc("brew list", False,
+                                                      False)[1]
+            if name in self.opt["brew_packages"]:
+                check = "brew"
+                opt = self.brewinfo.get_options(name)
+                if os.path.islink(self.opt["brew_repo"] +
+                                  "/Library/Formula/" + name + ".rb"):
+                    link = os.readlink(self.opt["brew_repo"] +
+                                       "/Library/Formula/" + name + ".rb")
+                    tap_brew = link.replace("../Taps/", "").\
+                        replace("homebrew-").replace("/"+name+".rb")
+                else:
+                    tap_brew = ""
         return (check, tap_brew, opt)
 
     def check_cask(self):
