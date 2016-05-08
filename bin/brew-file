@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.2"
+__version__ = "v3.12.3"
 __date__ = "9/May/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -579,7 +579,7 @@ class BrewInfo:
                     isfirst = isfirst_pack = False
                     for tp in self.tap_packs:
                         for p_in_t in self.brew_list:
-                            if tp == p_in_t.split("/")[-1].rstrip(".rb"):
+                            if tp == p_in_t.split("/")[-1].replace(".rb", ""):
                                 if direct_first:
                                     direct_first = False
                                     out.writeln("\n## " + "Direct install")
@@ -1205,7 +1205,7 @@ class BrewFile:
                     p = p.replace("gem-", "")
                 is_removed = False
                 for bi in self.get(input_list):
-                    if p == bi or p == bi.split("/")[-1].rstrip(".rb"):
+                    if p == bi or p == bi.split("/")[-1].replace(".rb", ""):
                         self.remove_pack(input_list, bi)
                         if input_list == "brew_input":
                             self.remove_pack("brew_input_opt", bi)
@@ -1240,7 +1240,7 @@ class BrewFile:
                     else:
                         t = "direct"
                 if p in self.get(input_list) or\
-                        p.split("/")[-1].rstrip(".rb")\
+                        p.split("/")[-1].replace(".rb", "")\
                         in self.get(input_list):
                     self.warning(p + " is already in Brewfile.")
                     self.warning("Do 'brew file init' to clean up Brewfile")
@@ -2165,11 +2165,11 @@ class BrewFile:
                         if not x.startswith(".") and x != "Utilities"
                         and os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
-                if app.rstrip(".app")\
+                if app.replace(".app", "")\
                         in appstore_list.keys():  # pragma: no cover
                     tap = "appstore"
                     installed = False
-                    name = appstore_list[app.rstrip(".app")]
+                    name = appstore_list[app.replace(".app", "")]
                     check = "appstore"
                 elif app in casks.keys() or\
                         app.split(".")[0] in casks.keys():
@@ -2393,7 +2393,7 @@ class BrewFile:
         if len(apps["appstore"][False]) > 0:  # pragma: no cover
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
-                p = app_path.split("/")[-1].rstrip(".app")
+                p = app_path.split("/")[-1].replace(".app", "")
                 if name != '':
                     line = "%s %s #%s" % (name, p, app_path)
                 else:
