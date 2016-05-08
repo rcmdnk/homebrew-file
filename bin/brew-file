@@ -705,7 +705,6 @@ class BrewFile:
         self.opt["noupdateatupdate"] = False
         self.opt["link"] = True
         self.opt["caskonly"] = False
-        self.opt["appstore"] = True
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
         self.opt["tap_dir"] = self.opt["brew_repo"] + "/Library/Taps"
@@ -758,10 +757,19 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
-        self.opt["float_test"] = 0.0
+        self.opt["appstore"] = os.environ.get("HOMEBREW_FILE_APPSTORE", True)
+        if type(self.opt["appstore"]) == bool:
+            pass
+        elif type(self.opt["appstore"]) == str:
+            if self.opt["appstore"].lower() == "true":
+                self.opt["appstore"] = True
+            else:
+                self.opt["appstore"] = False
+        elif type(self.opt["appstore"]) == int:
+            self.opt["appstore"] = bool(int(self.opt["appstore"]))
 
         self.int_opts = ["verbose"]
-        self.float_opts = ["float_test"]
+        self.float_opts = []
 
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
@@ -2694,8 +2702,9 @@ def main():
         "-b", "--backup", action="store", dest="backup",
         default=b.opt["backup"],
         help="Set backup file (default: %(default)s). \n"
-              "You can set input file by environmental variable,"
-              " HOMEBREW_BREWFILE_BACKUP.")
+             "If it is empty, no backup is made.\n"
+             "You can set backup file by environmental variable,"
+             " HOMEBREW_BREWFILE_BACKUP.")
 
     format_parser = argparse.ArgumentParser(add_help=False)
     format_parser.add_argument(
@@ -2742,7 +2751,9 @@ def main():
     appstore_parser.add_argument(
         "--no_appstore", action="store_false", default=True,
         dest="appstore", help="Don't check AppStore applications.\n"
-             "(For other than casklist command)")
+             "(For other than casklist command.)\n"
+             "You can set input file by environmental variable,"
+             "'HOMEBREW_FILE_APPSTORE=False'")
 
     dryrun_parser = argparse.ArgumentParser(add_help=False)
     dryrun_parser.add_argument(
