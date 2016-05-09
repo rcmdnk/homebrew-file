@@ -1,5 +1,5 @@
-Usage
-=====
+Settings
+========
 
 Following environmental variables can be used.
 
