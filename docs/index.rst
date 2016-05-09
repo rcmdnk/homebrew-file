@@ -28,6 +28,7 @@ Contents:
    requirements
    getting_started
    usage
+   settings
    brew-wrap
    completion
    help
