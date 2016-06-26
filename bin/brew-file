@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.4"
+__version__ = "v3.12.5"
 __date__ = "26/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -130,7 +130,7 @@ class BrewHelper:
         self.opt = opt
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, verbose_level=1):
+             exit_on_error=True, ignore_err_msg=False, verbose_level=1):
         """ Get process output."""
         import shlex
         import subprocess
@@ -142,8 +142,8 @@ class BrewHelper:
             self.info('$ ' + ' '.join(cmd), verbose_level)
         lines = []
         try:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+            stderr = None if ignore_err_msg else subprocess.STDOUT
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr)
             for line in p.stdout:
                 l = my_decode(line).rstrip()
                 lines.append(l)
@@ -813,10 +813,11 @@ class BrewFile:
         return v
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, verbose_level=1):
+             exit_on_error=True, ignore_err_msg=False, verbose_level=1):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_error=exit_on_error, verbose_level=verbose_level)
+            exit_on_error=exit_on_error, ignore_err_msg=ignore_err_msg,
+            verbose_level=verbose_level)
 
     def info(self, text, verbose_level=2):
         self.helper.info(text, verbose_level)
@@ -1273,10 +1274,12 @@ class BrewFile:
                             " " + " ".join(opts[porig]).strip()
                     else:
                         self.brewinfo.brew_input_opt[p] = ""
-                    for p_dep in self.proc("brew deps " + p, False, False)[1]:
-                        if p_dep not in self.get(input_list):
-                            self.brewinfo.brew_input.append(p_dep)
-                            self.brewinfo.brew_input_opt[p_dep] = ""
+                    if not self.opt["leaves"]:
+                        for p_dep in self.proc(
+                                "brew deps " + p, False, False)[1]:
+                            if p_dep not in self.get(input_list):
+                                self.brewinfo.brew_input.append(p_dep)
+                                self.brewinfo.brew_input_opt[p_dep] = ""
                     self.brewinfo.brew_input.sort()
                 if t != "" and t not in self.get("tap_input"):
                     self.brewinfo.tap_input.append(t)
@@ -1479,7 +1482,8 @@ class BrewFile:
 
         if not self.check_cask_cmd(force):  # pragma: no cover
             return (False, [])
-        (ret, lines) = self.proc("brew cask list", False, False)
+        (ret, lines) = self.proc("brew cask list", False, False,
+                                 ignore_err_msg=True)
         if lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
@@ -1511,6 +1515,7 @@ class BrewFile:
                     self.brewinfo.get_options(p["name"], p)
 
             # pip/gem
+            # pip/gem packages are not in brew info list
             (ret, lines) = self.proc("brew list", False, False)
             for p in lines:
                 if p.startswith("pip-"):
@@ -1717,6 +1722,27 @@ class BrewFile:
 
         # Check up packages in the input file
         self.read_all()
+        infotmp = self.proc(
+            "brew info --json=v1 --installed", False, False)[1][0]
+        import json
+        infotmp = json.loads(infotmp)
+        info = {}
+        for i in infotmp:
+            info[i["name"]] = i
+
+        def add_dependncies(package):
+            for pac in info[package]["dependencies"]:
+                if pac not in info:
+                    continue
+                p = pac.split("/")[-1]
+                if p not in self.get("brew_input"):
+                    self.brewinfo.brew_input.append(p)
+                    self.brewinfo.brew_input_opt[p] = ""
+                    add_dependncies(p)
+        for p in self.get("brew_input"):
+            if p not in info:
+                continue
+            add_dependncies(p)
 
         # Clean up App Store applications
         if self.opt["appstore"] and \
