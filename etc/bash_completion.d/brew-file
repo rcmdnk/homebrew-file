@@ -10,7 +10,7 @@ _brew_file_options () {
     cat casklist cask_upgrade test get_files commands version help"
   local commands_hyphen="-i --init -s --set_repo -c --clean -u --update -e \
     --edit --cat --test --commands -v --version -h --help"
-  local options="-f --file -b --backup -F --format --form -U --noupdate \
+  local options="-f --file -b --backup -F --format --form --leaves -U --noupdate \
     --preupdate -r --repo -n --nolink --caskonly --no_appstore -C -y --yes -V --verbose"
   if [ "$1" = "commands" ];then
     echo $commands
@@ -79,7 +79,7 @@ _brew_file () {
       complist="0 1 2"
     elif cmd=$(_brew_file_check_commands);then
       if [ "${cur:0:1}" = "-" ];then
-        local minopt='-f --file -F --format -y --yes -v --verbose'
+        local minopt='-f --file -F --format --leaves -y --yes -v --verbose'
         case $cmd in
           install|pull|push|edit|-e|--edit)
             complist="$minopt --preupdate -U --noupdate";;

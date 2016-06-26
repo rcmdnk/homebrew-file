@@ -5,8 +5,9 @@ Help message of brew-file:
 
 .. code-block:: none
 
-    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [-U] [--preupdate] [-r REPO]
-                     [-n] [--caskonly] [--no_appstore] [-C] [-y] [-V VERBOSE]
+    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves] [-U]
+                     [--preupdate] [-r REPO] [-n] [--caskonly] [--no_appstore]
+                     [-C] [-y] [-V VERBOSE]
                      [command] ...
     
     Brew-file: Manager for packages of Homebrew
@@ -23,7 +24,8 @@ Help message of brew-file:
       -b BACKUP, --backup BACKUP
                             Set backup file (default: ). 
                             If it is empty, no backup is made.
-                            You can set backup file by environmental variable, HOMEBREW_BREWFILE_BACKUP.
+                            You can set backup file by environmental variable, HOMEBREW_BREWFILE_BACKUP, like:
+                            .    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup
       -F FORM, --format FORM, --form FORM
                             Set input file format (default: file). 
                             file              : brew vim --HEAD --with-lua
@@ -31,6 +33,9 @@ Help message of brew-file:
                               Compatible with [homebrew-bundle](https://github.com/Homebrew/homebrew-bundle).
                             command or cmd    : brew install vim --HEAD --with-lua
                               Can be used as a shell script.
+      --leaves              Make list only for leaves (taken by `brew leaves`).
+                            You can set this by environmental variable, HOMEBREW_BREWFILE_LEAVES, like:
+                            .    export HOMEBREW_BREWFILE_LEAVES=1
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
       --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.

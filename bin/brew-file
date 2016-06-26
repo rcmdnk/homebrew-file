@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.3"
-__date__ = "9/May/2016"
+__version__ = "v3.12.4"
+__date__ = "26/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -694,6 +694,8 @@ class BrewFile:
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
+        self.opt["leaves"] = int(os.environ.get(
+            "HOMEBREW_BREWFILE_LEAVES", 0))
         self.opt["form"] = "file"
         self.opt["repo"] = ""
         self.opt["noupdate"] = True
@@ -1492,8 +1494,18 @@ class BrewFile:
         if not self.opt["caskonly"]:
             (ret, lines) = self.proc("brew info --json=v1 --installed",
                                      False, False)
+            if self.opt["leaves"]:
+                (ret, leavestmp) = self.proc("brew leaves", False, False)
+                leaves = []
+                for l in leavestmp:
+                    leaves.append(l.split("/")[-1])
+            else:
+                (ret, leaves) = self.proc("brew list", False, False)
+
             import json
             for p in json.loads(lines[0]):
+                if p["name"] not in leaves:
+                    continue
                 self.brewinfo.brew_list.append(p["name"])
                 self.brewinfo.brew_list_opt[p["name"]] =\
                     self.brewinfo.get_options(p["name"], p)
@@ -2709,7 +2721,8 @@ def main():
         help="Set backup file (default: %(default)s). \n"
              "If it is empty, no backup is made.\n"
              "You can set backup file by environmental variable,"
-             " HOMEBREW_BREWFILE_BACKUP.")
+             " HOMEBREW_BREWFILE_BACKUP, like:\n."
+             "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup")
 
     format_parser = argparse.ArgumentParser(add_help=False)
     format_parser.add_argument(
@@ -2723,6 +2736,15 @@ def main():
               "(https://github.com/Homebrew/homebrew-bundle).\n"
               "command or cmd    : brew install vim --HEAD --with-lua\n"
               "  Can be used as a shell script.\n")
+
+    leaves_parser = argparse.ArgumentParser(add_help=False)
+    leaves_parser.add_argument(
+        "--leaves", action="store_true", default=False,
+        dest="leaves",
+        help="Make list only for leaves (taken by `brew leaves`).\n"
+             "You can set this by environmental variable,"
+             " HOMEBREW_BREWFILE_LEAVES, like:\n."
+             "    export HOMEBREW_BREWFILE_LEAVES=1")
 
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdateatupdate_parser.add_argument(
@@ -2774,7 +2796,7 @@ def main():
     verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
                                 dest="verbose", help="Verbose level 0/1/2")
 
-    min_parsers = [file_parser, backup_parser, format_parser,
+    min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
                    appstore_parser, caskonly_parser, yn_parser, verbose_parser]
     subparser_options = {
         "parents": min_parsers + [noupdate_parser],
@@ -2783,7 +2805,7 @@ def main():
     # Main parser
     parser = argparse.ArgumentParser(
         add_help=False, prog=__prog__,
-        parents=[file_parser, backup_parser, format_parser,
+        parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  noupdateatupdate_parser, noupdate_parser, repo_parser,
                  link_parser, caskonly_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
@@ -2921,7 +2943,7 @@ def main():
                            '-u', '--update', '-e', '--edit', '--cat', '--test',
                            '--commands', '-v', '--version', '-h', '--help']
         options = ['-f', '--file', '-b', '--backup',
-                   '-F', '--format', '--form', '-U', '--noupdate',
+                   '-F', '--format', '--form', '--leaves', '-U', '--noupdate',
                    '--preupdate', '-r', '--repo', '-n', '--nolink',
                    '--caskonly', '--no_appstore', '-C', '-y', '--yes',
                    '-V', '--verbose']
