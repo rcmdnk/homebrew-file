@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.6"
+__version__ = "v3.12.7"
 __date__ = "26/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -708,8 +708,7 @@ class BrewFile:
         self.opt["cache_dir"] = self.proc(
             "brew --cache", False, False, True, 0)[1][0]
         self.opt["cask_repo"] = "caskroom/cask"
-        self.opt["mas_repo"] = "argon/mas"
-        self.opt["mas_formula"] = self.opt["mas_repo"] + "/mas"
+        self.opt["mas_formula"] = "mas"
         self.opt["pip_pack"] = "brew-pip"
         self.opt["gem_pack"] = "brew-gem"
         self.opt["my_editor"] = os.environ.get("EDITOR", "vim")
@@ -845,8 +844,6 @@ class BrewFile:
             if not self.opt["cask_repo"] in self.get("tap_input"):
                 self.brewinfo.tap_input.append(self.opt["cask_repo"])
         if self.opt["mas_cmd_installed"]:
-            if not self.opt["mas_repo"] in self.get("tap_input"):
-                self.brewinfo.tap_input.append(self.opt["mas_repo"])
             p = os.path.basename(self.opt["mas_formula"])
             if p not in self.get("brew_input"):
                 self.brewinfo.brew_input.append(p)
@@ -1374,8 +1371,6 @@ class BrewFile:
                 self.warning("\nFailed to install " +
                              self.opt["mas_formula"] + "\n", 0)
                 sys.exit(ret)
-            if not self.opt["mas_repo"] in self.get("tap_list"):
-                self.brewinfo.tap_list.append(self.opt["mas_repo"])
             p = os.path.basename(self.opt["mas_formula"])
             if p not in self.get("brew_list"):
                 self.brewinfo.brew_list.append(p)
