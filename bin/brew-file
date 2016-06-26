@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.5"
+__version__ = "v3.12.6"
 __date__ = "26/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -694,8 +694,8 @@ class BrewFile:
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
-        self.opt["leaves"] = int(os.environ.get(
-            "HOMEBREW_BREWFILE_LEAVES", 0))
+        self.opt["leaves"] = bool(int(
+            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0)))
         self.opt["form"] = "file"
         self.opt["repo"] = ""
         self.opt["noupdate"] = True
@@ -2765,7 +2765,7 @@ def main():
 
     leaves_parser = argparse.ArgumentParser(add_help=False)
     leaves_parser.add_argument(
-        "--leaves", action="store_true", default=False,
+        "--leaves", action="store_true", default=b.opt["leaves"],
         dest="leaves",
         help="Make list only for leaves (taken by `brew leaves`).\n"
              "You can set this by environmental variable,"
