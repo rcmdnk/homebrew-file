@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.7"
+__version__ = "v3.12.8"
 __date__ = "26/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -130,7 +130,7 @@ class BrewHelper:
         self.opt = opt
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, ignore_err_msg=False, verbose_level=1):
+             exit_on_error=True, separete_err_msg=False, verbose_level=1):
         """ Get process output."""
         import shlex
         import subprocess
@@ -142,7 +142,7 @@ class BrewHelper:
             self.info('$ ' + ' '.join(cmd), verbose_level)
         lines = []
         try:
-            stderr = None if ignore_err_msg else subprocess.STDOUT
+            stderr = None if separete_err_msg else subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr)
             for line in p.stdout:
                 l = my_decode(line).rstrip()
@@ -812,10 +812,10 @@ class BrewFile:
         return v
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, ignore_err_msg=False, verbose_level=1):
+             exit_on_error=True, separete_err_msg=False, verbose_level=1):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_error=exit_on_error, ignore_err_msg=ignore_err_msg,
+            exit_on_error=exit_on_error, separete_err_msg=separete_err_msg,
             verbose_level=verbose_level)
 
     def info(self, text, verbose_level=2):
@@ -1450,8 +1450,11 @@ class BrewFile:
 
         ret = self.check_mas_cmd(True)
         if ret and ret != "MASNOTAVAILABLE":
-            (ret, lines) = self.proc("mas list", False, False)
+            (ret, lines) = self.proc("mas list", False, False,
+                                     separete_err_msg=True)
             apps = sorted(lines, key=lambda x: x.split()[1:])
+            if len(lines) > 0 and lines[0] == "No installed apps found":
+                lines = []
         elif ret:
             import glob
             apps_tmp = []
@@ -1478,7 +1481,7 @@ class BrewFile:
         if not self.check_cask_cmd(force):  # pragma: no cover
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False,
-                                 ignore_err_msg=True)
+                                 separete_err_msg=True)
         if lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
