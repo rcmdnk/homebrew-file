@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.10"
+__version__ = "v3.13.1"
 __date__ = "27/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -710,6 +710,7 @@ class BrewFile:
         self.opt["cache_dir"] = self.proc(
             "brew --cache", False, False, True, 0)[1][0]
         self.opt["cask_repo"] = "caskroom/cask"
+        self.opt["reattach_formula"] = "reattach-to-user-namespace"
         self.opt["mas_formula"] = "mas"
         self.opt["pip_pack"] = "brew-pip"
         self.opt["gem_pack"] = "brew-gem"
@@ -717,8 +718,10 @@ class BrewFile:
         self.opt["is_brew_cmd"] = False
         self.opt["is_cask_cmd"] = False
         self.opt["cask_cmd_installed"] = False
+        self.opt["mas_cmd"] = "mas"
         self.opt["is_mas_cmd"] = False
         self.opt["mas_cmd_installed"] = False
+        self.opt["reattach_cmd_installed"] = False
         self.opt["is_pip_cmd"] = False
         self.opt["pip_cmd_installed"] = False
         self.opt["is_gem_cmd"] = False
@@ -847,6 +850,11 @@ class BrewFile:
                 self.brewinfo.tap_input.append(self.opt["cask_repo"])
         if self.opt["mas_cmd_installed"]:
             p = os.path.basename(self.opt["mas_formula"])
+            if p not in self.get("brew_input"):
+                self.brewinfo.brew_input.append(p)
+                self.brewinfo.brew_input_opt[p] = ""
+        if self.opt["reattach_cmd_installed"]:
+            p = os.path.basename(self.opt["reattach_formula"])
             if p not in self.get("brew_input"):
                 self.brewinfo.brew_input.append(p)
                 self.brewinfo.brew_input_opt[p] = ""
@@ -1351,6 +1359,7 @@ class BrewFile:
         """Check mas is installed or not"""
         if self.opt["is_mas_cmd"]:
             return self.opt["is_mas_cmd"]
+
         if self.proc("type mas", False, False, False)[0] != 0:
             sw_vers = self.proc("sw_vers -productVersion",
                                 False, False, False)[1][0].split(".")
@@ -1378,9 +1387,36 @@ class BrewFile:
             if p not in self.get("brew_list"):
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ""
-            self.opt["is_mas_cmd"] = True
             self.opt["mas_cmd_installed"] = True
-        if self.proc("mas", False, False, False)[0] != 0:
+
+        is_tmux = os.environ.get("TMUX", "")
+        if is_tmux != "":
+            if self.proc("type reattach-to-user-namespace",
+                         False, False, False)[0] != 0:
+                if not force:
+                    ans = self.ask_yn(
+                        "You need %s in tmux. Do you want to install it?" %
+                        self.opt["reattach_formula"])
+                    if not ans:  # pragma: no cover
+                        self.warning("If you need it, please do:")
+                        self.warning("    $ brew install %s"
+                                     % (self.opt["reattach_formula"]))
+                        return self.opt["is_mas_cmd"]
+                ret = self.proc(["brew", "install",
+                                 self.opt["reattach_formula"]],
+                                True, True, False)[0]
+                if ret != 0:  # pragma: no cover
+                    self.warning("\nFailed to install " +
+                                 self.opt["reattach_formula"] + "\n", 0)
+                    sys.exit(ret)
+                p = os.path.basename(self.opt["reattach_formula"])
+                if p not in self.get("brew_list"):
+                    self.brewinfo.brew_list.append(p)
+                    self.brewinfo.brew_list_opt[p] = ""
+                self.opt["reattach_cmd_installed"] = True
+            self.opt["mas_cmd"] = "reattach-to-user-namespace mas"
+
+        if self.proc(self.opt["mas_cmd"], False, False, False)[0] != 0:
             # fail?
             self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
         else:
@@ -1453,11 +1489,11 @@ class BrewFile:
 
         ret = self.check_mas_cmd(True)
         if ret and ret != "MASNOTAVAILABLE":
-            (ret, lines) = self.proc("mas list", False, False,
-                                     separete_err_msg=True)
+            (ret, lines) = self.proc(self.opt["mas_cmd"] + " list",
+                                     False, False, separete_err_msg=True)
             apps = sorted(lines, key=lambda x: x.split()[1:])
-            if len(lines) > 0 and lines[0] == "No installed apps found":
-                lines = []
+            if len(apps) > 0 and apps[0] == "No installed apps found":
+                apps = []
         elif ret:
             import glob
             apps_tmp = []
@@ -2003,7 +2039,7 @@ class BrewFile:
                 ret = self.check_mas_cmd(True)
                 if identifier != "" and ret and ret != "NOTAVAILABLE":
                     self.info("Installing " + package)
-                    self.proc("mas install " + identifier)
+                    self.proc(self.opt["mas_cmd"] + " install " + identifier)
                 else:
                     self.info("Installing " + package)
                     self.proc(
@@ -2021,9 +2057,11 @@ class BrewFile:
         # Initialize if commands are installed
         if self.opt["cask_cmd_installed"] or\
                 self.opt["mas_cmd_installed"] or\
+                self.opt["reattach_cmd_installed"] or\
                 self.opt["pip_cmd_installed"] or\
                 self.opt["gem_cmd_installed"]:
             self.opt["cask_cmd_installed"] = self.opt["mas_cmd_installed"] =\
+                self.opt["reattach_cmd_installed"] =\
                 self.opt["pip_cmd_installed"] =\
                 self.opt["gem_cmd_installed"] = False
             self.input_to_list()
