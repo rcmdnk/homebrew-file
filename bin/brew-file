@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.9"
-__date__ = "26/Jun/2016"
+__version__ = "v3.12.10"
+__date__ = "27/Jun/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -696,6 +696,8 @@ class BrewFile:
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["leaves"] = bool(int(
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0)))
+        self.opt["top_packages"] = os.environ.get(
+            "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "file"
         self.opt["repo"] = ""
         self.opt["noupdate"] = True
@@ -1271,12 +1273,13 @@ class BrewFile:
                             " " + " ".join(opts[porig]).strip()
                     else:
                         self.brewinfo.brew_input_opt[p] = ""
-                    if not self.opt["leaves"]:
-                        for p_dep in self.proc(
-                                "brew deps " + p, False, False)[1]:
-                            if p_dep not in self.get(input_list):
-                                self.brewinfo.brew_input.append(p_dep)
-                                self.brewinfo.brew_input_opt[p_dep] = ""
+                    for p_dep in self.proc(
+                            "brew deps " + p, False, False)[1]:
+                        if p_dep not in self.get(input_list) and \
+                                (not self.opt["leaves"] or
+                                 p_dep in self.opt["top_packages"].split(",")):
+                            self.brewinfo.brew_input.append(p_dep)
+                            self.brewinfo.brew_input_opt[p_dep] = ""
                     self.brewinfo.brew_input.sort()
                 if t != "" and t not in self.get("tap_input"):
                     self.brewinfo.tap_input.append(t)
@@ -1494,18 +1497,23 @@ class BrewFile:
 
         # Brew packages
         if not self.opt["caskonly"]:
-            (ret, lines) = self.proc("brew info --json=v1 --installed",
-                                     False, False)
+            full_list = self.proc("brew list", False, False)[1]
             if self.opt["leaves"]:
-                (ret, leavestmp) = self.proc("brew leaves", False, False)
+                leavestmp = self.proc("brew leaves", False, False)[1]
                 leaves = []
                 for l in leavestmp:
                     leaves.append(l.split("/")[-1])
+                for p in self.opt["top_packages"].split(","):
+                    if p == "":
+                        continue
+                    if p in full_list and p not in leaves:
+                        leaves.append(p)
             else:
-                (ret, leaves) = self.proc("brew list", False, False)
+                leaves = full_list
 
             import json
-            for p in json.loads(lines[0]):
+            for p in json.loads(self.proc("brew info --json=v1 --installed",
+                                          False, False)[1][0]):
                 if p["name"] not in leaves:
                     continue
                 self.brewinfo.brew_list.append(p["name"])
@@ -1514,8 +1522,7 @@ class BrewFile:
 
             # pip/gem
             # pip/gem packages are not in brew info list
-            (ret, lines) = self.proc("brew list", False, False)
-            for p in lines:
+            for p in full_list:
                 if p.startswith("pip-"):
                     package = p.replace("pip-", "")
                     self.brewinfo.pip_list.append(package)
@@ -2770,6 +2777,16 @@ def main():
              " HOMEBREW_BREWFILE_LEAVES, like:\n."
              "    export HOMEBREW_BREWFILE_LEAVES=1")
 
+    top_packages_parser = argparse.ArgumentParser(add_help=False)
+    top_packages_parser.add_argument(
+        "--top_packages", action="store", default=b.opt["top_packages"],
+        dest="top_packages",
+        help="Packages to be listed even if they are under dependencies "
+             "and `leaves` option is used.\n"
+             "You can set this by environmental variable,"
+             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n."
+             "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
+
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdateatupdate_parser.add_argument(
         "-U", "--noupdate", action="store_true",
@@ -2821,7 +2838,8 @@ def main():
                                 dest="verbose", help="Verbose level 0/1/2")
 
     min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
-                   appstore_parser, caskonly_parser, yn_parser, verbose_parser]
+                   top_packages_parser, appstore_parser, caskonly_parser,
+                   yn_parser, verbose_parser]
     subparser_options = {
         "parents": min_parsers + [noupdate_parser],
         "formatter_class": argparse.RawTextHelpFormatter}
@@ -2830,8 +2848,8 @@ def main():
     parser = argparse.ArgumentParser(
         add_help=False, prog=__prog__,
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
-                 noupdateatupdate_parser, noupdate_parser, repo_parser,
-                 link_parser, caskonly_parser, appstore_parser,
+                 top_packages_parser, noupdateatupdate_parser, noupdate_parser,
+                 repo_parser, link_parser, caskonly_parser, appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description=__description__)
@@ -2967,8 +2985,9 @@ def main():
                            '-u', '--update', '-e', '--edit', '--cat', '--test',
                            '--commands', '-v', '--version', '-h', '--help']
         options = ['-f', '--file', '-b', '--backup',
-                   '-F', '--format', '--form', '--leaves', '-U', '--noupdate',
-                   '--preupdate', '-r', '--repo', '-n', '--nolink',
+                   '-F', '--format', '--form', '--leaves', '--top_packages',
+                   '-U', '--noupdate', '--preupdate',
+                   '-r', '--repo', '-n', '--nolink',
                    '--caskonly', '--no_appstore', '-C', '-y', '--yes',
                    '-V', '--verbose']
         print('commands:', ' '.join(commands))

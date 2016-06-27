@@ -5,9 +5,9 @@ Help message of brew-file:
 
 .. code-block:: none
 
-    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves] [-U]
-                     [--preupdate] [-r REPO] [-n] [--caskonly] [--no_appstore]
-                     [-C] [-y] [-V VERBOSE]
+    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves]
+                     [--top_packages TOP_PACKAGES] [-U] [--preupdate] [-r REPO]
+                     [-n] [--caskonly] [--no_appstore] [-C] [-y] [-V VERBOSE]
                      [command] ...
     
     Brew-file: Manager for packages of Homebrew
@@ -36,6 +36,10 @@ Help message of brew-file:
       --leaves              Make list only for leaves (taken by `brew leaves`).
                             You can set this by environmental variable, HOMEBREW_BREWFILE_LEAVES, like:
                             .    export HOMEBREW_BREWFILE_LEAVES=1
+      --top_packages TOP_PACKAGES
+                            Packages to be listed even if they are under dependencies and `leaves` option is used.
+                            You can set this by environmental variable, HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:
+                            .    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
       --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
