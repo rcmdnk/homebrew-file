@@ -73,7 +73,7 @@ Help message of brew-file:
                             By drault, cleanup runs as dry-run.
                             If you want to enforce cleanup, use '-C' option.
         update              or -u/--update
-                            Do pull, install, brew update/upgrade,
+                            Do brew update/upgrade, pull, install,
                             init and push.
                             In addition, pull and push
                             will be done if the repository is assigned.
