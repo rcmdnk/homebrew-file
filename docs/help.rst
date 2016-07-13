@@ -48,7 +48,8 @@ Help message of brew-file:
       --no_appstore         Don't check AppStore applications.
                             (For other than casklist command.)
                             You can set input file by environmental variable,'HOMEBREW_FILE_APPSTORE=False'
-      -C                    Run cleanup in non dry-run mode.
+      -C                    Run clean as non dry-run mode.
+                            Use this option to run clean at update command, too.
       -y, --yes             Answer yes to all yes/no questions.
       -V VERBOSE, --verbose VERBOSE
                             Verbose level 0/1/2
@@ -72,10 +73,11 @@ Help message of brew-file:
                             By drault, cleanup runs as dry-run.
                             If you want to enforce cleanup, use '-C' option.
         update              or -u/--update
-                            Do pull, install, clean, brew update/upgrade,
+                            Do pull, install, brew update/upgrade,
                             init and push.
                             In addition, pull and push
                             will be done if the repository is assigned.
+                            'clean' is also executed after install if you give -C option.
         edit                or -e/--edit
                             Edit input files.
         cat                 or --cat
