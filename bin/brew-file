@@ -2721,14 +2721,14 @@ class BrewFile:
 
         # Update
         if self.opt["command"] == "update":
+            if not self.opt["noupdateatupdate"]:
+                self.proc("brew update")
+                self.proc("brew upgrade --all")
             if self.opt["repo"] != "":
                 self.repomgr("pull")
             self.install()
             if not self.opt["dryrun"]:
                 self.cleanup()
-            if not self.opt["noupdateatupdate"]:
-                self.proc("brew update")
-                self.proc("brew upgrade --all")
             self.initialize(False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
@@ -2940,7 +2940,7 @@ def main():
         "clean", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -u/--update\nDo pull, install, brew update/upgrade,\n"\
+    help = "or -u/--update\nDo brew update/upgrade, pull, install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
            "will be done if the repository is assigned.\n"\
