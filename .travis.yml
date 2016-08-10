@@ -184,7 +184,7 @@ script:
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe --no_appstore install -V 2
   - coverage run --parallel-mode $exe casklist -V 0
-  - command brew rm emacs
+  - command brew rm tig
   - coverage run --parallel-mode $exe init -y -V 0
   - coverage run --parallel-mode $exe update -y -U -V 2
   - coverage run --parallel-mode $exe update -y

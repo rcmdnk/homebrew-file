@@ -3,7 +3,7 @@ before echo EXT before
 
 # brew install with opt
 brew wget --HEAD --with-iri --with-debug
-brew install emacs --cocoa --with-gnutls
+brew install tig --with-docs
 
 ## After commands
 after echo EXT after
