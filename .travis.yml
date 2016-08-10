@@ -127,8 +127,8 @@ script:
   - command brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - coverage run --parallel-mode $exe brew install brew-pip
-  - coverage run --parallel-mode $exe brew pip asciinema
-  - coverage run --parallel-mode $exe brew uninstall pip-asciinema
+  - coverage run --parallel-mode $exe brew pip pep8
+  - coverage run --parallel-mode $exe brew uninstall pip-pep8
   - coverage run --parallel-mode $exe brew pip -u django==1.2
   - coverage run --parallel-mode $exe brew rm brew-pip
   - coverage run --parallel-mode $exe brew install brew-gem
