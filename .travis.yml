@@ -74,6 +74,9 @@ script:
   - rm -rf /usr/local/bin/pip2
   - rm -rf /usr/local/bin/pip2.7
   - brew install $PYTHON_VERSION
+  - '[ "$PYTHON_VERSION" = "python3" ] && brew rm python|| :'
+  - ls /usr/local/bin/python || :
+  - ls /usr/local/bin/pip || :
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python && ln -s /usr/local/bin/python3 /usr/local/bin/python || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip && ln -s /usr/local/bin/pip3 /usr/local/bin/pip || :'
   - python --version
@@ -206,8 +209,8 @@ script:
   - coverage run --parallel-mode $exe install --no_appstore -F command
   # Clean up tests
   - echo "brew brew-file $version" > $testfile
-  - echo "brew python" >> $testfile
-  - echo "brew python3" >> $testfile
+  - '[ "$PYTHON_VERSION" != "python3" ] && echo brew python >> $testfile || :'
+  - '[ "$PYTHON_VERSION" = "python3" ] && echo brew python3 >> $testfile || :'
   - echo "file BrewfileExt" >> $testfile
   - echo "brew bash" >> $testfile
   - while read p;do echo "brew $p" >> $testfile;done < brewlist.orig
