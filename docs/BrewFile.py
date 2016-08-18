@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.12.10"
-__date__ = "27/Jun/2016"
+__version__ = "v3.15.1"
+__date__ = "18/Aug/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -51,6 +51,20 @@ def open_output_file(name, mode="w"):
             not os.path.exists(os.path.dirname(name)):
         os.makedirs(os.path.dirname(name))
     return open(name, mode)
+
+
+def to_bool(val):
+    if type(val) == bool:
+        return val
+    elif type(val) == int or (type(val) == str and val.isdigit()):
+        return bool(int(val))
+    elif type(val) == str:
+        if val.lower() == "true":
+            return True
+        else:
+            return False
+    else:
+        return False
 
 
 class Tee:
@@ -466,7 +480,7 @@ class BrewInfo:
             import json
             package_info = json.loads(self.helper.proc(
                 "brew info --json=v1 " + package,
-                False, False)[1][0])[0]
+                False, False, True, True)[1][0])[0]
 
         opt = ""
         for i in package_info["installed"]:
@@ -548,8 +562,8 @@ class BrewInfo:
         # Before commands
         if len(self.before_input) > 0:
             out.writeln("# Before commands")
-            for p in self.before_input:
-                out.writeln(cmd_before + p)
+            for c in self.before_input:
+                out.writeln(cmd_before + c)
 
         # Taps
         if len(self.tap_list) > 0:
@@ -560,38 +574,39 @@ class BrewInfo:
                     out.writeln("\n# tap repositories and their packages")
 
             def first_tap_pack_write(out, isfirst, direct_first, isfirst_pack,
-                                     p, cmd_tap):
+                                     tap, cmd_tap):
                 first_tap_write(out, isfirst)
                 if not direct_first and isfirst_pack:
                     out.writeln("\n" +
-                                cmd_tap + self.packout(p))
+                                cmd_tap + self.packout(tap))
 
-            for p in self.tap_list:
+            for t in self.tap_list:
                 isfirst_pack = True
-                self.get_tap(p)
+                self.get_tap(t)
                 direct_first = False
-                if p == "direct":
+                if t == "direct":
                     direct_first = True
 
                 if not self.helper.opt["caskonly"]:
                     first_tap_pack_write(out, isfirst, direct_first,
-                                         isfirst_pack, p, cmd_tap)
+                                         isfirst_pack, t, cmd_tap)
                     isfirst = isfirst_pack = False
-                    for tp in self.tap_packs:
-                        for p_in_t in self.brew_list:
-                            if tp == p_in_t.split("/")[-1].replace(".rb", ""):
-                                if direct_first:
-                                    direct_first = False
-                                    out.writeln("\n## " + "Direct install")
-                                pack = self.packout(p_in_t) +\
-                                    self.brew_list_opt[p_in_t]
-                                out.writeln(cmd_install + pack)
-                                self.brew_list.remove(p_in_t)
-                                del self.brew_list_opt[p_in_t]
+
+                    for p in self.brew_list[:]:
+                        if p.split("/")[-1].replace(
+                                ".rb", "") in self.tap_packs:
+                            if direct_first:
+                                direct_first = False
+                                out.writeln("\n## " + "Direct install")
+                            pack = self.packout(p) +\
+                                self.brew_list_opt[p]
+                            out.writeln(cmd_install + pack)
+                            self.brew_list.remove(p)
+                            del self.brew_list_opt[p]
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
                         first_tap_pack_write(out, isfirst, False,
-                                             isfirst_pack, p, cmd_tap)
+                                             isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
                         out.writeln(cmd_cask + self.packout(tc))
                         self.cask_list.remove(tc)
@@ -622,39 +637,39 @@ class BrewInfo:
         # Casks
         if len(self.cask_list) > 0:
             out.writeln("\n# Cask applications")
-            for p in self.cask_list:
-                out.writeln(cmd_cask + self.packout(p))
+            for c in self.cask_list:
+                out.writeln(cmd_cask + self.packout(c))
 
         # Installed by cask, but cask files were not found...
         if len(self.cask_nocask_list) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
-            for p in self.cask_nocask_list:
-                out.writeln(cmd_cask_nocask + self.packout(p))
+            for c in self.cask_nocask_list:
+                out.writeln(cmd_cask_nocask + self.packout(c))
 
         # App Store applications
         if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
-            for p in self.appstore_list:
-                out.writeln(cmd_appstore + self.packout(p))
+            for a in self.appstore_list:
+                out.writeln(cmd_appstore + self.packout(a))
 
         # Additional files
         if len(self.file_list) > 0:
             out.writeln("\n# Additional files")
-            for p in self.file_list:
-                out.writeln(cmd_file + self.packout(p))
+            for f in self.file_list:
+                out.writeln(cmd_file + self.packout(f))
 
         # Other commands
         if len(self.cmd_input) > 0:
             out.writeln("\n# Other commands")
-            for p in self.cmd_input:
-                out.writeln(cmd_other + p)
+            for c in self.cmd_input:
+                out.writeln(cmd_other + c)
 
         # After commands
         if len(self.after_input) > 0:
             out.writeln("\n# After commands")
-            for p in self.after_input:
-                out.writeln(cmd_after + p)
+            for c in self.after_input:
+                out.writeln(cmd_after + c)
 
         # Close Brewfile
         out.close()
@@ -679,7 +694,8 @@ class BrewFile:
         self.opt = {}
 
         # Prepare helper, need verbose first
-        self.opt["verbose"] = int(os.environ.get("HOMEBREW_FILE_VERBOSE", 1))
+        self.opt["verbose"] = int(
+            os.environ.get("HOMEBREW_BRWEFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
         # First check Homebrew
@@ -694,8 +710,8 @@ class BrewFile:
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
-        self.opt["leaves"] = bool(int(
-            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0)))
+        self.opt["leaves"] = to_bool(
+            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0))
         self.opt["top_packages"] = os.environ.get(
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "file"
@@ -710,6 +726,7 @@ class BrewFile:
         self.opt["cache_dir"] = self.proc(
             "brew --cache", False, False, True, 0)[1][0]
         self.opt["cask_repo"] = "caskroom/cask"
+        self.opt["reattach_formula"] = "reattach-to-user-namespace"
         self.opt["mas_formula"] = "mas"
         self.opt["pip_pack"] = "brew-pip"
         self.opt["gem_pack"] = "brew-gem"
@@ -717,8 +734,10 @@ class BrewFile:
         self.opt["is_brew_cmd"] = False
         self.opt["is_cask_cmd"] = False
         self.opt["cask_cmd_installed"] = False
+        self.opt["mas_cmd"] = "mas"
         self.opt["is_mas_cmd"] = False
         self.opt["mas_cmd_installed"] = False
+        self.opt["reattach_cmd_installed"] = False
         self.opt["is_pip_cmd"] = False
         self.opt["pip_cmd_installed"] = False
         self.opt["is_gem_cmd"] = False
@@ -741,9 +760,14 @@ class BrewFile:
                          " is not a proper format.", 0)
             self.warning("Ignore the value.\n", 0)
 
-        self.opt["caskroom"] = cask_opts["--caskroom"] \
-            if cask_opts["--caskroom"] != "" \
-            else "/opt/homebrew-cask/Caskroom"
+        if cask_opts["--caskroom"] != "":
+            self.opt["caskroom"] = cask_opts["--caskroom"]
+        else:
+            if not os.path.isdir(self.opt["brew_repo"] + "/Caskroom") and\
+                    os.path.isdir("/opt/homebrew-cask/Caskroom"):
+                self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
+            else:
+                self.opt["caskroom"] = self.opt["brew_repo"] + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
@@ -756,16 +780,8 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
-        self.opt["appstore"] = os.environ.get("HOMEBREW_FILE_APPSTORE", True)
-        if type(self.opt["appstore"]) == bool:
-            pass
-        elif type(self.opt["appstore"]) == str:
-            if self.opt["appstore"].lower() == "true":
-                self.opt["appstore"] = True
-            else:
-                self.opt["appstore"] = False
-        elif type(self.opt["appstore"]) == int:
-            self.opt["appstore"] = bool(int(self.opt["appstore"]))
+        self.opt["appstore"] = to_bool(
+            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", True))
 
         self.int_opts = ["verbose"]
         self.float_opts = []
@@ -847,6 +863,11 @@ class BrewFile:
                 self.brewinfo.tap_input.append(self.opt["cask_repo"])
         if self.opt["mas_cmd_installed"]:
             p = os.path.basename(self.opt["mas_formula"])
+            if p not in self.get("brew_input"):
+                self.brewinfo.brew_input.append(p)
+                self.brewinfo.brew_input_opt[p] = ""
+        if self.opt["reattach_cmd_installed"]:
+            p = os.path.basename(self.opt["reattach_formula"])
             if p not in self.get("brew_input"):
                 self.brewinfo.brew_input.append(p)
                 self.brewinfo.brew_input_opt[p] = ""
@@ -1351,6 +1372,7 @@ class BrewFile:
         """Check mas is installed or not"""
         if self.opt["is_mas_cmd"]:
             return self.opt["is_mas_cmd"]
+
         if self.proc("type mas", False, False, False)[0] != 0:
             sw_vers = self.proc("sw_vers -productVersion",
                                 False, False, False)[1][0].split(".")
@@ -1378,9 +1400,36 @@ class BrewFile:
             if p not in self.get("brew_list"):
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ""
-            self.opt["is_mas_cmd"] = True
             self.opt["mas_cmd_installed"] = True
-        if self.proc("mas", False, False, False)[0] != 0:
+
+        is_tmux = os.environ.get("TMUX", "")
+        if is_tmux != "":
+            if self.proc("type reattach-to-user-namespace",
+                         False, False, False)[0] != 0:
+                if not force:
+                    ans = self.ask_yn(
+                        "You need %s in tmux. Do you want to install it?" %
+                        self.opt["reattach_formula"])
+                    if not ans:  # pragma: no cover
+                        self.warning("If you need it, please do:")
+                        self.warning("    $ brew install %s"
+                                     % (self.opt["reattach_formula"]))
+                        return self.opt["is_mas_cmd"]
+                ret = self.proc(["brew", "install",
+                                 self.opt["reattach_formula"]],
+                                True, True, False)[0]
+                if ret != 0:  # pragma: no cover
+                    self.warning("\nFailed to install " +
+                                 self.opt["reattach_formula"] + "\n", 0)
+                    sys.exit(ret)
+                p = os.path.basename(self.opt["reattach_formula"])
+                if p not in self.get("brew_list"):
+                    self.brewinfo.brew_list.append(p)
+                    self.brewinfo.brew_list_opt[p] = ""
+                self.opt["reattach_cmd_installed"] = True
+            self.opt["mas_cmd"] = "reattach-to-user-namespace mas"
+
+        if self.proc(self.opt["mas_cmd"], False, False, False)[0] != 0:
             # fail?
             self.opt["is_mas_cmd"] = "MASNOTAVAILABLE"
         else:
@@ -1453,11 +1502,11 @@ class BrewFile:
 
         ret = self.check_mas_cmd(True)
         if ret and ret != "MASNOTAVAILABLE":
-            (ret, lines) = self.proc("mas list", False, False,
-                                     separete_err_msg=True)
+            (ret, lines) = self.proc(self.opt["mas_cmd"] + " list",
+                                     False, False, separete_err_msg=True)
             apps = sorted(lines, key=lambda x: x.split()[1:])
-            if len(lines) > 0 and lines[0] == "No installed apps found":
-                lines = []
+            if len(apps) > 0 and apps[0] == "No installed apps found":
+                apps = []
         elif ret:
             import glob
             apps_tmp = []
@@ -1513,7 +1562,7 @@ class BrewFile:
 
             import json
             for p in json.loads(self.proc("brew info --json=v1 --installed",
-                                          False, False)[1][0]):
+                                          False, False, True, True)[1][0]):
                 if p["name"] not in leaves:
                     continue
                 self.brewinfo.brew_list.append(p["name"])
@@ -1728,7 +1777,7 @@ class BrewFile:
         # Check up packages in the input file
         self.read_all()
         infotmp = self.proc(
-            "brew info --json=v1 --installed", False, False)[1][0]
+            "brew info --json=v1 --installed", False, False, True, True)[1][0]
         import json
         infotmp = json.loads(infotmp)
         info = {}
@@ -1888,7 +1937,8 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    # (ret, lines) = self.proc("brew info " + p, False, False)
+                    # (ret, lines) = self.proc("brew info " + p, False, False,
+                    #                          True, True)
                     # for l in lines:
                     #     if l.find("ln -s") >= 0:
                     #         if len(l.split()) > 2:
@@ -2003,7 +2053,7 @@ class BrewFile:
                 ret = self.check_mas_cmd(True)
                 if identifier != "" and ret and ret != "NOTAVAILABLE":
                     self.info("Installing " + package)
-                    self.proc("mas install " + identifier)
+                    self.proc(self.opt["mas_cmd"] + " install " + identifier)
                 else:
                     self.info("Installing " + package)
                     self.proc(
@@ -2021,9 +2071,11 @@ class BrewFile:
         # Initialize if commands are installed
         if self.opt["cask_cmd_installed"] or\
                 self.opt["mas_cmd_installed"] or\
+                self.opt["reattach_cmd_installed"] or\
                 self.opt["pip_cmd_installed"] or\
                 self.opt["gem_cmd_installed"]:
             self.opt["cask_cmd_installed"] = self.opt["mas_cmd_installed"] =\
+                self.opt["reattach_cmd_installed"] =\
                 self.opt["pip_cmd_installed"] =\
                 self.opt["gem_cmd_installed"] = False
             self.input_to_list()
@@ -2678,14 +2730,14 @@ class BrewFile:
 
         # Update
         if self.opt["command"] == "update":
-            if self.opt["repo"] != "":
-                self.repomgr("pull")
-            self.install()
-            self.opt["dryrun"] = False
-            self.cleanup()
             if not self.opt["noupdateatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --all")
+            if self.opt["repo"] != "":
+                self.repomgr("pull")
+            self.install()
+            if not self.opt["dryrun"]:
+                self.cleanup()
             self.initialize(False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
@@ -2790,51 +2842,53 @@ def main():
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdateatupdate_parser.add_argument(
         "-U", "--noupdate", action="store_true",
-        default=False, dest="noupdateatupdate",
+        default=b.opt["noupdateatupdate"], dest="noupdateatupdate",
         help="Do not execute `brew update/brew upgrade`"
              " at `brew file update`.")
 
     noupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdate_parser.add_argument(
         "--preupdate", action="store_false",
-        default=True, dest="noupdate",
+        default=b.opt["noupdate"], dest="noupdate",
         help="Execute `brew update` before install or other commands.")
 
     repo_parser = argparse.ArgumentParser(add_help=False)
     repo_parser.add_argument(
-        "-r", "--repo", action="store", default="", dest="repo",
+        "-r", "--repo", action="store", default=b.opt["repo"], dest="repo",
         help="Set repository name. Use with set_repo.")
 
     link_parser = argparse.ArgumentParser(add_help=False)
     link_parser.add_argument(
-        "-n", "--nolink", action="store_false", default=True,
+        "-n", "--nolink", action="store_false", default=b.opt["link"],
         dest="link", help="Don't make links for Apps.")
 
     caskonly_parser = argparse.ArgumentParser(add_help=False)
     caskonly_parser.add_argument(
-        "--caskonly", action="store_true", default=False,
+        "--caskonly", action="store_true", default=b.opt["caskonly"],
         dest="caskonly", help="Write out only cask related packages")
 
     appstore_parser = argparse.ArgumentParser(add_help=False)
     appstore_parser.add_argument(
-        "--no_appstore", action="store_false", default=True,
+        "--no_appstore", action="store_false", default=b.opt["appstore"],
         dest="appstore", help="Don't check AppStore applications.\n"
              "(For other than casklist command.)\n"
-             "You can set input file by environmental variable,"
-             "'HOMEBREW_FILE_APPSTORE=False'")
+             "You can set input file by environmental variable:\n"
+             "    export HOMEBREW_BRWEFILE_APPSTORE=0")
 
     dryrun_parser = argparse.ArgumentParser(add_help=False)
     dryrun_parser.add_argument(
-        "-C", action="store_false", default=True,
-        dest="dryrun", help="Run cleanup in non dry-run mode.")
+        "-C", action="store_false", default=b.opt["dryrun"],
+        dest="dryrun", help="Run clean as non dry-run mode.\n"
+        "Use this option to run clean at update command, too.")
 
     yn_parser = argparse.ArgumentParser(add_help=False)
     yn_parser.add_argument(
-        "-y", "--yes", action="store_true", default=False,
+        "-y", "--yes", action="store_true", default=b.opt["yn"],
         dest="yn", help="Answer yes to all yes/no questions.")
 
     verbose_parser = argparse.ArgumentParser(add_help=False)
-    verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
+    verbose_parser.add_argument("-V", "--verbose", action="store",
+                                default=b.opt["verbose"],
                                 dest="verbose", help="Verbose level 0/1/2")
 
     min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
@@ -2896,13 +2950,15 @@ def main():
         "clean", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -u/--update\nDo pull, install, clean, brew update/upgrade,\n"\
+    help = "or -u/--update\nDo brew update/upgrade, pull, install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
-           "will be done if the repository is assigned."
+           "will be done if the repository is assigned.\n"\
+           "'clean' is also executed after install if you give -C option."
     subparsers.add_parser(
         "update", description=help, help=help,
-        parents=min_parsers+[link_parser, noupdateatupdate_parser],
+        parents=min_parsers+[link_parser, noupdateatupdate_parser,
+                             dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help, help=help,

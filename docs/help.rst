@@ -47,7 +47,8 @@ Help message of brew-file:
       --caskonly            Write out only cask related packages
       --no_appstore         Don't check AppStore applications.
                             (For other than casklist command.)
-                            You can set input file by environmental variable,'HOMEBREW_FILE_APPSTORE=False'
+                            You can set input file by environmental variable:
+                                export HOMEBREW_BRWEFILE_APPSTORE=0
       -C                    Run clean as non dry-run mode.
                             Use this option to run clean at update command, too.
       -y, --yes             Answer yes to all yes/no questions.
