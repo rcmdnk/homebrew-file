@@ -548,8 +548,8 @@ class BrewInfo:
         # Before commands
         if len(self.before_input) > 0:
             out.writeln("# Before commands")
-            for p in self.before_input:
-                out.writeln(cmd_before + p)
+            for c in self.before_input:
+                out.writeln(cmd_before + c)
 
         # Taps
         if len(self.tap_list) > 0:
@@ -560,38 +560,39 @@ class BrewInfo:
                     out.writeln("\n# tap repositories and their packages")
 
             def first_tap_pack_write(out, isfirst, direct_first, isfirst_pack,
-                                     p, cmd_tap):
+                                     tap, cmd_tap):
                 first_tap_write(out, isfirst)
                 if not direct_first and isfirst_pack:
                     out.writeln("\n" +
-                                cmd_tap + self.packout(p))
+                                cmd_tap + self.packout(tap))
 
-            for p in self.tap_list:
+            for t in self.tap_list:
                 isfirst_pack = True
-                self.get_tap(p)
+                self.get_tap(t)
                 direct_first = False
-                if p == "direct":
+                if t == "direct":
                     direct_first = True
 
                 if not self.helper.opt["caskonly"]:
                     first_tap_pack_write(out, isfirst, direct_first,
-                                         isfirst_pack, p, cmd_tap)
+                                         isfirst_pack, t, cmd_tap)
                     isfirst = isfirst_pack = False
-                    for tp in self.tap_packs:
-                        for p_in_t in self.brew_list:
-                            if tp == p_in_t.split("/")[-1].replace(".rb", ""):
-                                if direct_first:
-                                    direct_first = False
-                                    out.writeln("\n## " + "Direct install")
-                                pack = self.packout(p_in_t) +\
-                                    self.brew_list_opt[p_in_t]
-                                out.writeln(cmd_install + pack)
-                                self.brew_list.remove(p_in_t)
-                                del self.brew_list_opt[p_in_t]
+
+                    for p in self.brew_list[:]:
+                        if p.split("/")[-1].replace(
+                                ".rb", "") in self.tap_packs:
+                            if direct_first:
+                                direct_first = False
+                                out.writeln("\n## " + "Direct install")
+                            pack = self.packout(p) +\
+                                self.brew_list_opt[p]
+                            out.writeln(cmd_install + pack)
+                            self.brew_list.remove(p)
+                            del self.brew_list_opt[p]
                 for tc in self.tap_casks:
                     if tc in self.cask_list:
                         first_tap_pack_write(out, isfirst, False,
-                                             isfirst_pack, p, cmd_tap)
+                                             isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
                         out.writeln(cmd_cask + self.packout(tc))
                         self.cask_list.remove(tc)
@@ -622,39 +623,39 @@ class BrewInfo:
         # Casks
         if len(self.cask_list) > 0:
             out.writeln("\n# Cask applications")
-            for p in self.cask_list:
-                out.writeln(cmd_cask + self.packout(p))
+            for c in self.cask_list:
+                out.writeln(cmd_cask + self.packout(c))
 
         # Installed by cask, but cask files were not found...
         if len(self.cask_nocask_list) > 0:
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
-            for p in self.cask_nocask_list:
-                out.writeln(cmd_cask_nocask + self.packout(p))
+            for c in self.cask_nocask_list:
+                out.writeln(cmd_cask_nocask + self.packout(c))
 
         # App Store applications
         if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
-            for p in self.appstore_list:
-                out.writeln(cmd_appstore + self.packout(p))
+            for a in self.appstore_list:
+                out.writeln(cmd_appstore + self.packout(a))
 
         # Additional files
         if len(self.file_list) > 0:
             out.writeln("\n# Additional files")
-            for p in self.file_list:
-                out.writeln(cmd_file + self.packout(p))
+            for f in self.file_list:
+                out.writeln(cmd_file + self.packout(f))
 
         # Other commands
         if len(self.cmd_input) > 0:
             out.writeln("\n# Other commands")
-            for p in self.cmd_input:
-                out.writeln(cmd_other + p)
+            for c in self.cmd_input:
+                out.writeln(cmd_other + c)
 
         # After commands
         if len(self.after_input) > 0:
             out.writeln("\n# After commands")
-            for p in self.after_input:
-                out.writeln(cmd_after + p)
+            for c in self.after_input:
+                out.writeln(cmd_after + c)
 
         # Close Brewfile
         out.close()
