@@ -53,6 +53,20 @@ def open_output_file(name, mode="w"):
     return open(name, mode)
 
 
+def to_bool(val):
+    if type(val) == bool:
+        return val
+    elif type(val) == int or (type(val) == str and val.isdigit()):
+        return bool(int(val))
+    elif type(val) == str:
+        if val.lower() == "true":
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
 class Tee:
     """Module to write out in two ways at once."""
 
@@ -695,8 +709,8 @@ class BrewFile:
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
-        self.opt["leaves"] = bool(int(
-            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0)))
+        self.opt["leaves"] = to_bool(
+            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0))
         self.opt["top_packages"] = os.environ.get(
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "file"
@@ -765,16 +779,8 @@ class BrewFile:
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
 
-        self.opt["appstore"] = os.environ.get("HOMEBREW_FILE_APPSTORE", True)
-        if type(self.opt["appstore"]) == bool:
-            pass
-        elif type(self.opt["appstore"]) == str:
-            if self.opt["appstore"].lower() == "true":
-                self.opt["appstore"] = True
-            else:
-                self.opt["appstore"] = False
-        elif type(self.opt["appstore"]) == int:
-            self.opt["appstore"] = bool(int(self.opt["appstore"]))
+        self.opt["appstore"] = to_bool(
+            os.environ.get("HOMEBREW_FILE_APPSTORE", True))
 
         self.int_opts = ["verbose"]
         self.float_opts = []
@@ -2835,52 +2841,53 @@ def main():
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdateatupdate_parser.add_argument(
         "-U", "--noupdate", action="store_true",
-        default=False, dest="noupdateatupdate",
+        default=b.opt["noupdateatupdate"], dest="noupdateatupdate",
         help="Do not execute `brew update/brew upgrade`"
              " at `brew file update`.")
 
     noupdate_parser = argparse.ArgumentParser(add_help=False)
     noupdate_parser.add_argument(
         "--preupdate", action="store_false",
-        default=True, dest="noupdate",
+        default=b.opt["noupdate"], dest="noupdate",
         help="Execute `brew update` before install or other commands.")
 
     repo_parser = argparse.ArgumentParser(add_help=False)
     repo_parser.add_argument(
-        "-r", "--repo", action="store", default="", dest="repo",
+        "-r", "--repo", action="store", default=b.opt["repo"], dest="repo",
         help="Set repository name. Use with set_repo.")
 
     link_parser = argparse.ArgumentParser(add_help=False)
     link_parser.add_argument(
-        "-n", "--nolink", action="store_false", default=True,
+        "-n", "--nolink", action="store_false", default=b.opt["link"],
         dest="link", help="Don't make links for Apps.")
 
     caskonly_parser = argparse.ArgumentParser(add_help=False)
     caskonly_parser.add_argument(
-        "--caskonly", action="store_true", default=False,
+        "--caskonly", action="store_true", default=b.opt["caskonly"],
         dest="caskonly", help="Write out only cask related packages")
 
     appstore_parser = argparse.ArgumentParser(add_help=False)
     appstore_parser.add_argument(
-        "--no_appstore", action="store_false", default=True,
+        "--no_appstore", action="store_false", default=b.opt["appstore"],
         dest="appstore", help="Don't check AppStore applications.\n"
              "(For other than casklist command.)\n"
-             "You can set input file by environmental variable,"
-             "'HOMEBREW_FILE_APPSTORE=False'")
+             "You can set input file by environmental variable:\n"
+             "    export HOMEBREW_FILE_APPSTORE=0")
 
     dryrun_parser = argparse.ArgumentParser(add_help=False)
     dryrun_parser.add_argument(
-        "-C", action="store_false", default=True,
+        "-C", action="store_false", default=b.opt["dryrun"],
         dest="dryrun", help="Run clean as non dry-run mode.\n"
         "Use this option to run clean at update command, too.")
 
     yn_parser = argparse.ArgumentParser(add_help=False)
     yn_parser.add_argument(
-        "-y", "--yes", action="store_true", default=False,
+        "-y", "--yes", action="store_true", default=b.opt["yn"],
         dest="yn", help="Answer yes to all yes/no questions.")
 
     verbose_parser = argparse.ArgumentParser(add_help=False)
-    verbose_parser.add_argument("-V", "--verbose", action="store", default=1,
+    verbose_parser.add_argument("-V", "--verbose", action="store",
+                                default=b.opt["verbose"],
                                 dest="verbose", help="Verbose level 0/1/2")
 
     min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
