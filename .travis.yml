@@ -65,7 +65,6 @@ script:
   - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
   # Check with old Python (expect 2.7.5)
   - python --version
-  - 'coverage run --parallel-mode $exe brew install tig --HEAD --with-docs | :' # old version can't use hyphen options at brew file brew.
   # Install the latest version of Python
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
