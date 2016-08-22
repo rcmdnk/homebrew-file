@@ -77,7 +77,7 @@ Use GitHub (or any git repository) for Brewfile management
 Set up a repository
 ```````````````````
 
-First, create a repository with a file named **Brwefile**.
+First, create a repository with a file named **Brewfile**.
 
 If you use GitHub, you can make it with brew-file::
 

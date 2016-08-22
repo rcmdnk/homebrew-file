@@ -102,7 +102,7 @@ or can initialize Brewfile by Brew-file as written below.
 
 ## Usage
 
-Brwe-file manages pakcages installed by Homebrew.
+Brew-file manages pakcages installed by Homebrew.
 It also supports [brew-tap](https://github.com/mxcl/homebrew/wiki/brew-tap)
 and [brew-cask](https://github.com/phinze/homebrew-cask).
 
@@ -150,7 +150,7 @@ Example:
     brew macvim --with-lua
 
     # Additional files
-    file ~/.Brwefile
+    file ~/.Brewfile
 
 First column is command.
 Second to the last columns are package name and options.
@@ -209,7 +209,7 @@ in main Brewfile, and prepare files like
     Brewfile Host1.Brewfile Host2.Brewfile Host3.Brewfile
 
 in the same directory,
-then `brew-file` picks up **Host1.Brwefile** for Host1,
+then `brew-file` picks up **Host1.Brewfile** for Host1,
 and **Host2.Brewfile** for Host2, etc...
 
 Or if you just have
