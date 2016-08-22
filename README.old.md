@@ -141,7 +141,7 @@ If you want to do only installing new packages, then set as:
 
 ### Set up a repository
 
-First, create a repository with a file named **Brwefile**.
+First, create a repository with a file named **Brewfile**.
 
 If you use GitHub, you can make it with brew-file:
 
