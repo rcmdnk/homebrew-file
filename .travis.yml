@@ -24,6 +24,7 @@ env:
     - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
 before_install:
+  #- 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
   - openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.tar.enc -out .travis_rsa.tar -d
   - tar xvf .travis_rsa.tar
   - cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa
