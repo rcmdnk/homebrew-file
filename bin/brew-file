@@ -47,7 +47,7 @@ def my_decode(word):
 
 def open_output_file(name, mode="w"):
     """Helper function to open a file even if it doesn't exist."""
-    if os.path.dirname(name) != '' and \
+    if os.path.dirname(name) != "" and \
             not os.path.exists(os.path.dirname(name)):
         os.makedirs(os.path.dirname(name))
     return open(name, mode)
@@ -153,7 +153,7 @@ class BrewHelper:
         if cmd[0] == "brew":
             cmd = ["command"] + cmd
         if print_cmd:
-            self.info('$ ' + ' '.join(cmd), verbose_level)
+            self.info("$ " + " ".join(cmd), verbose_level)
         lines = []
         try:
             stderr = None if separete_err_msg else subprocess.STDOUT
@@ -166,13 +166,13 @@ class BrewHelper:
             ret = p.wait()
         except OSError as e:
             if print_out:
-                lines = [' '.join(cmd) + ': ' + str(e)]
+                lines = [" ".join(cmd) + ": " + str(e)]
                 self.info(lines[0].strip(), verbose_level)
             ret = -1
 
         if exit_on_error and ret != 0:
             if not (print_out and self.opt["verbose"] >= verbose_level):
-                print('\n'.join(lines))
+                print("\n".join(lines))
             sys.exit(ret)
 
         return (ret, lines)
@@ -196,7 +196,7 @@ class BrewHelper:
 class BrewInfo:
     """Homebrew information storage."""
 
-    def __init__(self, helper, filename=''):
+    def __init__(self, helper, filename=""):
 
         self.brew_input_opt = {}
         self.pip_input_opt = {}
@@ -357,11 +357,11 @@ class BrewInfo:
         elif type(self.list_dic[name]) == dict:
             self.list_dic[name].update(val)
 
-    def read(self, filename=''):
+    def read(self, filename=""):
         self.clear_input()
 
         try:
-            if filename == '':
+            if filename == "":
                 f = open(self.filename, "r")
             else:
                 f = open(filename, "r")
@@ -537,12 +537,12 @@ class BrewInfo:
             out.writeln("  brew_installed=0")
             out.writeln("  echo Homebrew is not installed!")
             out.writeln("  echo Install now...")
-            out.writeln('  echo ruby -e \\"\$\(curl -fsSL '
-                        'https://raw.githubusercontent.com/Homebrew/'
-                        'install/master/install\)\\"')
-            out.writeln('  ruby -e "$(curl -fsSL '
-                        'https://raw.githubusercontent.com/Homebrew/'
-                        'install/master/install)"')
+            out.writeln("  echo ruby -e \\\"\$\(curl -fsSL "
+                        "https://raw.githubusercontent.com/Homebrew/"
+                        "install/master/install\)\\\"")
+            out.writeln("  ruby -e \"$(curl -fsSL "
+                        "https://raw.githubusercontent.com/Homebrew/"
+                        "install/master/install)\"")
             out.writeln("  echo")
             out.writeln("fi")
             out.writeln("#BREWFILE_ENDIGNORE")
@@ -1336,7 +1336,7 @@ class BrewFile:
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
-                print('')
+                print("")
                 self.warning("\nCheck brew environment and fix problems\n"
                              "# You can check with:\n"
                              "#     $ brew doctor", 0)
@@ -1513,7 +1513,7 @@ class BrewFile:
             for d in self.opt["appdirlist"]:
                 apps_tmp += [
                     ("/".join(x.split("/")[:-3]).split(".app")[0])
-                    for x in glob.glob(d + '/*/Contents/_MASReceipt/receipt')]
+                    for x in glob.glob(d + "/*/Contents/_MASReceipt/receipt")]
                 apps_tmp += x
             # Another method
             # Sometime it can't find applications which have not been used?
@@ -1756,7 +1756,7 @@ class BrewFile:
         self.read_all()
         files = [x.get_file() for x in [self.brewinfo] + self.brewinfo_ext]
         if is_print:
-            print('\n'.join(files))
+            print("\n".join(files))
         return files
 
     def edit_brewfile(self):
@@ -1769,7 +1769,7 @@ class BrewFile:
     def cat_brewfile(self):
         """Cat brewfiles"""
         import subprocess
-        subprocess.call(['cat'] + self.get_files())
+        subprocess.call(["cat"] + self.get_files())
 
     def cleanup(self):
         """Clean up."""
@@ -1818,7 +1818,7 @@ class BrewFile:
             for p in self.get("appstore_list"):
                 identifier = p.split()[0]
                 if identifier.isdigit() and len(identifier) == 9:
-                    package = ' '.join(p.split()[1:])
+                    package = " ".join(p.split()[1:])
                 else:
                     identifier = ""
                     package = p
@@ -1826,7 +1826,7 @@ class BrewFile:
                 for pi in self.get("appstore_input"):
                     i_identifier = pi.split()[0]
                     if i_identifier.isdigit() and len(i_identifier) == 9:
-                        i_package = ' '.join(pi.split()[1:])
+                        i_package = " ".join(pi.split()[1:])
                     else:
                         i_identifier = ""
                         i_package = pi
@@ -1836,7 +1836,7 @@ class BrewFile:
                 if isinput:
                     continue
                 tmpcmd = cmd
-                package = ' '.join(p.split()[1:])
+                package = " ".join(p.split()[1:])
                 for d in self.opt["appdirlist"]:
                     a = "%s/%s.app" % (d, package)
                     if os.path.isdir(a):
@@ -2021,7 +2021,7 @@ class BrewFile:
                                 cmdtmp = l.split()
                                 cmd = []
                                 for c in cmdtmp:
-                                    if c.startswith('~/'):
+                                    if c.startswith("~/"):
                                         cmd.append(os.path.expanduser(c))
                                     else:
                                         cmd.append(c)
@@ -2035,7 +2035,7 @@ class BrewFile:
             for p in self.get("appstore_input"):
                 identifier = p.split()[0]
                 if identifier.isdigit() and len(identifier) == 9:
-                    package = ' '.join(p.split()[1:])
+                    package = " ".join(p.split()[1:])
                 else:
                     identifier = ""
                     package = p
@@ -2043,7 +2043,7 @@ class BrewFile:
                 for pl in self.get("appstore_list"):
                     l_identifier = pl.split()[0]
                     if l_identifier.isdigit() and len(l_identifier) == 9:
-                        l_package = ' '.join(pl.split()[1:])
+                        l_package = " ".join(pl.split()[1:])
                     else:
                         l_identifier = ""
                         l_package = pl
@@ -2167,7 +2167,7 @@ class BrewFile:
         for p in self.get_appstore_list():
             identifier = p.split()[0]
             if identifier.isdigit() and len(identifier) == 9:
-                package = ' '.join(p.split()[1:])
+                package = " ".join(p.split()[1:])
             else:
                 identifier = ""
                 package = p
@@ -2211,20 +2211,20 @@ class BrewFile:
                     noinst = False
                 with open(d + "/" + cask + ".rb", "r") as f:
                     content = f.read()
-                for l in content.split('\n'):
+                for l in content.split("\n"):
                     cask_app = ""
                     if re.search("^ *name ", l):
                         cask_app = re.sub("^ *name ", "",
                                           l).strip('"\' ') + ".app"
                     elif re.search("^ *app ", l):
                         cask_app = re.sub("^ *app ", "",
-                                          l).strip('"\' ').split('/')[-1]
+                                          l).strip('"\' ').split("/")[-1]
                     elif re.search("\.app", l):
                         cask_app = l.split(".app")[0].split("/")[-1].\
                             split("'")[-1].split('"')[-1]
                     elif re.search("^ *pkg ", l):
                         cask_app = re.sub("^ *pkg ", "", l).strip('"\' ').\
-                            split('/')[-1].replace(".pkg", "")
+                            split("/")[-1].replace(".pkg", "")
                     if cask_app != "" and cask_app not in cask_apps:
                         cask_apps.append(cask_app)
 
@@ -2491,7 +2491,7 @@ class BrewFile:
             out.writeln("# Apps installed from AppStore")
             for (name, app_path, check) in apps["appstore"][False]:
                 p = app_path.split("/")[-1].replace(".app", "")
-                if name != '':
+                if name != "":
                     line = "%s %s #%s" % (name, p, app_path)
                 else:
                     line = "%s #%s" % (p, app_path)
@@ -2511,7 +2511,7 @@ class BrewFile:
         if self.verbose() > 0:
             print("Total:", napps, "apps have been checked.")
             print("Apps in",
-                  [d.replace(os.environ["HOME"], "~") for d in app_dirs], '\n')
+                  [d.replace(os.environ["HOME"], "~") for d in app_dirs], "\n")
             maxlen = max(len(x.replace(os.environ["HOME"], "~"))
                          for x in app_dirs)
             if sum(apps_check["cask"].values()) > 0:
@@ -2623,12 +2623,12 @@ class BrewFile:
         for v in self.pack_deps.values():
             dep_packs.extend(v)
         self.top_packs = [x for x in packs if x not in dep_packs]
-        if self.opt['verbose'] > 1:
+        if self.opt["verbose"] > 1:
             def print_dep(p, depth=0):
                 if depth != 0:
-                    print('#', end="")
+                    print("#", end="")
                     for i in range(depth-2):
-                        print(' ', end="")
+                        print(" ", end="")
                 print(p)
                 for deps in self.pack_deps[p]:
                     print_dep(deps, depth+2)
@@ -2649,17 +2649,17 @@ class BrewFile:
         self.remove("dir")
         self.remove("aaa")
         self.brewinfo.read()
-        print('read input:', len(self.brewinfo.brew_input))
+        print("read input:", len(self.brewinfo.brew_input))
         self.brewinfo.clear()
-        print('read input cleared:', len(self.brewinfo.brew_input))
-        self.brewinfo.set_file('/test/not/correct/file/path')
+        print("read input cleared:", len(self.brewinfo.brew_input))
+        self.brewinfo.set_file("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
-        self.brewinfo.set_val('brew_input_opt', {"test_pack": "test opt"})
-        self.brewinfo.add('brew_input_opt', {"test_pack2": "test opt2"})
-        print(self.brewinfo.get('brew_input_opt'))
-        self.brewinfo.read('testfile')
-        self.brewinfo.get_tap('/aaa/bbb')
+        self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
+        self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
+        print(self.brewinfo.get("brew_input_opt"))
+        self.brewinfo.read("testfile")
+        self.brewinfo.get_tap("/aaa/bbb")
 
         self.make_pack_deps()
 
@@ -3001,7 +3001,7 @@ def main():
         print("Execute `" + __prog__ + " help` for more information.")
         sys.exit(1)
 
-    if sys.argv[1] == 'brew':
+    if sys.argv[1] == "brew":
         args = sys.argv[1:]
         if len([x for x in args if x.startswith("-")]) > 0:
             v = sys.version_info
@@ -3027,7 +3027,7 @@ def main():
 
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
-    args.update({'args': args_tmp})
+    args.update({"args": args_tmp})
 
     b.set_args(**args)
 
@@ -3035,22 +3035,22 @@ def main():
         parser.print_help()
         sys.exit(0)
     if b.opt["command"] == "commands":
-        commands = ['install', 'brew', 'init', 'dump', 'set_repo', 'pull',
-                    'push', 'clean', 'update', 'edit', 'cat', 'casklist',
-                    'cask_upgrade', 'test', 'get_files', 'commands', 'version',
-                    'help']
-        commands_hyphen = ['-i', '--init', '-s', '--set_repo', '-c', '--clean',
-                           '-u', '--update', '-e', '--edit', '--cat', '--test',
-                           '--commands', '-v', '--version', '-h', '--help']
-        options = ['-f', '--file', '-b', '--backup',
-                   '-F', '--format', '--form', '--leaves', '--top_packages',
-                   '-U', '--noupdate', '--preupdate',
-                   '-r', '--repo', '-n', '--nolink',
-                   '--caskonly', '--no_appstore', '-C', '-y', '--yes',
-                   '-V', '--verbose']
-        print('commands:', ' '.join(commands))
-        print('commands_hyphen:', ' '.join(commands_hyphen))
-        print('options:', ' '.join(options))
+        commands = ["install", "brew", "init", "dump", "set_repo", "pull",
+                    "push", "clean", "update", "edit", "cat", "casklist",
+                    "cask_upgrade", "test", "get_files", "commands", "version",
+                    "help"]
+        commands_hyphen = ["-i", "--init", "-s", "--set_repo", "-c", "--clean",
+                           "-u", "--update", "-e", "--edit", "--cat", "--test",
+                           "--commands", "-v", "--version", "-h", "--help"]
+        options = ["-f", "--file", "-b", "--backup",
+                   "-F", "--format", "--form", "--leaves", "--top_packages",
+                   "-U", "--noupdate", "--preupdate",
+                   "-r", "--repo", "-n", "--nolink",
+                   "--caskonly", "--no_appstore", "-C", "-y", "--yes",
+                   "-V", "--verbose"]
+        print("commands:", " ".join(commands))
+        print("commands_hyphen:", " ".join(commands_hyphen))
+        print("options:", " ".join(options))
         sys.exit(0)
     if b.opt["command"] == "version":
         print(__prog__ + " " + __version__ + " " + __date__)
