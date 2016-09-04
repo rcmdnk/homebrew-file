@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v3.15.4"
-__date__ = "18/Aug/2016"
+__version__ = "v3.16.1"
+__date__ = "05/Sep/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2575,28 +2575,24 @@ class BrewFile:
         for a in self.get_cask_list()[1]:
             lines = self.proc("brew cask info " + a, False, False)[1]
             installed = True
+            current = ""
             for l in lines:
+                if l.startswith(a + ":"):
+                    current = l.split()[1]
                 if l.find("Not installed") >= 0:
                     installed = False
-                    break
-            if not installed:
+
+            appdir = self.opt["caskroom"] + "/" + a
+            if not installed or not os.path.isdir(appdir + "/" + current):
                 self.info(a + " was installed by cask, but it may have newer"
                           " version, might be removed"
                           " or overwritten by direct installation.\n"
                           "Install it by cask.", 1)
                 if not self.opt["dryrun"]:
-                    if self.proc(["brew", "cask", "install", a],
+                    if self.proc(["brew", "cask", "install", "--force", a],
                                  exit_on_error=False)[0] != 0:
                         continue
 
-            lines = self.proc("brew cask info " + a, False, False)[1]
-            current = ""
-            for l in lines:
-                if l.startswith(self.opt["caskroom"]):
-                    current = l.split()[0]
-            if current == "":
-                continue
-            appdir = os.path.dirname(current)
             for d in os.listdir(appdir):
                 if d != current.split("/")[-1] and d != ".metadata" and \
                         d != ".DS_Store":
@@ -2607,6 +2603,10 @@ class BrewFile:
                         except:
                             if d != "":
                                 self.proc("sudo rm -rf " + appdir + "/" + d)
+
+        if self.opt["dryrun"]:
+            self.info("\nThis is dryrun.", 1)
+            self.info("Please use -C to execute commands.", 1)
 
     def make_pack_deps(self):
         """Make package dependencies"""

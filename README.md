@@ -7,4 +7,4 @@ Brew-file
 
 Brewfile manager for [Homebrew](http://brew.sh/) at OS X.
 
-See more details in [the Documentation](http://homebrew-file.readthedocs.io).
+See more details in [the documentation](http://homebrew-file.readthedocs.io).
