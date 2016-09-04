@@ -64,7 +64,7 @@ brew () {
       # Use brew-file directly for brew-file commands
       if ! echo " $(echo $(command brew commands\
           |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
-          |grep -q -- " $1 ";then
+          |grep -q -- " $1";then
         if echo " $(brew-file commands) "|grep -q -- " $1 ";then
           brew-file "$@"
           return $?
