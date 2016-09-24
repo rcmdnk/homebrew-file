@@ -143,6 +143,18 @@ class BrewHelper:
     def __init__(self, opt):
         self.opt = opt
 
+    @staticmethod
+    def readstdout(proc):
+      while True:
+        line = proc.stdout.readline()
+        code = proc.poll()
+        if line == '':
+          if code is not None:
+            break
+          else:
+            continue
+        yield line
+
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_error=True, separete_err_msg=False, verbose_level=1):
         """ Get process output."""
@@ -158,7 +170,7 @@ class BrewHelper:
         try:
             stderr = None if separete_err_msg else subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr)
-            for line in p.stdout:
+            for line in self.readstdout(p):
                 l = my_decode(line).rstrip()
                 lines.append(l)
                 if print_out:
