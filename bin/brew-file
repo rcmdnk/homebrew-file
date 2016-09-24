@@ -144,7 +144,7 @@ class BrewHelper:
         self.opt = opt
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separete_err_msg=False, verbose_level=1):
+             exit_on_error=True, separate_err_msg=False, verbose_level=1):
         """ Get process output."""
         import shlex
         import subprocess
@@ -156,7 +156,7 @@ class BrewHelper:
             self.info("$ " + " ".join(cmd), verbose_level)
         lines = []
         try:
-            stderr = None if separete_err_msg else subprocess.STDOUT
+            stderr = None if separate_err_msg else subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr)
             for line in p.stdout:
                 l = my_decode(line).rstrip()
@@ -830,10 +830,10 @@ class BrewFile:
         return v
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separete_err_msg=False, verbose_level=1):
+             exit_on_error=True, separate_err_msg=False, verbose_level=1):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_error=exit_on_error, separete_err_msg=separete_err_msg,
+            exit_on_error=exit_on_error, separate_err_msg=separate_err_msg,
             verbose_level=verbose_level)
 
     def info(self, text, verbose_level=2):
@@ -1503,7 +1503,7 @@ class BrewFile:
         ret = self.check_mas_cmd(True)
         if ret and ret != "MASNOTAVAILABLE":
             (ret, lines) = self.proc(self.opt["mas_cmd"] + " list",
-                                     False, False, separete_err_msg=True)
+                                     False, False, separate_err_msg=True)
             apps = sorted(lines, key=lambda x: x.split()[1:])
             if len(apps) > 0 and apps[0] == "No installed apps found":
                 apps = []
@@ -1534,7 +1534,7 @@ class BrewFile:
         if not self.check_cask_cmd(force):  # pragma: no cover
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False,
-                                 separete_err_msg=True)
+                                 separate_err_msg=True)
         if len(lines) > 0 and lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
