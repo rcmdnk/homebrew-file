@@ -143,17 +143,16 @@ class BrewHelper:
     def __init__(self, opt):
         self.opt = opt
 
-    @staticmethod
-    def readstdout(proc):
-      while True:
-        line = proc.stdout.readline()
-        code = proc.poll()
-        if line == '':
-          if code is not None:
-            break
-          else:
-            continue
-        yield line
+    def readstdout(self, proc):
+        while True:
+            line = proc.stdout.readline()
+            code = proc.poll()
+            if line == '':
+                if code is not None:
+                    break
+                else:
+                    continue
+            yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_error=True, separete_err_msg=False, verbose_level=1):
