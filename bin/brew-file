@@ -145,7 +145,7 @@ class BrewHelper:
 
     def readstdout(self, proc):
         while True:
-            line = proc.stdout.readline()
+            line = my_decode(proc.stdout.readline()).rstrip()
             code = proc.poll()
             if line == '':
                 if code is not None:
@@ -170,10 +170,9 @@ class BrewHelper:
             stderr = None if separate_err_msg else subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr)
             for line in self.readstdout(p):
-                l = my_decode(line).rstrip()
-                lines.append(l)
+                lines.append(line)
                 if print_out:
-                    self.info(l, verbose_level)
+                    self.info(line, verbose_level)
             ret = p.wait()
         except OSError as e:
             if print_out:
