@@ -32,7 +32,10 @@ before_install:
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
+  - sw_vers
+  - brew --version
   - brew update
+  - brew --version
 install:
   - testaccount=rcmdnk
   - testreponame=BrewfileTest_$PYTHON_VERSION
@@ -40,7 +43,6 @@ install:
   - testrepodir=${testaccount}_${testreponame}
   - testrepofulldir=$HOME/.brewfile/$testrepodir
   - testfile=$testrepofulldir/Brewfile
-  - sw_vers
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file $version
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
@@ -96,6 +98,7 @@ script:
   - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
   - coverage run --parallel-mode $exe init -y
+  - echo $(brew --repository)
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe install --no_appstore --preupdate -y -V 2
@@ -105,9 +108,9 @@ script:
   - coverage run --parallel-mode $exe brew help
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew info bash
-  - coverage run --parallel-mode $exe brew install wget --HEAD --with-iri
+    #  - coverage run --parallel-mode $exe brew install wget --HEAD --with-iri
   - coverage run --parallel-mode $exe init -y -V 0
-  - coverage run --parallel-mode $exe brew uninstall wget
+    #  - coverage run --parallel-mode $exe brew uninstall wget
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew install mytest2
@@ -190,7 +193,7 @@ script:
   - coverage run --parallel-mode $exe init -y -V 0
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ];then coverage run --parallel-mode $exe update -y -U -V 2; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ];then coverage run --parallel-mode $exe update -y; fi'
-  - coverage run --parallel-mode $exe brew rm wget
+    #  - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
