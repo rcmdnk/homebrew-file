@@ -65,15 +65,16 @@ script:
   - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
   - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
   # Check with old Python (expect 2.7.5)
+  - which python
   - python --version
-  # Install the latest version of Python
-  - rm -rf /usr/local/lib/python2.7/site-packages
-  - rm -rf /usr/local/bin/easy_install
-  - rm -rf /usr/local/bin/easy_install-2.7
-  - rm -rf /usr/local/bin/pip
-  - rm -rf /usr/local/bin/pip2
-  - rm -rf /usr/local/bin/pip2.7
-  - brew install $PYTHON_VERSION
+#  # Install the latest version of Python
+#  - rm -rf /usr/local/lib/python2.7/site-packages
+#  - rm -rf /usr/local/bin/easy_install
+#  - rm -rf /usr/local/bin/easy_install-2.7
+#  - rm -rf /usr/local/bin/pip
+#  - rm -rf /usr/local/bin/pip2
+#  - rm -rf /usr/local/bin/pip2.7
+  - brew install --force $PYTHON_VERSION
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python && ln -s /usr/local/bin/python3 /usr/local/bin/python || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip && ln -s /usr/local/bin/pip3 /usr/local/bin/pip || :'
   - brew uninstall --force mercurial
