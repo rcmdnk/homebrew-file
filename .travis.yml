@@ -1,9 +1,12 @@
 language: objective-c
-#language: python
-os: osx
+# os variable doesn't work, need to set objective-c to use OS X
+#os: osx
+# set osx_image to xcode8 to use OS X 10.11
+# [Building an Objective-C Project - Travis CI](https://docs.travis-ci.com/user/languages/objective-c/)
 osx_image: xcode8
 # Python version is not available for OSX
 # [Python runtime is not yet available on OS X · Issue #2312 · travis-ci/travis-ci](https://github.com/travis-ci/travis-ci/issues/2312)
+#language: python
 #python:
 #  - "2.7"
 #  - "3.5"
@@ -26,7 +29,7 @@ env:
     - PYTHON_VERSION="python3"
 before_install:
   #- 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   - brew update
@@ -47,7 +50,7 @@ install:
   - cp ../homebrew-file/BrewfileTest ./Brewfile
   - cp ../homebrew-file/BrewfileExt ./BrewfileExt
   - cp ../homebrew-file/BrewfileHome ~/BrewfileHome
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; git add -A && git commit -a -m "init" && git push -f || echo nothing to be done; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then git add -A && git commit -a -m "init" && git push -f || echo nothing to be done; fi'
   - cd ../homebrew-file
   - rm -rf ../$testrepo
 before_script:
@@ -184,8 +187,8 @@ script:
   - coverage run --parallel-mode $exe casklist -V 0
   - command brew rm tig
   - coverage run --parallel-mode $exe init -y -V 0
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; coverage run --parallel-mode $exe update -y -U -V 2; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; coverage run --parallel-mode $exe update -y; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ];then coverage run --parallel-mode $exe update -y -U -V 2; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ];then coverage run --parallel-mode $exe update -y; fi'
   - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
   - coverage run --parallel-mode $exe casklist -V 2
@@ -222,7 +225,7 @@ script:
   - 'coverage run --parallel-mode $exe install --no_appstore | :'
   # Push current Brewfile in homebrew-file to BrewfileTest
   - cp Brewfile $testfile
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; coverage run --parallel-mode $exe push -V 0; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ];then coverage run --parallel-mode $exe push -V 0; fi'
   # Test with brew-wrap
   - source $(brew --prefix)/etc/brew-wrap
   - type brew
