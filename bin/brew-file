@@ -1713,15 +1713,15 @@ class BrewFile:
                           ".")
                 else:
                     print(self.opt["input"] + " is already there.")
-
-                if self.opt["repo"] == "" and self.opt["backup"] != "":
-                    ans = self.ask_yn("Do you want to overwrite it?")
-                    if ans:
-                            os.rename(self.opt["input"], self.opt["backup"])
-                            self.info("Ok, old input file was moved to " +
-                                      self.opt["backup"], 1)
-                    else:  # pragma: no cover
-                        sys.exit(0)
+                    if self.opt["backup"] != "":
+                        os.rename(self.opt["input"], self.opt["backup"])
+                    else:
+                        ans = self.ask_yn("Do you want to overwrite it?")
+                        if ans:
+                                self.info("Ok, old input file was moved to " +
+                                          self.opt["backup"], 1)
+                        else:  # pragma: no cover
+                            sys.exit(0)
 
         # Get installed package list
         self.get_list()
