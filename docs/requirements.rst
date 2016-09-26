@@ -19,7 +19,7 @@ or python3.x::
 
 
 If you set your ``PYTHONPATH`` for python3,
-you may need to execute brew-file directly::
+you may need to execute ``brew-file`` directly::
 
     $ python3 /usr/local/bin/brew-file
 

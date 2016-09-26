@@ -1,7 +1,7 @@
 Usage
 =====
 
-Brew-file manages pakcages installed by Homebrew.
+Brew-file manages packages installed by Homebrew.
 It also supports `brew-cask <https://github.com/phinze/homebrew-cask>`_
 and other Homebrew subcommand installers.
 
@@ -10,7 +10,7 @@ You can reuse ``Brewfile`` for Brewdler, too.
 
 If you want to specify input file, use ``-f`` option.
 
-If you want to change default Brewfile, set environmental variable: ``HOMEBREW_BREWFILE``
+If you want to change default ``Brewfile``, set environmental variable: ``HOMEBREW_BREWFILE``
 in your setup file (e.g. **.bashrc**), like:
 
 .. code-block:: sh
@@ -25,15 +25,15 @@ You might want to add the following line to your **.bashrc** or **.zshenv**:
 
     export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom --appdir=$HOME/MyApplications"
 
-If there is no Brewfile, Brew-file will ask you if you want to initialize Brewfile
+If there is no ``Brewfile``, Brew-file will ask you if you want to initialize ``Brewfile``
 with installed packages or not.
 You can also make it with ``install`` (``-i``) subcommand.
 
-With ``install`` subcommand, Brew-file tries to install packages listed in Brewfile.
+With ``install`` subcommand, Brew-file tries to install packages listed in ``Brewfile``.
 If any packages managed with Homebrew Cask are listed, brew-cask is also installed automatically.
 
-Brewfile convention is similar as Brewdler.
-Normally, you don't need to modify anything on Brewdler's Brewfile for Brew-file
+``Brewfile`` convention is similar as Brewdler.
+Normally, you don't need to modify anything on Brewdler's ``Brewfile`` for Brew-file
 
 Example::
 
@@ -82,7 +82,7 @@ If the second column is ``install``, it will be ignored.
 
 i.e. ``brew install package`` is same as ``brew package``.
 
-If you want to build macvim with lua option, you can write as above example Brewfile.
+If you want to build macvim with lua option, you can write as above example ``Brewfile``.
 
 If you use ``tap``, Brew-file only does ``tap`` the repository.
 
@@ -90,12 +90,12 @@ If you use ``tapall``, Brew-file does ``brew install`` for all Formulae in the r
 in addition to do ``tap`` the repository.
 
 If you want to divide the list into several files.
-If the main Brewfile has ``file`` or ``brewfile`` commands,
+If the main ``Brewfile`` has ``file`` or ``brewfile`` commands,
 then corresponding argument is used as an external file.
 The path can be an absolute or a relative.
-If you use a relative path, like ./Brewfile2,
+If you use a relative path, like .``/Brewfile2``,
 then the start directory is the directory
-where the main Brewfile is.
+where the main ``Brewfile`` is.
 
 You can use a nest of ``file``, too.
 The relative path starts from the parent file's directory.
@@ -109,7 +109,7 @@ If you have::
 
     file ./${HOST}.Brewfile
 
-in main Brewfile, and prepare files like::
+in main ``Brewfile``, and prepare files like::
 
     Brewfile Host1.Brewfile Host2.Brewfile Host3.Brewfile
 
@@ -138,15 +138,15 @@ With ``clean`` option, Brew-file runs cleanup.
 By default, it just does dry run (no actual cleanup).
 To run cleanup in non dry-run mode, use ``-C``.
 
-If you want edit Brewfile, use ``edit`` option.
+If you want edit ``Brewfile``, use ``edit`` option.
 
 .. warning::
 
-   If you do ``brew file edit`` before installing Brewfile and save w/o any modification,
-   you may make empty Brewfile (Be careful, ``brew -c -C`` remove all packages :scream:).
-   Therefore I recommend you to do ``brew file -i`` at first if you don't have Brewfile.
+   If you do ``brew file edit`` before installing ``Brewfile`` and save w/o any modification,
+   you may make empty ``Brewfile`` (Be careful, ``brew -c -C`` remove all packages :scream:).
+   Therefore I recommend you to do ``brew file -i`` at first if you don't have ``Brewfile``.
 
-You can maintain your Brewfile at the git repository.
+You can maintain your ``Brewfile`` at the git repository.
 First, make new repository at GitHub (or other git server).
 
 Then, set the repository by::
@@ -154,34 +154,34 @@ Then, set the repository by::
     $ brew file set_repo -r <repository>
 
 It will clone the repository.
-If the repository has a file named "Brewfile", the file will be used instead of
+If the repository has a file named ``Brewfile``, the file will be used instead of
 ``~/.brewfile/Brewfile``.
 (then ``~/.brewfile/Brewfile`` will have this repository informatoin.)
 
 ``repository`` should be like `rcmdnk/Brewfile <https://github.com/rcmdnk/Brewfile>`_ in GitHub,
-which should have "Brewfile" (different file name can be used by ``-f``).
+which should have ``Brewfile`` (different file name can be used by ``-f``).
 
 If you want to use other hosts than github, use full path for the repository, like::
 
     $ brew file set_repo -r git@bitbucket.org:rcmdnk/my_brewfile
 
-If the repository doesn't have "Brewfile"(or specified by ``-f``, ``brew file init`` initialize the file.
+If the repository doesn't have ``Brewfile`` (or specified by ``-f``, ``brew file init`` initialize the file.
 Then, you can push it by ``brew file push``.
 
 With this procedure, you can synchronize all your Mac easily :thumbsup:
 
 To install new package, use::
 
-    $ brew file brew intall <package>
+    $ brew file brew install <package>
 
 instead of ``brew install <package>``, because above command
-automatically update Brewfile.
+automatically update ``Brewfile``.
 
-This is useful especially if you are using the repository for the Brewfile,
+This is useful especially if you are using the repository for the ``Brewfile``,
 and want to use ``brew file update``.
 
 Otherwise, please be careful to use ``brew file update``,
-because it deletes what you installed, but you have not registered in Brewfile.
+because it deletes what you installed, but you have not registered in ``Brewfile``.
 
 If you want to check your Apps for Cask, use::
 
@@ -235,5 +235,4 @@ This command makes ``Caskfile.txt``, which is like::
 You can find applications which were installed manually,
 but can be managed by Cask under "Apps not installed by Cask, but installed in...".
 
-If you want to manage them with Brewfile, just copy above lines w/o "#" for these Apps.
-
+If you want to manage them with ``Brewfile``, just copy above lines w/o "#" for these Apps.
