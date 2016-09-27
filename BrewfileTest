@@ -17,7 +17,7 @@ pip gcalcli
 
 ## gem
 #install brew-gem
-gem heroku
+#gem heroku
 
 # App Store applications
 appstore Keynote
