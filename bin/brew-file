@@ -715,7 +715,7 @@ class BrewFile:
         self.opt["command"] = ""
         self.opt["brew_repo"] =\
             self.proc(
-                "brew --repository", False, False, True, 0)[1][0]
+                "brew --prefix", False, False, True, 0)[1][0]
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
