@@ -1545,6 +1545,7 @@ class BrewFile:
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False,
                                  separate_err_msg=True)
+        print(lines)
         if len(lines) > 0 and lines[0].find("Warning: nothing to list") != -1:
             lines = []
         return (True, lines)
