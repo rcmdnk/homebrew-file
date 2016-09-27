@@ -62,10 +62,6 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
-  - echo $(brew --repository)
-  - ls $(brew --repository)
-  - ls $(brew --repository)/Caskroom
-  - ls /opt/homebrew-cask/Caskroom
   # Check differences between checked out's version and brew installed version
   - '[ "$version" != "" ] && diff $installed_brew $exe || :'
   - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
@@ -102,6 +98,10 @@ script:
   - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
   - coverage run --parallel-mode $exe init -y
+  - echo $(brew --repository)
+  - ls $(brew --repository)
+  - ls $(brew --repository)/Caskroom
+  - ls /opt/homebrew-cask/Caskroom
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - coverage run --parallel-mode $exe test -V 2
   - coverage run --parallel-mode $exe install --no_appstore --preupdate -y -V 2

@@ -1545,9 +1545,11 @@ class BrewFile:
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False,
                                  separate_err_msg=True)
-        print(lines)
-        if len(lines) > 0 and lines[0].find("Warning: nothing to list") != -1:
-            lines = []
+        packages = []
+        for l in lines:
+            if "Warning: nothing to list" in l or "==>" in l or "->" in l:
+                continue
+            packages.append(l)
         return (True, lines)
 
     def get_list(self):
