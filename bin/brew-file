@@ -1547,12 +1547,10 @@ class BrewFile:
                                  separate_err_msg=True)
         packages = []
         for l in lines:
-            print(l)
             if "Warning: nothing to list" in l or "=>" in l or "->" in l:
-                print('skip')
                 continue
             packages.append(l)
-        return (True, lines)
+        return (True, packages)
 
     def get_list(self):
         """Get List"""
