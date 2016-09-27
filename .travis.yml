@@ -62,6 +62,10 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
+  - echo $(brew --repository)
+  - ls $(brew --repository)
+  - ls $(brew --repository)/Caskroom
+  - ls /opt/homebrew-cask/Caskroom
   # Check differences between checked out's version and brew installed version
   - '[ "$version" != "" ] && diff $installed_brew $exe || :'
   - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
