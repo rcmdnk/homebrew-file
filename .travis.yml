@@ -33,9 +33,9 @@ before_install:
   - version=""
   - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   - sw_vers
-  - brew version
+  - brew --version
   - brew update
-  - brew version
+  - brew --version
 install:
   - testaccount=rcmdnk
   - testreponame=BrewfileTest_$PYTHON_VERSION
