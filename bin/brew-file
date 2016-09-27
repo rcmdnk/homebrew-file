@@ -715,6 +715,9 @@ class BrewFile:
         self.opt["command"] = ""
         self.opt["brew_repo"] =\
             self.proc(
+                "brew --repository", False, False, True, 0)[1][0]
+        self.opt["brew_prefix"] =\
+            self.proc(
                 "brew --prefix", False, False, True, 0)[1][0]
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
                                            os.environ["HOME"] +
@@ -773,11 +776,11 @@ class BrewFile:
         if cask_opts["--caskroom"] != "":
             self.opt["caskroom"] = cask_opts["--caskroom"]
         else:
-            if not os.path.isdir(self.opt["brew_repo"] + "/Caskroom") and\
+            if not os.path.isdir(self.opt["brew_prefix"] + "/Caskroom") and\
                     os.path.isdir("/opt/homebrew-cask/Caskroom"):
                 self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
             else:
-                self.opt["caskroom"] = self.opt["brew_repo"] + "/Caskroom"
+                self.opt["caskroom"] = self.opt["brew_prefix"] + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
