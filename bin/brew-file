@@ -1996,6 +1996,7 @@ class BrewFile:
 
         # Tap
         for p in self.get("tap_input"):
+            print("tap_input: " + p)
             if p in self.get("tap_list") or p == "direct":
                 continue
             self.proc("brew tap " + p)
