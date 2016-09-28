@@ -22,7 +22,6 @@ env:
     - PAGER=cat
     - EDITOR=cat # for brew-file edit test
     - VISUAL=cat
-    - HOMEBREW_NO_AUTO_UPDATE=1
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
   matrix:
