@@ -1599,8 +1599,10 @@ class BrewFile:
                     self.brewinfo.gem_list_opt[package] = ""
 
         # Taps
+        #(ret, lines) = self.proc(
+        #    "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", False, False)
         (ret, lines) = self.proc(
-            "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", False, False)
+            "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", True, True)
         self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
 
