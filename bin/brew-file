@@ -1599,10 +1599,16 @@ class BrewFile:
                     self.brewinfo.gem_list_opt[package] = ""
 
         # Taps
-        #(ret, lines) = self.proc(
-        #    "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", False, False)
         (ret, lines) = self.proc(
-            "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", True, True)
+            "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", False, False)
+
+        # remove additional lines by preupdate at brew tap
+        i = 0
+        for j in xrange(len(lines)):
+            if lines[j] == "":
+                i = j
+        lines = lines[i:]
+
         self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
 
@@ -2329,7 +2335,7 @@ class BrewFile:
                         name = name_cands[0]
                         tap = tap_cands[0]
                     elif len(name_cands) > 0:
-                        for i in range(len(tap_cands)):
+                        for i in xrange(len(tap_cands)):
                             (check, tap, opt) =\
                                 self.find_brew_app(name_cands[i], tap_cands[i])
                             if check == "brew":
@@ -2337,7 +2343,7 @@ class BrewFile:
                                 break
                     if name == "":
                         if len(tap_cands) > 0:
-                            for i in range(len(tap_cands)):
+                            for i in xrange(len(tap_cands)):
                                 apps[tap_cands[i]][installed].append(
                                     (name_cands[i], d + "/" + app, check))
                         else:
@@ -2652,7 +2658,7 @@ class BrewFile:
             def print_dep(p, depth=0):
                 if depth != 0:
                     print("#", end="")
-                    for i in range(depth-2):
+                    for i in xrange(depth-2):
                         print(" ", end="")
                 print(p)
                 for deps in self.pack_deps[p]:
