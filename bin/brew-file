@@ -1996,58 +1996,65 @@ class BrewFile:
 
         # Tap
         for p in self.get("tap_input"):
-            if p not in self.get("tap_list") and p != "direct":
-                self.proc("brew tap " + p)
+            if p in self.get("tap_list") or p == "direct":
+                continue
+            self.proc("brew tap " + p)
 
         # Cask
         for p in self.get("cask_input"):
-            if p not in self.get("cask_list"):
-                self.check_cask_cmd(True)
-                self.proc("brew cask install " + p)
+            if p in self.get("cask_list"):
+                continue
+            self.check_cask_cmd(True)
+            self.proc("brew cask install " + p)
 
         if not self.opt["caskonly"]:
             # pip
             for p in self.get("pip_input"):
-                if p not in self.get("pip_list"):
-                    self.check_pip_cmd(True)
-                    self.proc("brew pip " + p + self.get("pip_input_opt")[p])
+                if p in self.get("pip_list"):
+                    continue
+                self.check_pip_cmd(True)
+                self.proc("brew pip " + p + self.get("pip_input_opt")[p])
 
             # gem
             for p in self.get("gem_input"):
-                if p not in self.get("gem_list"):
-                    self.check_gem_cmd(True)
-                    self.proc("brew gem install " + p +
-                              self.get("gem_input_opt")[p])
+                if p in self.get("gem_list"):
+                    continue
+                self.check_gem_cmd(True)
+                self.proc("brew gem install " + p +
+                          self.get("gem_input_opt")[p])
 
             # Brew
             for p in self.get("brew_input"):
-                if p not in self.get("brew_list"):
-                    (ret, lines) = self.proc("brew install " + p +
-                                             self.get("brew_input_opt")[p])
-                    if ret != 0:
-                        self.warning("Can not install " + p + "."
-                                     "Please check the package name.\n"
-                                     "" + p + " may be installed "
-                                     "by using web direct formula.", 0)
-                        continue
-                    for l in lines:
-                        if l.find("ln -s") >= 0:
-                            if self.opt["link"]:
-                                cmdtmp = l.split()
-                                cmd = []
-                                for c in cmdtmp:
-                                    if c.startswith("~/"):
-                                        cmd.append(os.path.expanduser(c))
-                                    else:
-                                        cmd.append(c)
-                                self.proc(cmd)
-                        if l.find("brew linkapps") >= 0:
-                            if self.opt["link"]:
-                                self.proc("brew linkapps")
+                if p in self.get("brew_list"):
+                    continue
+                (ret, lines) = self.proc("brew install " + p +
+                                         self.get("brew_input_opt")[p])
+                if ret != 0:
+                    self.warning("Can not install " + p + "."
+                                 "Please check the package name.\n"
+                                 "" + p + " may be installed "
+                                 "by using web direct formula.", 0)
+                    continue
+                for l in lines:
+                    if l.find("ln -s") >= 0:
+                        if self.opt["link"]:
+                            cmdtmp = l.split()
+                            cmd = []
+                            for c in cmdtmp:
+                                if c.startswith("~/"):
+                                    cmd.append(os.path.expanduser(c))
+                                else:
+                                    cmd.append(c)
+                            self.proc(cmd)
+                    if l.find("brew linkapps") >= 0:
+                        if self.opt["link"]:
+                            self.proc("brew linkapps")
 
         # App Store
         if self.opt["appstore"]:
             for p in self.get("appstore_input"):
+                if p in self.get("appstore_list"):
+                    continue
                 identifier = p.split()[0]
                 if identifier.isdigit() and len(identifier) == 9:
                     package = " ".join(p.split()[1:])
