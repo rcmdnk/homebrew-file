@@ -1599,8 +1599,7 @@ class BrewFile:
                     self.brewinfo.gem_list_opt[package] = ""
 
         # Taps
-        (ret, lines) = self.proc(
-            "HOMEBREW_NO_AUTO_UPDATE=1 brew tap", False, False)
+        (ret, lines) = self.proc("brew tap", False, False)
 
         # remove additional lines by preupdate at brew tap
         i = 0
