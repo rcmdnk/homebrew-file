@@ -47,7 +47,7 @@ install:
   - brew install rcmdnk/file/brew-file $version
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - cd ../
-  - git clone git@github.com:$testrepo
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then git clone git@github.com:$testrepo;else git clone https://github.com/$testrepo; fi'
   - cd $testreponame
   - cp ../homebrew-file/BrewfileTest ./Brewfile
   - cp ../homebrew-file/BrewfileExt ./BrewfileExt
