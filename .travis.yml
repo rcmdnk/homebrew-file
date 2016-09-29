@@ -76,6 +76,7 @@ script:
 #  - rm -rf /usr/local/bin/pip
 #  - rm -rf /usr/local/bin/pip2
 #  - rm -rf /usr/local/bin/pip2.7
+  - 'brew rm $PYTHON_VERSION || :'
   - brew install --force $PYTHON_VERSION
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python && ln -s /usr/local/bin/python3 /usr/local/bin/python || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip && ln -s /usr/local/bin/pip3 /usr/local/bin/pip || :'
