@@ -1599,7 +1599,7 @@ class BrewFile:
                     self.brewinfo.gem_list_opt[package] = ""
 
         # Taps
-        (ret, lines) = self.proc("brew tap", False, False)
+        (ret, lines) = self.proc("brew tap", True, True)
         print(lines)
 
         # remove additional lines by preupdate at brew tap
