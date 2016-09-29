@@ -70,7 +70,7 @@ script:
   - which python
   - python --version
   # Install the latest version of Python
-  - 'brew rm $PYTHON_VERSION || :'
+  - 'brew rm python || :'
   - rm -rf /usr/local/lib/python2.7/site-packages
   - rm -rf /usr/local/bin/easy_install
   - rm -rf /usr/local/bin/easy_install-2.7
@@ -98,6 +98,7 @@ script:
   - coverage run --parallel-mode $exe brew list >/dev/null
   - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
+  - brew list
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe cat
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
