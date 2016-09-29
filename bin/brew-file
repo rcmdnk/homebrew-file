@@ -1607,7 +1607,7 @@ class BrewFile:
             print("remove auto updated part")
             i = 0
             for j in range(len(lines)):
-                if lines[j] == "":
+                if lines[j] == "" or "No changes to formulae." in lines[j]:
                     i = j + 1
             if i == 0:
                 lines = []
