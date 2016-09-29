@@ -200,7 +200,8 @@ script:
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
-  - coverage run --parallel-mode $exe casklist -V 0
+  - coverage run --parallel-mode $exe casklist -V 2
+  - coverage run --parallel-mode $exe brew tap rcmdnk/rcmdnkcask
   # brewdler format tests
   - coverage run --parallel-mode $exe init -F brewdler -y -V 2
   - coverage run --parallel-mode $exe install --no_appstore -F brewdler
@@ -222,7 +223,7 @@ script:
   - coverage run --parallel-mode $exe brew cask list
   - $exe get_files
   - cat $($exe get_files)
-  - coverage run --parallel-mode $exe clean -C
+  - coverage run --parallel-mode $exe clean -C -V 2
   - coverage run --parallel-mode $exe init -y -V 2
   - coverage run --parallel-mode $exe brew cask install firefox
   - coverage run --parallel-mode $exe clean -C
