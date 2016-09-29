@@ -1600,9 +1600,11 @@ class BrewFile:
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False)
+        print(lines)
 
         # remove additional lines by preupdate at brew tap
         if len(lines) > 0 and "Auto-updated Homebrew!" in lines[0]:
+            print("remove auto updated part")
             i = 0
             for j in range(len(lines)):
                 if lines[j] == "":
@@ -1611,6 +1613,7 @@ class BrewFile:
                 lines = []
             else:
                 lines = lines[i:]
+        print(lines)
 
         self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
