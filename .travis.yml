@@ -173,7 +173,7 @@ script:
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2; fi'
   - rm -rf $brewfile $testrepofulldir
   - coverage run --parallel-mode $exe set_repo -r https://github.com/$testrepo -y -V 2
-  - rm -rf $brewfile $testrepofulldir
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then rm -rf $brewfile $testrepofulldir; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe init -r $testrepo -y -V 2; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then rm -rf $brewfile $testrepofulldir; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2; fi'

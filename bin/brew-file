@@ -45,6 +45,19 @@ def my_decode(word):
         return word.decode()
 
 
+def my_input(word):
+    """Input method compatibility."""
+
+    global is_python3
+    if is_python3 == -1:
+        try:
+            input = raw_input
+            is_python3 = 0
+        except:
+            is_python3 = 1
+    return input(word)
+
+
 def open_output_file(name, mode="w"):
     """Helper function to open a file even if it doesn't exist."""
     if os.path.dirname(name) != "" and \
