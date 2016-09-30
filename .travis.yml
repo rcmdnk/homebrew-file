@@ -28,10 +28,7 @@ env:
     - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
 before_install:
-  #- 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in .travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
-  - version=""
-  - 'if [ $TRAVIS_BRANCH = master ];then version="--HEAD";elif [ $TRAVIS_BRANCH = bash ];then version="--bash";fi'
   - sw_vers
   - brew --version
   - brew update
@@ -44,7 +41,7 @@ install:
   - testrepofulldir=$HOME/.brewfile/$testrepodir
   - testfile=$testrepofulldir/Brewfile
   - brew list > brewlist.orig
-  - brew install rcmdnk/file/brew-file $version
+  - brew install rcmdnk/file/brew-file
   - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - cd ../
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then git clone git@github.com:$testrepo;else git clone https://github.com/$testrepo; fi'
@@ -62,10 +59,6 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
-  # Check differences between checked out's version and brew installed version
-  - '[ "$version" != "" ] && diff $installed_brew $exe || :'
-  - '[ "$version" != "" ] && brew file help | ( $exe help | diff /dev/fd/3 -) 3<&0 || :'
-  - '[ "$version" != "" ] && brew file version | ( $exe version | diff /dev/fd/3 -) 3<&0 || :'
   # Check with old Python (expect 2.7.5)
   - which python
   - python --version
@@ -177,14 +170,14 @@ script:
   # Use test repository
   - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
   - rm -rf $brewfile $testrepofulldir
-  - coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2; fi'
   - rm -rf $brewfile $testrepofulldir
   - coverage run --parallel-mode $exe set_repo -r https://github.com/$testrepo -y -V 2
   - rm -rf $brewfile $testrepofulldir
-  - coverage run --parallel-mode $exe init -r $testrepo -y -V 2
-  - rm -rf $brewfile $testrepofulldir
-  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
-  - coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe init -r $testrepo -y -V 2; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then rm -rf $brewfile $testrepofulldir; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r $testrepo -y -V 2; fi'
   - coverage run --parallel-mode $exe get_files
   - coverage run --parallel-mode $exe edit
   - cp $testfile .
@@ -213,7 +206,7 @@ script:
   - coverage run --parallel-mode $exe init -F command -y -V 2
   - coverage run --parallel-mode $exe install --no_appstore -F command
   # Clean up tests
-  - echo "brew brew-file $version" > $testfile
+  - echo "brew brew-file" > $testfile
   - '[ "$PYTHON_VERSION" != "python3" ] && echo brew python >> $testfile || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && echo brew python3 >> $testfile || :'
   - echo "file BrewfileExt" >> $testfile
