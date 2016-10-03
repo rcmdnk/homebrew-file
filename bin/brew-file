@@ -1371,17 +1371,9 @@ class BrewFile:
         """Check cask is installed or not"""
         if self.opt["is_cask_cmd"]:
             return True
-        if self.proc("brew cask", False, False, False)[0] == 0:
+        if os.path.isdir(self.brewinfo.get_tap_path(self.opt["cask_repo"])):
             self.opt["is_cask_cmd"] = True
             return True
-        self.info(self.opt["cask_repo"] + " has not been installed.")
-        if not force:
-            ans = self.ask_yn("Do you want to install %s?" %
-                              self.opt["cask_repo"])
-            if not ans:  # pragma: no cover
-                self.warning("If you need it, please do:")
-                self.warning("    $ brew tap %s" % (self.opt["cask_repo"]))
-                return self.opt["is_cask_cmd"]
         ret = self.proc(["brew", "tap", self.opt["cask_repo"]],
                         True, True, False)[0]
         if ret != 0:  # pragma: no cover
