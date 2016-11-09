@@ -25,6 +25,12 @@ You might want to add the following line to your **.bashrc** or **.zshenv**:
 
     export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom --appdir=$HOME/MyApplications"
 
+Similarly, you can specify the environment for brew-gem.  The following will tell brew-gem to use the Ruby installed by Homebrew itself:
+
+.. code-block:: sh
+
+    export HOMEBREW_GEM_OPTS="--homebrew-ruby"
+
 If there is no ``Brewfile``, Brew-file will ask you if you want to initialize ``Brewfile``
 with installed packages or not.
 You can also make it with ``install`` (``-i``) subcommand.

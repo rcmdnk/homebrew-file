@@ -771,20 +771,10 @@ class BrewFile:
         self.opt["args"] = []
         self.opt["yn"] = False
         self.opt["brew_packages"] = ""
+        self.opt["homebrew_ruby"] = False
 
-        cask_opts = {"--caskroom": "", "--appdir": ""}
-        env_cask_opts = os.environ.get("HOMEBREW_CASK_OPTS", "")
-        try:
-            if env_cask_opts != "":
-                for o in env_cask_opts.split():
-                    oo = o.split("=")
-                    if len(oo) == 1:
-                        oo.append("")
-                    cask_opts.update({oo[0]: oo[1]})
-        except ValueError:
-            self.warning("HOMEBREW_CASK_OPTS: " + env_cask_opts +
-                         " is not a proper format.", 0)
-            self.warning("Ignore the value.\n", 0)
+        cask_opts = self.parse_env_opts("HOMEBREW_CASK_OPTS",
+            {"--caskroom": "", "--appdir": ""})
 
         if cask_opts["--caskroom"] != "":
             self.opt["caskroom"] = cask_opts["--caskroom"]
@@ -809,6 +799,10 @@ class BrewFile:
         self.opt["appstore"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", True))
 
+        gem_opts = self.parse_env_opts("HOMEBREW_GEM_OPTS")
+        if "--homebrew-ruby" in gem_opts:
+            self.opt["homebrew_ruby"] = True
+
         self.int_opts = ["verbose"]
         self.float_opts = []
 
@@ -817,6 +811,33 @@ class BrewFile:
 
         self.pack_deps = {}
         self.top_packs = []
+
+    def parse_env_opts(self, env_var, base_opts=None):
+        """Returns a dictionary parsed from an environment variable"""
+
+        if base_opts is not None:
+            opts = base_opts.copy()
+        else:
+            opts = {}
+
+        env_var = env_var.upper()
+        env_opts = os.environ.get(env_var, None)
+        if env_opts:
+
+            # these can be flags ("--flag") or values ("--key=value")
+            # but not weirdness ("--foo=bar=baz")
+            user_opts = {key.lower(): value for (key, value) in
+                [pair.partition("=")[::2] for pair in env_opts.split() if
+                    pair.count("=") < 2]}
+
+            if user_opts:
+                opts.update(user_opts)
+            else:
+                self.warning("%s: \"%s\" is not a proper format." % (env_var,
+                    env_opts), 0)
+                self.warning("Ignoring the value.\n", 0)
+
+        return opts
 
     def set_args(self, **kw):
         """Set arguments."""
@@ -1174,6 +1195,8 @@ class BrewFile:
             self.check_pip_cmd(True)
         elif self.opt["args"][0] == "gem":
             self.check_gem_cmd(True)
+            if self.opt["homebrew_ruby"] and not "--homebrew-ruby" in self.opt["args"]:
+                self.opt["args"].append("--homebrew-ruby")
 
         (ret, lines) = self.proc(["brew"] + self.opt["args"],
                                  True, True, False)

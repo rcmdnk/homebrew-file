@@ -14,3 +14,4 @@ Following environmental variables can be used.
    HOMEBREW_BREWFILE_VERBOSE      | Set verbose level. | 1
    HOMEBREW_BREWFILE_APPSTORE     | Set 0 you don't want to list up AppStore applications Brewfile. | 1
    HOMEBREW_CASK_OPTS             | This is `Cask's option <https://github.com/caskroom/homebrew-cask/blob/master/USAGE.md>`_ to set cask environment. If caskroom or appdir is set with these options, Brew-file uses these values in it. | \"\"
+   HOMEBREW_GEM_OPTS              | This is `brew-gem's option <https://github.com/sportngin/brew-gem/blob/master/README.md>`_ to set Ruby environment. | \"\"
