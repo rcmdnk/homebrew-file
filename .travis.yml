@@ -108,7 +108,7 @@ script:
   - coverage run --parallel-mode $exe brew noinit list
   - coverage run --parallel-mode $exe brew info bash
     #  - coverage run --parallel-mode $exe brew install wget --HEAD --with-iri
-  - coverage run --parallel-mode $exe init -y -V 0
+  - coverage run --parallel-mode $exe -i -y -V 0
     #  - coverage run --parallel-mode $exe brew uninstall wget
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest

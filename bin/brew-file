@@ -2694,6 +2694,8 @@ class BrewFile:
                     print_dep(p)
 
     def my_test(self):
+        self.make_pack_deps()
+
         out = Tee("test")
         out.write("test\n")
         out.close()
@@ -2717,8 +2719,6 @@ class BrewFile:
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")
         self.brewinfo.get_tap("/aaa/bbb")
-
-        self.make_pack_deps()
 
     def execute(self):
         """Main execute function"""
@@ -3062,8 +3062,9 @@ def main():
         args = sys.argv[1:]
         if len([x for x in args if x.startswith("-")]) > 0:
             v = sys.version_info
-            if v.major == 2 and\
-               (v.minor < 7 or (v.minor == 7 and v.micro < 7)):
+            if v.major == 2 and (
+                    v.minor < 7 or(
+                        v.minor == 7 and v.micro < 7)):  # pragma: no cover
                 print("`brew-file brew ...` with option is available "
                       "only with Python 2.7.7 or later.\n"
                       "(Such Yosemite's default is 2.7.6.)\n"
