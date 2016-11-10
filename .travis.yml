@@ -189,7 +189,7 @@ script:
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
   - coverage run --parallel-mode $exe --no_appstore install -V 2
   - coverage run --parallel-mode $exe casklist -V 0
-  - command brew rm tig
+  - command brew rm cmake
   - coverage run --parallel-mode $exe init -y -V 0
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y -U -V 2; fi'

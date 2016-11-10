@@ -3,7 +3,7 @@ before echo EXT before
 
 # brew install with opt
 #brew wget --HEAD --with-iri --with-debug
-brew install tig --with-docs
+brew install cmake --without-docs
 
 ## After commands
 after echo EXT after
