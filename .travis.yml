@@ -131,6 +131,7 @@ script:
   - command brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - coverage run --parallel-mode $exe brew install brew-pip
+  - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew uninstall pip-pep8
   - coverage run --parallel-mode $exe brew pip -u django==1.2
@@ -196,6 +197,7 @@ script:
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y; fi'
     #  - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
+  - command brew install macvim
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask

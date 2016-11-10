@@ -29,7 +29,7 @@ __status__ = "Prototype"
 is_python3 = -1
 
 
-def my_decode(word):
+def my_decode(word):  # pragma: no cover
     """Decode when python3 is used."""
 
     global is_python3
@@ -45,7 +45,7 @@ def my_decode(word):
         return word.decode()
 
 
-def my_input(word):
+def my_input(word):  # pragma: no cover
     """Input method compatibility."""
 
     global is_python3
@@ -778,8 +778,8 @@ class BrewFile:
         self.opt["brew_packages"] = ""
         self.opt["homebrew_ruby"] = False
 
-        cask_opts = self.parse_env_opts("HOMEBREW_CASK_OPTS",
-            {"--caskroom": "", "--appdir": ""})
+        cask_opts = self.parse_env_opts(
+            "HOMEBREW_CASK_OPTS", {"--caskroom": "", "--appdir": ""})
 
         if cask_opts["--caskroom"] != "":
             self.opt["caskroom"] = cask_opts["--caskroom"]
@@ -832,14 +832,14 @@ class BrewFile:
             # these can be flags ("--flag") or values ("--key=value")
             # but not weirdness ("--foo=bar=baz")
             user_opts = {key.lower(): value for (key, value) in
-                [pair.partition("=")[::2] for pair in env_opts.split() if
-                    pair.count("=") < 2]}
+                         [pair.partition("=")[::2] for pair in env_opts.split()
+                          if pair.count("=") < 2]}
 
             if user_opts:
                 opts.update(user_opts)
             else:
-                self.warning("%s: \"%s\" is not a proper format." % (env_var,
-                    env_opts), 0)
+                self.warning("%s: \"%s\" is not a proper format." %
+                             (env_var, env_opts), 0)
                 self.warning("Ignoring the value.\n", 0)
 
         return opts
@@ -919,16 +919,16 @@ class BrewFile:
             if p not in self.get("brew_input"):
                 self.brewinfo.brew_input.append(p)
                 self.brewinfo.brew_input_opt[p] = ""
-        if self.opt["reattach_cmd_installed"]:
+        if self.opt["reattach_cmd_installed"]:  # pragma: no cover
             p = os.path.basename(self.opt["reattach_formula"])
             if p not in self.get("brew_input"):
                 self.brewinfo.brew_input.append(p)
                 self.brewinfo.brew_input_opt[p] = ""
-        if self.opt["pip_cmd_installed"]:
+        if self.opt["pip_cmd_installed"]:  # pragma: no cover
             if not self.opt["pip_pack"] in self.get("brew_input"):
                 self.brewinfo.brew_input.append(self.opt["pip_pack"])
                 self.brewinfo.brew_input_opt[self.opt["pip_pack"]] = ""
-        if self.opt["gem_cmd_installed"]:
+        if self.opt["gem_cmd_installed"]:  # pragma: no cover
             if not self.opt["gem_pack"] in self.get("brew_input"):
                 self.brewinfo.brew_input.append(self.opt["gem_pack"])
                 self.brewinfo.brew_input_opt[self.opt["gem_pack"]] = ""
@@ -974,7 +974,7 @@ class BrewFile:
     def remove_pack(self, name, package):
         if package in self.brewinfo.get(name):
             self.brewinfo.remove(name, package)
-        else:
+        else:  # pragma: no cover
             for b in self.brewinfo_ext:
                 if package in b.get(name):
                     b.remove(name, package)
@@ -1195,16 +1195,22 @@ class BrewFile:
                 noinit = True
                 self.opt["args"].pop(0)
 
+        cmd = "brew"
         if self.opt["args"][0] == "cask":
             self.check_cask_cmd(True)
         elif self.opt["args"][0] == "pip":
             self.check_pip_cmd(True)
+            cmd = "brew-pip"
+            self.opt["args"].pop(0)
         elif self.opt["args"][0] == "gem":
+            cmd = "brew-gem"
+            self.opt["args"].pop(0)
             self.check_gem_cmd(True)
-            if self.opt["homebrew_ruby"] and not "--homebrew-ruby" in self.opt["args"]:
+            if self.opt["homebrew_ruby"] and\
+                    "--homebrew-ruby" not in self.opt["args"]:
                 self.opt["args"].append("--homebrew-ruby")
 
-        (ret, lines) = self.proc(["brew"] + self.opt["args"],
+        (ret, lines) = self.proc([cmd] + self.opt["args"],
                                  True, True, False)
         if ret != 0 or noinit or len(self.opt["args"]) < 2 or\
                 (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
@@ -2086,7 +2092,7 @@ class BrewFile:
                             self.proc("brew linkapps")
 
         # App Store
-        if self.opt["appstore"]:
+        if self.opt["appstore"]:  # pragma: no cover
             for p in self.get("appstore_input"):
                 if p in self.get("appstore_list"):
                     continue
@@ -2221,7 +2227,7 @@ class BrewFile:
 
         # First, get App Store applications
         appstore_list = {}
-        for p in self.get_appstore_list():
+        for p in self.get_appstore_list():  # pragma: no cover
             identifier = p.split()[0]
             if identifier.isdigit() and len(identifier) == 9:
                 package = " ".join(p.split()[1:])
@@ -2637,7 +2643,7 @@ class BrewFile:
             for l in lines:
                 if l.startswith(a + ":"):
                     current = l.split()[1]
-                if l.find("Not installed") >= 0:
+                if l.find("Not installed") >= 0:  # pragma: no cover
                     installed = False
 
             appdir = self.opt["caskroom"] + "/" + a
@@ -2647,8 +2653,9 @@ class BrewFile:
                           " or overwritten by direct installation.\n"
                           "Install it by cask.", 1)
                 if not self.opt["dryrun"]:
-                    if self.proc(["brew", "cask", "install", "--force", a],
-                                 exit_on_error=False)[0] != 0:
+                    if self.proc(
+                            ["brew", "cask", "install", "--force", a],
+                            exit_on_error=False)[0] != 0:  # pragma: no cover
                         continue
 
             for d in os.listdir(appdir):
@@ -2658,7 +2665,7 @@ class BrewFile:
                     if not self.opt["dryrun"]:
                         try:
                             self.remove(appdir + "/" + d)
-                        except:
+                        except:  # pragma: no cover
                             if d != "":
                                 self.proc("sudo rm -rf " + appdir + "/" + d)
 
@@ -2843,8 +2850,6 @@ def main():
                        dest="command", const="commands")
     group.add_argument("-v", "--version", action="store_const",
                        dest="command", const="version")
-    group.add_argument("-h", "--help", action="store_const",
-                       dest="command", const="help")
 
     # Parent parser
     file_parser = argparse.ArgumentParser(add_help=False)
@@ -2950,6 +2955,11 @@ def main():
                                 default=b.opt["verbose"],
                                 dest="verbose", help="Verbose level 0/1/2")
 
+    help_parser = argparse.ArgumentParser(add_help=False)
+    help_parser.add_argument("-h", "--help", action="store_true",
+                             default=False, dest="help",
+                             help="Print Help (this message) and exit.")
+
     min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
                    top_packages_parser, appstore_parser, caskonly_parser,
                    yn_parser, verbose_parser]
@@ -2963,7 +2973,7 @@ def main():
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  top_packages_parser, noupdateatupdate_parser, noupdate_parser,
                  repo_parser, link_parser, caskonly_parser, appstore_parser,
-                 dryrun_parser, yn_parser, verbose_parser],
+                 dryrun_parser, yn_parser, verbose_parser, help_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description=__description__)
 
@@ -2976,7 +2986,7 @@ def main():
                           **subparser_options)
     help = "Execute brew command, and update BREWFILE."
     subparsers.add_parser("brew", description=help, help=help,
-                          parents=min_parsers,
+                          parents=min_parsers, add_help=False,
                           formatter_class=argparse.RawTextHelpFormatter)
     help = "or dump/-i/--init\nInitialize/Update BREWFILE "\
         "with installed packages."
@@ -2985,7 +2995,7 @@ def main():
         parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     subparsers.add_parser(
-        "dump", add_help=False,
+        "dump",
         parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
@@ -3032,8 +3042,8 @@ def main():
     help = "Check updates of cask applications.\n"\
            "With -C, upgrade is enforced (old versions will be removed)."
     subparsers.add_parser(
-        "cask_upgrade", description=help,
-        help=help, parents=min_parsers+[dryrun_parser],
+        "cask_upgrade", description=help, help=help,
+        parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or --test. Used for test."
     subparsers.add_parser("test", description=help, help=help,
@@ -3082,7 +3092,8 @@ def main():
                     args.remove(a)
                     args = [a] + args
                     break
-
+        if args[0] in ["-h", "--help"]:
+            args[0] = "help"
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
     args.update({"args": args_tmp})
@@ -3092,7 +3103,14 @@ def main():
     if b.opt["command"] == "help":
         parser.print_help()
         sys.exit(0)
-    if b.opt["command"] == "commands":
+    elif b.opt["command"] == "brew":
+        if len(args_tmp) > 0 and args_tmp[0] in ["-h", "--help"]:
+            subparsers.choices[b.opt["command"]].print_help()
+            sys.exit(0)
+    elif "help" in args_tmp:
+        subparsers.choices[b.opt["command"]].print_help()
+        sys.exit(0)
+    elif b.opt["command"] == "commands":
         commands = ["install", "brew", "init", "dump", "set_repo", "pull",
                     "push", "clean", "update", "edit", "cat", "casklist",
                     "cask_upgrade", "test", "get_files", "commands", "version",
@@ -3110,7 +3128,7 @@ def main():
         print("commands_hyphen:", " ".join(commands_hyphen))
         print("options:", " ".join(options))
         sys.exit(0)
-    if b.opt["command"] == "version":
+    elif b.opt["command"] == "version":
         print(__prog__ + " " + __version__ + " " + __date__)
         sys.exit(0)
 
