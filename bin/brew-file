@@ -222,7 +222,7 @@ class BrewHelper:
 
     def brew_val(self, name):
         if name not in self.opt:
-            self.opt[name] = self.proc("brew --" + name, False, False)
+            self.opt[name] = self.proc("brew --" + name, False, False)[1][0]
         return self.opt[name]
 
 
