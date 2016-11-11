@@ -220,6 +220,11 @@ class BrewHelper:
                 max = len(l)
         self.info("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose_level)
 
+    def brew_val(self, name):
+        if name not in self.opt:
+            self.opt[name] = self.proc("brew --" + name, False, False)
+        return self.opt[name]
+
 
 class BrewInfo:
     """Homebrew information storage."""
@@ -467,12 +472,12 @@ class BrewInfo:
     def get_tap_path(self, tap):
         """Get tap path"""
         if tap == "direct":
-            return self.helper.opt["cache_dir"] + "/Formula"
+            return self.brew_val("cache") + "/Formula"
 
         tap_user = os.path.dirname(tap)
         tap_repo = os.path.basename(tap)
-        return self.helper.opt["tap_dir"] + "/" +\
-            tap_user + "/homebrew-" + tap_repo
+        return self.helper.brew_val("repository") + "/Library/Taps" +\
+            "/" + tap_user + "/homebrew-" + tap_repo
 
     def get_tap(self, tap):
         """Helper for tap configuration file"""
@@ -731,12 +736,6 @@ class BrewFile:
 
         # Other default values
         self.opt["command"] = ""
-        self.opt["brew_repo"] =\
-            self.proc(
-                "brew --repository", False, False, True, 0)[1][0]
-        self.opt["brew_prefix"] =\
-            self.proc(
-                "brew --prefix", False, False, True, 0)[1][0]
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
                                            os.environ["HOME"] +
                                            "/.brewfile/Brewfile")
@@ -753,9 +752,6 @@ class BrewFile:
         self.opt["caskonly"] = False
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
-        self.opt["tap_dir"] = self.opt["brew_repo"] + "/Library/Taps"
-        self.opt["cache_dir"] = self.proc(
-            "brew --cache", False, False, True, 0)[1][0]
         self.opt["cask_repo"] = "caskroom/cask"
         self.opt["reattach_formula"] = "reattach-to-user-namespace"
         self.opt["mas_formula"] = "mas"
@@ -784,11 +780,13 @@ class BrewFile:
         if cask_opts["--caskroom"] != "":
             self.opt["caskroom"] = cask_opts["--caskroom"]
         else:
-            if not os.path.isdir(self.opt["brew_prefix"] + "/Caskroom") and\
+            if not os.path.isdir(
+                    self.brew_val("prefix") + "/Caskroom") and\
                     os.path.isdir("/opt/homebrew-cask/Caskroom"):
                 self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
             else:
-                self.opt["caskroom"] = self.opt["brew_prefix"] + "/Caskroom"
+                self.opt["caskroom"] =\
+                    self.brew_val("prefix") + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
@@ -907,6 +905,9 @@ class BrewFile:
             shutil.rmtree(path)
         else:
             self.warning("Tried to remove non usual file/directory:" + path, 0)
+
+    def brew_val(self, name):
+        return self.helper.brew_val(name)
 
     def read_all(self):
         del self.brewinfo_ext[:]
@@ -1207,7 +1208,7 @@ class BrewFile:
             self.check_pip_cmd(True)
             env["HOMEBREW_CELLAR"] = os.environ.get(
                 "HOMEBREW_CELLAR",
-                self.proc("brew --cellar", False, False)[1][0])
+                self.brew_val("cellar"))
         elif cmd == "gem":
             exe = "brew-gem"
             self.opt["args"].pop(0)
@@ -1393,15 +1394,15 @@ class BrewFile:
 
     def check_brew_cmd(self):  # pragma: no cover
         """Check Homebrew"""
-        if self.proc("which brew", False, False, False, 0)[0] != 0:
+        if self.proc("which brew", False, False, False, False, 0)[0] != 0:
             print("Homebrew has not been installed, install now...")
             cmd = "curl -O https://raw.githubusercontent.com/" +\
                   "Homebrew/install/master/install"
-            self.proc(cmd, True, True, False, 0)
+            self.proc(cmd, True, True, False, False, 0)
             cmd = "ruby install"
-            self.proc(cmd, True, True, False, 0)
+            self.proc(cmd, True, True, False, False, 0)
             (ret, lines) = self.proc("brew doctor",
-                                     True, True, False, 0)
+                                     True, True, False, False, 0)
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
@@ -2019,7 +2020,7 @@ class BrewFile:
         # Clean up cashe
         self.banner("# Clean up cache")
         cmd0 = "brew cleanup --force"
-        cmd1 = "rm -rf " + self.opt["cache_dir"]
+        cmd1 = "rm -rf " + self.brew_val("cache")
         if self.opt["dryrun"]:
             print(cmd0)
             print(cmd1)
@@ -2211,7 +2212,7 @@ class BrewFile:
         check = "has_cask"
         tap_brew = tap
         opt = ""
-        if os.path.isfile(self.opt["brew_repo"] +
+        if os.path.isfile(self.brew_val("repository") +
                           "/Library/Formula/" + name + ".rb"):
             if type(self.opt["brew_packages"]) == str:
                 self.opt["brew_packages"] = self.proc("brew list", False,
@@ -2219,9 +2220,9 @@ class BrewFile:
             if name in self.opt["brew_packages"]:
                 check = "brew"
                 opt = self.brewinfo.get_options(name)
-                if os.path.islink(self.opt["brew_repo"] +
+                if os.path.islink(self.brew_val("repository") +
                                   "/Library/Formula/" + name + ".rb"):
-                    link = os.readlink(self.opt["brew_repo"] +
+                    link = os.readlink(self.brew_val("repository") +
                                        "/Library/Formula/" + name + ".rb")
                     tap_brew = link.replace("../Taps/", "").\
                         replace("homebrew-").replace("/"+name+".rb")
