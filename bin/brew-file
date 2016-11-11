@@ -472,7 +472,7 @@ class BrewInfo:
     def get_tap_path(self, tap):
         """Get tap path"""
         if tap == "direct":
-            return self.brew_val("cache") + "/Formula"
+            return self.helper.brew_val("cache") + "/Formula"
 
         tap_user = os.path.dirname(tap)
         tap_repo = os.path.basename(tap)
