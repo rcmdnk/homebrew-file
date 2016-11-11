@@ -1190,51 +1190,55 @@ class BrewFile:
 
     def brew_cmd(self):
         noinit = False
-        if len(self.opt["args"]) > 0:
-            if "noinit" in self.opt["args"]:
-                noinit = True
-                self.opt["args"].pop(0)
+        if len(self.opt["args"]) > 0 and "noinit" in self.opt["args"]:
+            noinit = True
+            self.opt["args"].remove("noinit")
 
-        cmd = "brew"
+        exe = "brew"
+        cmd = self.opt["args"][0] if len(self.opt["args"]) > 0 else ""
+        subcmd = self.opt["args"][1] if len(self.opt["args"]) > 1 else ""
+        args = self.opt["args"]
         env = {}
-        if self.opt["args"][0] == "cask":
+        if cmd == "cask":
             self.check_cask_cmd(True)
-        elif self.opt["args"][0] == "pip":
-            self.check_pip_cmd(True)
-            cmd = "brew-pip"
+        elif cmd == "pip":
             self.opt["args"].pop(0)
+            exe = "brew-pip"
+            self.check_pip_cmd(True)
             env["HOMEBREW_CELLAR"] = os.environ.get(
                 "HOMEBREW_CELLAR",
                 self.proc("brew --cellar", False, False)[1][0])
-        elif self.opt["args"][0] == "gem":
-            cmd = "brew-gem"
+        elif cmd == "gem":
+            exe = "brew-gem"
             self.opt["args"].pop(0)
             self.check_gem_cmd(True)
             if self.opt["homebrew_ruby"] and\
                     "--homebrew-ruby" not in self.opt["args"]:
                 self.opt["args"].append("--homebrew-ruby")
 
-        (ret, lines) = self.proc([cmd] + self.opt["args"],
+        (ret, lines) = self.proc([exe] + self.opt["args"],
                                  False, True, False, env=env)
-        if ret != 0 or noinit or len(self.opt["args"]) < 2 or\
-                (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
+
+        if ret != 0 or noinit:
             sys.exit(ret)
 
-        cmd = self.opt["args"][0]
-        subcmd = self.opt["args"][1]
-
-        if cmd not in ["instal", "install", "reinstall", "tap", "pip", "gem",
-                       "rm", "remove", "uninstall", "untap", "cask"] or \
-                (cmd == "cask" and
-                 subcmd not in ["instal", "install", "rm", "remove",
-                                "uninstall"]) or \
-                (cmd == "gem" and subcmd not in ["instal", "install",
-                                                 "uninstall"]):
+        nargs = len(self.opt["args"])
+        if cmd not in ["instal", "install", "reinstall", "tap",
+                       "rm", "remove", "uninstall", "untap", "cask",
+                       "pip", "gem"] or\
+                (cmd == "cask" and (
+                    nargs < 3 or subcmd not in
+                    ["instal", "install", "rm", "remove", "uninstall"])) or\
+                (cmd == "gem" and (
+                    nargs < 2 or subcmd not in
+                    ["instal", "install", "uninstall"])):
             # Not install/remove command, no init.
             sys.exit(0)
 
-        if cmd in ["cask", "gem"]:
+        if cmd in ["cask"]:
             args = self.opt["args"][2:]
+        elif cmd in ["pip"]:
+            args = self.opt["args"]
         else:
             args = self.opt["args"][1:]
 
