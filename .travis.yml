@@ -144,8 +144,7 @@ script:
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox
-  # can't use for python3...?
-  #- coverage run --parallel-mode $exe brew install macvim # Application installed by brew command, instead of cask
+  - coverage run --parallel-mode $exe brew install macvim --without-python # Application installed by brew command, instead of cask
   - coverage run --parallel-mode $exe brew cask list
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
@@ -197,7 +196,6 @@ script:
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y; fi'
     #  - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
-  - command brew install macvim
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
