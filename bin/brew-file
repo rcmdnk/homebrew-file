@@ -169,7 +169,7 @@ class BrewHelper:
 
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_error=True, separate_err_msg=False, verbose_level=1,
-             noupdate=False):
+             env={}):
         """ Get process output."""
         import shlex
         import subprocess
@@ -179,14 +179,14 @@ class BrewHelper:
             cmd = ["command"] + cmd
         if print_cmd:
             self.info("$ " + " ".join(cmd), verbose_level)
-        env = os.environ.copy()
-        if noupdate:
-            env["HOMEBREW_NO_AUTO_UPDATE"] = "1"
+        all_env = os.environ.copy()
+        for k, v in env.items():
+            all_env[k] = v
         lines = []
         try:
             stderr = None if separate_err_msg else subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=env)
+                                 env=all_env)
             for line in self.readstdout(p):
                 lines.append(line)
                 if print_out:
@@ -883,11 +883,11 @@ class BrewFile:
 
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_error=True, separate_err_msg=False, verbose_level=1,
-             noupdate=False):
+             env={"HOMEBREW_NO_AUTO_UPDATE": "1"}):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
             exit_on_error=exit_on_error, separate_err_msg=separate_err_msg,
-            verbose_level=verbose_level, noupdate=noupdate)
+            verbose_level=verbose_level, env=env)
 
     def info(self, text, verbose_level=2):
         self.helper.info(text, verbose_level)
@@ -1196,12 +1196,16 @@ class BrewFile:
                 self.opt["args"].pop(0)
 
         cmd = "brew"
+        env = {}
         if self.opt["args"][0] == "cask":
             self.check_cask_cmd(True)
         elif self.opt["args"][0] == "pip":
             self.check_pip_cmd(True)
             cmd = "brew-pip"
             self.opt["args"].pop(0)
+            env["HOMEBREW_CELLAR"] = os.environ.get(
+                "HOMEBREW_CELLAR",
+                self.proc("brew --cellar", False, False)[1][0])
         elif self.opt["args"][0] == "gem":
             cmd = "brew-gem"
             self.opt["args"].pop(0)
@@ -1211,7 +1215,7 @@ class BrewFile:
                 self.opt["args"].append("--homebrew-ruby")
 
         (ret, lines) = self.proc([cmd] + self.opt["args"],
-                                 True, True, False)
+                                 False, True, False, env=env)
         if ret != 0 or noinit or len(self.opt["args"]) < 2 or\
                 (self.opt["args"][1] == "cask" and len(self.opt["args"]) < 3):
             sys.exit(ret)
@@ -1639,7 +1643,8 @@ class BrewFile:
                     self.brewinfo.gem_list_opt[package] = ""
 
         # Taps
-        (ret, lines) = self.proc("brew tap", False, False, noupdate=True)
+        (ret, lines) = self.proc("brew tap", False, False,
+                                 env={"HOMEBREW_NO_AUTO_UPDATE": "1"})
 
         self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
@@ -2243,7 +2248,8 @@ class BrewFile:
         # Set cask directories and reset application information list
         taps = list(filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
-            self.proc("brew tap", False, False, noupdate=True)[1]))
+            self.proc("brew tap", False, False,
+                      env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]))
         apps = dict([d, {True: [], False: []}]
                     for d in taps + ["", "appstore"])
         brew_apps = {}
