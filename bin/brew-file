@@ -88,7 +88,7 @@ class Tee:
 
         try:
             from cStringIO import StringIO
-        except ImportError:
+        except ImportError:  # pragma: no cover
             from io import StringIO
         if type(out1) == str:
             self.out1name = out1
@@ -674,7 +674,7 @@ class BrewInfo:
                 out.writeln(cmd_cask + self.packout(c))
 
         # Installed by cask, but cask files were not found...
-        if len(self.cask_nocask_list) > 0:
+        if len(self.cask_nocask_list) > 0:  # pragma: no cover
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
             for c in self.cask_nocask_list:
@@ -741,7 +741,7 @@ class BrewFile:
                                            "/.brewfile/Brewfile")
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["leaves"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_LEAVES", 0))
+            os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
         self.opt["top_packages"] = os.environ.get(
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "file"
@@ -835,7 +835,7 @@ class BrewFile:
 
             if user_opts:
                 opts.update(user_opts)
-            else:
+            else:  # pragma: no cover
                 self.warning("%s: \"%s\" is not a proper format." %
                              (env_var, env_opts), 0)
                 self.warning("Ignoring the value.\n", 0)

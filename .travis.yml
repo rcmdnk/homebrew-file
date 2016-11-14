@@ -99,10 +99,11 @@ script:
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe cat
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
-  - coverage run --parallel-mode $exe test -V 2
-  - coverage run --parallel-mode $exe install --no_appstore --preupdate -y -V 2
+  - HOMEBREW_BREWFILE_APPSTORE=true coverage run --parallel-mode $exe test -V 2
+  - HOMEBREW_BREWFILE_APPSTORE=false coverage run --parallel-mode $exe install --preupdate -y -V 2
   - rm $brewfile
-  - coverage run --parallel-mode $exe update -y
+  - coverage run --parallel-mode $exe update -C -y
+  - coverage run --parallel-mode $exe init -f ~/mkdirtest/Brewfile -y
   # brew command checks
   - coverage run --parallel-mode $exe brew help
   - coverage run --parallel-mode $exe brew noinit list
@@ -134,7 +135,7 @@ script:
   - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew uninstall pip-pep8
-  - coverage run --parallel-mode $exe brew pip -u django==1.2
+  - coverage run --parallel-mode $exe brew pip -u -v django==1.2
   - coverage run --parallel-mode $exe brew rm brew-pip
   - coverage run --parallel-mode $exe brew install brew-gem
   - coverage run --parallel-mode $exe brew gem install heroku
@@ -187,7 +188,7 @@ script:
   - coverage run --parallel-mode $exe edit
   - cp $testfile .
   - coverage run --parallel-mode $exe brew tap rcmdnk/mytest
-  - coverage run --parallel-mode $exe --no_appstore install -V 2
+  - HOMEBREW_BREWFILE_APPSTORE=0 coverage run --parallel-mode $exe install -V 2
   - coverage run --parallel-mode $exe casklist -V 0
   - command brew rm cmake
   - coverage run --parallel-mode $exe init -y -V 0
