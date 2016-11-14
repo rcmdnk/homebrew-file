@@ -1151,7 +1151,7 @@ class BrewFile:
             return
 
         # Check and prepare repository
-        if self.opt["repo"].find("github") >= 0:
+        if self.opt["repo"].find("github") != -1:
             self.check_github_repo()
         else:  # pragma: no cover
             self.clone_repo()
@@ -1252,7 +1252,8 @@ class BrewFile:
         elif cmd in ["pip"]:
             pip_upgrade = False
             for v in args:
-                if v.find("/") or v.find("tar.gz") or v.find(".zip"):
+                if v.find("/") != -1 or v.find("tar.gz") != -1 or\
+                        v.find(".zip") != -1:
                     # lock packages
                     sys.exit(0)
                 elif v in ["-h", "--help", "--version"]:
@@ -2008,7 +2009,7 @@ class BrewFile:
                     # (ret, lines) = self.proc("brew info " + p, False, False,
                     #                          True, True)
                     # for l in lines:
-                    #     if l.find("ln -s") >= 0:
+                    #     if l.find("ln -s") != -1:
                     #         if len(l.split()) > 2:
                     #             app = l.split()[2]
                     #             break
@@ -2087,7 +2088,7 @@ class BrewFile:
                                  "by using web direct formula.", 0)
                     continue
                 for l in lines:
-                    if l.find("ln -s") >= 0:
+                    if l.find("ln -s") != -1:
                         if self.opt["link"]:
                             cmdtmp = l.split()
                             cmd = []
@@ -2097,7 +2098,7 @@ class BrewFile:
                                 else:
                                     cmd.append(c)
                             self.proc(cmd)
-                    if l.find("brew linkapps") >= 0:
+                    if l.find("brew linkapps") != -1:
                         if self.opt["link"]:
                             self.proc("brew linkapps")
 
@@ -2169,12 +2170,12 @@ class BrewFile:
         lines = self.proc([cask_namer, '"' + app.split("/")[-1].lower() + '"'],
                           False, False, False)[1]
         for l in lines:
-            if l.find("Proposed token") >= 0:
+            if l.find("Proposed token") != -1:
                 name_cands.append(l.split()[2])
-            if l.find("already exists") >= 0:
+            if l.find("already exists") != -1:
                 for t in taps:
                     tname = t.split('/')[0]+"/homebrew-"+t.split('/')[1]
-                    if l.split("'")[1].find(tname) >= 0:
+                    if l.split("'")[1].find(tname) != -1:
                         tap_cands.append(t)
                         break
         if len(tap_cands) == 0:
@@ -2333,8 +2334,8 @@ class BrewFile:
         napps = 0
         for d in app_dirs:
             for app in [x for x in os.listdir(d)
-                        if not x.startswith(".") and x != "Utilities"
-                        and os.path.isdir(d + "/" + x)]:
+                        if not x.startswith(".") and x != "Utilities" and
+                        os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
                 if app.replace(".app", "")\
                         in appstore_list.keys():  # pragma: no cover
@@ -2654,7 +2655,7 @@ class BrewFile:
             for l in lines:
                 if l.startswith(a + ":"):
                     current = l.split()[1]
-                if l.find("Not installed") >= 0:  # pragma: no cover
+                if l.find("Not installed") != -1:  # pragma: no cover
                     installed = False
 
             appdir = self.opt["caskroom"] + "/" + a
