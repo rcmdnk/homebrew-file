@@ -41,8 +41,7 @@ def my_decode(word):  # pragma: no cover
             is_python3 = 1
     if is_python3 == 0:
         return word
-    else:
-        return word.decode()
+    return word.decode()
 
 
 def my_input(word):  # pragma: no cover
@@ -55,6 +54,8 @@ def my_input(word):  # pragma: no cover
             is_python3 = 0
         except:
             is_python3 = 1
+    elif is_python3 == 0:
+        input = raw_input
     return input(word)
 
 
@@ -863,14 +864,14 @@ class BrewFile:
         yes = ["yes", "y", ""]
         no = ["no", "n"]
 
-        yn = raw_input(question + " [y/n]: ").lower()
+        yn = my_input(question + " [y/n]: ").lower()
         while True:
             if yn in yes:
                 return True
             elif yn in no:
                 return False
             else:
-                yn = raw_input("Answer with yes (y) or no (n): ").lower()
+                yn = my_input("Answer with yes (y) or no (n): ").lower()
 
     def verbose(self):
         try:
@@ -1078,7 +1079,7 @@ class BrewFile:
 
         if not is_ok:
             # Try with two-factor code
-            twofac = raw_input("GitHub two-factor code: ")
+            twofac = my_input("GitHub two-factor code: ")
             headers.update({"X-Github-OTP": twofac})
             while True:
                 r = requests.post(url=url, data=json.dumps(data),
@@ -1732,12 +1733,12 @@ class BrewFile:
         if self.opt["repo"] == "":  # pragma: no cover
             print("Set repository, \"non\" for local Brewfile," +
                   "<user>/<repo> for github repository,")
-            self.opt["repo"] = raw_input("or full path for the repository: ")
+            self.opt["repo"] = my_input("or full path for the repository: ")
             while True:
                 if self.opt["repo"] != "":
                     break
                 print("Repository can not be empty")
-                self.opt["repo"] = raw_input("Set repository: ")
+                self.opt["repo"] = my_input("Set repository: ")
             self.banner("# Set Brewfile repository as " +
                         self.opt["repo"])
 

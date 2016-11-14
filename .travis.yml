@@ -67,13 +67,9 @@ script:
   - which python
   - python --version
   # Install the latest version of Python
-  - 'brew rm python || :'
-  - rm -rf /usr/local/lib/python2.7/site-packages
-  - rm -rf /usr/local/bin/easy_install
-  - rm -rf /usr/local/bin/easy_install-2.7
-  - rm -rf /usr/local/bin/pip
-  - rm -rf /usr/local/bin/pip2
-  - rm -rf /usr/local/bin/pip2.7
+  - 'brew rm mercurial || :'
+  - 'brew rm --ignore-dependencies python || :'
+  - rm -rf /usr/local/lib/python2.7/site-packages /usr/local/bin/easy_install /usr/local/bin/easy_install-2.7 /usr/local/bin/pip /usr/local/bin/pip2 /usr/local/bin/pip2.7
   - brew install --force $PYTHON_VERSION
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/python && ln -s /usr/local/bin/python3 /usr/local/bin/python || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && rm -f /usr/local/bin/pip && ln -s /usr/local/bin/pip3 /usr/local/bin/pip || :'
@@ -103,7 +99,7 @@ script:
   - HOMEBREW_BREWFILE_APPSTORE=false coverage run --parallel-mode $exe install --preupdate -y -V 2
   - rm $brewfile
   - coverage run --parallel-mode $exe update -C -y
-  - coverage run --parallel-mode $exe init -f ~/mkdirtest/Brewfile -y
+  - coverage run --parallel-mode $exe init -f ~/mkdirtest/Brewfile -r git://github.com/$testrepo -y
   # brew command checks
   - coverage run --parallel-mode $exe brew help
   - coverage run --parallel-mode $exe brew noinit list
@@ -134,6 +130,7 @@ script:
   - coverage run --parallel-mode $exe brew install brew-pip
   - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
+  - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe brew uninstall pip-pep8
   - coverage run --parallel-mode $exe brew pip -u -v django==1.2
   - coverage run --parallel-mode $exe brew rm brew-pip
