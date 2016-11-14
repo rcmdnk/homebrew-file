@@ -1224,25 +1224,24 @@ class BrewFile:
         if ret != 0 or noinit:
             sys.exit(ret)
 
-        nargs = len(self.opt["args"])
-        if cmd not in ["instal", "install", "reinstall", "tap",
-                       "rm", "remove", "uninstall", "untap", "cask",
-                       "pip", "gem"] or\
-                (cmd == "cask" and (
-                    nargs < 3 or subcmd not in
-                    ["instal", "install", "rm", "remove", "uninstall"])) or\
-                (cmd == "gem" and (
-                    nargs < 2 or subcmd not in
-                    ["instal", "install", "uninstall"])):
-            # Not install/remove command, no init.
-            sys.exit(0)
-
         if cmd in ["cask"]:
             args = self.opt["args"][2:]
         elif cmd in ["pip"]:
             args = self.opt["args"]
         else:
             args = self.opt["args"][1:]
+        nargs = len(args)
+
+        if cmd not in ["instal", "install", "reinstall", "tap",
+                       "rm", "remove", "uninstall", "untap", "cask",
+                       "pip", "gem"] or\
+                nargs == 0 or\
+                (cmd == "cask" and subcmd not in
+                    ["instal", "install", "rm", "remove", "uninstall"]) or\
+                (cmd == "gem" and subcmd not in
+                    ["instal", "install", "uninstall"]):
+            # Not install/remove command, no init.
+            sys.exit(0)
 
         global_opts = []
         packages = []
