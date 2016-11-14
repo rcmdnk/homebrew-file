@@ -131,7 +131,7 @@ script:
   - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew list
-  - coverage run --parallel-mode $exe brew uninstall pip-pep8
+  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies pip-pep8
   - coverage run --parallel-mode $exe brew pip -u -v django==1.2
   - coverage run --parallel-mode $exe brew rm brew-pip
   - coverage run --parallel-mode $exe brew install brew-gem

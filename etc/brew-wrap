@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # brew command wrapper for brew-file
 brew () {
   # No arguments
@@ -41,7 +41,16 @@ brew () {
         instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
           if [ $# -gt 1 ];then
             if [ "$cmd2" != "-h" ];then
-              brew-file brew "$@"
+              shift
+              exe="brew-file brew $cmd"
+              if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ];then
+                if echo "$@"|grep -q -- "pip-";then
+                  if ! echo "$@"|grep -q -- "--ignore-dependencies";then
+                    exe="brew-file brew $cmd --ignore-dependencies"
+                  fi
+                fi
+              fi
+              $exe "$@"
               return $?
             fi
           fi
