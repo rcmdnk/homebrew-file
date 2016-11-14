@@ -132,14 +132,14 @@ script:
   - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies pip-pep8
-  - coverage run --parallel-mode $exe brew pip -u -v django==1.2
+  - coverage run --parallel-mode $exe brew pip -u -v django==1.2 >/dev/null
   - coverage run --parallel-mode $exe brew rm brew-pip
   - coverage run --parallel-mode $exe brew install brew-gem
   - coverage run --parallel-mode $exe brew gem install heroku
 #  - coverage run --parallel-mode $exe brew gem uninstall heroku
-  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies heroku
+  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-heroku
   - coverage run --parallel-mode $exe brew gem install heroku 3.8.3
-  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies heroku
+  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-heroku
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox
@@ -211,6 +211,7 @@ script:
   - coverage run --parallel-mode $exe init -F command -y -V 2
   - coverage run --parallel-mode $exe install --no_appstore -F command
   # Clean up tests
+  - 'coverage run --parallel-mode $exe brew rm macvim || :' # to avoid dependencies check
   - echo "brew brew-file" > $testfile
   - '[ "$PYTHON_VERSION" != "python3" ] && echo brew python >> $testfile || :'
   - '[ "$PYTHON_VERSION" = "python3" ] && echo brew python3 >> $testfile || :'
