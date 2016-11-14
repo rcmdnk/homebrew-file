@@ -44,7 +44,7 @@ brew () {
               shift
               exe="brew-file brew $cmd"
               if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ];then
-                if echo "$@"|grep -q -- "pip-";then
+                if echo "$@"|grep -q -e "pip-" -e "gem-";then
                   if ! echo "$@"|grep -q -- "--ignore-dependencies";then
                     exe="brew-file brew $cmd --ignore-dependencies"
                   fi
