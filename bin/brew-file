@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.2"
+__version__ = "v4.1.3"
 __date__ = "15/Nov/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1935,7 +1935,7 @@ class BrewFile:
                     self.proc(cmd, True, True)
                 self.remove_pack("cask_list", p)
 
-        # Skip clean up cask at tap/brew if any cask packages exist
+        # Skip clean up cask at tap if any cask packages exist
         if len(self.get("cask_list")) > 0:
             self.remove_pack("tap_list", self.opt["cask_repo"])
 
@@ -1952,7 +1952,7 @@ class BrewFile:
                     self.proc(cmd, True, True, False)
                 self.remove_pack("pip_list", p)
                 self.remove_pack("pip_list_opt", p)
-        # Skip clean up cask at tap/brew if any cask packages exist
+        # Skip clean up brew-pip at brew if any pip packages exist
         if len(self.get("pip_list")) > 0:
             self.remove_pack("brew_list", self.opt["pip_pack"])
             self.remove_pack("brew_list_opt", self.opt["pip_pack"])
@@ -1970,10 +1970,24 @@ class BrewFile:
                     self.proc(cmd, True, True, False)
                 self.remove_pack("gem_list", p)
                 self.remove_pack("gem_list_opt", p)
-        # Skip clean up cask at tap/brew if any cask packages exist
+        # Skip clean up brew-gem at brew if any gem packages exist
         if len(self.get("gem_list")) > 0:
             self.remove_pack("brew_list", self.opt["gem_pack"])
             self.remove_pack("brew_list_opt", self.opt["gem_pack"])
+
+        # Clean up brew packages
+        if len(self.get("brew_list")) > 0:
+            self.banner("# Clean up brew packages")
+            for p in self.get("brew_list"):
+                if p in self.get("brew_input"):
+                    continue
+                # Use --ignore-dependencies option to remove packages w/o
+                # formula (tap of which could be removed before).
+                cmd = "brew uninstall --ignore-dependencies " + p
+                if self.opt["dryrun"]:
+                    print(cmd)
+                else:
+                    self.proc(cmd, False, True)
 
         # Clean up tap packages
         if len(self.get("tap_list")) > 0:
@@ -1990,33 +2004,18 @@ class BrewFile:
                         break
                 if not untapflag:
                     continue
+                for tc in self.brewinfo.tap_casks:
+                    if tc in self.get("cask_input"):
+                        # Keep the Tap as related cask is remained
+                        untapflag = False
+                        break
+                if not untapflag:
+                    continue
                 cmd = "brew untap " + p
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
                     self.proc(cmd, True, True)
-
-        # Clean up brew packages
-        if len(self.get("brew_list")) > 0:
-            self.banner("# Clean up brew packages")
-            for p in self.get("brew_list"):
-                if p in self.get("brew_input"):
-                    continue
-                cmd = "brew uninstall " + p
-                if self.opt["dryrun"]:
-                    print(cmd)
-                else:
-                    # (ret, lines) = self.proc("brew info " + p, False, False,
-                    #                          True, True)
-                    # for l in lines:
-                    #     if l.find("ln -s") != -1:
-                    #         if len(l.split()) > 2:
-                    #             app = l.split()[2]
-                    #             break
-                    # for d in self.opt["appdirlist"]:
-                    #     self.remove(d + app)
-
-                    self.proc(cmd, False, True)
 
         # Clean up cashe
         self.banner("# Clean up cache")
