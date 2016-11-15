@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 # brew command wrapper for brew-file
 brew () {
-  # No arguments
-  if [ $# -eq 0 ];then
-    command brew
-    return $?
-  fi
-
   # version check
   if [ "$ZSH_VERSION" != "" ];then
     local isksharrays=0
@@ -15,6 +9,8 @@ brew () {
       setopt ksharrays
     fi
   fi
+
+  # Check if do wrap or not
   wrap=1
   v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
   if [ "${v[0]}" -eq 2 ];then
@@ -28,57 +24,63 @@ brew () {
     unsetopt ksharrays
   fi
 
+  # Check args
+  nargs=0
+  for a in "$@";do
+    if [[ "$a" != ^- ]];then
+      ((nargs++))
+    fi
+  done
+  cmd=$1
+  cmd2=$2
+
+  # No auto update for tap listing
+  env=""
+  if [ "$cmd" = "tap" ] && [ $nargs -eq 1 ];then
+    env="HOMEBREW_NO_AUTO_UPDATE=1"
+  fi
+
+  # Set exe
+  exe="command brew"
+
   # Do wrap
   if [ $wrap -eq 1 ];then
-    # Arguments
-    cmd=$1
-    cmd2=$2
-    cmd3=$3
-
     if type -a brew-file >/dev/null 2>&1;then
       case "$cmd" in
         # brew install/uninstall/tap/pip/gem
         instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
-          if [ $# -gt 1 ];then
-            if [ "$cmd2" != "-h" ];then
-              shift
-              exe="brew-file brew $cmd"
-              if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ];then
-                if echo "$@"|grep -q -e "pip-" -e "gem-";then
-                  if ! echo "$@"|grep -q -- "--ignore-dependencies";then
-                    exe="brew-file brew $cmd --ignore-dependencies"
-                  fi
+          if [ $nargs -gt 1 ];then
+            exe="brew-file brew"
+            if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ];then
+              if echo "$@"|grep -q -e "pip-" -e "gem-";then
+                if ! echo "$@"|grep -q -- "--ignore-dependencies";then
+                  shift
+                  exe="brew-file brew $cmd --ignore-dependencies"
                 fi
               fi
-              $exe "$@"
-              return $?
             fi
           fi
           ;;
         # brew cask install/uninstall
         cask)
-          if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || \
-              [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ] || \
-              [ "$cmd2" = "instal" ];then
-            if [ $# -gt 2 ];then
-              if [ "$cmd3" != "-h" ];then
-                brew-file brew "$@"
-                return $?
-              fi
+          if [ $nargs -gt 2 ];then
+            if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || \
+                [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ] || \
+                [ "$cmd2" = "instal" ];then
+              exe="brew-file brew"
             fi
           fi
           ;;
+        *)
+          # Use brew-file directly for brew-file commands
+          if ! echo " $(echo $(command brew commands\
+              |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
+              |grep -q -- " $1";then
+            if echo " $(brew-file commands) "|grep -q -- " $1 ";then
+              exe="brew-file"
+            fi
+          fi
       esac
-
-      # Use brew-file directly for brew-file commands
-      if ! echo " $(echo $(command brew commands\
-          |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
-          |grep -q -- " $1";then
-        if echo " $(brew-file commands) "|grep -q -- " $1 ";then
-          brew-file "$@"
-          return $?
-        fi
-      fi
     fi
   fi
 
@@ -87,8 +89,8 @@ brew () {
     shift
   fi
 
-  # Remaining command
-  command brew "$@"
+  # Execute command
+  eval $env $exe "$@"
   return $?
 }
 
