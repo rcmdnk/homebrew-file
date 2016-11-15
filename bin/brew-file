@@ -1945,7 +1945,7 @@ class BrewFile:
             for p in self.get("pip_list"):
                 if p in self.get("pip_input"):
                     continue
-                cmd = "brew uninstall pip-" + p
+                cmd = "brew uninstall --ignore-dependencies pip-" + p
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
@@ -1963,7 +1963,7 @@ class BrewFile:
             for p in self.get("gem_list"):
                 if p in self.get("gem_input"):
                     continue
-                cmd = "brew gem uninstall " + p
+                cmd = "brew uninstall --ignore-dependencies gem-" + p
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
