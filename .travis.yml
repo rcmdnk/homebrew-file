@@ -127,14 +127,12 @@ script:
   - coverage run --parallel-mode $exe brew cask rm appcleaner
   - command brew cask install appcleaner
   - coverage run --parallel-mode $exe brew cask rm appcleaner
-  - coverage run --parallel-mode $exe brew install brew-pip
   - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies pip-pep8
   - coverage run --parallel-mode $exe brew pip -u -v django==1.2 >/dev/null
   - coverage run --parallel-mode $exe brew rm brew-pip
-  - coverage run --parallel-mode $exe brew install brew-gem
   - coverage run --parallel-mode $exe brew gem install heroku
 #  - coverage run --parallel-mode $exe brew gem uninstall heroku
   - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-heroku
@@ -164,14 +162,14 @@ script:
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
   - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
-  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 0 || :'
+  - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 2 || :'
   - 'coverage run --parallel-mode $exe -f BrewfileWrong --no_appstore install -y -V 0 || :'
   - 'coverage run --parallel-mode $exe wrongcommand || :'
   # Wrong command test (test proc)
   - echo 'ls wrong_file' > $brewfile
   - 'coverage run --parallel-mode $exe install --no_appstore || :'
   # Use test repository
-  - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -y -V 2
+  - coverage run --parallel-mode $exe set_repo -r git://github.com/$testrepo -b ~/backup.brewfile -y -V 2
   - rm -rf $brewfile $testrepofulldir
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe set_repo -r git@github.com:$testrepo -y -V 2; fi'
