@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 # brew command wrapper for brew-file
 brew () {
-  # version check
-  if [ "$ZSH_VERSION" != "" ];then
-    local isksharrays=0
-    if ! setopt|grep -q ksharrays;then
-      isksharrays=1
-      setopt ksharrays
-    fi
-  fi
+  # Emulate ksh / local options if zsh
+  [ -z "$ZSH_VERSION" ] || emulate -L ksh
 
   # Check if do wrap or not
   wrap=1
@@ -19,9 +13,6 @@ brew () {
     elif [ "${v[1]}" -eq 7 ] && [ "${v[2]}" -le 6 ];then
       wrap=0
     fi
-  fi
-  if [ "$ZSH_VERSION" != "" ] && [ $isksharrays -eq 1 ];then
-    unsetopt ksharrays
   fi
 
   # Check args
@@ -108,23 +99,19 @@ fi
 
 _brew_completion_wrap () {
   if [ "$ZSH_VERSION" != "" ];then
-    local isksharrays=0
-    if ! setopt|grep -q ksharrays;then
-      isksharrays=1
-      setopt ksharrays
-    fi
     local cword=$((CURRENT-1))
     local w
-    w=("${words[@]}")
+    w=($words[@])
+
+    local first=${w[0]}
   else
     local cword=$((COMP_CWORD))
     local w=("${COMP_WORDS[@]}")
+    local first=${w[1]}
   fi
+
   local cur=${w[cword]}
-  local first=${w[1]}
-  if [ "$ZSH_VERSION" != "" ] && [ $isksharrays -eq 1 ];then
-    unsetopt ksharrays
-  fi
+
   if [ "$first" = "file" ];then
     _brew_file "$@"
   else
