@@ -101,9 +101,9 @@ _brew_completion_wrap () {
   if [ "$ZSH_VERSION" != "" ];then
     local cword=$((CURRENT-1))
     local w
-    w=($words[@])
+    w=(${words[@]})
 
-    local first=${w[0]}
+    local first=${w[2]}
   else
     local cword=$((COMP_CWORD))
     local w=("${COMP_WORDS[@]}")
