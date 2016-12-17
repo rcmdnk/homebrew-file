@@ -88,9 +88,9 @@ brew () {
 # Wrap the brew command completion, to use the completion on `brew file`.
 if ! type -a _brew >& /dev/null;then
   return
-elif [ "$ZSH_VERSION" = "" ] && ! type -a _brew_file >& /dev/null;then
+elif [ -z "$ZSH_VERSION" ] && ! type -a _brew_file >& /dev/null;then
   return
-elif [ "$ZSH_VERSION" != "" ];then
+elif [ -n "$ZSH_VERSION" ];then
   if ! type -a _brew-file >& /dev/null;then
     return
   fi
@@ -98,14 +98,13 @@ elif [ "$ZSH_VERSION" != "" ];then
 fi
 
 _brew_completion_wrap () {
-  if [ "$ZSH_VERSION" != "" ];then
-    local cword=$((CURRENT-1))
+  if [ -n "$ZSH_VERSION" ];then
+    local cword=$CURRENT
     local w
-    w=(${words[@]})
-
+    w=("${words[@]}")
     local first=${w[2]}
   else
-    local cword=$((COMP_CWORD))
+    local cword=$COMP_CWORD
     local w=("${COMP_WORDS[@]}")
     local first=${w[1]}
   fi
@@ -117,7 +116,7 @@ _brew_completion_wrap () {
   else
     _brew
     if [ $cword -eq 1 ];then
-      if [ "$ZSH_VERSION" != "" ];then
+      if [ -n "$ZSH_VERSION" ];then
         # Use longest brew's subcommand 'reinstall' to align with other brew commands.
         _values 'Subcommands' 'file[manage Brewfile]'
       else
@@ -126,7 +125,7 @@ _brew_completion_wrap () {
     fi
   fi
 }
-if [ "$ZSH_VERSION" != "" ];then
+if [ -n "$ZSH_VERSION" ];then
   compdef _brew_completion_wrap brew
 else
   complete -o bashdefault -o default -F _brew_completion_wrap brew

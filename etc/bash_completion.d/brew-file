@@ -26,7 +26,7 @@ _brew_file_options () {
 }
 
 _brew_file_check_commands () {
-  if [ "$ZSH_VERSION" != "" ];then
+  if [ -n "$ZSH_VERSION" ];then
     local w
     w=("${words[@]:1}")
   else
@@ -37,7 +37,7 @@ _brew_file_check_commands () {
   local c
   for c in "${w[@]}";do
     if echo " ${cmds[*]} "|grep -q " $c ";then
-      echo $c
+      echo "$c"
       return 0
     fi
   done
@@ -45,17 +45,12 @@ _brew_file_check_commands () {
 }
 
 _brew_file () {
-  if [ "$ZSH_VERSION" != "" ];then
-    local isksharrays=0
-    if ! setopt|grep -q ksharrays;then
-      isksharrays=1
-      setopt ksharrays
-    fi
-    local cword=$((CURRENT-1))
+  if [ -n "$ZSH_VERSION" ];then
+    local cword=$CURRENT
     local w
     w=("${words[@]}")
   else
-    local cword=$((COMP_CWORD))
+    local cword=$COMP_CWORD
     local w=("${COMP_WORDS[@]}")
   fi
   if [ $cword -gt 2 ] && [ "$1" = "brew" ] && [ "$2" = "file" ];then
@@ -108,9 +103,6 @@ _brew_file () {
     else
       COMPREPLY=($(compgen -W "$complist" -- "${cur}"))
     fi
-  fi
-  if [ "$ZSH_VERSION" != "" ] && [ $isksharrays -eq 1 ];then
-    unsetopt ksharrays
   fi
 }
 
