@@ -18,7 +18,7 @@ brew () {
   # Check args
   nargs=0
   for a in "$@";do
-    if [[ "$a" != ^- ]];then
+    if [[ ! "$a" =~ ^- ]];then
       ((nargs++))
     fi
   done
