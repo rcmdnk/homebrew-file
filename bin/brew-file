@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.5"
-__date__ = "20/Dec/2016"
+__version__ = "v4.1.6"
+__date__ = "21/Dec/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1007,12 +1007,14 @@ class BrewFile:
         self.info("# Initialize the repository with README.md/Brewfile.", 1)
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
-        f = open("README.md", "w")
-        f.write("# " + self.repo_name() + "\n\n"
+        if not os.path.exists("README.md"):
+            f = open("README.md", "w")
+            f.write(
+                "# " + self.repo_name() + "\n\n"
                 "Package list for [homebrew](http://brew.sh/).\n\n"
                 "Managed by "
                 "[homebrew-file](https://github.com/rcmdnk/homebrew-file).")
-        f.close()
+            f.close()
         open(self.brewinfo.get_file(), "a").close()
 
         if self.check_gitconfig():
@@ -1021,7 +1023,7 @@ class BrewFile:
                        "\"Prepared by " + __prog__ + "\""])
             self.proc("git push -u origin master")
 
-    def clone_repo(self, noinit=True):
+    def clone_repo(self):
         ret = self.proc("git clone " + self.opt["repo"] + " \"" +
                         self.brewinfo.get_dir() + "\"",
                         True, True, False)[0]
@@ -1034,15 +1036,7 @@ class BrewFile:
 
         self.init_repo()
 
-        # Initialize
-        if not noinit:
-            ans = self.ask_yn(
-                "Do you want to initialize from installed packages?")
-            if ans:
-                self.initialize(False)
-                self.repomgr("push")
-
-    def check_github_repo(self, noinit=True):  # pragma: no cover
+    def check_github_repo(self):  # pragma: no cover
         """helper to check and create GitHub repository."""
         try:
             from urllib2 import urlopen, HTTPError
@@ -1061,7 +1055,7 @@ class BrewFile:
 
         # Clone if exists
         if exist_repo:
-            self.clone_repo(noinit)
+            self.clone_repo()
             return
 
         # Create new repository #
@@ -1138,9 +1132,9 @@ class BrewFile:
                 sys.exit(1)
 
         # Clone and initialize
-        self.clone_repo(noinit)
+        self.clone_repo()
 
-    def check_repo(self, noinit=True):
+    def check_repo(self):
         """Check input file for GitHub repository."""
         import re
         self.brewinfo.set_file(self.opt["input"])
@@ -1165,9 +1159,9 @@ class BrewFile:
             return
 
         # Check repository name and add git@github.com: if necessary
-        if (re.match("git://", self.opt["repo"]) is None and
-                re.match("git@", self.opt["repo"]) is None and
-                re.match("https?://", self.opt["repo"]) is None):
+        if (not self.opt["repo"].startswith("git://") and
+                not self.opt["repo"].startswith("git@") and
+                not self.opt["repo"].startswith("http")):
             self.opt["repo"] = "git@github.com:" + self.opt["repo"]
 
         # Set Brewfile in the repository
@@ -1182,11 +1176,18 @@ class BrewFile:
 
         # Check and prepare repository
         if self.opt["repo"].find("github") != -1:
-            self.check_github_repo(noinit)
+            self.check_github_repo()
         else:  # pragma: no cover
-            self.clone_repo(noinit)
+            self.clone_repo()
 
     def check_gitconfig(self):
+        if (self.opt["repo"].startswith("git://") or
+                self.opt["repo"].startswith("http")):
+            self.info(
+                "You are using repository of %s" % self.opt["repo"] +
+                "\nUse git protocol (git@...) to push your Brewfile update.",
+                0)
+            return False
         name = self.proc("git config user.name", False, False, False, True)[1]
         email = self.proc(
             "git config user.email", False, False, False, True)[1]
@@ -1219,7 +1220,7 @@ class BrewFile:
 
         # Clone if it doesn't exist
         if not self.brewinfo.check_dir():  # pragma: no cover
-            self.clone_repo(noinit=True)
+            self.clone_repo()
 
         # pull/push
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
@@ -1744,7 +1745,7 @@ class BrewFile:
         self.brewinfo.file_list.extend(self.brewinfo.file_input)
         self.input_to_list(only_ext=True)
 
-    def set_brewfile_repo(self, noinit=True):
+    def set_brewfile_repo(self):
         """Set Brewfile repository"""
         import re
 
@@ -1797,7 +1798,7 @@ class BrewFile:
             f = open_output_file(self.opt["input"], "w")
             f.write("git " + self.opt["repo"])
             f.close()
-            self.check_repo(noinit)
+            self.check_repo()
 
     def initialize(self, check=True):
         """Initialize Brewfile"""
@@ -2797,11 +2798,11 @@ class BrewFile:
 
         # Set BREWFILE repository
         if self.opt["command"] == "set_repo":
-            self.set_brewfile_repo(noinit=False)
+            self.set_brewfile_repo()
             sys.exit(0)
 
         # Change brewfile if it is repository's one.
-        self.check_repo(noinit=True)
+        self.check_repo()
 
         # Do pull/push for the repository.
         if self.opt["command"] in ["pull", "push"]:
