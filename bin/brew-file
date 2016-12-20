@@ -985,9 +985,9 @@ class BrewFile:
         """Helper to build Brewfile path for the repository."""
         repo_name = self.opt["repo"].split("/")[-1].split(".git")[0]
         user_name = self.opt["repo"].split("/")[-2].split(":")[-1]
-        input = self.opt["input"].split("/")[-1]
+        input_file = self.opt["input"].split("/")[-1]
         return os.path.dirname(self.opt["input"]) + "/" + user_name + "_" +\
-            repo_name + "/" + input
+            repo_name + "/" + input_file
 
     def clone_repo(self):
         ret = self.proc("git clone " + self.opt["repo"] + " \"" +
