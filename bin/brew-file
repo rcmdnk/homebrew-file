@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.6"
+__version__ = "v4.1.7"
 __date__ = "21/Dec/2016"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -1004,7 +1004,7 @@ class BrewFile:
         if len(branches) != 0:
             return
 
-        self.info("# Initialize the repository with README.md/Brewfile.", 1)
+        self.info("Initialize the repository with README.md/Brewfile.", 1)
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
         if not os.path.exists("README.md"):
@@ -1191,10 +1191,10 @@ class BrewFile:
         name = self.proc("git config user.name", False, False, False, True)[1]
         email = self.proc(
             "git config user.email", False, False, False, True)[1]
-        if name == "" or email == "":
+        if len(name) == 0 or len(email) == 0:
             self.warning(
-                "You don't have user/email information in your .gitconfig."
-                "To commit and push your update, run"
+                "You don't have user/email information in your .gitconfig.\n"
+                "To commit and push your update, run\n"
                 '  git config --global user.email "you@example.com"\n'
                 '  git config --global user.name "Your Name"\n'
                 'and try again.', 0)
