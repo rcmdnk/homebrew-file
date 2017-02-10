@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.8"
-__date__ = "7/Feb/2017"
+__version__ = "v4.1.9"
+__date__ = "10/Feb/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1675,15 +1675,6 @@ class BrewFile:
             else:
                 leaves = full_list
 
-            import json
-            for p in json.loads(self.proc("brew info --json=v1 --installed",
-                                          False, False, True, True)[1][0]):
-                if p["name"] not in leaves:
-                    continue
-                self.brewinfo.brew_list.append(p["name"])
-                self.brewinfo.brew_list_opt[p["name"]] =\
-                    self.brewinfo.get_options(p["name"], p)
-
             # pip/gem
             # pip/gem packages are not in brew info list
             for p in full_list:
@@ -1695,6 +1686,19 @@ class BrewFile:
                     package = p.replace("gem-", "")
                     self.brewinfo.gem_list.append(package)
                     self.brewinfo.gem_list_opt[package] = ""
+                else:
+                    continue
+                if p in leaves:
+                    leaves.remove(p)
+
+            import json
+            for p in json.loads(self.proc("brew info --json=v1 --installed",
+                                          False, False, True, True)[1][0]):
+                if p["name"] not in leaves:
+                    continue
+                self.brewinfo.brew_list.append(p["name"])
+                self.brewinfo.brew_list_opt[p["name"]] =\
+                    self.brewinfo.get_options(p["name"], p)
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False,

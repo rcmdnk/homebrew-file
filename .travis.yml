@@ -220,6 +220,7 @@ script:
   - coverage run --parallel-mode $exe brew cask list
   - $exe get_files
   - cat $($exe get_files)
+  - brew list
   - coverage run --parallel-mode $exe clean -C -V 2
   - coverage run --parallel-mode $exe init -y -V 2
   - coverage run --parallel-mode $exe brew cask install firefox
