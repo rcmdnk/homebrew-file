@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.9"
-__date__ = "10/Feb/2017"
+__version__ = "v4.1.10"
+__date__ = "15/Feb/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1615,7 +1615,7 @@ class BrewFile:
         if ret and ret != "MASNOTAVAILABLE":
             (ret, lines) = self.proc(self.opt["mas_cmd"] + " list",
                                      False, False, separate_err_msg=True)
-            apps = sorted(lines, key=lambda x: x.split()[1:])
+            apps = sorted(lines, key=lambda x: " ".join(x.split()[1:]).lower())
             if len(apps) > 0 and apps[0] == "No installed apps found":
                 apps = []
         elif ret:  # pragma: no cover
@@ -2289,13 +2289,15 @@ class BrewFile:
         # First, get App Store applications
         appstore_list = {}
         for p in self.get_appstore_list():  # pragma: no cover
-            identifier = p.split()[0]
+            pinfo = p.split()
+            identifier = pinfo[0]
             if identifier.isdigit() and len(identifier) == 9:
-                package = " ".join(p.split()[1:])
+                package = " ".join(pinfo[1:])
             else:
                 identifier = ""
                 package = p
-            appstore_list[package] = identifier
+            (pname, version) = package.split("(")
+            appstore_list[pname.strip()] = [identifier, "(" + version]
 
         # Get cask list, force to install brew-cask
         # if it has not been installed.
@@ -2387,11 +2389,15 @@ class BrewFile:
                         if not x.startswith(".") and x != "Utilities" and
                         os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
-                if app.replace(".app", "")\
-                        in appstore_list.keys():  # pragma: no cover
+                aname = app.replace(".app", "")
+                if aname in appstore_list.keys():  # pragma: no cover
                     tap = "appstore"
                     installed = False
-                    name = appstore_list[app.replace(".app", "")]
+                    if appstore_list[aname][0] != "":
+                        name = appstore_list[aname][0] + " " + aname +\
+                            " " + appstore_list[aname][1]
+                    else:
+                        name = ""
                     check = "appstore"
                 elif app in casks.keys() or\
                         app.split(".")[0] in casks.keys():
@@ -2471,13 +2477,13 @@ class BrewFile:
                            if x[2] != "cask_obsolete"):
                 if name not in casks_in_others:
                     out.writeln(
-                        "cask install " + name +
-                        " #" + app_path.replace(os.environ["HOME"], "~"))
+                        "cask " + name +
+                        " # " + app_path.replace(os.environ["HOME"], "~"))
                     casks_in_others.append(name)
                 else:
                     out.writeln(
-                        "#cask install " + name +
-                        " #" + app_path.replace(os.environ["HOME"], "~"))
+                        "#cask " + name +
+                        " # " + app_path.replace(os.environ["HOME"], "~"))
 
             if len([x for x in apps[self.opt["cask_repo"]][True]
                     if x[2] == "cask_obsolete"]) > 0:
@@ -2488,13 +2494,13 @@ class BrewFile:
                                if x[2] == "cask_obsolete"):
                     if name not in casks_in_others:
                         out.writeln(
-                            "cask install " + name +
-                            " #" + app_path.replace(os.environ["HOME"], "~"))
+                            "cask " + name +
+                            " # " + app_path.replace(os.environ["HOME"], "~"))
                         casks_in_others.append(name)
                     else:
                         out.writeln(
-                            "#cask install " + name +
-                            " #" + app_path.replace(os.environ["HOME"], "~"))
+                            "#cask " + name +
+                            " # " + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
         if len([x[0] for x in list(casks.values()) + nonapp_casks
@@ -2506,7 +2512,7 @@ class BrewFile:
                     x[0] for x in list(casks.values()) + nonapp_casks
                     if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
                 if name not in casks_in_others:
-                    out.writeln("cask install " + name)
+                    out.writeln("cask " + name)
                     casks_in_others.append(name)
             if len([x[0] for x in list(casks.values()) + nonapp_casks
                    if x[1] == self.opt["cask_repo"] and
@@ -2527,8 +2533,8 @@ class BrewFile:
                         self.opt["cask_repo"])
             for (name, app_path, check) in\
                     sorted(x for x in apps[self.opt["cask_repo"]][False]):
-                out.writeln("#cask install " + name +
-                            " #" + app_path.replace(os.environ["HOME"], "~"))
+                out.writeln("#cask " + name +
+                            " # " + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
         for t in filter(lambda x: x != self.opt["cask_repo"] and
@@ -2542,11 +2548,11 @@ class BrewFile:
                         sorted(x for x in apps[t][True]
                                if x[2] != "cask_obsolete"):
                     if name not in casks_in_others:
-                        out.writeln("cask install " + name + " #" +
+                        out.writeln("cask " + name + " # " +
                                     app_path.replace(os.environ["HOME"], "~"))
                         casks_in_others.append(name)
                     else:
-                        out.writeln("#cask install " + name + " #" +
+                        out.writeln("#cask " + name + " # " +
                                     app_path.replace(os.environ["HOME"], "~"))
 
                 if len([x for x in apps[t][True]
@@ -2558,12 +2564,12 @@ class BrewFile:
                                    if x[2] == "cask_obsolete"):
                         if name not in casks_in_others:
                             out.writeln(
-                                "cask install " + name + " #" +
+                                "cask " + name + " # " +
                                 app_path.replace(os.environ["HOME"], "~"))
                             casks_in_others.append(name)
                         else:
                             out.writeln(
-                                "#cask install " + name + " #" +
+                                "#cask " + name + " # " +
                                 app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
@@ -2576,7 +2582,7 @@ class BrewFile:
                                    for x in list(casks.values()) + nonapp_casks
                                    if x[1] == t and x[2] and not x[3]):
                     if name not in casks_in_others:
-                        out.writeln("cask install " + name)
+                        out.writeln("cask " + name)
                         casks_in_others.append(name)
                 if len([x[0] for x in list(casks.values()) + nonapp_casks
                         if x[1] == t and not x[2] and not x[3]]) > 0:
@@ -2587,7 +2593,7 @@ class BrewFile:
                                        nonapp_casks
                                        if x[1] == t and not x[2] and not x[3]):
                         if name not in casks_in_others:
-                            out.writeln("cask install " + name)
+                            out.writeln("cask " + name)
                             casks_in_others.append(name)
                 out.writeln("")
 
@@ -2595,7 +2601,7 @@ class BrewFile:
                 out.writeln(
                     "# Apps installed directly instead of by Cask in " + t)
                 for (name, app_path, check) in apps[t][False]:
-                        out.writeln("#cask install " + name + " #" +
+                        out.writeln("#cask " + name + " # " +
                                     app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
@@ -2603,31 +2609,33 @@ class BrewFile:
             out.writeln("# Apps installed by brew install command")
             if "" in brew_apps:
                 for (name, app_path, opt) in brew_apps[""]:
-                    out.writeln("install " + name + " " + opt + " #" +
+                    out.writeln("brew " + name + " " + opt + " # " +
                                 app_path.replace(os.environ["HOME"], "~"))
             for tap in [x for x in brew_apps.keys() if x != ""]:
                 out.writeln("tap " + tap)
                 for (name, app_path, opt) in brew_apps[tap]:
-                    out.writeln("install " + name + " " + opt + " #" +
+                    out.writeln("brew " + name + " " + opt + " # " +
                                 app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
         if len(apps["appstore"][False]) > 0:  # pragma: no cover
             out.writeln("# Apps installed from AppStore")
-            for (name, app_path, check) in apps["appstore"][False]:
-                p = app_path.split("/")[-1].replace(".app", "")
+            for x in apps["appstore"][False]:
+                print(" ".join(x[0].split()[1:]).lower())
+            for (name, app_path, check) in sorted(
+                    apps["appstore"][False],
+                    key=lambda x: " ".join(x[0].split()[1:]).lower()):
                 if name != "":
-                    line = "%s %s #%s" % (name, p, app_path)
+                    out.writeln("appstore " + name + " # " + app_path)
                 else:
-                    line = "%s #%s" % (p, app_path)
-                out.writeln(line)
+                    out.writeln("#appstore # " + app_path)
             out.writeln("")
 
         if len(apps[""][False]) > 0:
             out.writeln("# Apps installed but no casks are available")
             out.writeln("# (System applications or directory installed.)")
             for (name, app_path, check) in apps[""][False]:
-                    out.writeln("#" + app_path)
+                    out.writeln("# " + app_path)
 
         out.close()
 
