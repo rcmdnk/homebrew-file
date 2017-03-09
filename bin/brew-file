@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.10"
-__date__ = "15/Feb/2017"
+__version__ = "v4.1.11"
+__date__ = "9/Mar/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2113,13 +2113,25 @@ class BrewFile:
             # pip
             for p in self.get("pip_input"):
                 if p in self.get("pip_list"):
-                    continue
+                    if self.get("pip_input_opt")[p] ==\
+                            self.get("pip_list_opt")[p]:
+                        continue
+                    else:
+                        self.proc(
+                            "brew uninstall --ignore-dependencies pip-" + p)
+
                 self.check_pip_cmd(True)
                 self.proc("brew pip " + p + self.get("pip_input_opt")[p])
 
             # gem
             for p in self.get("gem_input"):
                 if p in self.get("gem_list"):
+                    if self.get("gem_input_opt")[p] ==\
+                            self.get("gem_list_opt")[p]:
+                        continue
+                    else:
+                        self.proc(
+                            "brew uninstall --ignore-dependencies gem-" + p)
                     continue
                 self.check_gem_cmd(True)
                 self.proc("brew gem install " + p +
@@ -2127,9 +2139,14 @@ class BrewFile:
 
             # Brew
             for p in self.get("brew_input"):
+                cmd = "install"
                 if p in self.get("brew_list"):
-                    continue
-                (ret, lines) = self.proc("brew install " + p +
+                    if self.get("brew_input_opt")[p] ==\
+                            self.get("brew_list_opt")[p]:
+                        continue
+                    else:
+                        cmd = "reinstall"
+                (ret, lines) = self.proc("brew " + cmd + " " + p +
                                          self.get("brew_input_opt")[p])
                 if ret != 0:  # pragma: no cover
                     self.warning("Can not install " + p + "."
