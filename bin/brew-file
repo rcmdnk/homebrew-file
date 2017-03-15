@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.11"
-__date__ = "9/Mar/2017"
+__version__ = "v4.1.12"
+__date__ = "15/Mar/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2175,7 +2175,7 @@ class BrewFile:
                 if p in self.get("appstore_list"):
                     continue
                 identifier = p.split()[0]
-                if identifier.isdigit() and len(identifier) == 9:
+                if identifier.isdigit() and len(identifier) >= 9:
                     package = " ".join(p.split()[1:])
                 else:
                     identifier = ""
@@ -2183,7 +2183,7 @@ class BrewFile:
                 islist = False
                 for pl in self.get("appstore_list"):
                     l_identifier = pl.split()[0]
-                    if l_identifier.isdigit() and len(l_identifier) == 9:
+                    if l_identifier.isdigit() and len(l_identifier) >= 9:
                         l_package = " ".join(pl.split()[1:])
                     else:
                         l_identifier = ""
@@ -2194,14 +2194,22 @@ class BrewFile:
                 if islist:
                     continue
                 ret = self.check_mas_cmd(True)
-                if identifier != "" and ret and ret != "NOTAVAILABLE":
-                    self.info("Installing " + package)
-                    self.proc(self.opt["mas_cmd"] + " install " + identifier)
+                self.info("Installing " + package)
+                if identifier != "":
+                    if ret and ret != "NOTAVAILABLE":
+                        self.proc(self.opt["mas_cmd"] + " install " +
+                                  identifier)
+                    else:
+                        self.info("Please install %s from AppStore." %
+                                  package, 0)
+                        self.proc(
+                            "open -W 'macappstore://itunes.apple.com/app/id%s'"
+                            % (identifier))
                 else:
-                    self.info("Installing " + package)
-                    self.proc(
-                        "open -W 'macappstore://itunes.apple.com/app/id%s'"
-                        % (identifier))
+                    self.warning("No id or wrong id information was given for "
+                                 "AppStore App: %s.\n"
+                                 "Please install it manually." % package,
+                                 0)  # pragma: no cover
 
         # Other commands
         for c in self.get("cmd_input"):
