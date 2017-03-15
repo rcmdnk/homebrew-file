@@ -147,7 +147,7 @@ script:
   - coverage run --parallel-mode $exe casklist -V 2
   - coverage run --parallel-mode $exe brew untap caskroom/cask
   - coverage run --parallel-mode $exe casklist -V 0
-  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
+  - coverage run --parallel-mode $exe cask_upgrade -C -V 2
   - command brew cask rm firefox
   - coverage run --parallel-mode $exe cask_upgrade -C -V 0
   - command brew cask install firefox
