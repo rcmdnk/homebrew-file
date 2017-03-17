@@ -191,7 +191,7 @@ script:
   - coverage run --parallel-mode $exe init -y -V 0
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y -U -V 2; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y -V 2; fi'
     #  - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
   - coverage run --parallel-mode $exe casklist -V 2
