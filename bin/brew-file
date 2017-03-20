@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.12"
-__date__ = "15/Mar/2017"
+__version__ = "v4.1.13"
+__date__ = "20/Mar/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -426,14 +426,20 @@ class BrewInfo:
                 args.pop(0)
                 cmd = args[0]
                 p = args[1]
+                if self.helper.opt["form"] == "none":
+                    self.helper.opt["form"] = "cmd"
             if len(args) > 2 and cmd in ["brew", "cask", "gem"] and \
                     p == "install":
                 args.pop(1)
                 p = args[1]
+                if self.helper.opt["form"] == "none":
+                    self.helper.opt["form"] = "cmd"
 
             if len(args) > 2:
                 if args[2] == "args:":
                     opt = " " + " ".join(["--" + x for x in args[3:]]).strip()
+                    if self.helper.opt["form"] == "none":
+                        self.helper.opt["form"] = "bundle"
                 else:
                     opt = " " + " ".join(args[2:]).strip()
             else:
@@ -507,7 +513,7 @@ class BrewInfo:
         else:
             return pack
 
-    def get_options(self, package, package_info=""):
+    def get_option(self, package, package_info=""):
         """get install options from brew info"""
 
         # Get options for build
@@ -528,7 +534,9 @@ class BrewInfo:
                             opt += " --HEAD"
                         else:
                             opt += " --" + k
+        return opt
 
+    def convert_option(self, opt):
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
             import re
             opt = ", args: [" + ", ".join(
@@ -540,7 +548,7 @@ class BrewInfo:
         out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
 
         # commands for each format
-        if self.helper.opt["form"] == "file":
+        if self.helper.opt["form"] in ["file", "none"]:
             cmd_before = "before "
             cmd_after = "after "
             cmd_other = ""
@@ -634,7 +642,7 @@ class BrewInfo:
                                 direct_first = False
                                 out.writeln("\n## " + "Direct install")
                             pack = self.packout(p) +\
-                                self.brew_list_opt[p]
+                                self.convert_option(self.brew_list_opt[p])
                             out.writeln(cmd_install + pack)
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
@@ -650,7 +658,8 @@ class BrewInfo:
         if not self.helper.opt["caskonly"] and len(self.brew_list) > 0:
             out.writeln("\n# Other Homebrew packages")
             for p in self.brew_list:
-                pack = self.packout(p) + self.brew_list_opt[p]
+                pack = self.packout(p) +\
+                    self.convert_option(self.brew_list_opt[p])
                 out.writeln(cmd_install + pack)
 
         # pip packages
@@ -746,7 +755,7 @@ class BrewFile:
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
         self.opt["top_packages"] = os.environ.get(
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
-        self.opt["form"] = "file"
+        self.opt["form"] = "none"
         self.opt["repo"] = ""
         self.opt["noupdate"] = True
         self.opt["noupdateatupdate"] = False
@@ -813,6 +822,7 @@ class BrewFile:
 
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
+        self.opt["read"] = False
 
         self.pack_deps = {}
         self.top_packs = []
@@ -911,7 +921,9 @@ class BrewFile:
     def brew_val(self, name):
         return self.helper.brew_val(name)
 
-    def read_all(self):
+    def read_all(self, force=False):
+        if not force and self.opt["read"]:
+            return
         del self.brewinfo_ext[:]
         self.read(self.brewinfo)
         if self.opt["cask_cmd_installed"]:
@@ -935,6 +947,7 @@ class BrewFile:
             if not self.opt["gem_pack"] in self.get("brew_input"):
                 self.brewinfo.brew_input.append(self.opt["gem_pack"])
                 self.brewinfo.brew_input_opt[self.opt["gem_pack"]] = ""
+        self.opt["read"] = True
 
     def read(self, brewinfo):
         brewinfo.read()
@@ -1698,7 +1711,7 @@ class BrewFile:
                     continue
                 self.brewinfo.brew_list.append(p["name"])
                 self.brewinfo.brew_list_opt[p["name"]] =\
-                    self.brewinfo.get_options(p["name"], p)
+                    self.brewinfo.get_option(p["name"], p)
 
         # Taps
         (ret, lines) = self.proc("brew tap", False, False,
@@ -2295,7 +2308,7 @@ class BrewFile:
                                                       False)[1]
             if name in self.opt["brew_packages"]:
                 check = "brew"
-                opt = self.brewinfo.get_options(name)
+                opt = self.brewinfo.get_option(name)
                 if os.path.islink(self.brew_val("repository") +
                                   "/Library/Formula/" + name + ".rb"):
                     link = os.readlink(self.brew_val("repository") +
@@ -2971,7 +2984,7 @@ def main():
         "-F", "--format", "--form", action="store", dest="form",
         default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
-              "file              : brew vim --HEAD --with-lua\n"
+              "file (or none)    : brew vim --HEAD --with-lua\n"
               "brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']\n"
               "  Compatible with "
               "[homebrew-bundle]"
