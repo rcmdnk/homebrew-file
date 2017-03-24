@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.1.14"
-__date__ = "20/Mar/2017"
+__version__ = "v4.1.15"
+__date__ = "24/Mar/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -57,6 +57,8 @@ def my_input(word):  # pragma: no cover
             is_python3 = 1
     elif is_python3 == 0:
         _input = raw_input
+    else:
+        _input = input
     return _input(word)
 
 
