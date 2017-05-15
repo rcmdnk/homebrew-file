@@ -1,0 +1,718 @@
+# Change Log
+
+## [v4.1.16](https://github.com/rcmdnk/homebrew-file/tree/v4.1.16) (2017-05-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.15...v4.1.16)
+
+## [v4.1.15](https://github.com/rcmdnk/homebrew-file/tree/v4.1.15) (2017-03-24)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.14...v4.1.15)
+
+## [v4.1.14](https://github.com/rcmdnk/homebrew-file/tree/v4.1.14) (2017-03-20)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.13...v4.1.14)
+
+**Closed issues:**
+
+- Method of syncing system to brew-file arguments of installed brew [\#72](https://github.com/rcmdnk/homebrew-file/issues/72)
+
+## [v4.1.13](https://github.com/rcmdnk/homebrew-file/tree/v4.1.13) (2017-03-20)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.12...v4.1.13)
+
+**Closed issues:**
+
+- App Storeのアプリインストールで失敗する [\#73](https://github.com/rcmdnk/homebrew-file/issues/73)
+
+## [v4.1.12](https://github.com/rcmdnk/homebrew-file/tree/v4.1.12) (2017-03-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.11...v4.1.12)
+
+## [v4.1.11](https://github.com/rcmdnk/homebrew-file/tree/v4.1.11) (2017-03-09)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.10...v4.1.11)
+
+## [v4.1.10](https://github.com/rcmdnk/homebrew-file/tree/v4.1.10) (2017-02-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.9...v4.1.10)
+
+## [v4.1.9](https://github.com/rcmdnk/homebrew-file/tree/v4.1.9) (2017-02-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.8...v4.1.9)
+
+## [v4.1.8](https://github.com/rcmdnk/homebrew-file/tree/v4.1.8) (2017-02-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.7...v4.1.8)
+
+**Closed issues:**
+
+- "brew file init "and "brew file update" is stuck after "brew file set\_repo" [\#71](https://github.com/rcmdnk/homebrew-file/issues/71)
+- Python3 compatibility breaks `brew file init` command [\#69](https://github.com/rcmdnk/homebrew-file/issues/69)
+
+## [v4.1.7](https://github.com/rcmdnk/homebrew-file/tree/v4.1.7) (2016-12-20)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.6...v4.1.7)
+
+## [v4.1.6](https://github.com/rcmdnk/homebrew-file/tree/v4.1.6) (2016-12-20)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.5...v4.1.6)
+
+## [v4.1.5](https://github.com/rcmdnk/homebrew-file/tree/v4.1.5) (2016-12-20)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.4...v4.1.5)
+
+## [v4.1.4](https://github.com/rcmdnk/homebrew-file/tree/v4.1.4) (2016-12-19)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.3...v4.1.4)
+
+**Closed issues:**
+
+- travis seems broken? [\#53](https://github.com/rcmdnk/homebrew-file/issues/53)
+
+**Merged pull requests:**
+
+- Fix ZSH issues in brew-wrap - doesn't run brew-file [\#70](https://github.com/rcmdnk/homebrew-file/pull/70) ([derimagia](https://github.com/derimagia))
+
+## [v4.1.3](https://github.com/rcmdnk/homebrew-file/tree/v4.1.3) (2016-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.2...v4.1.3)
+
+## [v4.1.2](https://github.com/rcmdnk/homebrew-file/tree/v4.1.2) (2016-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.1.1...v4.1.2)
+
+## [v4.1.1](https://github.com/rcmdnk/homebrew-file/tree/v4.1.1) (2016-11-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.5...v4.1.1)
+
+## [v4.0.5](https://github.com/rcmdnk/homebrew-file/tree/v4.0.5) (2016-11-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.4...v4.0.5)
+
+## [v4.0.4](https://github.com/rcmdnk/homebrew-file/tree/v4.0.4) (2016-11-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.3...v4.0.4)
+
+## [v4.0.3](https://github.com/rcmdnk/homebrew-file/tree/v4.0.3) (2016-11-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.2...v4.0.3)
+
+**Closed issues:**
+
+- Disable sportngin/brew-gem [\#67](https://github.com/rcmdnk/homebrew-file/issues/67)
+- ZSH brew-wrap [\#62](https://github.com/rcmdnk/homebrew-file/issues/62)
+
+**Merged pull requests:**
+
+- add environment support for using brew's ruby installation with brew-gem [\#68](https://github.com/rcmdnk/homebrew-file/pull/68) ([boneskull](https://github.com/boneskull))
+
+## [v4.0.2](https://github.com/rcmdnk/homebrew-file/tree/v4.0.2) (2016-10-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.1...v4.0.2)
+
+## [v4.0.1](https://github.com/rcmdnk/homebrew-file/tree/v4.0.1) (2016-09-29)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v4.0.0...v4.0.1)
+
+## [v4.0.0](https://github.com/rcmdnk/homebrew-file/tree/v4.0.0) (2016-09-28)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.3...v4.0.0)
+
+**Closed issues:**
+
+- stdout is too slow; homebrew may appear like it's not doing anything [\#49](https://github.com/rcmdnk/homebrew-file/issues/49)
+- brew cask\_upgradeでアップデートできない [\#48](https://github.com/rcmdnk/homebrew-file/issues/48)
+
+**Merged pull requests:**
+
+- fix some spelling in bin/brew-file [\#52](https://github.com/rcmdnk/homebrew-file/pull/52) ([boneskull](https://github.com/boneskull))
+- fix a couple issues in docs [\#51](https://github.com/rcmdnk/homebrew-file/pull/51) ([boneskull](https://github.com/boneskull))
+- stdout buffer flushes in realtime; closes \#49 [\#50](https://github.com/rcmdnk/homebrew-file/pull/50) ([boneskull](https://github.com/boneskull))
+
+## [v3.16.3](https://github.com/rcmdnk/homebrew-file/tree/v3.16.3) (2016-09-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.2...v3.16.3)
+
+## [v3.16.2](https://github.com/rcmdnk/homebrew-file/tree/v3.16.2) (2016-09-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.1...v3.16.2)
+
+## [v3.16.1](https://github.com/rcmdnk/homebrew-file/tree/v3.16.1) (2016-09-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.4...v3.16.1)
+
+**Closed issues:**
+
+- Yosemite で Failed to install mas [\#47](https://github.com/rcmdnk/homebrew-file/issues/47)
+
+## [v3.15.4](https://github.com/rcmdnk/homebrew-file/tree/v3.15.4) (2016-08-23)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.3...v3.15.4)
+
+## [v3.15.3](https://github.com/rcmdnk/homebrew-file/tree/v3.15.3) (2016-08-23)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.2...v3.15.3)
+
+## [v3.15.2](https://github.com/rcmdnk/homebrew-file/tree/v3.15.2) (2016-08-22)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.1...v3.15.2)
+
+**Merged pull requests:**
+
+- fix typos [\#46](https://github.com/rcmdnk/homebrew-file/pull/46) ([znz](https://github.com/znz))
+
+## [v3.15.1](https://github.com/rcmdnk/homebrew-file/tree/v3.15.1) (2016-08-18)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.5...v3.15.1)
+
+## [v3.14.5](https://github.com/rcmdnk/homebrew-file/tree/v3.14.5) (2016-08-18)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.4...v3.14.5)
+
+## [v3.14.4](https://github.com/rcmdnk/homebrew-file/tree/v3.14.4) (2016-08-18)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.3...v3.14.4)
+
+**Closed issues:**
+
+- `brew file update`でエラーが発生します [\#45](https://github.com/rcmdnk/homebrew-file/issues/45)
+
+## [v3.14.3](https://github.com/rcmdnk/homebrew-file/tree/v3.14.3) (2016-08-05)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.2...v3.14.3)
+
+**Closed issues:**
+
+- Do you have any license on this project? [\#44](https://github.com/rcmdnk/homebrew-file/issues/44)
+
+## [v3.14.2](https://github.com/rcmdnk/homebrew-file/tree/v3.14.2) (2016-07-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.1...v3.14.2)
+
+## [v3.14.1](https://github.com/rcmdnk/homebrew-file/tree/v3.14.1) (2016-07-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.13.2...v3.14.1)
+
+**Closed issues:**
+
+- `brew file update`でXCodeがアンインストールされてしまう件について [\#43](https://github.com/rcmdnk/homebrew-file/issues/43)
+- Support mas being installed through homebrew-core's mas [\#42](https://github.com/rcmdnk/homebrew-file/issues/42)
+
+## [v3.13.2](https://github.com/rcmdnk/homebrew-file/tree/v3.13.2) (2016-06-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.13.1...v3.13.2)
+
+## [v3.13.1](https://github.com/rcmdnk/homebrew-file/tree/v3.13.1) (2016-06-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.11...v3.13.1)
+
+## [v3.12.11](https://github.com/rcmdnk/homebrew-file/tree/v3.12.11) (2016-06-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.10...v3.12.11)
+
+## [v3.12.10](https://github.com/rcmdnk/homebrew-file/tree/v3.12.10) (2016-06-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.9...v3.12.10)
+
+**Closed issues:**
+
+- Limit brewfile to items you install and not dependencies [\#41](https://github.com/rcmdnk/homebrew-file/issues/41)
+
+## [v3.12.9](https://github.com/rcmdnk/homebrew-file/tree/v3.12.9) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.8...v3.12.9)
+
+## [v3.12.8](https://github.com/rcmdnk/homebrew-file/tree/v3.12.8) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.7...v3.12.8)
+
+## [v3.12.7](https://github.com/rcmdnk/homebrew-file/tree/v3.12.7) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.6...v3.12.7)
+
+## [v3.12.6](https://github.com/rcmdnk/homebrew-file/tree/v3.12.6) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.5...v3.12.6)
+
+## [v3.12.5](https://github.com/rcmdnk/homebrew-file/tree/v3.12.5) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.4...v3.12.5)
+
+## [v3.12.4](https://github.com/rcmdnk/homebrew-file/tree/v3.12.4) (2016-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.3...v3.12.4)
+
+**Closed issues:**
+
+- unable to run clamav on mac os 10.10.5 [\#40](https://github.com/rcmdnk/homebrew-file/issues/40)
+- 'brew file init' loses install arguments [\#39](https://github.com/rcmdnk/homebrew-file/issues/39)
+
+## [v3.12.3](https://github.com/rcmdnk/homebrew-file/tree/v3.12.3) (2016-05-08)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.2...v3.12.3)
+
+## [v3.12.2](https://github.com/rcmdnk/homebrew-file/tree/v3.12.2) (2016-05-08)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.12.1...v3.12.2)
+
+## [v3.12.1](https://github.com/rcmdnk/homebrew-file/tree/v3.12.1) (2016-05-08)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.11.2...v3.12.1)
+
+**Closed issues:**
+
+- doesn't work with Python 3.x [\#37](https://github.com/rcmdnk/homebrew-file/issues/37)
+
+**Merged pull requests:**
+
+- Doc updates since brew cat exists now [\#38](https://github.com/rcmdnk/homebrew-file/pull/38) ([derimagia](https://github.com/derimagia))
+
+## [v3.11.2](https://github.com/rcmdnk/homebrew-file/tree/v3.11.2) (2016-04-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.11.1...v3.11.2)
+
+## [v3.11.1](https://github.com/rcmdnk/homebrew-file/tree/v3.11.1) (2016-04-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.10...v3.11.1)
+
+## [v3.10.10](https://github.com/rcmdnk/homebrew-file/tree/v3.10.10) (2016-03-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.9...v3.10.10)
+
+## [v3.10.9](https://github.com/rcmdnk/homebrew-file/tree/v3.10.9) (2016-03-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.8...v3.10.9)
+
+## [v3.10.8](https://github.com/rcmdnk/homebrew-file/tree/v3.10.8) (2016-02-22)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.7...v3.10.8)
+
+## [v3.10.7](https://github.com/rcmdnk/homebrew-file/tree/v3.10.7) (2016-02-22)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.6...v3.10.7)
+
+## [v3.10.6](https://github.com/rcmdnk/homebrew-file/tree/v3.10.6) (2016-02-22)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.5...v3.10.6)
+
+## [v3.10.5](https://github.com/rcmdnk/homebrew-file/tree/v3.10.5) (2016-02-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.4...v3.10.5)
+
+## [v3.10.4](https://github.com/rcmdnk/homebrew-file/tree/v3.10.4) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.3...v3.10.4)
+
+## [v3.10.3](https://github.com/rcmdnk/homebrew-file/tree/v3.10.3) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.2...v3.10.3)
+
+## [v3.10.2](https://github.com/rcmdnk/homebrew-file/tree/v3.10.2) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.1...v3.10.2)
+
+## [v3.10.1](https://github.com/rcmdnk/homebrew-file/tree/v3.10.1) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.10.0...v3.10.1)
+
+## [v3.10.0](https://github.com/rcmdnk/homebrew-file/tree/v3.10.0) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.9...v3.10.0)
+
+## [v3.9.9](https://github.com/rcmdnk/homebrew-file/tree/v3.9.9) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.8...v3.9.9)
+
+## [v3.9.8](https://github.com/rcmdnk/homebrew-file/tree/v3.9.8) (2016-02-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.7...v3.9.8)
+
+## [v3.9.7](https://github.com/rcmdnk/homebrew-file/tree/v3.9.7) (2016-02-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.6...v3.9.7)
+
+## [v3.9.6](https://github.com/rcmdnk/homebrew-file/tree/v3.9.6) (2016-01-28)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.5...v3.9.6)
+
+## [v3.9.5](https://github.com/rcmdnk/homebrew-file/tree/v3.9.5) (2016-01-28)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.4...v3.9.5)
+
+## [v3.9.4](https://github.com/rcmdnk/homebrew-file/tree/v3.9.4) (2016-01-28)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.3...v3.9.4)
+
+**Closed issues:**
+
+- Persistent mis-identification when multiple casks define the same applications. [\#31](https://github.com/rcmdnk/homebrew-file/issues/31)
+
+## [v3.9.3](https://github.com/rcmdnk/homebrew-file/tree/v3.9.3) (2016-01-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.2...v3.9.3)
+
+**Closed issues:**
+
+- Hook brew-instal [\#36](https://github.com/rcmdnk/homebrew-file/issues/36)
+- `set\_repo` fails when `HOMEBREW\_BREWFILE` contains space [\#35](https://github.com/rcmdnk/homebrew-file/issues/35)
+
+## [v3.9.2](https://github.com/rcmdnk/homebrew-file/tree/v3.9.2) (2016-01-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.9.1...v3.9.2)
+
+## [v3.9.1](https://github.com/rcmdnk/homebrew-file/tree/v3.9.1) (2016-01-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.8.1...v3.9.1)
+
+**Closed issues:**
+
+- \[Feature\] Support Brew Gem [\#34](https://github.com/rcmdnk/homebrew-file/issues/34)
+- \[Feature\] Support Brew Pip [\#33](https://github.com/rcmdnk/homebrew-file/issues/33)
+
+## [v3.8.1](https://github.com/rcmdnk/homebrew-file/tree/v3.8.1) (2016-01-05)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.9...v3.8.1)
+
+## [v3.7.9](https://github.com/rcmdnk/homebrew-file/tree/v3.7.9) (2016-01-05)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.8...v3.7.9)
+
+**Closed issues:**
+
+- Inadequate escaping for incremental brewfile update. [\#32](https://github.com/rcmdnk/homebrew-file/issues/32)
+- Duplication of outdated casks. [\#30](https://github.com/rcmdnk/homebrew-file/issues/30)
+
+## [v3.7.8](https://github.com/rcmdnk/homebrew-file/tree/v3.7.8) (2016-01-05)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.7...v3.7.8)
+
+## [v3.7.7](https://github.com/rcmdnk/homebrew-file/tree/v3.7.7) (2016-01-03)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.6...v3.7.7)
+
+## [v3.7.6](https://github.com/rcmdnk/homebrew-file/tree/v3.7.6) (2015-12-18)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.5...v3.7.6)
+
+## [v3.7.5](https://github.com/rcmdnk/homebrew-file/tree/v3.7.5) (2015-12-17)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.4...v3.7.5)
+
+## [v3.7.4](https://github.com/rcmdnk/homebrew-file/tree/v3.7.4) (2015-11-17)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.3...v3.7.4)
+
+## [v3.7.3](https://github.com/rcmdnk/homebrew-file/tree/v3.7.3) (2015-11-16)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.2...v3.7.3)
+
+**Closed issues:**
+
+- Add option for specifying per-host directives [\#29](https://github.com/rcmdnk/homebrew-file/issues/29)
+- Add configuration options for backup files [\#28](https://github.com/rcmdnk/homebrew-file/issues/28)
+
+## [v3.7.2](https://github.com/rcmdnk/homebrew-file/tree/v3.7.2) (2015-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.1...v3.7.2)
+
+**Closed issues:**
+
+- brew file initが失敗する [\#26](https://github.com/rcmdnk/homebrew-file/issues/26)
+- brew reinstall [\#25](https://github.com/rcmdnk/homebrew-file/issues/25)
+
+**Merged pull requests:**
+
+- brew file edit throws error for certain $EDITOR variables [\#27](https://github.com/rcmdnk/homebrew-file/pull/27) ([zebernst](https://github.com/zebernst))
+
+## [v3.7.1](https://github.com/rcmdnk/homebrew-file/tree/v3.7.1) (2015-11-09)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.7.0...v3.7.1)
+
+## [v3.7.0](https://github.com/rcmdnk/homebrew-file/tree/v3.7.0) (2015-11-06)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.10...v3.7.0)
+
+## [v3.6.10](https://github.com/rcmdnk/homebrew-file/tree/v3.6.10) (2015-11-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.9...v3.6.10)
+
+## [v3.6.9](https://github.com/rcmdnk/homebrew-file/tree/v3.6.9) (2015-11-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.8...v3.6.9)
+
+## [v3.6.8](https://github.com/rcmdnk/homebrew-file/tree/v3.6.8) (2015-11-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.7...v3.6.8)
+
+**Closed issues:**
+
+- Doesn't know how to handle URL [\#24](https://github.com/rcmdnk/homebrew-file/issues/24)
+
+## [v3.6.7](https://github.com/rcmdnk/homebrew-file/tree/v3.6.7) (2015-10-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.6...v3.6.7)
+
+## [v3.6.6](https://github.com/rcmdnk/homebrew-file/tree/v3.6.6) (2015-10-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.5...v3.6.6)
+
+## [v3.6.5](https://github.com/rcmdnk/homebrew-file/tree/v3.6.5) (2015-10-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.4...v3.6.5)
+
+## [v3.6.4](https://github.com/rcmdnk/homebrew-file/tree/v3.6.4) (2015-10-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.3...v3.6.4)
+
+**Merged pull requests:**
+
+- Typo [\#23](https://github.com/rcmdnk/homebrew-file/pull/23) ([adjohnson916](https://github.com/adjohnson916))
+
+## [v3.6.3](https://github.com/rcmdnk/homebrew-file/tree/v3.6.3) (2015-09-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.2...v3.6.3)
+
+## [v3.6.2](https://github.com/rcmdnk/homebrew-file/tree/v3.6.2) (2015-09-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.1...v3.6.2)
+
+## [v3.6.1](https://github.com/rcmdnk/homebrew-file/tree/v3.6.1) (2015-09-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.0...v3.6.1)
+
+## [v3.6.0](https://github.com/rcmdnk/homebrew-file/tree/v3.6.0) (2015-09-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.13...v3.6.0)
+
+**Closed issues:**
+
+- Add an option to ignore appstore apps [\#22](https://github.com/rcmdnk/homebrew-file/issues/22)
+
+## [v3.5.13](https://github.com/rcmdnk/homebrew-file/tree/v3.5.13) (2015-08-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.12...v3.5.13)
+
+## [v3.5.12](https://github.com/rcmdnk/homebrew-file/tree/v3.5.12) (2015-07-31)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.11...v3.5.12)
+
+## [v3.5.11](https://github.com/rcmdnk/homebrew-file/tree/v3.5.11) (2015-07-31)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.10...v3.5.11)
+
+## [v3.5.10](https://github.com/rcmdnk/homebrew-file/tree/v3.5.10) (2015-07-31)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.9...v3.5.10)
+
+## [v3.5.9](https://github.com/rcmdnk/homebrew-file/tree/v3.5.9) (2015-06-25)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.8...v3.5.9)
+
+## [v3.5.8](https://github.com/rcmdnk/homebrew-file/tree/v3.5.8) (2015-06-25)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.7...v3.5.8)
+
+## [v3.5.7](https://github.com/rcmdnk/homebrew-file/tree/v3.5.7) (2015-06-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.6...v3.5.7)
+
+## [v3.5.6](https://github.com/rcmdnk/homebrew-file/tree/v3.5.6) (2015-06-06)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.5...v3.5.6)
+
+## [v3.5.5](https://github.com/rcmdnk/homebrew-file/tree/v3.5.5) (2015-06-03)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.4...v3.5.5)
+
+## [v3.5.4](https://github.com/rcmdnk/homebrew-file/tree/v3.5.4) (2015-06-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.3...v3.5.4)
+
+## [v3.5.3](https://github.com/rcmdnk/homebrew-file/tree/v3.5.3) (2015-06-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.2...v3.5.3)
+
+## [v3.5.2](https://github.com/rcmdnk/homebrew-file/tree/v3.5.2) (2015-06-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.1...v3.5.2)
+
+## [v3.5.1](https://github.com/rcmdnk/homebrew-file/tree/v3.5.1) (2015-06-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.5.0...v3.5.1)
+
+## [v3.5.0](https://github.com/rcmdnk/homebrew-file/tree/v3.5.0) (2015-06-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.8...v3.5.0)
+
+## [v3.4.8](https://github.com/rcmdnk/homebrew-file/tree/v3.4.8) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.7...v3.4.8)
+
+## [v3.4.7](https://github.com/rcmdnk/homebrew-file/tree/v3.4.7) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.6...v3.4.7)
+
+## [v3.4.6](https://github.com/rcmdnk/homebrew-file/tree/v3.4.6) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.5...v3.4.6)
+
+## [v3.4.5](https://github.com/rcmdnk/homebrew-file/tree/v3.4.5) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.4...v3.4.5)
+
+## [v3.4.4](https://github.com/rcmdnk/homebrew-file/tree/v3.4.4) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.3...v3.4.4)
+
+## [v3.4.3](https://github.com/rcmdnk/homebrew-file/tree/v3.4.3) (2015-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.2...v3.4.3)
+
+## [v3.4.2](https://github.com/rcmdnk/homebrew-file/tree/v3.4.2) (2015-05-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.1...v3.4.2)
+
+## [v3.4.1](https://github.com/rcmdnk/homebrew-file/tree/v3.4.1) (2015-05-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.4.0...v3.4.1)
+
+## [v3.4.0](https://github.com/rcmdnk/homebrew-file/tree/v3.4.0) (2015-05-08)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.10...v3.4.0)
+
+**Closed issues:**
+
+- Error handling for brew command with Python 2.7.6 and earlier [\#21](https://github.com/rcmdnk/homebrew-file/issues/21)
+
+## [v3.3.10](https://github.com/rcmdnk/homebrew-file/tree/v3.3.10) (2015-03-23)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.9...v3.3.10)
+
+## [v3.3.9](https://github.com/rcmdnk/homebrew-file/tree/v3.3.9) (2015-03-22)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.8...v3.3.9)
+
+## [v3.3.8](https://github.com/rcmdnk/homebrew-file/tree/v3.3.8) (2015-03-17)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.7...v3.3.8)
+
+## [v3.3.7](https://github.com/rcmdnk/homebrew-file/tree/v3.3.7) (2015-03-16)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.6...v3.3.7)
+
+## [v3.3.6](https://github.com/rcmdnk/homebrew-file/tree/v3.3.6) (2015-03-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.5...v3.3.6)
+
+**Closed issues:**
+
+- Use HOMEBREW\_CASK\_OPTS \(--appdir\) for casklist command. [\#20](https://github.com/rcmdnk/homebrew-file/issues/20)
+
+## [v3.3.5](https://github.com/rcmdnk/homebrew-file/tree/v3.3.5) (2015-03-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.4...v3.3.5)
+
+## [v3.3.4](https://github.com/rcmdnk/homebrew-file/tree/v3.3.4) (2015-03-09)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.3...v3.3.4)
+
+**Closed issues:**
+
+- Strange message "The cask file of Warning: nothing to list doesn't exist." [\#19](https://github.com/rcmdnk/homebrew-file/issues/19)
+- Dubious results with `brew file casklist` [\#18](https://github.com/rcmdnk/homebrew-file/issues/18)
+- "ImportError: No module named requests" on freshly installed Yosemite [\#17](https://github.com/rcmdnk/homebrew-file/issues/17)
+
+## [v3.3.3](https://github.com/rcmdnk/homebrew-file/tree/v3.3.3) (2015-03-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.2...v3.3.3)
+
+## [v3.3.2](https://github.com/rcmdnk/homebrew-file/tree/v3.3.2) (2014-12-24)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.1...v3.3.2)
+
+## [v3.3.1](https://github.com/rcmdnk/homebrew-file/tree/v3.3.1) (2014-12-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.3.0...v3.3.1)
+
+**Merged pull requests:**
+
+- "infi\(\)" -\> "info\(\)" \(line 1270\) [\#16](https://github.com/rcmdnk/homebrew-file/pull/16) ([joker8phoenix](https://github.com/joker8phoenix))
+
+## [v3.3.0](https://github.com/rcmdnk/homebrew-file/tree/v3.3.0) (2014-12-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.2.1...v3.3.0)
+
+## [v3.2.1](https://github.com/rcmdnk/homebrew-file/tree/v3.2.1) (2014-12-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.2.0...v3.2.1)
+
+**Merged pull requests:**
+
+- Update brew-file [\#15](https://github.com/rcmdnk/homebrew-file/pull/15) ([joker8phoenix](https://github.com/joker8phoenix))
+
+## [v3.2.0](https://github.com/rcmdnk/homebrew-file/tree/v3.2.0) (2014-11-19)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.1.2...v3.2.0)
+
+## [v3.1.2](https://github.com/rcmdnk/homebrew-file/tree/v3.1.2) (2014-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.1.1...v3.1.2)
+
+## [v3.1.1](https://github.com/rcmdnk/homebrew-file/tree/v3.1.1) (2014-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.1.0...v3.1.1)
+
+**Closed issues:**
+
+- Dont buffer the output of Brew [\#13](https://github.com/rcmdnk/homebrew-file/issues/13)
+- Please translate the article on your webpage about homebrew file into english [\#12](https://github.com/rcmdnk/homebrew-file/issues/12)
+- Specify alternative location for Brewfile doesn't work [\#11](https://github.com/rcmdnk/homebrew-file/issues/11)
+- Include brew-wrap as an option of brew-file [\#9](https://github.com/rcmdnk/homebrew-file/issues/9)
+
+## [v3.1.0](https://github.com/rcmdnk/homebrew-file/tree/v3.1.0) (2014-11-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.0.0...v3.1.0)
+
+**Merged pull requests:**
+
+- Added before/after commands [\#14](https://github.com/rcmdnk/homebrew-file/pull/14) ([rcmdnk](https://github.com/rcmdnk))
+
+## [v3.0.0](https://github.com/rcmdnk/homebrew-file/tree/v3.0.0) (2014-11-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.2.1...v3.0.0)
+
+## [v2.2.1](https://github.com/rcmdnk/homebrew-file/tree/v2.2.1) (2014-11-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.11...v2.2.1)
+
+## [v2.1.11](https://github.com/rcmdnk/homebrew-file/tree/v2.1.11) (2014-11-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.10...v2.1.11)
+
+## [v2.1.10](https://github.com/rcmdnk/homebrew-file/tree/v2.1.10) (2014-11-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.9...v2.1.10)
+
+## [v2.1.9](https://github.com/rcmdnk/homebrew-file/tree/v2.1.9) (2014-11-11)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.8...v2.1.9)
+
+## [v2.1.8](https://github.com/rcmdnk/homebrew-file/tree/v2.1.8) (2014-11-11)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.7...v2.1.8)
+
+## [v2.1.7](https://github.com/rcmdnk/homebrew-file/tree/v2.1.7) (2014-11-11)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.6...v2.1.7)
+
+## [v2.1.6](https://github.com/rcmdnk/homebrew-file/tree/v2.1.6) (2014-11-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.5...v2.1.6)
+
+## [v2.1.5](https://github.com/rcmdnk/homebrew-file/tree/v2.1.5) (2014-11-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.4...v2.1.5)
+
+## [v2.1.4](https://github.com/rcmdnk/homebrew-file/tree/v2.1.4) (2014-11-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.3...v2.1.4)
+
+## [v2.1.3](https://github.com/rcmdnk/homebrew-file/tree/v2.1.3) (2014-11-10)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.2...v2.1.3)
+
+**Closed issues:**
+
+- add a key to travis [\#10](https://github.com/rcmdnk/homebrew-file/issues/10)
+- Breaks with custom brew-cask appdir [\#8](https://github.com/rcmdnk/homebrew-file/issues/8)
+
+## [v2.1.2](https://github.com/rcmdnk/homebrew-file/tree/v2.1.2) (2014-11-02)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.1...v2.1.2)
+
+## [v2.1.1](https://github.com/rcmdnk/homebrew-file/tree/v2.1.1) (2014-10-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v2.1.0...v2.1.1)
+
+**Merged pull requests:**
+
+- modify the default installation locations of Cask packages [\#7](https://github.com/rcmdnk/homebrew-file/pull/7) ([yuuki-arc](https://github.com/yuuki-arc))
+
+## [v2.1.0](https://github.com/rcmdnk/homebrew-file/tree/v2.1.0) (2014-09-28)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.8...v2.1.0)
+
+## [v1.1.8](https://github.com/rcmdnk/homebrew-file/tree/v1.1.8) (2014-09-17)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.7...v1.1.8)
+
+**Closed issues:**
+
+- help内容のtypo [\#5](https://github.com/rcmdnk/homebrew-file/issues/5)
+
+**Merged pull requests:**
+
+- fixed remove comma in get\_options function [\#6](https://github.com/rcmdnk/homebrew-file/pull/6) ([thermes](https://github.com/thermes))
+
+## [v1.1.7](https://github.com/rcmdnk/homebrew-file/tree/v1.1.7) (2014-09-06)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.6...v1.1.7)
+
+## [v1.1.6](https://github.com/rcmdnk/homebrew-file/tree/v1.1.6) (2014-09-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.5...v1.1.6)
+
+## [v1.1.5](https://github.com/rcmdnk/homebrew-file/tree/v1.1.5) (2014-08-31)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.4...v1.1.5)
+
+## [v1.1.4](https://github.com/rcmdnk/homebrew-file/tree/v1.1.4) (2014-08-30)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.3...v1.1.4)
+
+## [v1.1.3](https://github.com/rcmdnk/homebrew-file/tree/v1.1.3) (2014-08-29)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.2...v1.1.3)
+
+## [v1.1.2](https://github.com/rcmdnk/homebrew-file/tree/v1.1.2) (2014-08-29)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.1...v1.1.2)
+
+## [v1.1.1](https://github.com/rcmdnk/homebrew-file/tree/v1.1.1) (2014-08-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.1.0...v1.1.1)
+
+## [v1.1.0](https://github.com/rcmdnk/homebrew-file/tree/v1.1.0) (2014-08-27)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.0.1...v1.1.0)
+
+**Closed issues:**
+
+- 自分のリポジトリでcask fontを管理している場合 [\#4](https://github.com/rcmdnk/homebrew-file/issues/4)
+
+## [v1.0.1](https://github.com/rcmdnk/homebrew-file/tree/v1.0.1) (2014-08-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v1.0.0...v1.0.1)
+
+**Closed issues:**
+
+- caskファイルがローカルにない場合の挙動について [\#3](https://github.com/rcmdnk/homebrew-file/issues/3)
+
+## [v1.0.0](https://github.com/rcmdnk/homebrew-file/tree/v1.0.0) (2014-08-25)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.2.0...v1.0.0)
+
+## [v0.2.0](https://github.com/rcmdnk/homebrew-file/tree/v0.2.0) (2014-08-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.9...v0.2.0)
+
+## [v0.1.9](https://github.com/rcmdnk/homebrew-file/tree/v0.1.9) (2014-08-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.8...v0.1.9)
+
+## [v0.1.8](https://github.com/rcmdnk/homebrew-file/tree/v0.1.8) (2014-08-01)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.7...v0.1.8)
+
+## [v0.1.7](https://github.com/rcmdnk/homebrew-file/tree/v0.1.7) (2014-07-18)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.6...v0.1.7)
+
+## [v0.1.6](https://github.com/rcmdnk/homebrew-file/tree/v0.1.6) (2014-07-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.5...v0.1.6)
+
+## [v0.1.5](https://github.com/rcmdnk/homebrew-file/tree/v0.1.5) (2014-07-07)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.4...v0.1.5)
+
+## [v0.1.4](https://github.com/rcmdnk/homebrew-file/tree/v0.1.4) (2014-06-26)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.3...v0.1.4)
+
+**Closed issues:**
+
+- "Initialize" dialog after every brewall command [\#2](https://github.com/rcmdnk/homebrew-file/issues/2)
+
+## [v0.1.3](https://github.com/rcmdnk/homebrew-file/tree/v0.1.3) (2014-06-08)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.2...v0.1.3)
+
+## [v0.1.2](https://github.com/rcmdnk/homebrew-file/tree/v0.1.2) (2014-05-14)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.1...v0.1.2)
+
+## [v0.1.1](https://github.com/rcmdnk/homebrew-file/tree/v0.1.1) (2014-05-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.1.0...v0.1.1)
+
+## [v0.1.0](https://github.com/rcmdnk/homebrew-file/tree/v0.1.0) (2014-05-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.9...v0.1.0)
+
+## [v0.0.9](https://github.com/rcmdnk/homebrew-file/tree/v0.0.9) (2014-05-12)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.8...v0.0.9)
+
+## [v0.0.8](https://github.com/rcmdnk/homebrew-file/tree/v0.0.8) (2014-05-09)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.7...v0.0.8)
+
+## [v0.0.7](https://github.com/rcmdnk/homebrew-file/tree/v0.0.7) (2013-11-25)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.6...v0.0.7)
+
+## [v0.0.6](https://github.com/rcmdnk/homebrew-file/tree/v0.0.6) (2013-11-13)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.5...v0.0.6)
+
+## [v0.0.5](https://github.com/rcmdnk/homebrew-file/tree/v0.0.5) (2013-11-04)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.4...v0.0.5)
+
+## [v0.0.4](https://github.com/rcmdnk/homebrew-file/tree/v0.0.4) (2013-10-21)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/test...v0.0.4)
+
+**Merged pull requests:**
+
+- Add a Bitdeli Badge to README [\#1](https://github.com/rcmdnk/homebrew-file/pull/1) ([bitdeli-chef](https://github.com/bitdeli-chef))
+
+## [test](https://github.com/rcmdnk/homebrew-file/tree/test) (2013-09-16)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.2...test)
+
+## [v0.0.2](https://github.com/rcmdnk/homebrew-file/tree/v0.0.2) (2013-09-15)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.1...v0.0.2)
+
+## [v0.0.1](https://github.com/rcmdnk/homebrew-file/tree/v0.0.1) (2013-09-13)
+
+
+\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
