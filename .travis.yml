@@ -63,6 +63,7 @@ before_script:
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
+  - command brew tap
   # Check with old Python (expect 2.7.5)
   - which python
   - python --version
@@ -90,6 +91,7 @@ script:
   - 'coverage run --parallel-mode $exe || :'
   - coverage run --parallel-mode $exe brew list >/dev/null
   - mkdir -p $(dirname "$brewfile")
+  - command brew tap
   - touch "$brewfile"
   - brew list
   - coverage run --parallel-mode $exe init -y
