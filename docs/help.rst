@@ -5,9 +5,9 @@ Help message of brew-file:
 
 .. code-block:: none
 
-    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves]
+    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves] [--on_request]
                      [--top_packages TOP_PACKAGES] [-U] [--preupdate] [-r REPO]
-                     [-n] [--caskonly] [--no_appstore] [-C] [-y] [-V VERBOSE]
+                     [-n] [--caskonly] [--no_appstore] [-C] [-y] [-V VERBOSE] [-h]
                      [command] ...
     
     Brew-file: Manager for packages of Homebrew
@@ -17,18 +17,18 @@ Help message of brew-file:
     
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /Users/user/.brewfile/Brewfile). 
+                            Set input file (default: /Users/<USER>/.brewfile/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
       -b BACKUP, --backup BACKUP
-                            Set backup file (default: ). 
+                            Set backup file (default: ).
                             If it is empty, no backup is made.
                             You can set backup file by environmental variable, HOMEBREW_BREWFILE_BACKUP, like:
                             .    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup
       -F FORM, --format FORM, --form FORM
-                            Set input file format (default: file). 
-                            file              : brew vim --HEAD --with-lua
+                            Set input file format (default: none).
+                            file (or none)    : brew vim --HEAD --with-lua
                             brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']
                               Compatible with [homebrew-bundle](https://github.com/Homebrew/homebrew-bundle).
                             command or cmd    : brew install vim --HEAD --with-lua
@@ -36,8 +36,12 @@ Help message of brew-file:
       --leaves              Make list only for leaves (taken by `brew leaves`).
                             You can set this by environmental variable, HOMEBREW_BREWFILE_LEAVES, like:
                             .    export HOMEBREW_BREWFILE_LEAVES=1
+      --on_request          Make list only for packages installed on request.
+                            This option is given priority over 'leaves'.
+                            You can set this by environmental variable, HOMEBREW_BREWFILE_ON_REQUEST, like:
+                            .    export HOMEBREW_BREWFILE_ON_REQUEST=1
       --top_packages TOP_PACKAGES
-                            Packages to be listed even if they are under dependencies and `leaves` option is used.
+                            Packages to be listed even if they are under dependencies and `leaves`/'on_request' option is used.
                             You can set this by environmental variable, HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:
                             .    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
@@ -54,6 +58,7 @@ Help message of brew-file:
       -y, --yes             Answer yes to all yes/no questions.
       -V VERBOSE, --verbose VERBOSE
                             Verbose level 0/1/2
+      -h, --help            Print Help (this message) and exit.
     
     subcommands:
       [command]
@@ -94,3 +99,5 @@ Help message of brew-file:
                             Show version.
         help                or -h/--help
                             Print Help (this message) and exit.
+
+                            Check https://homebrew-file.readthedocs.io for more details.
