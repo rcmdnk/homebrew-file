@@ -1,8 +1,11 @@
 language: objective-c
-os: osx
-# xcode9: macOS Sierra 10.12, xcode7.3: OS X El Capitan 10.11
+# os variable doesn't work, need to set objective-c to use OS X
+#os: osx
+# set osx_image to xcode8 to use OS X 10.11
 # [Building an Objective-C Project - Travis CI](https://docs.travis-ci.com/user/languages/objective-c/)
-osx_image: xcode8
+osx_image:
+  - xcode9
+#  - xcode7.3
 # Python version is not available for OSX
 # [Python runtime is not yet available on OS X · Issue #2312 · travis-ci/travis-ci](https://github.com/travis-ci/travis-ci/issues/2312)
 #language: python
