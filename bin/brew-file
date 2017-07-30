@@ -3054,7 +3054,7 @@ def main():
         dest="leaves",
         help="Make list only for leaves (taken by `brew leaves`).\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_LEAVES, like:\n."
+             " HOMEBREW_BREWFILE_LEAVES, like:\n"
              "    export HOMEBREW_BREWFILE_LEAVES=1")
 
     on_request_parser = argparse.ArgumentParser(add_help=False)
@@ -3064,7 +3064,7 @@ def main():
         help="Make list only for packages installed on request.\n"
              "This option is given priority over 'leaves'.\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_ON_REQUEST, like:\n."
+             " HOMEBREW_BREWFILE_ON_REQUEST, like:\n"
              "    export HOMEBREW_BREWFILE_ON_REQUEST=1")
 
     top_packages_parser = argparse.ArgumentParser(add_help=False)
@@ -3074,7 +3074,7 @@ def main():
         help="Packages to be listed even if they are under dependencies "
              "and `leaves`/'on_request' option is used.\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n."
+             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
