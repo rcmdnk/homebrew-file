@@ -61,11 +61,11 @@ install:
   - rm -rf ../$testrepo
   - which python
   - python --version
-  - brew install $PYTHON_VERSION
+  - 'brew install $PYTHON_VERSION || :'
   - 'brew upgrade $PYTHON_VERSION || :'
   - '[ "$PYTHON_VERSION" = "python" ] &&  pip install virtualenv|| :'
   - '[ "$PYTHON_VERSION" = "python" ] &&  virtualenv -p python2 py_env|| :'
-  - '[ "$PYTHON_VERSION" = "python3" ] &&  python3 -m venv my_env|| :'
+  - '[ "$PYTHON_VERSION" = "python3" ] &&  python3 -m venv py_env|| :'
   - source py_env/bin/activate
   - python --version
   - which python
