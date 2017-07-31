@@ -545,13 +545,13 @@ class BrewInfo:
             package_info = self.get_info(package)[package]
 
         installed = {}
-        if package_info["keg_only"] is False:
+        if package_info["linked_keg"] is None:
+            installed = package_info["installed"][0]
+        else:
             for i in package_info["installed"]:
                 if i["version"] == package_info["linked_keg"]:
                     installed = i
                     break
-        else:
-            installed = package_info["installed"][0]
         return installed
 
     def get_option(self, package, package_info=""):
