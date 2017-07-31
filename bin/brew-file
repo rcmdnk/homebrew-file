@@ -539,6 +539,21 @@ class BrewInfo:
             info[i["name"]] = i
         return info
 
+    def get_installed(self, package, package_info=""):
+        """get installed version of brew package"""
+        if type(package_info) != dict:  # pragma: no cover
+            package_info = self.get_info(package)[package]
+
+        installed = {}
+        if package_info["keg_only"] is False:
+            for i in package_info["installed"]:
+                if i["version"] == package_info["linked_keg"]:
+                    installed = i
+                    break
+        else:
+            installed = package_info["installed"][0]
+        return installed
+
     def get_option(self, package, package_info=""):
         """get install options from brew info"""
 
@@ -547,16 +562,15 @@ class BrewInfo:
             package_info = self.get_info(package)[package]
 
         opt = ""
-        for i in package_info["installed"]:
-            if i["version"] == package_info["linked_keg"]:
-                if len(i["used_options"]) > 0:
-                    opt = " " + " ".join(i["used_options"])
-                for k, v in package_info["versions"].items():
-                    if i["version"] == v and k != "stable":
-                        if k == "head":
-                            opt += " --HEAD"
-                        else:
-                            opt += " --" + k
+        installed = self.get_installed(package, package_info)
+        if len(installed["used_options"]) > 0:
+            opt = " " + " ".join(installed["used_options"])
+        for k, v in package_info["versions"].items():
+            if installed["version"] == v and k != "stable":
+                if k == "head":
+                    opt += " --HEAD"
+                else:
+                    opt += " --" + k
         return opt
 
     def convert_option(self, opt):
@@ -1708,12 +1722,10 @@ class BrewFile:
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
-                    for i in info[p]["installed"]:
-                        if i["version"] != info[p]["linked_keg"]:
-                            continue
-                        if i["installed_on_request"] is True or\
-                                i["installed_on_request"] is None:
-                            leaves.append(p)
+                    installed = self.brewinfo.get_installed(p, info[p])
+                    if installed["installed_on_request"] is True or\
+                            installed["installed_on_request"] is None:
+                        leaves.append(p)
 
             elif self.opt["leaves"]:
                 leaves = self.brewinfo.get_leaves()
@@ -1949,15 +1961,13 @@ class BrewFile:
         for p in info:
             if p not in leaves:
                 continue
-            for i in info[p]["installed"]:
-                if i["version"] != info[p]["linked_keg"]:
-                    continue
-                if i["installed_on_request"] is False:
-                    cmd = "brew uninstall " + p
-                    if self.opt["dryrun"]:
-                        print(cmd)
-                    else:
-                        self.proc(cmd, False, True)
+            installed = self.brewinfo.get_installed(p, info[p])
+            if installed["installed_on_request"] is False:
+                cmd = "brew uninstall " + p
+                if self.opt["dryrun"]:
+                    print(cmd)
+                else:
+                    self.proc(cmd, False, True)
 
         if self.opt["dryrun"]:
             self.banner("# This is dry run.\n"
