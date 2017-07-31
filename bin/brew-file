@@ -520,6 +520,13 @@ class BrewInfo:
         else:
             return pack
 
+    def get_leaves(self):
+        leavestmp = self.helper.proc("brew leaves", False, False)[1]
+        leaves = []
+        for l in leavestmp:
+            leaves.append(l.split("/")[-1])
+        return leaves
+
     def get_info(self, package=""):
         if package == "":
             package = "--installed"
@@ -1709,10 +1716,7 @@ class BrewFile:
                             leaves.append(p)
 
             elif self.opt["leaves"]:
-                leavestmp = self.proc("brew leaves", False, False)[1]
-                leaves = []
-                for l in leavestmp:
-                    leaves.append(l.split("/")[-1])
+                leaves = self.brewinfo.get_leaves()
             else:
                 import copy
                 leaves = copy.deepcopy(full_list)
@@ -1941,7 +1945,10 @@ class BrewFile:
             self.banner("# Dry run")
 
         info = self.brewinfo.get_info()
+        leaves = self.brewinfo.get_leaves()
         for p in info:
+            if p not in leaves:
+                continue
             for i in info[p]["installed"]:
                 if i["version"] != info[p]["linked_keg"]:
                     continue
