@@ -23,7 +23,7 @@ You might want to add the following line to your **.bashrc** or **.zshenv**:
 
 .. code-block:: sh
 
-    export HOMEBREW_CASK_OPTS="--caskroom=/etc/Caskroom --appdir=$HOME/MyApplications"
+    export HOMEBREW_CASK_OPTS="--appdir=$HOME/MyApplications"
 
 Similarly, you can specify the environment for brew-gem.  The following will tell brew-gem to use the Ruby installed by Homebrew itself:
 

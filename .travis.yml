@@ -39,6 +39,8 @@ before_install:
   - brew update
   - brew --version
 install:
+  - git config --global user.email "$GIT_AUTHOR_EMAIL"
+  - git config --global user.name "$GIT_AUTHOR_NAME"
   - testaccount=rcmdnk
   - testreponame=BrewfileTest_$PYTHON_VERSION
   - testrepo=$testaccount/$testreponame
@@ -153,11 +155,11 @@ script:
   - command brew cask rm firefox
   - mv Firefox.app /Applications/
   - coverage run --parallel-mode $exe casklist -V 0
-  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
   - coverage run --parallel-mode $exe cask_upgrade -V 0
   - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
   - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
-  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications --caskroom=/opt/homebrew-cask/Caskroom"
+  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
   - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
   - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 2 || :'

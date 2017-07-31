@@ -12,7 +12,6 @@ tapall rcmdnk/rcmdnkpac
 
 ## pip
 #install brew-pip
-pip asciinema
 pip gcalcli
 
 ## gem

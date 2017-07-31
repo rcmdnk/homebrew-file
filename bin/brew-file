@@ -837,18 +837,15 @@ class BrewFile:
         self.opt["homebrew_ruby"] = False
 
         cask_opts = self.parse_env_opts(
-            "HOMEBREW_CASK_OPTS", {"--caskroom": "", "--appdir": ""})
+            "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""})
 
-        if cask_opts["--caskroom"] != "":
-            self.opt["caskroom"] = cask_opts["--caskroom"]
+        if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and\
+                os.path.isdir(
+                    "/opt/homebrew-cask/Caskroom"):  # pragma: no cover
+            self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
         else:
-            if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and\
-                    os.path.isdir(
-                        "/opt/homebrew-cask/Caskroom"):  # pragma: no cover
-                self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
-            else:
-                self.opt["caskroom"] =\
-                    self.brew_val("prefix") + "/Caskroom"
+            self.opt["caskroom"] =\
+                self.brew_val("prefix") + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
             else os.environ["HOME"]+"/Applications"
@@ -860,6 +857,8 @@ class BrewFile:
                                    for x in self.opt["appdirlist"]]
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
+        # fontdir may be used for application search, too
+        self.opt["fontdir"] = cask_opts["--fontdir"]
 
         self.opt["appstore"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", True))
