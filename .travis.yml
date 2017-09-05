@@ -1,4 +1,4 @@
-language: objective-c
+language: ruby
 os: osx
 # xcode9: macOS Sierra 10.12, xcode7.3: OS X El Capitan 10.11
 # [Building an Objective-C Project - Travis CI](https://docs.travis-ci.com/user/languages/objective-c/)
