@@ -1,4 +1,4 @@
-language: ruby
+language: objective-c
 os: osx
 # xcode9: macOS Sierra 10.12, xcode7.3: OS X El Capitan 10.11
 # [Building an Objective-C Project - Travis CI](https://docs.travis-ci.com/user/languages/objective-c/)
@@ -76,6 +76,9 @@ install:
   - pip install --upgrade pip
   - '[ "$coveralls" = "coveralls-python" ] && pip install coveralls || :'
   - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
+  - which ruby
+  - brew install ruby
+  - which ruby
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
