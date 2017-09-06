@@ -78,7 +78,9 @@ install:
   - '[ "$coveralls" = "python-coveralls" ] && pip -e . --use-mirrors || :'
   - which ruby
   - brew install ruby
+  - hash -r
   - which ruby
+  - which gem
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
