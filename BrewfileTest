@@ -16,7 +16,7 @@ pip gcalcli
 
 ## gem
 #install brew-gem
-gem ruby-prof
+#gem ruby-prof
 
 # App Store applications
 appstore Keynote
