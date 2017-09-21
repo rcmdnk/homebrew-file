@@ -2896,14 +2896,14 @@ class BrewFile:
     def my_test(self):
         self.make_pack_deps()
 
-        out = Tee("test")
+        out = Tee("test_file")
         out.write("test\n")
         out.close()
-        out = Tee(sys.stdout, "test")
+        out = Tee(sys.stdout, "test_file")
         out.write("test\n")
         out.flush()
         out.close()
-        self.remove("test")
+        self.remove("test_file")
         os.mkdir("dir")
         self.remove("dir")
         self.remove("aaa")
