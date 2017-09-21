@@ -5,7 +5,7 @@ Brew-file manages packages installed by Homebrew.
 It also supports `brew-cask <https://github.com/phinze/homebrew-cask>`_
 and other Homebrew subcommand installers.
 
-It uses input file. By default, the file is **~/.brewfile/Brewfile**.
+It uses input file. By default, the file is **~/.config/brewfile/Brewfile**.
 You can reuse ``Brewfile`` for Brewdler, too.
 
 If you want to specify input file, use ``-f`` option.
@@ -161,8 +161,8 @@ Then, set the repository by::
 
 It will clone the repository.
 If the repository has a file named ``Brewfile``, the file will be used instead of
-``~/.brewfile/Brewfile``.
-(then ``~/.brewfile/Brewfile`` will have this repository informatoin.)
+``~/.config/brewfile/Brewfile``.
+(then ``~/.config/brewfile/Brewfile`` will have this repository information.)
 
 ``repository`` should be like `rcmdnk/Brewfile <https://github.com/rcmdnk/Brewfile>`_ in GitHub,
 which should have ``Brewfile`` (different file name can be used by ``-f``).

@@ -17,7 +17,7 @@ Help message of brew-file:
     
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /Users/<USER>/.brewfile/Brewfile).
+                            Set input file (default: /Users/<USER>/.config/brewfile/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile

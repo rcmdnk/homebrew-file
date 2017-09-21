@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.2.1"
-__date__ = "31/Jul/2017"
+__version__ = "v4.2.2"
+__date__ = "21/Sep/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -796,9 +796,15 @@ class BrewFile:
 
         # Other default values
         self.opt["command"] = ""
-        self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
-                                           os.environ["HOME"] +
-                                           "/.brewfile/Brewfile")
+        self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE", "")
+        brewfile_config = os.environ["HOME"] + "/.config/brewfile/Brewfile"
+        brewfile_home = os.environ["HOME"] + "/.brewfile/Brewfile"
+        if self.opt["input"] == "":
+            if not os.path.isfile(brewfile_config) and\
+                    os.path.isfile(brewfile_home):
+                self.opt["input"] = brewfile_home
+            else:
+                self.opt["input"] = brewfile_config
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["leaves"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
@@ -848,7 +854,7 @@ class BrewFile:
                 self.brew_val("prefix") + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
-            else os.environ["HOME"]+"/Applications"
+            else os.environ["HOME"] + "/Applications"
         self.opt["appdirlist"] = ["/Applications",
                                   os.environ["HOME"] + "/Applications"]
         if self.opt["appdir"].rstrip("/") not in self.opt["appdirlist"]:

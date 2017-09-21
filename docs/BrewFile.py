@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.2.0"
-__date__ = "27/Jul/2017"
+__version__ = "v4.2.1"
+__date__ = "31/Jul/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -520,6 +520,13 @@ class BrewInfo:
         else:
             return pack
 
+    def get_leaves(self):
+        leavestmp = self.helper.proc("brew leaves", False, False)[1]
+        leaves = []
+        for l in leavestmp:
+            leaves.append(l.split("/")[-1])
+        return leaves
+
     def get_info(self, package=""):
         if package == "":
             package = "--installed"
@@ -532,6 +539,33 @@ class BrewInfo:
             info[i["name"]] = i
         return info
 
+    def get_installed(self, package, package_info=""):
+        """get installed version of brew package"""
+        if type(package_info) != dict:  # pragma: no cover
+            package_info = self.get_info(package)[package]
+
+        installed = {}
+        version = ""
+        if package_info["linked_keg"] is None:
+            version = self.helper.proc("ls -l " +
+                                       self.helper.brew_val("prefix") +
+                                       "/opt/" + package,
+                                       False, False, False, False)[1][0]
+            version = version.split("/")[-1]
+            if "No such file or directory" in version:
+                version = ""
+        else:
+            version = package_info["linked_keg"]
+
+        if version == "":
+            installed = package_info["installed"][0]
+        else:
+            for i in package_info["installed"]:
+                if i["version"] == version:
+                    installed = i
+                    break
+        return installed
+
     def get_option(self, package, package_info=""):
         """get install options from brew info"""
 
@@ -540,16 +574,15 @@ class BrewInfo:
             package_info = self.get_info(package)[package]
 
         opt = ""
-        for i in package_info["installed"]:
-            if i["version"] == package_info["linked_keg"]:
-                if len(i["used_options"]) > 0:
-                    opt = " " + " ".join(i["used_options"])
-                for k, v in package_info["versions"].items():
-                    if i["version"] == v and k != "stable":
-                        if k == "head":
-                            opt += " --HEAD"
-                        else:
-                            opt += " --" + k
+        installed = self.get_installed(package, package_info)
+        if len(installed["used_options"]) > 0:
+            opt = " " + " ".join(installed["used_options"])
+        for k, v in package_info["versions"].items():
+            if installed["version"] == v and k != "stable":
+                if k == "head":
+                    opt += " --HEAD"
+                else:
+                    opt += " --" + k
         return opt
 
     def convert_option(self, opt):
@@ -763,9 +796,15 @@ class BrewFile:
 
         # Other default values
         self.opt["command"] = ""
-        self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE",
-                                           os.environ["HOME"] +
-                                           "/.brewfile/Brewfile")
+        self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE", "")
+        brewfile_config = os.environ["HOME"] + "/.config/brewfile/Brewfile"
+        brewfile_home = os.environ["HOME"] + "/.brewfile/Brewfile"
+        if self.opt["input"] == "":
+            if not os.path.isfile(brewfile_config) and\
+                    os.path.isfile(brewfile_home):
+                self.opt["input"] = brewfile_home
+            else:
+                self.opt["input"] = brewfile_config
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
         self.opt["leaves"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
@@ -804,21 +843,18 @@ class BrewFile:
         self.opt["homebrew_ruby"] = False
 
         cask_opts = self.parse_env_opts(
-            "HOMEBREW_CASK_OPTS", {"--caskroom": "", "--appdir": ""})
+            "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""})
 
-        if cask_opts["--caskroom"] != "":
-            self.opt["caskroom"] = cask_opts["--caskroom"]
+        if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and\
+                os.path.isdir(
+                    "/opt/homebrew-cask/Caskroom"):  # pragma: no cover
+            self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
         else:
-            if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and\
-                    os.path.isdir(
-                        "/opt/homebrew-cask/Caskroom"):  # pragma: no cover
-                self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
-            else:
-                self.opt["caskroom"] =\
-                    self.brew_val("prefix") + "/Caskroom"
+            self.opt["caskroom"] =\
+                self.brew_val("prefix") + "/Caskroom"
         self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
             if cask_opts["--appdir"] != ""\
-            else os.environ["HOME"]+"/Applications"
+            else os.environ["HOME"] + "/Applications"
         self.opt["appdirlist"] = ["/Applications",
                                   os.environ["HOME"] + "/Applications"]
         if self.opt["appdir"].rstrip("/") not in self.opt["appdirlist"]:
@@ -827,6 +863,8 @@ class BrewFile:
                                    for x in self.opt["appdirlist"]]
         self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
                                   if os.path.isdir(x)]
+        # fontdir may be used for application search, too
+        self.opt["fontdir"] = cask_opts["--fontdir"]
 
         self.opt["appstore"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", True))
@@ -1701,20 +1739,13 @@ class BrewFile:
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
-                    if "installed" not in info[p]:
-                        continue
-                    for i in info[p]["installed"]:
-                        if i["version"] != info[p]["linked_keg"]:
-                            continue
-                        if i["installed_on_request"] is True or\
-                                i["installed_on_request"] is None:
-                            leaves.append(p)
+                    installed = self.brewinfo.get_installed(p, info[p])
+                    if installed["installed_on_request"] is True or\
+                            installed["installed_on_request"] is None:
+                        leaves.append(p)
 
             elif self.opt["leaves"]:
-                leavestmp = self.proc("brew leaves", False, False)[1]
-                leaves = []
-                for l in leavestmp:
-                    leaves.append(l.split("/")[-1])
+                leaves = self.brewinfo.get_leaves()
             else:
                 import copy
                 leaves = copy.deepcopy(full_list)
@@ -1936,6 +1967,29 @@ class BrewFile:
         """Cat brewfiles"""
         import subprocess
         subprocess.call(["cat"] + self.get_files())
+
+    def clean_non_request(self):
+        """Clean up non requested packages."""
+        if self.opt["dryrun"]:
+            self.banner("# Dry run")
+
+        info = self.brewinfo.get_info()
+        leaves = self.brewinfo.get_leaves()
+        for p in info:
+            if p not in leaves:
+                continue
+            installed = self.brewinfo.get_installed(p, info[p])
+            if installed["installed_on_request"] is False:
+                cmd = "brew uninstall " + p
+                if self.opt["dryrun"]:
+                    print(cmd)
+                else:
+                    self.proc(cmd, False, True)
+
+        if self.opt["dryrun"]:
+            self.banner("# This is dry run.\n"
+                        "# If you want to enforce cleanup, use '-C':\n"
+                        "#     $ " + __prog__ + " clean_non_request -C", 0)
 
     def cleanup(self):
         """Clean up."""
@@ -2920,6 +2974,11 @@ class BrewFile:
             self.get_files(is_print=True)
             sys.exit(0)
 
+        # Cleanup
+        if self.opt["command"] == "clean_non_request":
+            self.clean_non_request()
+            sys.exit(0)
+
         # Get list for cleanup/install
         self.get_list()
 
@@ -3029,7 +3088,7 @@ def main():
         dest="leaves",
         help="Make list only for leaves (taken by `brew leaves`).\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_LEAVES, like:\n."
+             " HOMEBREW_BREWFILE_LEAVES, like:\n"
              "    export HOMEBREW_BREWFILE_LEAVES=1")
 
     on_request_parser = argparse.ArgumentParser(add_help=False)
@@ -3039,7 +3098,7 @@ def main():
         help="Make list only for packages installed on request.\n"
              "This option is given priority over 'leaves'.\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_ON_REQUEST, like:\n."
+             " HOMEBREW_BREWFILE_ON_REQUEST, like:\n"
              "    export HOMEBREW_BREWFILE_ON_REQUEST=1")
 
     top_packages_parser = argparse.ArgumentParser(add_help=False)
@@ -3049,7 +3108,7 @@ def main():
         help="Packages to be listed even if they are under dependencies "
              "and `leaves`/'on_request' option is used.\n"
              "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n."
+             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
     noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
@@ -3169,6 +3228,15 @@ def main():
         "clean", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
+    help = "or --clean_non_request.\n"\
+           "Uninstall packages which were installed as dependencies but "\
+           "parent packages of which were already uninstalled.\n"\
+           "By drault, cleanup runs as dry-run.\n"\
+           "If you want to enforce cleanup, use '-C' option."
+    subparsers.add_parser(
+        "clean_non_request", description=help, help=help,
+        parents=min_parsers+[dryrun_parser],
+        formatter_class=argparse.RawTextHelpFormatter)
     help = "or -u/--update\nDo brew update/upgrade, pull, install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
@@ -3208,14 +3276,17 @@ def main():
     help = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -h/--help\nPrint Help (this message) and exit."
+    help = "or -h/--help\nPrint Help (this message) and exit.\n\n"\
+        "Check https://homebrew-file.readthedocs.io for more details."
     subparsers.add_parser("help", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
 
     if len(sys.argv) == 1:
         parser.print_usage()
         print("")
-        print("Execute `" + __prog__ + " help` for more information.")
+        print("Execute `" + __prog__ + " help` to get help.")
+        print("")
+        print("Refer https://homebrew-file.readthedocs.io for more details.")
         sys.exit(1)
 
     if sys.argv[1] == "brew":
@@ -3262,12 +3333,13 @@ def main():
         sys.exit(0)
     elif b.opt["command"] == "commands":
         commands = ["install", "brew", "init", "dump", "set_repo", "pull",
-                    "push", "clean", "update", "edit", "cat", "casklist",
-                    "cask_upgrade", "test", "get_files", "commands", "version",
-                    "help"]
+                    "push", "clean", "clean_non_request", "update", "edit",
+                    "cat", "casklist", "cask_upgrade", "test", "get_files",
+                    "commands", "version", "help"]
         commands_hyphen = ["-i", "--init", "-s", "--set_repo", "-c", "--clean",
-                           "-u", "--update", "-e", "--edit", "--cat", "--test",
-                           "--commands", "-v", "--version", "-h", "--help"]
+                           "--clean_non_request", "-u", "--update", "-e",
+                           "--edit", "--cat", "--test", "--commands", "-v",
+                           "--version", "-h", "--help"]
         options = ["-f", "--file", "-b", "--backup",
                    "-F", "--format", "--form", "--leaves", "--on_request",
                    "--top_packages", "-U", "--noupdate", "--preupdate",

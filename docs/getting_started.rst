@@ -4,7 +4,7 @@ Getting Started
 Use local Brewfile
 ------------------
 
-By default, **Brewfile** is **~/.brewfile/Brewfile**.
+By default, **Brewfile** is **~/.config/brewfile/Brewfile**.
 
 If you don't have **Brewfile**, first, do::
 
@@ -21,7 +21,7 @@ You can check your package list by::
     $ brew file cat
 
 If you already have **Brewfile**, then copy it to
-**~/.brewfile/Brewfile**
+**~/.config/brewfile/Brewfile**
 and install packages listed in **Brewfile** by::
 
     $ brew file install
@@ -31,7 +31,7 @@ After each command, **Brewfile** is updated automatically
 if you set ``brew-wrap`` as above.
 
 When you get new Mac, copy
-**~/.brewfile** to new Mac
+**~/.config/brewfile** to new Mac
 and just do::
 
     $ brew file install

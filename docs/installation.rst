@@ -23,34 +23,49 @@ such a ``brew install`` or ``brew uninstall``.
 
 .. note::
 
-  17/Dec/2015 update
-  
+  21/Sep/2017 update
+
   The default place of Brewfile has been changed from::
-  
-      /usr/local/Library/Brewfile
-  
-  to::
-  
+
       ~/.brewfile/Brewfile
-  
+
+  to::
+
+      ~/.config/brewfile/Brewfile
+
+  If ~/.config/brewfile/Brewfile doesn't exist but ~/.brewfile/Brewfile exists,
+  ~/.brewfile/Brewfile is used as default Brewfile.
+
+.. note::
+
+  17/Dec/2015 update
+
+  The default place of Brewfile has been changed from::
+
+      /usr/local/Library/Brewfile
+
+  to::
+
+      ~/.brewfile/Brewfile
+
   because Homebrew deletes files under **/usr/local** other than
   Homebrew's one when such ``brew update`` is executed.
   (Homebrew checkout its repository as **/usr/local**.)
-  
+
   If you used an old default setting (**/usr/local/Library/Brewfile**), you might lose Brewfile.
-  
+
   In such case, please try ``brew file init`` and chose local Brewfile, which makes
   new file **~/.brewfile/Brewfile**.
-  
+
   If you used git repository, you might see a output when you executed ``brew update``::
-  
+
       $ brew update
       Ignoring path Library/rcmdnk_Brewfile/
       To restore the stashed changes to /usr/local run:
         `cd /usr/local && git stash pop`
         Already up-to-date.
-  
+
   In this case, please delete **/usr/local/Library/<your_git_account>_Brewfile**,
   then do ``brew file set_repo``.
-  
+
   New repository will be checked out to **~/.brewfile/<your_git_account>_Brewfile**.
