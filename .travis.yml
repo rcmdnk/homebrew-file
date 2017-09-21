@@ -27,6 +27,7 @@ env:
     - VISUAL=cat
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
+    - CONFIGDIR="$HOME/.config"
   matrix:
     - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
@@ -45,7 +46,7 @@ install:
   - testreponame=BrewfileTest_$PYTHON_VERSION
   - testrepo=$testaccount/$testreponame
   - testrepodir=${testaccount}_${testreponame}
-  - testrepofulldir=$HOME/.brewfile/$testrepodir
+  - testrepofulldir=$CONFIGDIR/$testrepodir
   - testfile=$testrepofulldir/Brewfile
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file
@@ -84,7 +85,7 @@ install:
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
-  - brewfile=$HOME/.config/brewfile/Brewfile
+  - brewfile=$CONFIGDIR/brewfile/Brewfile
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
