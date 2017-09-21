@@ -84,7 +84,7 @@ install:
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
-  - brewfile=$HOME/.brewfile/Brewfile
+  - brewfile=$HOME/.config/brewfile/Brewfile
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
