@@ -211,7 +211,7 @@ script:
   - echo "appstore 'KeyNotes'" >> $testfile
   - echo "file 'BrewfileExt'" >> $testfile
   - coverage run --parallel-mode $exe -F brewdler brew cask uninstall google-chrome
-  - cat /Users/travis/.brewfile/rcmdnk_$testreponame/Brewfile
+  - cat "$testrepofulldir/Brewfile"
   # command format tests
   - coverage run --parallel-mode $exe init -F command -y -V 2
   - coverage run --parallel-mode $exe install --no_appstore -F command
