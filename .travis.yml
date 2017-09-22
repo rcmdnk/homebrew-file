@@ -27,7 +27,7 @@ env:
     - VISUAL=cat
     - coveralls=coveralls-python
     #- coveralls=python-coveralls
-    - CONFIGDIR="$HOME/.config"
+    - CONFIGDIR="$HOME/.config/brewfile"
   matrix:
     - PYTHON_VERSION="python"
     - PYTHON_VERSION="python3"
@@ -85,7 +85,7 @@ install:
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
-  - brewfile=$CONFIGDIR/brewfile/Brewfile
+  - brewfile=$CONFIGDIR/Brewfile
   - exe=$(pwd)/bin/brew-file
   - git config --global push.default simple # to suppress git warning
 script:
