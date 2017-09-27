@@ -10,7 +10,7 @@ If you don't have **Brewfile**, first, do::
 
     $ brew init
 
-``brew init`` is same as ``brew file init``, if you setup ``brew-wrap`` as above.
+``brew init`` is same as ``brew file init``, if you setup ``brew-wrap`` as in :doc:`installation`.
 
 Note: In below, ``set_repo`` command can be used directly after ``brew``,
 but ``install`` or ``update`` need to use with ``brew file`` because
@@ -28,7 +28,7 @@ and install packages listed in **Brewfile** by::
 
 After that, you need to do only normal ``brew`` commands, like ``brew install`` or ``brew uninstall``.
 After each command, **Brewfile** is updated automatically
-if you set ``brew-wrap`` as above.
+if you set ``brew-wrap`` as in :doc:`installation`.
 
 When you get new Mac, copy
 **~/.config/brewfile** to new Mac
