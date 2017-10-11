@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.2.2"
-__date__ = "21/Sep/2017"
+__version__ = "v4.3.0"
+__date__ = "11/Oct/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -370,6 +370,41 @@ class BrewInfo:
         self.appstore_list.extend(self.appstore_input)
         self.file_list.extend(self.file_input)
 
+    def sort(self):
+        core = 0
+        homebrew_taps = []
+        cask = 0
+        cask_taps = []
+        other_taps = []
+        for t in self.tap_list:
+            if t == "homebrew/core":
+                core = 1
+            elif t.startswith("homebrew/"):
+                homebrew_taps.append(t)
+            elif t == "caskroom/cask":
+                cask = 1
+            elif t.startswith("caskroom/"):
+                cask_taps.append(t)
+            else:
+                other_taps.append(t)
+        homebrew_taps.sort()
+        cask_taps.sort()
+        other_taps.sort()
+        self.tap_list = []
+        if core == 1:
+            self.tap_list.append("homebrew/core")
+        self.tap_list += homebrew_taps
+        if cask == 1:
+            self.tap_list.append("caskroom/cask")
+        self.tap_list += cask_taps
+        self.tap_list += other_taps
+
+        self.brew_list.sort()
+        self.tap_casks.sort()
+        self.gem_list.sort()
+
+        self.appstore_list.sort(key=lambda x: x.split()[1].lower())
+
     def get(self, name):
         import copy
         return copy.deepcopy(self.list_dic[name])
@@ -650,6 +685,9 @@ class BrewInfo:
             cmd_cask_nocask = "#brew cask install "
             cmd_appstore = "#appstore "
             cmd_file = "#file "
+
+        # sort
+        self.sort()
 
         # Before commands
         if len(self.before_input) > 0:
