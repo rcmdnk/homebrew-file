@@ -172,17 +172,18 @@ class BrewHelper:
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separate_err=False, print_err=True,
+             exit_on_err=True, separate_err=False, print_err=True,
              verbose=1, env={}):
         """ Get process output."""
         import shlex
         import subprocess
         if type(cmd) != list:
             cmd = shlex.split(cmd)
+        cmd_orig = " ".join(cmd)
         if cmd[0] == "brew":
             cmd = ["command"] + cmd
         if print_cmd:
-            self.info("$ " + " ".join(cmd), verbose)
+            self.info("$ " + " ".join(cmd_orig), verbose)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
@@ -210,7 +211,7 @@ class BrewHelper:
                 self.info(lines[0].strip(), verbose)
             ret = -1
 
-        if exit_on_error and ret != 0:
+        if exit_on_err and ret != 0:
             if not (print_out and self.opt["verbose"] >= verbose):
                 print("\n".join(lines))
             sys.exit(ret)
@@ -996,11 +997,11 @@ class BrewFile:
         return v
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separate_err=False, print_err=True,
+             exit_on_err=True, separate_err=False, print_err=True,
              verbose=1, env={"HOMEBREW_NO_AUTO_UPDATE": "1"}):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_error=exit_on_error, separate_err=separate_err,
+            exit_on_err=exit_on_err, separate_err=separate_err,
             print_err=print_err, verbose=verbose, env=env)
 
     def info(self, text, verbose=2):
@@ -1351,7 +1352,7 @@ class BrewFile:
                 self.proc("git add -A")
                 self.proc(["git", "commit", "-m",
                            "\"Update the package list\""],
-                          exit_on_error=False)
+                          exit_on_err=False)
                 self.proc("git push")
             return
 
@@ -2255,7 +2256,23 @@ class BrewFile:
             if p in self.get("cask_list"):
                 continue
             self.check_cask_cmd(True)
-            self.proc("brew cask install " + p)
+            cmd = "brew cask install " + p
+            while True:
+                (ret, lines) = self.proc(cmd, False, False, False)
+                if ret == 0:
+                    self.info("$ " + cmd, 1)
+                    for line in lines:
+                        self.info(line, 1)
+                    break
+                if lines[-1].startswith(
+                        "Error: It seems there is already an App at"):
+                    app = lines[-1].split("'")[1]
+                    self.warning(
+                        "It seems there is already an App at " + app + ".\n" +
+                        "Removing " + app + " and installing with cask.")
+                    self.remove(app)
+                else:
+                    sys.exit(ret)
 
         if not self.opt["caskonly"]:
             # pip
@@ -2900,7 +2917,7 @@ class BrewFile:
                 if not self.opt["dryrun"]:
                     if self.proc(
                             ["brew", "cask", "install", "--force", a],
-                            exit_on_error=False)[0] != 0:  # pragma: no cover
+                            exit_on_err=False)[0] != 0:  # pragma: no cover
                         continue
 
             for d in os.listdir(appdir):
