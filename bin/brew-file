@@ -172,8 +172,8 @@ class BrewHelper:
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separate_err_msg=False, verbose_level=1,
-             env={}):
+             exit_on_error=True, separate_err=False, print_err=True,
+             verbose=1, env={}):
         """ Get process output."""
         import shlex
         import subprocess
@@ -182,47 +182,55 @@ class BrewHelper:
         if cmd[0] == "brew":
             cmd = ["command"] + cmd
         if print_cmd:
-            self.info("$ " + " ".join(cmd), verbose_level)
+            self.info("$ " + " ".join(cmd), verbose)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
         lines = []
         try:
-            stderr = None if separate_err_msg else subprocess.STDOUT
+            if separate_err:
+                if print_err:
+                    stderr = None
+                else:
+                    stderr = open(os.devnull, 'w')
+            else:
+                stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
                                  env=all_env)
+            if separate_err and not print_err:
+                stderr.close()
             for line in self.readstdout(p):
                 lines.append(line)
                 if print_out:
-                    self.info(line, verbose_level)
+                    self.info(line, verbose)
             ret = p.wait()
         except OSError as e:
             if print_out:
                 lines = [" ".join(cmd) + ": " + str(e)]
-                self.info(lines[0].strip(), verbose_level)
+                self.info(lines[0].strip(), verbose)
             ret = -1
 
         if exit_on_error and ret != 0:
-            if not (print_out and self.opt["verbose"] >= verbose_level):
+            if not (print_out and self.opt["verbose"] >= verbose):
                 print("\n".join(lines))
             sys.exit(ret)
 
         return (ret, lines)
 
-    def info(self, text, verbose_level=2):
-        if self.opt["verbose"] < verbose_level:
+    def info(self, text, verbose=2):
+        if self.opt["verbose"] < verbose:
             return
         print(text)
 
-    def warning(self, text, verbose_level=1):
-        self.info("\033[31;1m" + text + "\033[m", verbose_level)
+    def warning(self, text, verbose=1):
+        self.info("\033[31;1m" + text + "\033[m", verbose)
 
-    def banner(self, text, verbose_level=2):
+    def banner(self, text, verbose=2):
         max = 0
         for l in text.split("\n"):
             if max < len(l):
                 max = len(l)
-        self.info("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose_level)
+        self.info("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose)
 
     def brew_val(self, name):
         if name not in self.opt:
@@ -988,21 +996,21 @@ class BrewFile:
         return v
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_error=True, separate_err_msg=False, verbose_level=1,
-             env={"HOMEBREW_NO_AUTO_UPDATE": "1"}):
+             exit_on_error=True, separate_err=False, print_err=True,
+             verbose=1, env={"HOMEBREW_NO_AUTO_UPDATE": "1"}):
         return self.helper.proc(
             cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_error=exit_on_error, separate_err_msg=separate_err_msg,
-            verbose_level=verbose_level, env=env)
+            exit_on_error=exit_on_error, separate_err=separate_err,
+            print_err=print_err, verbose=verbose, env=env)
 
-    def info(self, text, verbose_level=2):
-        self.helper.info(text, verbose_level)
+    def info(self, text, verbose=2):
+        self.helper.info(text, verbose)
 
-    def warning(self, text, verbose_level=1):
-        self.helper.warning(text, verbose_level)
+    def warning(self, text, verbose=1):
+        self.helper.warning(text, verbose)
 
-    def banner(self, text, verbose_level=2):
-        self.helper.banner(text, verbose_level)
+    def banner(self, text, verbose=2):
+        self.helper.banner(text, verbose)
 
     def remove(self, path):
         """Helper to remove file/directory."""
@@ -1553,15 +1561,15 @@ class BrewFile:
 
     def check_brew_cmd(self):  # pragma: no cover
         """Check Homebrew"""
-        if self.proc("which brew", False, False, False, False, 0)[0] != 0:
+        if self.proc("which brew", False, False, False, verbose=1)[0] != 0:
             print("Homebrew has not been installed, install now...")
             cmd = "curl -O https://raw.githubusercontent.com/" +\
                   "Homebrew/install/master/install"
-            self.proc(cmd, True, True, False, False, 0)
+            self.proc(cmd, True, True, False, verbose=0)
             cmd = "ruby install"
-            self.proc(cmd, True, True, False, False, 0)
-            (ret, lines) = self.proc("brew doctor",
-                                     True, True, False, False, 0)
+            self.proc(cmd, True, True, False, verbose=0)
+            (ret, lines) = self.proc("brew doctor", True, True, False,
+                                     verbose=0)
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
@@ -1727,7 +1735,7 @@ class BrewFile:
 
         if self.check_mas_cmd(True) == 1:
             (ret, lines) = self.proc(self.opt["mas_cmd"] + " list",
-                                     False, False, separate_err_msg=True)
+                                     False, False, separate_err=True)
             apps = sorted(lines, key=lambda x: " ".join(x.split()[1:]).lower())
             if len(apps) > 0 and apps[0] == "No installed apps found":
                 apps = []
@@ -1758,7 +1766,7 @@ class BrewFile:
         if not self.check_cask_cmd(force):  # pragma: no cover
             return (False, [])
         (ret, lines) = self.proc("brew cask list", False, False,
-                                 separate_err_msg=True)
+                                 separate_err=True, print_err=False)
         packages = []
         for l in lines:
             if "Warning: nothing to list" in l or "=>" in l or "->" in l:
