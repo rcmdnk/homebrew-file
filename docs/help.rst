@@ -35,15 +35,15 @@ Help message of brew-file:
                               Can be used as a shell script.
       --leaves              Make list only for leaves (taken by `brew leaves`).
                             You can set this by environmental variable, HOMEBREW_BREWFILE_LEAVES, like:
-                            .    export HOMEBREW_BREWFILE_LEAVES=1
+                                export HOMEBREW_BREWFILE_LEAVES=1
       --on_request          Make list only for packages installed on request.
                             This option is given priority over 'leaves'.
                             You can set this by environmental variable, HOMEBREW_BREWFILE_ON_REQUEST, like:
-                            .    export HOMEBREW_BREWFILE_ON_REQUEST=1
+                                export HOMEBREW_BREWFILE_ON_REQUEST=1
       --top_packages TOP_PACKAGES
                             Packages to be listed even if they are under dependencies and `leaves`/'on_request' option is used.
                             You can set this by environmental variable, HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:
-                            .    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
+                                export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
       --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
@@ -69,6 +69,8 @@ Help message of brew-file:
                             Initialize/Update BREWFILE with installed packages.
         set_repo            or -s/--set_repo
                             Set BREWFILE repository (e.g. rcmdnk/Brewfile).
+        set_local           or --set_local
+                            Set BREWFILE to local file.
         pull                Update BREWFILE from the repository.
         push                Push your BREWFILE to the repository.
         clean               or -c/--clean
@@ -76,6 +78,10 @@ Help message of brew-file:
                             Uninstall packages not in the list.
                             Untap packages not in the list.
                             Cleanup cache (brew cleanup)
+                            By drault, cleanup runs as dry-run.
+                            If you want to enforce cleanup, use '-C' option.
+        clean_non_request   or --clean_non_request.
+                            Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled.
                             By drault, cleanup runs as dry-run.
                             If you want to enforce cleanup, use '-C' option.
         update              or -u/--update
