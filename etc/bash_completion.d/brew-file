@@ -77,11 +77,11 @@ _brew_file () {
         local minopt='-f --file -F --format --leaves -y --yes -v --verbose'
         case $cmd in
           install|pull|push|edit|-e|--edit)
-            complist="$minopt -U --noupdate";;
+            complist="$minopt -U --noupgrade";;
           brew)
             complist="$minopt";;
           init|dump|-i|--init|update|-u|--update)
-            complist="$minopt -n --nolink --caskonly -U --noupdate";;
+            complist="$minopt -n --nolink --caskonly -U --noupgrade";;
           set_repo|-s|--set_repo)
             complist="$minopt -r --repo";;
           clean|-c|--clean)

@@ -102,7 +102,6 @@ script:
   - coverage run --parallel-mode $exe cat
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - HOMEBREW_BREWFILE_APPSTORE=true coverage run --parallel-mode $exe test -V 2
-  - HOMEBREW_BREWFILE_APPSTORE=false coverage run --parallel-mode $exe install --preupdate -y -V 2
   - rm $brewfile
   - coverage run --parallel-mode $exe update -C -y
   - coverage run --parallel-mode $exe init -f ~/mkdirtest/Brewfile -r git://github.com/$testrepo -y
@@ -165,7 +164,6 @@ script:
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
   - coverage run --parallel-mode $exe cask_upgrade -V 0
   - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
-  - 'coverage run --parallel-mode $exe brew noupdate help >/dev/null || :'
   - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
   - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
@@ -196,7 +194,6 @@ script:
   - command brew rm cmake
   - coverage run --parallel-mode $exe init -y -V 0
   - echo $TRAVIS_PULL_REQUEST
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y -U -V 2; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y; fi'
     #  - coverage run --parallel-mode $exe brew rm wget
   - command brew cask install google-chrome
