@@ -866,7 +866,6 @@ class BrewFile:
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "none"
         self.opt["repo"] = ""
-        self.opt["noupdate"] = True
         self.opt["noupdateatupdate"] = False
         self.opt["link"] = True
         self.opt["caskonly"] = False
@@ -2240,10 +2239,6 @@ class BrewFile:
 
     def install(self):
         """Install"""
-        # First update Homebrew
-        if not self.opt["noupdate"]:
-            self.proc("brew update")
-
         # Reinit flag
         reinit = 0
 
@@ -3195,12 +3190,6 @@ def main():
         help="Do not execute `brew update/brew upgrade`"
              " at `brew file update`.")
 
-    noupdate_parser = argparse.ArgumentParser(add_help=False)
-    noupdate_parser.add_argument(
-        "--preupdate", action="store_false",
-        default=b.opt["noupdate"], dest="noupdate",
-        help="Execute `brew update` before install or other commands.")
-
     repo_parser = argparse.ArgumentParser(add_help=False)
     repo_parser.add_argument(
         "-r", "--repo", action="store", default=b.opt["repo"], dest="repo",
@@ -3249,7 +3238,7 @@ def main():
                    on_request_parser, top_packages_parser, appstore_parser,
                    caskonly_parser, yn_parser, verbose_parser]
     subparser_options = {
-        "parents": min_parsers + [noupdate_parser],
+        "parents": min_parsers,
         "formatter_class": argparse.RawTextHelpFormatter}
 
     # Main parser
@@ -3257,17 +3246,16 @@ def main():
         add_help=False, prog=__prog__,
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  on_request_parser, top_packages_parser,
-                 noupdateatupdate_parser, noupdate_parser, repo_parser,
-                 link_parser, caskonly_parser, appstore_parser,
-                 dryrun_parser, yn_parser, verbose_parser, help_parser],
+                 noupdateatupdate_parser, repo_parser, link_parser,
+                 caskonly_parser, appstore_parser, dryrun_parser, yn_parser,
+                 verbose_parser, help_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description=__description__)
 
     subparsers = parser.add_subparsers(
         title="subcommands", metavar="[command]", help="", dest="command")
 
-    help = "Install packages in BREWFILE.\n"\
-           "Use `--preupdate` to execute `brew update` before install."
+    help = "Install packages in BREWFILE."
     subparsers.add_parser("install", description=help, help=help,
                           **subparser_options)
     help = "Execute brew command, and update BREWFILE."
@@ -3278,11 +3266,11 @@ def main():
         "with installed packages."
     subparsers.add_parser(
         "init", description=help, help=help,
-        parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
+        parents=min_parsers+[link_parser, repo_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     subparsers.add_parser(
         "dump",
-        parents=min_parsers+[link_parser, repo_parser, noupdate_parser],
+        parents=min_parsers+[link_parser, repo_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
     subparsers.add_parser(
@@ -3424,10 +3412,9 @@ def main():
                            "--commands", "-v", "--version", "-h", "--help"]
         options = ["-f", "--file", "-b", "--backup",
                    "-F", "--format", "--form", "--leaves", "--on_request",
-                   "--top_packages", "-U", "--noupdate", "--preupdate",
-                   "-r", "--repo", "-n", "--nolink",
-                   "--caskonly", "--no_appstore", "-C", "-y", "--yes",
-                   "-V", "--verbose"]
+                   "--top_packages", "-U", "--noupdate", "-r", "--repo", "-n",
+                   "--nolink", "--caskonly", "--no_appstore", "-C",
+                   "-y", "--yes", "-V", "--verbose"]
         print("commands:", " ".join(commands))
         print("commands_hyphen:", " ".join(commands_hyphen))
         print("options:", " ".join(options))

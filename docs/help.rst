@@ -45,7 +45,6 @@ Help message of brew-file:
                             You can set this by environmental variable, HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:
                                 export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
       -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
-      --preupdate           Execute `brew update` before install or other commands.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
       --caskonly            Write out only cask related packages
@@ -63,7 +62,6 @@ Help message of brew-file:
     subcommands:
       [command]
         install             Install packages in BREWFILE.
-                            Use `--preupdate` to execute `brew update` before install.
         brew                Execute brew command, and update BREWFILE.
         init                or dump/-i/--init
                             Initialize/Update BREWFILE with installed packages.
