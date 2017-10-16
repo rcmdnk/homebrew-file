@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.4.0"
+__version__ = "v4.4.1"
 __date__ = "16/Oct/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -179,11 +179,11 @@ class BrewHelper:
         import subprocess
         if type(cmd) != list:
             cmd = shlex.split(cmd)
-        cmd_orig = " ".join(cmd)
+        cmd_orig = " ".join(["$"] + cmd)
         if cmd[0] == "brew":
             cmd = ["command"] + cmd
         if print_cmd:
-            self.info("$ " + " ".join(cmd_orig), verbose)
+            self.info(cmd_orig, verbose)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
@@ -2262,23 +2262,7 @@ class BrewFile:
             if p in self.get("cask_list"):
                 continue
             self.check_cask_cmd(True)
-            cmd = "brew cask install " + p
-            while True:
-                (ret, lines) = self.proc(cmd, False, False, False)
-                if ret == 0:
-                    self.info("$ " + cmd, 1)
-                    for line in lines:
-                        self.info(line, 1)
-                    break
-                if lines[-1].startswith(
-                        "Error: It seems there is already an App at"):
-                    app = lines[-1].split("'")[1]
-                    self.warn(
-                        "It seems there is already an App at " + app + ".\n" +
-                        "Removing " + app + " and installing with cask.")
-                    self.remove(app)
-                else:
-                    sys.exit(ret)
+            self.proc("brew cask install --force " + p)
 
         if not self.opt["caskonly"]:
             # pip
