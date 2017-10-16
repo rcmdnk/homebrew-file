@@ -2244,6 +2244,9 @@ class BrewFile:
         if not self.opt["noupdate"]:
             self.proc("brew update")
 
+        # Reinit flag
+        reinit = 0
+
         # Check packages in the input file
         self.read_all()
 
@@ -2268,12 +2271,13 @@ class BrewFile:
             # pip
             for p in self.get("pip_input"):
                 if p in self.get("pip_list"):
-                    if self.get("pip_input_opt")[p] ==\
-                            self.get("pip_list_opt")[p]:
-                        continue
-                    else:
-                        self.proc(
-                            "brew uninstall --ignore-dependencies pip-" + p)
+                    # if sorted(self.get("pip_input_opt")[p].split()) ==\
+                    #         sorted(self.get("pip_list_opt")[p].split()):
+                    #     continue
+                    # else:
+                    #     self.proc(
+                    #         "brew uninstall --ignore-dependencies pip-" + p)
+                    continue
 
                 self.check_pip_cmd(True)
                 self.proc("brew pip " + p + self.get("pip_input_opt")[p])
@@ -2281,12 +2285,12 @@ class BrewFile:
             # gem
             for p in self.get("gem_input"):
                 if p in self.get("gem_list"):
-                    if self.get("gem_input_opt")[p] ==\
-                            self.get("gem_list_opt")[p]:
-                        continue
-                    else:
-                        self.proc(
-                            "brew uninstall --ignore-dependencies gem-" + p)
+                    # if sorted(self.get("gem_input_opt")[p].split()) ==\
+                    #         sorted(self.get("gem_list_opt")[p].split()):
+                    #     continue
+                    # else:
+                    #     self.proc(
+                    #         "brew uninstall --ignore-dependencies gem-" + p)
                     continue
                 self.check_gem_cmd(True)
                 self.proc("brew gem install " + p +
@@ -2296,8 +2300,8 @@ class BrewFile:
             for p in self.get("brew_input"):
                 cmd = "install"
                 if p in self.get("brew_list"):
-                    if self.get("brew_input_opt")[p] ==\
-                            self.get("brew_list_opt")[p]:
+                    if sorted(self.get("brew_input_opt")[p].split()) ==\
+                              sorted(self.get("brew_list_opt")[p].split()):
                         continue
                     else:
                         cmd = "reinstall"
@@ -2323,6 +2327,12 @@ class BrewFile:
                     if l.find("brew linkapps") != -1:
                         if self.opt["link"]:
                             self.proc("brew linkapps")
+                if p in self.get("brew_list") and\
+                        self.get("brew_input_opt")[p] !=\
+                        self.get("brew_list_opt")[p]:
+                    self.brewinfo.add("brew_input_opt",
+                                      {p: self.brewinfo.get_option(p)})
+                    reinit = 1
 
         # App Store
         if self.opt["appstore"]:  # pragma: no cover
@@ -2381,7 +2391,8 @@ class BrewFile:
                 self.opt["mas_cmd_installed"] or\
                 self.opt["reattach_cmd_installed"] or\
                 self.opt["pip_cmd_installed"] or\
-                self.opt["gem_cmd_installed"]:
+                self.opt["gem_cmd_installed"] or\
+                reinit:
             self.opt["cask_cmd_installed"] = self.opt["mas_cmd_installed"] =\
                 self.opt["reattach_cmd_installed"] =\
                 self.opt["pip_cmd_installed"] =\
