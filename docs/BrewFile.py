@@ -19,7 +19,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v4.4.1"
+__version__ = "v5.0.0"
 __date__ = "16/Oct/2017"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -824,7 +824,7 @@ class BrewInfo:
             self.helper.proc("chmod 755 %s" % self.get_file(), False, False,
                              False)
         else:
-            self.helper.proc("chmod 655 %s" % self.get_file(), False, False,
+            self.helper.proc("chmod 644 %s" % self.get_file(), False, False,
                              False)
 
 

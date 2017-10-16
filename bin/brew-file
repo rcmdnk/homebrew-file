@@ -824,7 +824,7 @@ class BrewInfo:
             self.helper.proc("chmod 755 %s" % self.get_file(), False, False,
                              False)
         else:
-            self.helper.proc("chmod 655 %s" % self.get_file(), False, False,
+            self.helper.proc("chmod 644 %s" % self.get_file(), False, False,
                              False)
 
 
