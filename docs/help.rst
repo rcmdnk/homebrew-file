@@ -44,7 +44,7 @@ Help message of brew-file:
                             Packages to be listed even if they are under dependencies and `leaves`/'on_request' option is used.
                             You can set this by environmental variable, HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:
                                 export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
-      -U, --noupdate        Do not execute `brew update/brew upgrade` at `brew file update`.
+      -U, --noupgrade       Do not execute `brew update/brew upgrade` at `brew file update`.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
       -n, --nolink          Don't make links for Apps.
       --caskonly            Write out only cask related packages

@@ -866,7 +866,7 @@ class BrewFile:
             "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "none"
         self.opt["repo"] = ""
-        self.opt["noupdateatupdate"] = False
+        self.opt["noupgradeatupdate"] = False
         self.opt["link"] = True
         self.opt["caskonly"] = False
         self.opt["dryrun"] = True
@@ -3064,7 +3064,7 @@ class BrewFile:
 
         # Update
         if self.opt["command"] == "update":
-            if not self.opt["noupdateatupdate"]:
+            if not self.opt["noupgradeatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --fetch-HEAD")
             if self.opt["repo"] != "":
@@ -3183,10 +3183,10 @@ def main():
              " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
-    noupdateatupdate_parser = argparse.ArgumentParser(add_help=False)
-    noupdateatupdate_parser.add_argument(
-        "-U", "--noupdate", action="store_true",
-        default=b.opt["noupdateatupdate"], dest="noupdateatupdate",
+    noupgradeatupdate_parser = argparse.ArgumentParser(add_help=False)
+    noupgradeatupdate_parser.add_argument(
+        "-U", "--noupgrade", action="store_true",
+        default=b.opt["noupgradeatupdate"], dest="noupgradeatupdate",
         help="Do not execute `brew update/brew upgrade`"
              " at `brew file update`.")
 
@@ -3246,7 +3246,7 @@ def main():
         add_help=False, prog=__prog__,
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  on_request_parser, top_packages_parser,
-                 noupdateatupdate_parser, repo_parser, link_parser,
+                 noupgradeatupdate_parser, repo_parser, link_parser,
                  caskonly_parser, appstore_parser, dryrun_parser, yn_parser,
                  verbose_parser, help_parser],
         formatter_class=argparse.RawTextHelpFormatter,
@@ -3314,7 +3314,7 @@ def main():
            "'clean' is also executed after install if you give -C option."
     subparsers.add_parser(
         "update", description=help, help=help,
-        parents=min_parsers+[link_parser, noupdateatupdate_parser,
+        parents=min_parsers+[link_parser, noupgradeatupdate_parser,
                              dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or -e/--edit\nEdit input files."
@@ -3412,7 +3412,7 @@ def main():
                            "--commands", "-v", "--version", "-h", "--help"]
         options = ["-f", "--file", "-b", "--backup",
                    "-F", "--format", "--form", "--leaves", "--on_request",
-                   "--top_packages", "-U", "--noupdate", "-r", "--repo", "-n",
+                   "--top_packages", "-U", "--noupgrade", "-r", "--repo", "-n",
                    "--nolink", "--caskonly", "--no_appstore", "-C",
                    "-y", "--yes", "-V", "--verbose"]
         print("commands:", " ".join(commands))
