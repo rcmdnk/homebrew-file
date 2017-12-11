@@ -229,7 +229,7 @@ class BrewHelper:
     def err(self, text, verbose=0):
         self.info("\033[31;1m" + text + "\033[m", verbose)
 
-    def banner(self, text, verbose=2):
+    def banner(self, text, verbose=1):
         max = 0
         for l in text.split("\n"):
             if max < len(l):
@@ -1015,7 +1015,7 @@ class BrewFile:
     def err(self, text, verbose=1):
         self.helper.err(text, verbose)
 
-    def banner(self, text, verbose=2):
+    def banner(self, text, verbose=1):
         self.helper.banner(text, verbose)
 
     def remove(self, path):
@@ -1077,10 +1077,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo.get_file(), 1)
+        self.banner("# Initialize " + self.brewinfo.get_file())
         self.brewinfo.write()
         for b in self.brewinfo_ext:
-            self.banner("# Initialize " + b.get_file(), 1)
+            self.banner("# Initialize " + b.get_file())
             b.write()
 
     def get(self, name, only_ext=False):
@@ -2029,7 +2029,7 @@ class BrewFile:
     def clean_non_request(self):
         """Clean up non requested packages."""
         if self.opt["dryrun"]:
-            self.banner("# Dry run")
+            self.banner("# This is dry run.")
 
         info = self.brewinfo.get_info()
         leaves = self.brewinfo.get_leaves()
@@ -2047,12 +2047,12 @@ class BrewFile:
         if self.opt["dryrun"]:
             self.banner("# This is dry run.\n"
                         "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean_non_request -C", 0)
+                        "#     $ " + __prog__ + " clean_non_request -C")
 
     def cleanup(self):
         """Clean up."""
         if self.opt["dryrun"]:
-            self.banner("# Dry run")
+            self.banner("# This is dry run.")
 
         # Check up packages in the input file
         self.read_all()
@@ -2232,7 +2232,7 @@ class BrewFile:
             # Dry run message
             self.banner("# This is dry run.\n"
                         "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean -C", 0)
+                        "#     $ " + __prog__ + " clean -C")
         else:
             self.proc(cmd0, False)
             self.proc(cmd1, False)
@@ -2894,6 +2894,9 @@ class BrewFile:
 
     def cask_upgrade(self):
         """Upgrade cask applications"""
+        if self.opt["dryrun"]:
+            self.banner("# This is dry run.")
+
         for a in self.get_cask_list()[1]:
             lines = self.proc("brew cask info " + a, False, False)[1]
             installed = True
@@ -2928,8 +2931,8 @@ class BrewFile:
                                 self.proc("sudo rm -rf " + appdir + "/" + d)
 
         if self.opt["dryrun"]:
-            self.info("\nThis is dryrun.", 1)
-            self.info("Please use -C to execute commands.", 1)
+            self.banner("# This is dry run.\n" +
+                        "# Please use -C to execute commands.")
 
     def make_pack_deps(self):
         """Make package dependencies"""
