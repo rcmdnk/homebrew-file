@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v5.0.0"
-__date__ = "16/Oct/2017"
+__version__ = "v5.1.0"
+__date__ = "5/Jan/2018"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -172,7 +172,7 @@ class BrewHelper:
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_err=True, separate_err=False, print_err=True,
+             exit_on_err=True, separate_err=False, print_err=True, shell=False,
              verbose=1, env={}):
         """ Get process output."""
         import shlex
@@ -184,6 +184,8 @@ class BrewHelper:
             cmd = ["command"] + cmd
         if print_cmd:
             self.info(cmd_orig, verbose)
+        if shell:
+            cmd = ' '.join(cmd)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
@@ -197,7 +199,7 @@ class BrewHelper:
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=all_env)
+                                 env=all_env, shell=shell)
             if separate_err and not print_err:
                 stderr.close()
             for line in self.readstdout(p):
@@ -470,7 +472,10 @@ class BrewInfo:
                     re.match(" *#", l) is not None:
                 continue
             args = l.replace("'", "").replace('"', "").\
-                replace(",", " ").replace("[", "").replace("]", "").split()
+                replace(",", " ").replace("[", "").replace("]", "")
+            args = self.helper.proc('echo \\"' + args + '\\"', False, False,
+                                    False, True, True, shell=True
+                                    )[1][0].split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
             if len(args) > 2 and p in ["tap", "cask", "pip", "gem"]:

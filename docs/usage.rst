@@ -77,7 +77,7 @@ cask             ``brew cask install X``. Require `caskroom/homebrew-cask <https
 pip              `brew pip X`. Require `hanxue/brew-pip <https://github.com/hanxue/brew-pip>`_. (It will be installed automatically.)
 gem              ``brew gem install X``. Require `sportngin/brew-gem <https://github.com/sportngin/brew-gem>`_. (It will be installed automatically.)
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
-file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it.
+file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
 brewfile         Same as ``file``.
 before           Execute ``X`` at the beginning of the install.
 after            Execute ``X`` after all install commands.
