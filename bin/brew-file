@@ -3300,7 +3300,7 @@ def main():
            "Uninstall packages not in the list.\n"\
            "Untap packages not in the list.\n"\
            "Cleanup cache (brew cleanup)\n"\
-           "By drault, cleanup runs as dry-run.\n"\
+           "By default, cleanup runs as dry-run.\n"\
            "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
         "clean", description=help, help=help,
@@ -3309,7 +3309,7 @@ def main():
     help = "or --clean_non_request.\n"\
            "Uninstall packages which were installed as dependencies but "\
            "parent packages of which were already uninstalled.\n"\
-           "By drault, cleanup runs as dry-run.\n"\
+           "By default, cleanup runs as dry-run.\n"\
            "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
         "clean_non_request", description=help, help=help,
