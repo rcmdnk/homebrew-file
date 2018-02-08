@@ -50,7 +50,6 @@ install:
   - testfile=$testrepofulldir/Brewfile
   - brew list > brewlist.orig
   - brew install rcmdnk/file/brew-file
-  - brew tap homebrew/dupes # needed, as current travis environment is old and has some packages which are now under dupes, but travis environment doesn't have dupes tap.
   - cd ../
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then echo TRAVIS_PULL_REQUEST test; fi'
