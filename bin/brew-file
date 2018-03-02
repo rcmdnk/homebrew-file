@@ -26,40 +26,22 @@ __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
 
-is_python3 = -1
-
-
 def my_decode(word):  # pragma: no cover
     """Decode when python3 is used."""
 
-    global is_python3
-    if is_python3 == -1:
-        try:
-            unicode
-            is_python3 = 0
-        except:
-            is_python3 = 1
-    if is_python3 == 0:
-        return word
-    return word.decode()
+    if sys.version_info.major > 2:
+        return word.decode()
+
+    return word
 
 
 def my_input(word):  # pragma: no cover
     """Input method compatibility."""
 
-    global is_python3
-    if is_python3 == -1:
-        try:
-            _input = raw_input
-            is_python3 = 0
-        except:
-            _input = input
-            is_python3 = 1
-    elif is_python3 == 0:
-        _input = raw_input
-    else:
-        _input = input
-    return _input(word)
+    if sys.version_info.major > 2:
+        return input(word)
+
+    return raw_input(word)
 
 
 def open_output_file(name, mode="w"):
