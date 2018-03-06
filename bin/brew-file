@@ -752,7 +752,7 @@ class BrewInfo:
 
         # pip packages
         if not self.helper.opt["caskonly"] and len(self.pip_list) > 0:
-            out.writeln("\n# pip packages")
+            out.writeln("\n# Other pip packages")
             for p in self.pip_list:
                 pack = self.packout(p)
                 if len(self.pip_list_opt[p]) == 1:
@@ -761,14 +761,14 @@ class BrewInfo:
 
         # gem packages
         if not self.helper.opt["caskonly"] and len(self.gem_list) > 0:
-            out.writeln("\n# gem packages")
+            out.writeln("\n# Other gem packages")
             for p in self.gem_list:
                 pack = self.packout(p) + self.gem_list_opt[p]
                 out.writeln(cmd_gem + pack)
 
         # Casks
         if len(self.cask_list) > 0:
-            out.writeln("\n# Cask applications")
+            out.writeln("\n# Other Cask applications")
             for c in self.cask_list:
                 out.writeln(cmd_cask + self.packout(c))
 
