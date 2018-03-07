@@ -29,12 +29,12 @@ env:
     #- coveralls=python-coveralls
     - CONFIGDIR="$HOME/.config/brewfile"
   matrix:
-    - PYTHON_VERSION="python"
+    - PYTHON_VERSION="python2"
     - PYTHON_VERSION="python3"
 before_install:
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then echo pull request test; fi'
-  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in test/.travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then openssl aes-256-cbc -K $encrypted_63171a4b9582_key -iv $encrypted_63171a4b9582_iv -in test/.travis_rsa.tar.enc -out .travis_rsa.tar -d; tar xvf .travis_rsa.tar; mv .travis_rsa_python .travis_rsa_python2; cp .travis_rsa_$PYTHON_VERSION ~/.ssh/id_rsa; chmod 600 ~/.ssh/id_rsa; echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config; fi'
   - sw_vers
   - brew --version
   - brew update
@@ -63,11 +63,16 @@ install:
   - rm -rf ../$testrepo
   - which python
   - python --version
+  - 'brew rm --ignore-dependencies  mercurial || :'
+  - 'brew rm --ignore-dependencies python || :'
+  - 'brew rm --ignore-dependencies python2 || :'
   - 'brew install $PYTHON_VERSION || :'
+  - hash -r
   - 'brew upgrade $PYTHON_VERSION || :'
-  - '[ "$PYTHON_VERSION" = "python" ] &&  pip install virtualenv|| :'
-  - '[ "$PYTHON_VERSION" = "python" ] &&  virtualenv -p python2 py_env|| :'
-  - '[ "$PYTHON_VERSION" = "python3" ] &&  python3 -m venv py_env|| :'
+  - '[ "$PYTHON_VERSION" = "python2" ] &&  export PATH="/usr/local/opt/python@2/libexec/bin:$PATH"|| :'
+  - '[ "$PYTHON_VERSION" = "python2" ] &&  pip install virtualenv|| :'
+  - '[ "$PYTHON_VERSION" = "python2" ] &&  virtualenv -p python py_env|| :'
+  - '[ "$PYTHON_VERSION" = "python3" ] &&  python -m venv py_env|| :'
   - source py_env/bin/activate
   - python --version
   - which python
