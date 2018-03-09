@@ -3127,8 +3127,8 @@ def main():
         default=b.opt["backup"],
         help="Set backup file (default: %(default)s). \n"
              "If it is empty, no backup is made.\n"
-             "You can set backup file by environmental variable,"
-             " HOMEBREW_BREWFILE_BACKUP, like:\n."
+             "You can set backup file by environmental variable,\n"
+             " HOMEBREW_BREWFILE_BACKUP, like:\n"
              "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup")
 
     format_parser = argparse.ArgumentParser(add_help=False)
@@ -3167,9 +3167,9 @@ def main():
     top_packages_parser.add_argument(
         "--top_packages", action="store", default=b.opt["top_packages"],
         dest="top_packages",
-        help="Packages to be listed even if they are under dependencies "
+        help="Packages to be listed even if they are under dependencies\n"
              "and `leaves`/'on_request' option is used.\n"
-             "You can set this by environmental variable,"
+             "You can set this by environmental variable,\n"
              " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
@@ -3289,8 +3289,8 @@ def main():
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or --clean_non_request.\n"\
-           "Uninstall packages which were installed as dependencies but "\
-           "parent packages of which were already uninstalled.\n"\
+           "Uninstall packages which were installed as dependencies \n"\
+           "but parent packages of which were already uninstalled.\n"\
            "By default, cleanup runs as dry-run.\n"\
            "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
