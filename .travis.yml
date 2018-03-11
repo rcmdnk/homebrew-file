@@ -69,7 +69,7 @@ install:
   - 'brew install $PYTHON_VERSION || :'
   - hash -r
   - 'brew upgrade $PYTHON_VERSION || :'
-  - '[ "$PYTHON_VERSION" = "python2" ] &&  export PATH="/usr/local/opt/python@2/libexec/bin:$PATH"|| :'
+  - export PATH="$(brew --prefix)/opt/$PYTHON_VERSION/libexec/bin:$PATH"
   - '[ "$PYTHON_VERSION" = "python2" ] &&  pip install virtualenv|| :'
   - '[ "$PYTHON_VERSION" = "python2" ] &&  virtualenv -p python py_env|| :'
   - '[ "$PYTHON_VERSION" = "python3" ] &&  python -m venv py_env|| :'
