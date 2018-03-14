@@ -157,19 +157,6 @@ script:
   - coverage run --parallel-mode $exe casklist -V 2
   - coverage run --parallel-mode $exe brew untap caskroom/cask
   - coverage run --parallel-mode $exe casklist -V 0
-  - coverage run --parallel-mode $exe cask_upgrade -C -V 2
-  - command brew cask rm firefox
-  - coverage run --parallel-mode $exe cask_upgrade -C -V 0
-  - command brew cask install firefox
-  - mv /Applications/Firefox.app .
-  - command brew cask rm firefox
-  - mv Firefox.app /Applications/
-  - coverage run --parallel-mode $exe casklist -V 0
-  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
-  - coverage run --parallel-mode $exe cask_upgrade -V 0
-  - export HOMEBREW_CASK_OPTS="cask_opt_error_test"
-  - export HOMEBREW_CASK_OPTS="--appdir=~/Applications"
-  - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
   - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 2 || :'
   - 'coverage run --parallel-mode $exe -f BrewfileWrong --no_appstore install -y -V 0 || :'

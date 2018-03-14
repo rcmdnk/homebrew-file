@@ -2490,7 +2490,6 @@ class BrewFile:
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
         apps_check = {"cask": dict([d, 0] for d in app_dirs),
-                      "cask_obsolete": dict([d, 0] for d in app_dirs),
                       "has_cask": dict([d, 0] for d in app_dirs),
                       "brew": dict([d, 0] for d in app_dirs),
                       "appstore": dict([d, 0] for d in app_dirs),
@@ -2584,11 +2583,9 @@ class BrewFile:
                                     casks.keys()):
                         casks[a][3] = True
                     casks[app_key][3] = True
-                    if installed:
-                        check = "cask"
-                    elif name != "":
+                    if installed or name != "":
                         installed = True
-                        check = "cask_obsolete"
+                        check = "cask"
                 else:
                     app_find = app
                     if not app.endswith(".app"):
@@ -2648,8 +2645,7 @@ class BrewFile:
         if len(apps[self.opt["cask_repo"]][True]) > 0:
             out.writeln("# Apps installed by Cask in " + self.opt["cask_repo"])
             for (name, app_path, check) in\
-                    sorted(x for x in apps[self.opt["cask_repo"]][True]
-                           if x[2] != "cask_obsolete"):
+                    sorted(apps[self.opt["cask_repo"]][True]):
                 if name not in casks_in_others:
                     out.writeln(
                         "cask " + name +
@@ -2660,22 +2656,6 @@ class BrewFile:
                         "#cask " + name +
                         " # " + app_path.replace(os.environ["HOME"], "~"))
 
-            if len([x for x in apps[self.opt["cask_repo"]][True]
-                    if x[2] == "cask_obsolete"]) > 0:
-                out.writeln(
-                    "\n# There are new version for following applications.")
-                for (name, app_path, check) in\
-                        sorted(x for x in apps[self.opt["cask_repo"]][True]
-                               if x[2] == "cask_obsolete"):
-                    if name not in casks_in_others:
-                        out.writeln(
-                            "cask " + name +
-                            " # " + app_path.replace(os.environ["HOME"], "~"))
-                        casks_in_others.append(name)
-                    else:
-                        out.writeln(
-                            "#cask " + name +
-                            " # " + app_path.replace(os.environ["HOME"], "~"))
             out.writeln("")
 
         if len([x[0] for x in list(casks.values()) + nonapp_casks
@@ -2719,9 +2699,7 @@ class BrewFile:
             out.writeln("")
             if len(apps[t][True]) > 0:
                 out.writeln("# Apps installed by Cask in " + t)
-                for (name, app_path, check) in\
-                        sorted(x for x in apps[t][True]
-                               if x[2] != "cask_obsolete"):
+                for (name, app_path, check) in sorted(apps[t][True]):
                     if name not in casks_in_others:
                         out.writeln("cask " + name + " # " +
                                     app_path.replace(os.environ["HOME"], "~"))
@@ -2730,22 +2708,6 @@ class BrewFile:
                         out.writeln("#cask " + name + " # " +
                                     app_path.replace(os.environ["HOME"], "~"))
 
-                if len([x for x in apps[t][True]
-                        if x[2] == "cask_obsolete"]) > 0:  # pragma: no cover
-                    out.writeln(
-                        "# There are new version for following applications.")
-                    for (name, app_path, check) in\
-                            sorted(x for x in apps[t][True]
-                                   if x[2] == "cask_obsolete"):
-                        if name not in casks_in_others:
-                            out.writeln(
-                                "cask " + name + " # " +
-                                app_path.replace(os.environ["HOME"], "~"))
-                            casks_in_others.append(name)
-                        else:
-                            out.writeln(
-                                "#cask " + name + " # " +
-                                app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
             if len([x[0] for x in list(casks.values()) + nonapp_casks
@@ -2831,17 +2793,6 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["cask"][d]))
                 print("")
-            if sum(apps_check["cask_obsolete"].values())\
-                    > 0:  # pragma: no cover
-                print("Installed by Cask (New version is availble, " +
-                      "try `brew file cask_upgrade`):")
-                for d in app_dirs:
-                    if apps_check["cask_obsolete"][d] == 0:
-                        continue
-                    print("{0:<{1}s} : {2:d}".format(d.replace(
-                        os.environ["HOME"], "~"), maxlen,
-                        apps_check["cask_obsolete"][d]))
-                print("")
             if sum(apps_check["brew"].values()) > 0:
                 print("Installed by brew install command")
                 for d in app_dirs:
@@ -2878,48 +2829,6 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["no_cask"][d]))
                 print("")
-
-    def cask_upgrade(self):
-        """Upgrade cask applications"""
-        if self.opt["dryrun"]:
-            self.banner("# This is dry run.")
-
-        for a in self.get_cask_list()[1]:
-            lines = self.proc("brew cask info " + a, False, False)[1]
-            installed = True
-            current = ""
-            for l in lines:
-                if l.startswith(a + ":"):
-                    current = l.split()[1]
-                if l.find("Not installed") != -1:  # pragma: no cover
-                    installed = False
-
-            appdir = self.opt["caskroom"] + "/" + a
-            if not installed or not os.path.isdir(appdir + "/" + current):
-                self.info(a + " was installed by cask, but it may have newer"
-                          " version, might be removed"
-                          " or overwritten by direct installation.\n"
-                          "Install it by cask.", 1)
-                if not self.opt["dryrun"]:
-                    if self.proc(
-                            ["brew", "cask", "install", "--force", a],
-                            exit_on_err=False)[0] != 0:  # pragma: no cover
-                        continue
-
-            for d in os.listdir(appdir):
-                if d != current.split("/")[-1] and d != ".metadata" and \
-                        d != ".DS_Store":
-                    self.info("Remove older version: " + appdir + "/" + d, 1)
-                    if not self.opt["dryrun"]:
-                        try:
-                            self.remove(appdir + "/" + d)
-                        except:  # pragma: no cover
-                            if d != "":
-                                self.proc("sudo rm -rf " + appdir + "/" + d)
-
-        if self.opt["dryrun"]:
-            self.banner("# This is dry run.\n" +
-                        "# Please use -C to execute commands.")
 
     def make_pack_deps(self):
         """Make package dependencies"""
@@ -2980,11 +2889,6 @@ class BrewFile:
         # Cask list check
         if self.opt["command"] == "casklist":
             self.check_cask()
-            sys.exit(0)
-
-        # Upgrade cask applications
-        if self.opt["command"] == "cask_upgrade":
-            self.cask_upgrade()
             sys.exit(0)
 
         # Set BREWFILE repository
@@ -3057,6 +2961,7 @@ class BrewFile:
             if not self.opt["noupgradeatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --fetch-HEAD")
+                self.proc("brew cask upgrade")
             if self.opt["repo"] != "":
                 self.repomgr("pull")
             self.install()
@@ -3297,7 +3202,7 @@ def main():
         "clean_non_request", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -u/--update\nDo brew update/upgrade, pull, install,\n"\
+    help = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull, install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
            "will be done if the repository is assigned.\n"\
@@ -3317,12 +3222,6 @@ def main():
     subparsers.add_parser("casklist", description=help, help=help,
                           parents=[verbose_parser],
                           formatter_class=argparse.RawTextHelpFormatter)
-    help = "Check updates of cask applications.\n"\
-           "With -C, upgrade is enforced (old versions will be removed)."
-    subparsers.add_parser(
-        "cask_upgrade", description=help, help=help,
-        parents=min_parsers+[dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
     help = "or --test. Used for test."
     subparsers.add_parser("test", description=help, help=help,
                           parents=min_parsers,
@@ -3394,7 +3293,7 @@ def main():
     elif b.opt["command"] == "commands":
         commands = ["install", "brew", "init", "dump", "set_repo", "set_local",
                     "pull", "push", "clean", "clean_non_request", "update",
-                    "edit", "cat", "casklist", "cask_upgrade", "test",
+                    "edit", "cat", "casklist", "test",
                     "get_files", "commands", "version", "help"]
         commands_hyphen = ["-i", "--init", "-s", "--set_repo", "--set_local",
                            "-c", "--clean", "--clean_non_request", "-u",

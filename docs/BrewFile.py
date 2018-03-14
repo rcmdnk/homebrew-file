@@ -19,47 +19,29 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v5.0.0"
-__date__ = "16/Oct/2017"
+__version__ = "v5.1.0"
+__date__ = "5/Jan/2018"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
 
-is_python3 = -1
-
-
 def my_decode(word):  # pragma: no cover
     """Decode when python3 is used."""
 
-    global is_python3
-    if is_python3 == -1:
-        try:
-            unicode
-            is_python3 = 0
-        except:
-            is_python3 = 1
-    if is_python3 == 0:
-        return word
-    return word.decode()
+    if sys.version_info.major > 2:
+        return word.decode()
+
+    return word
 
 
 def my_input(word):  # pragma: no cover
     """Input method compatibility."""
 
-    global is_python3
-    if is_python3 == -1:
-        try:
-            _input = raw_input
-            is_python3 = 0
-        except:
-            _input = input
-            is_python3 = 1
-    elif is_python3 == 0:
-        _input = raw_input
-    else:
-        _input = input
-    return _input(word)
+    if sys.version_info.major > 2:
+        return input(word)
+
+    return raw_input(word)
 
 
 def open_output_file(name, mode="w"):
@@ -172,7 +154,7 @@ class BrewHelper:
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_err=True, separate_err=False, print_err=True,
+             exit_on_err=True, separate_err=False, print_err=True, shell=False,
              verbose=1, env={}):
         """ Get process output."""
         import shlex
@@ -184,6 +166,8 @@ class BrewHelper:
             cmd = ["command"] + cmd
         if print_cmd:
             self.info(cmd_orig, verbose)
+        if shell:
+            cmd = ' '.join(cmd)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
@@ -197,7 +181,7 @@ class BrewHelper:
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=all_env)
+                                 env=all_env, shell=shell)
             if separate_err and not print_err:
                 stderr.close()
             for line in self.readstdout(p):
@@ -229,7 +213,7 @@ class BrewHelper:
     def err(self, text, verbose=0):
         self.info("\033[31;1m" + text + "\033[m", verbose)
 
-    def banner(self, text, verbose=2):
+    def banner(self, text, verbose=1):
         max = 0
         for l in text.split("\n"):
             if max < len(l):
@@ -470,7 +454,10 @@ class BrewInfo:
                     re.match(" *#", l) is not None:
                 continue
             args = l.replace("'", "").replace('"', "").\
-                replace(",", " ").replace("[", "").replace("]", "").split()
+                replace(",", " ").replace("[", "").replace("]", "")
+            args = self.helper.proc('echo \\"' + args + '\\"', False, False,
+                                    False, True, True, shell=True
+                                    )[1][0].split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
             if len(args) > 2 and p in ["tap", "cask", "pip", "gem"]:
@@ -765,7 +752,7 @@ class BrewInfo:
 
         # pip packages
         if not self.helper.opt["caskonly"] and len(self.pip_list) > 0:
-            out.writeln("\n# pip packages")
+            out.writeln("\n# Other pip packages")
             for p in self.pip_list:
                 pack = self.packout(p)
                 if len(self.pip_list_opt[p]) == 1:
@@ -774,14 +761,14 @@ class BrewInfo:
 
         # gem packages
         if not self.helper.opt["caskonly"] and len(self.gem_list) > 0:
-            out.writeln("\n# gem packages")
+            out.writeln("\n# Other gem packages")
             for p in self.gem_list:
                 pack = self.packout(p) + self.gem_list_opt[p]
                 out.writeln(cmd_gem + pack)
 
         # Casks
         if len(self.cask_list) > 0:
-            out.writeln("\n# Cask applications")
+            out.writeln("\n# Other Cask applications")
             for c in self.cask_list:
                 out.writeln(cmd_cask + self.packout(c))
 
@@ -1015,7 +1002,7 @@ class BrewFile:
     def err(self, text, verbose=1):
         self.helper.err(text, verbose)
 
-    def banner(self, text, verbose=2):
+    def banner(self, text, verbose=1):
         self.helper.banner(text, verbose)
 
     def remove(self, path):
@@ -1077,10 +1064,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo.get_file(), 1)
+        self.banner("# Initialize " + self.brewinfo.get_file())
         self.brewinfo.write()
         for b in self.brewinfo_ext:
-            self.banner("# Initialize " + b.get_file(), 1)
+            self.banner("# Initialize " + b.get_file())
             b.write()
 
     def get(self, name, only_ext=False):
@@ -2029,7 +2016,7 @@ class BrewFile:
     def clean_non_request(self):
         """Clean up non requested packages."""
         if self.opt["dryrun"]:
-            self.banner("# Dry run")
+            self.banner("# This is dry run.")
 
         info = self.brewinfo.get_info()
         leaves = self.brewinfo.get_leaves()
@@ -2047,12 +2034,12 @@ class BrewFile:
         if self.opt["dryrun"]:
             self.banner("# This is dry run.\n"
                         "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean_non_request -C", 0)
+                        "#     $ " + __prog__ + " clean_non_request -C")
 
     def cleanup(self):
         """Clean up."""
         if self.opt["dryrun"]:
-            self.banner("# Dry run")
+            self.banner("# This is dry run.")
 
         # Check up packages in the input file
         self.read_all()
@@ -2232,7 +2219,7 @@ class BrewFile:
             # Dry run message
             self.banner("# This is dry run.\n"
                         "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean -C", 0)
+                        "#     $ " + __prog__ + " clean -C")
         else:
             self.proc(cmd0, False)
             self.proc(cmd1, False)
@@ -2847,7 +2834,7 @@ class BrewFile:
             if sum(apps_check["cask_obsolete"].values())\
                     > 0:  # pragma: no cover
                 print("Installed by Cask (New version is availble, " +
-                      "try `brew file cask_upgrade`):")
+                      "try `brew cask upgrade`):")
                 for d in app_dirs:
                     if apps_check["cask_obsolete"][d] == 0:
                         continue
@@ -2891,45 +2878,6 @@ class BrewFile:
                         os.environ["HOME"], "~"), maxlen,
                         apps_check["no_cask"][d]))
                 print("")
-
-    def cask_upgrade(self):
-        """Upgrade cask applications"""
-        for a in self.get_cask_list()[1]:
-            lines = self.proc("brew cask info " + a, False, False)[1]
-            installed = True
-            current = ""
-            for l in lines:
-                if l.startswith(a + ":"):
-                    current = l.split()[1]
-                if l.find("Not installed") != -1:  # pragma: no cover
-                    installed = False
-
-            appdir = self.opt["caskroom"] + "/" + a
-            if not installed or not os.path.isdir(appdir + "/" + current):
-                self.info(a + " was installed by cask, but it may have newer"
-                          " version, might be removed"
-                          " or overwritten by direct installation.\n"
-                          "Install it by cask.", 1)
-                if not self.opt["dryrun"]:
-                    if self.proc(
-                            ["brew", "cask", "install", "--force", a],
-                            exit_on_err=False)[0] != 0:  # pragma: no cover
-                        continue
-
-            for d in os.listdir(appdir):
-                if d != current.split("/")[-1] and d != ".metadata" and \
-                        d != ".DS_Store":
-                    self.info("Remove older version: " + appdir + "/" + d, 1)
-                    if not self.opt["dryrun"]:
-                        try:
-                            self.remove(appdir + "/" + d)
-                        except:  # pragma: no cover
-                            if d != "":
-                                self.proc("sudo rm -rf " + appdir + "/" + d)
-
-        if self.opt["dryrun"]:
-            self.info("\nThis is dryrun.", 1)
-            self.info("Please use -C to execute commands.", 1)
 
     def make_pack_deps(self):
         """Make package dependencies"""
@@ -2990,11 +2938,6 @@ class BrewFile:
         # Cask list check
         if self.opt["command"] == "casklist":
             self.check_cask()
-            sys.exit(0)
-
-        # Upgrade cask applications
-        if self.opt["command"] == "cask_upgrade":
-            self.cask_upgrade()
             sys.exit(0)
 
         # Set BREWFILE repository
@@ -3067,6 +3010,7 @@ class BrewFile:
             if not self.opt["noupgradeatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --fetch-HEAD")
+                self.proc("brew cask upgrade")
             if self.opt["repo"] != "":
                 self.repomgr("pull")
             self.install()
@@ -3137,8 +3081,8 @@ def main():
         default=b.opt["backup"],
         help="Set backup file (default: %(default)s). \n"
              "If it is empty, no backup is made.\n"
-             "You can set backup file by environmental variable,"
-             " HOMEBREW_BREWFILE_BACKUP, like:\n."
+             "You can set backup file by environmental variable,\n"
+             " HOMEBREW_BREWFILE_BACKUP, like:\n"
              "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup")
 
     format_parser = argparse.ArgumentParser(add_help=False)
@@ -3177,9 +3121,9 @@ def main():
     top_packages_parser.add_argument(
         "--top_packages", action="store", default=b.opt["top_packages"],
         dest="top_packages",
-        help="Packages to be listed even if they are under dependencies "
+        help="Packages to be listed even if they are under dependencies\n"
              "and `leaves`/'on_request' option is used.\n"
-             "You can set this by environmental variable,"
+             "You can set this by environmental variable,\n"
              " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
@@ -3292,22 +3236,22 @@ def main():
            "Uninstall packages not in the list.\n"\
            "Untap packages not in the list.\n"\
            "Cleanup cache (brew cleanup)\n"\
-           "By drault, cleanup runs as dry-run.\n"\
+           "By default, cleanup runs as dry-run.\n"\
            "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
         "clean", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
     help = "or --clean_non_request.\n"\
-           "Uninstall packages which were installed as dependencies but "\
-           "parent packages of which were already uninstalled.\n"\
-           "By drault, cleanup runs as dry-run.\n"\
+           "Uninstall packages which were installed as dependencies \n"\
+           "but parent packages of which were already uninstalled.\n"\
+           "By default, cleanup runs as dry-run.\n"\
            "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
         "clean_non_request", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -u/--update\nDo brew update/upgrade, pull, install,\n"\
+    help = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull, install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
            "will be done if the repository is assigned.\n"\
@@ -3327,12 +3271,6 @@ def main():
     subparsers.add_parser("casklist", description=help, help=help,
                           parents=[verbose_parser],
                           formatter_class=argparse.RawTextHelpFormatter)
-    help = "Check updates of cask applications.\n"\
-           "With -C, upgrade is enforced (old versions will be removed)."
-    subparsers.add_parser(
-        "cask_upgrade", description=help, help=help,
-        parents=min_parsers+[dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
     help = "or --test. Used for test."
     subparsers.add_parser("test", description=help, help=help,
                           parents=min_parsers,
@@ -3404,7 +3342,7 @@ def main():
     elif b.opt["command"] == "commands":
         commands = ["install", "brew", "init", "dump", "set_repo", "set_local",
                     "pull", "push", "clean", "clean_non_request", "update",
-                    "edit", "cat", "casklist", "cask_upgrade", "test",
+                    "edit", "cat", "casklist", "test",
                     "get_files", "commands", "version", "help"]
         commands_hyphen = ["-i", "--init", "-s", "--set_repo", "--set_local",
                            "-c", "--clean", "--clean_non_request", "-u",
