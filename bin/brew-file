@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.0.0"
-__date__ = "14/Mar/2018"
+__version__ = "v6.1.0"
+__date__ = "16/Mar/2018"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -259,8 +259,6 @@ class BrewInfo:
         self.appstore_list = []
         self.file_list = []
 
-        self.tap_packs = []
-        self.tap_casks = []
         self.cask_nocask_list = []
 
         self.list_dic = {
@@ -288,8 +286,6 @@ class BrewInfo:
             "gem_list": self.gem_list,
             "appstore_list": self.appstore_list,
             "file_list": self.file_list,
-            "tap_packs": self.tap_packs,
-            "tap_casks": self.tap_casks,
         }
         self.filename = filename
         self.helper = helper
@@ -318,9 +314,6 @@ class BrewInfo:
     def clear(self):
         self.clear_input()
         self.clear_list()
-
-        del self.tap_packs[:]
-        del self.tap_casks[:]
 
     def clear_input(self):
         self.brew_input_opt.clear()
@@ -367,37 +360,34 @@ class BrewInfo:
         self.file_list.extend(self.file_input)
 
     def sort(self):
-        core = 0
-        homebrew_taps = []
-        cask = 0
+        core_tap = []
+        cask_tap = []
+        brew_taps = []
         cask_taps = []
         other_taps = []
         for t in self.tap_list:
             if t == "homebrew/core":
-                core = 1
-            elif t.startswith("homebrew/"):
-                homebrew_taps.append(t)
+                core_tap.append(t)
             elif t == "caskroom/cask":
-                cask = 1
+                cask_tap.append(t)
+            elif t.startswith("homebrew/"):
+                brew_taps.append(t)
             elif t.startswith("caskroom/"):
                 cask_taps.append(t)
             else:
                 other_taps.append(t)
-        homebrew_taps.sort()
+        brew_taps.sort()
         cask_taps.sort()
         other_taps.sort()
-        self.tap_list = []
-        if core == 1:
-            self.tap_list.append("homebrew/core")
-        self.tap_list += homebrew_taps
-        if cask == 1:
-            self.tap_list.append("caskroom/cask")
-        self.tap_list += cask_taps
-        self.tap_list += other_taps
+        self.tap_list = core_tap + brew_taps + cask_tap + cask_taps\
+            + other_taps
 
         self.brew_list.sort()
-        self.tap_casks.sort()
+        self.cask_list.sort()
+        self.pip_list.sort()
         self.gem_list.sort()
+        self.file_list.sort()
+        self.cask_nocask_list.sort()
 
         self.appstore_list.sort(
             key=lambda x: x.split()[1].lower() if len(x.split()) > 1
@@ -496,10 +486,11 @@ class BrewInfo:
                 self.tap_input.append(p)
             elif cmd == "tapall":
                 self.tap_input.append(p)
-                self.get_tap(p)
-                for tp in self.tap_packs:
+                for tp in self.get_tap_packs(p):
                     self.brew_input.append(tp)
                     self.brew_input_opt[tp] = ""
+                for tp in self.get_tap_casks(p):
+                    self.cask_input.append(tp)
             elif cmd == "cask":
                 self.cask_input.append(p)
             elif cmd == "pip":
@@ -530,25 +521,34 @@ class BrewInfo:
         return self.helper.brew_val("repository") + "/Library/Taps" +\
             "/" + tap_user + "/homebrew-" + tap_repo
 
-    def get_tap(self, tap):
+    def get_tap_packs(self, tap):
         """Helper for tap configuration file"""
+        packs = []
         tap_path = self.get_tap_path(tap)
         if not os.path.isdir(tap_path):
-            return
-        self.set_val("tap_packs", list(map(lambda x: x.replace(".rb", ""),
-                                           filter(lambda y: y.endswith(".rb"),
-                                                  os.listdir(tap_path)))))
+            return packs
+        packs = list(map(lambda x: x.replace(".rb", ""),
+                         filter(lambda y: y.endswith(".rb"),
+                                os.listdir(tap_path))))
         path = tap_path + "/Formula"
         if os.path.isdir(path):
-            self.add("tap_packs", list(map(lambda x: x.replace(".rb", ""),
-                                           filter(lambda y: y.endswith(".rb"),
-                                                  os.listdir(path)))))
+            packs  += list(map(lambda x: x.replace(".rb", ""),
+                               filter(lambda y: y.endswith(".rb"),
+                                      os.listdir(path))))
+        return sorted(packs)
+
+    def get_tap_casks(self, tap):
+        """Helper for tap configuration file"""
+        tap_path = self.get_tap_path(tap)
+        casks = []
+        if not os.path.isdir(tap_path):
+            return casks
         path = tap_path + "/Casks"
         if os.path.isdir(path):
-            self.set_val("tap_casks",
-                         list(map(lambda x: x.replace(".rb", ""),
-                                  filter(lambda y: y.endswith(".rb"),
-                                         os.listdir(tap_path + "/Casks")))))
+            casks = list(map(lambda x: x.replace(".rb", ""),
+                             filter(lambda y: y.endswith(".rb"),
+                                    os.listdir(tap_path + "/Casks"))))
+        return sorted(casks)
 
     def packout(self, pack):
         if self.helper.opt["form"] in ["brewdler", "bundle"]:
@@ -713,11 +713,11 @@ class BrewInfo:
 
             for t in self.tap_list:
                 isfirst_pack = True
-                self.get_tap(t)
                 direct_first = False
                 if t == "direct":
                     direct_first = True
 
+                tap_packs = self.get_tap_packs(t)
                 if not self.helper.opt["caskonly"]:
                     first_tap_pack_write(out, isfirst, direct_first,
                                          isfirst_pack, t, cmd_tap)
@@ -725,7 +725,7 @@ class BrewInfo:
 
                     for p in self.brew_list[:]:
                         if p.split("/")[-1].replace(
-                                ".rb", "") in self.tap_packs:
+                                ".rb", "") in tap_packs:
                             if direct_first:
                                 direct_first = False
                                 out.writeln("\n## " + "Direct install")
@@ -734,7 +734,7 @@ class BrewInfo:
                             out.writeln(cmd_install + pack)
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
-                for tc in self.tap_casks:
+                for tc in self.get_tap_casks(t):
                     if tc in self.cask_list:
                         first_tap_pack_write(out, isfirst, False,
                                              isfirst_pack, t, cmd_tap)
@@ -2187,16 +2187,15 @@ class BrewFile:
             for p in self.get("tap_list"):
                 if p in self.get("tap_input"):
                     continue
-                self.brewinfo.get_tap(p)
                 untapflag = True
-                for tp in self.brewinfo.tap_packs:
+                for tp in self.brewinfo.get_tap_packs(p):
                     if tp in self.get("brew_input"):
                         # Keep the Tap as related package is remained
                         untapflag = False
                         break
                 if not untapflag:
                     continue
-                for tc in self.brewinfo.tap_casks:
+                for tc in self.brewinfo.get_tap_casks(p):
                     if tc in self.get("cask_input"):
                         # Keep the Tap as related cask is remained
                         untapflag = False
@@ -2882,7 +2881,6 @@ class BrewFile:
         self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")
-        self.brewinfo.get_tap("/aaa/bbb")
 
     def execute(self):
         """Main execute function"""
