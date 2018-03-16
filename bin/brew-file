@@ -700,13 +700,10 @@ class BrewInfo:
         if len(self.tap_list) > 0:
             isfirst = True
 
-            def first_tap_write(out, isfirst):
-                if isfirst:
-                    out.writeln("\n# tap repositories and their packages")
-
             def first_tap_pack_write(out, isfirst, direct_first, isfirst_pack,
                                      tap, cmd_tap):
-                first_tap_write(out, isfirst)
+                if isfirst:
+                    out.writeln("\n# tap repositories and their packages")
                 if not direct_first and isfirst_pack:
                     out.writeln("\n" +
                                 cmd_tap + self.packout(tap))
@@ -734,8 +731,9 @@ class BrewInfo:
                             out.writeln(cmd_install + pack)
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
-                for tc in self.get_tap_casks(t):
-                    if tc in self.cask_list:
+                tap_casks = self.get_tap_casks(t)
+                for p in self.cask_list:
+                    if p in tap_casks:
                         first_tap_pack_write(out, isfirst, False,
                                              isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
