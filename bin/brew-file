@@ -500,6 +500,8 @@ class BrewInfo:
                 self.gem_input.append(p)
                 self.gem_input_opt[p] = (opt)
             elif cmd == "mas" and l.find(',') != -1:
+                if self.helper.opt["form"] == "none":
+                    self.helper.opt["form"] = "bundle"
                 p = l.split()[1].strip(",").strip("'").strip('"')
                 pid = l.split()[3]
                 self.appstore_input.append(pid + ' ' + p)
