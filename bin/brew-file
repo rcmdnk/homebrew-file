@@ -499,7 +499,11 @@ class BrewInfo:
             elif cmd == "gem":
                 self.gem_input.append(p)
                 self.gem_input_opt[p] = (opt)
-            elif cmd == "appstore":
+            elif cmd == "mas" and l.find(',') != -1:
+                p = l.split()[1].strip(",").strip("'").strip('"')
+                pid = l.split()[3]
+                self.appstore_input.append(pid + ' ' + p)
+            elif cmd == "appstore" or cmd == "mas":
                 self.appstore_input.append(re.sub("^ *appstore *", "", l).
                                            strip().strip("'").strip('"'))
             elif cmd == "file" or cmd.lower() == "brewfile":
@@ -549,12 +553,6 @@ class BrewInfo:
                              filter(lambda y: y.endswith(".rb"),
                                     os.listdir(tap_path + "/Casks"))))
         return sorted(casks)
-
-    def packout(self, pack):
-        if self.helper.opt["form"] in ["brewdler", "bundle"]:
-            return "'" + pack + "'"
-        else:
-            return pack
 
     def get_leaves(self):
         leavestmp = self.helper.proc("brew leaves", False, False)[1]
@@ -628,6 +626,21 @@ class BrewInfo:
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
         return opt
 
+    def packout(self, pack):
+        if self.helper.opt["form"] in ["brewdler", "bundle"]:
+            return "'" + pack + "'"
+        else:
+            return pack
+
+    def mas_pack(self, pack):
+        if self.helper.opt["form"] in ["brewdler", "bundle"]:
+            pack_split = pack.split()
+            pid = pack_split[0]
+            name = pack_split[1:]
+            return "'" + ' '.join(name) + "', id: " + pid
+        else:
+            return pack
+
     def write(self):
         # Prepare output
         out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
@@ -655,7 +668,7 @@ class BrewInfo:
             cmd_pip = "#pip "
             cmd_gem = "#gem "
             cmd_cask_nocask = "#cask "
-            cmd_appstore = "#appstore "
+            cmd_appstore = "mas "
             cmd_file = "#file "
         elif self.helper.opt["form"] in ["command", "cmd"]:
             # Shebang for command format
@@ -684,7 +697,7 @@ class BrewInfo:
             cmd_pip = "brew pip "
             cmd_gem = "brew gem install "
             cmd_cask_nocask = "#brew cask install "
-            cmd_appstore = "#appstore "
+            cmd_appstore = "mas install "
             cmd_file = "#file "
 
         # sort
@@ -737,8 +750,8 @@ class BrewInfo:
                         first_tap_pack_write(out, isfirst, False,
                                              isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
-                        out.writeln(cmd_cask + self.packout(tc))
-                        self.cask_list.remove(tc)
+                        out.writeln(cmd_cask + self.packout(p))
+                        self.cask_list.remove(p)
 
         # Brew packages
         if not self.helper.opt["caskonly"] and len(self.brew_list) > 0:
@@ -781,7 +794,7 @@ class BrewInfo:
         if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for a in self.appstore_list:
-                out.writeln(cmd_appstore + self.packout(a))
+                out.writeln(cmd_appstore + self.mas_pack(a))
 
         # Additional files
         if len(self.file_list) > 0:
