@@ -2,23 +2,16 @@ Requirements
 ============
 
 - `Homebrew <https://github.com/mxcl/homebrew>`_ (Can be installed by the install script of brew-file, too).
-- Python 2.7.7 or later (optional).
+- Python 2.7.7 or later, or Python 3.
 - Requests module (optional)
 
-Although it is not mandatory,
-the latest Python 2.7.x or 3.x is recommended,
-to use ``brew file brew`` command (and ``brew-wrap``).
+Current macOS High Sierra's python (``/usr/bin/python``) is 2.7.10,
+so that there is no need to do on python.
 
-You can install the latest python2.x by Homebrew::
+It calls ``/usr/bin/env python``, i.e., ``python`` command in your ``PATH``.
 
-    $ brew install python
-
-or python3.x::
-
-    $ brew install python3
-
-
-If you set your ``PYTHONPATH`` for python3,
+If you set your ``PYTHONPATH`` for python3
+and ``python`` command is linked to python2,
 you may need to execute ``brew-file`` directly::
 
     $ python3 /usr/local/bin/brew-file
