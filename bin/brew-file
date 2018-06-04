@@ -141,6 +141,9 @@ class BrewHelper:
 
     def __init__(self, opt):
         self.opt = opt
+        self.colors = {"black": "30", "red": "31", "green": "32",
+                       "yellow": "33", "blue": "34", "magenta": "35",
+                       "lightblue": 36, "white": 37}
 
     def readstdout(self, proc):
         while True:
@@ -202,23 +205,31 @@ class BrewHelper:
 
         return (ret, lines)
 
-    def info(self, text, verbose=2):
+    def out(self, text, verbose=100, color=""):
         if self.opt["verbose"] < verbose:
             return
-        print(text)
+        pre = post = ""
+        if color != "" and sys.stdout.isatty():
+            if color in self.colors.keys():
+                pre = "\033[" + self.colors[color] + ";1m"
+                post = "\033[m"
+        print(pre + text + post)
+
+    def info(self, text, verbose=2):
+        self.out(text, verbose)
 
     def warn(self, text, verbose=1):
-        self.info("\033[33;1m" + text + "\033[m", verbose)
+        self.out(text, verbose, "yellow")
 
     def err(self, text, verbose=0):
-        self.info("\033[31;1m" + text + "\033[m", verbose)
+        self.out(text, verbose, "red")
 
     def banner(self, text, verbose=1):
         max = 0
         for l in text.split("\n"):
             if max < len(l):
                 max = len(l)
-        self.info("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose)
+        self.out("\n"+"#"*max+"\n"+text+"\n" + "#"*max+"\n", verbose)
 
     def brew_val(self, name):
         if name not in self.opt:
@@ -1010,10 +1021,10 @@ class BrewFile:
         self.helper.info(text, verbose)
 
     def warn(self, text, verbose=1):
-        self.helper.warn(text, verbose)
+        self.helper.warn("[WARNING]: " + text, verbose)
 
     def err(self, text, verbose=1):
-        self.helper.err(text, verbose)
+        self.helper.err("[ERROR]: " + text, verbose)
 
     def banner(self, text, verbose=1):
         self.helper.banner(text, verbose)
@@ -1579,8 +1590,7 @@ class BrewFile:
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
-                print("")
-                self.warn("\nCheck brew environment and fix problems\n"
+                self.warn("\n\nCheck brew environment and fix problems\n"
                           "# You can check with:\n"
                           "#     $ brew doctor", 0)
 
@@ -1757,7 +1767,6 @@ class BrewFile:
             # (ret, app_tmp) = self.proc(
             #     "mdfind 'kMDItemAppStoreHasReceipt=1'", False, False)
             for a in apps_tmp:
-                print(a)
                 apps_id = self.proc(
                     "mdls -name kMDItemAppStoreAdamID -raw '%s.app'" % a,
                     False, False)[1][0]
