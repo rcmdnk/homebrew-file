@@ -219,10 +219,10 @@ class BrewHelper:
         self.out(text, verbose)
 
     def warn(self, text, verbose=1):
-        self.out(text, verbose, "yellow")
+        self.out("[WARNING]: " + text, verbose, "yellow")
 
     def err(self, text, verbose=0):
-        self.out(text, verbose, "red")
+        self.out("[ERROR]: " + text, verbose, "red")
 
     def banner(self, text, verbose=1):
         max = 0
@@ -1021,10 +1021,10 @@ class BrewFile:
         self.helper.info(text, verbose)
 
     def warn(self, text, verbose=1):
-        self.helper.warn("[WARNING]: " + text, verbose)
+        self.helper.warn(text, verbose)
 
     def err(self, text, verbose=1):
-        self.helper.err("[ERROR]: " + text, verbose)
+        self.helper.err(text, verbose)
 
     def banner(self, text, verbose=1):
         self.helper.banner(text, verbose)
