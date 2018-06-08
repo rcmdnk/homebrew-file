@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.1.2"
-__date__ = "5/Jun/2018"
+__version__ = "v6.1.3"
+__date__ = "8/Jun/2018"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -374,24 +374,19 @@ class BrewInfo:
         core_tap = []
         cask_tap = []
         brew_taps = []
-        cask_taps = []
         other_taps = []
         for t in self.tap_list:
             if t == "homebrew/core":
                 core_tap.append(t)
-            elif t == "caskroom/cask":
+            elif t == self.helper.opt["cask_repo"]:
                 cask_tap.append(t)
             elif t.startswith("homebrew/"):
                 brew_taps.append(t)
-            elif t.startswith("caskroom/"):
-                cask_taps.append(t)
             else:
                 other_taps.append(t)
         brew_taps.sort()
-        cask_taps.sort()
         other_taps.sort()
-        self.tap_list = core_tap + brew_taps + cask_tap + cask_taps\
-            + other_taps
+        self.tap_list = core_tap + brew_taps + cask_tap + other_taps
 
         self.brew_list.sort()
         self.cask_list.sort()
@@ -882,7 +877,7 @@ class BrewFile:
         self.opt["caskonly"] = False
         self.opt["dryrun"] = True
         self.opt["initialized"] = False
-        self.opt["cask_repo"] = "caskroom/cask"
+        self.opt["cask_repo"] = "homebrew/cask"
         self.opt["reattach_formula"] = "reattach-to-user-namespace"
         self.opt["mas_formula"] = "mas"
         self.opt["pip_pack"] = "brew-pip"
