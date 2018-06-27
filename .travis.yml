@@ -63,6 +63,8 @@ install:
   - rm -rf ../$testrepo
   - which python
   - python --version
+  - 'brew rm --ignore-dependencies  numpy || :'
+  - 'brew rm --ignore-dependencies  gdal || :'
   - 'brew rm --ignore-dependencies  mercurial || :'
   - 'brew rm --ignore-dependencies python || :'
   - 'brew rm --ignore-dependencies python2 || :'
