@@ -110,6 +110,7 @@ script:
   - coverage run --parallel-mode $exe cat
   - pip list
   - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
+  - brew rm postgis
   - brew rm gdal
   - brew rm numpy
   - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
