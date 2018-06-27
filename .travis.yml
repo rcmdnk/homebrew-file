@@ -66,6 +66,8 @@ install:
   - 'brew rm --ignore-dependencies  mercurial || :'
   - 'brew rm --ignore-dependencies python || :'
   - 'brew rm --ignore-dependencies python2 || :'
+  - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
+  - 'rm -rf /usr/local/lib/python2.7/site-packages/numpy/ || :'
   - 'brew install $PYTHON_VERSION || :'
   - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
   - pip list
