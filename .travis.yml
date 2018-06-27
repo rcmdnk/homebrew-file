@@ -67,6 +67,7 @@ install:
   - 'brew rm --ignore-dependencies python || :'
   - 'brew rm --ignore-dependencies python2 || :'
   - 'brew install $PYTHON_VERSION || :'
+  - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
   - pip list
   - hash -r
   - 'brew upgrade $PYTHON_VERSION || :'
@@ -108,5 +109,6 @@ script:
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe cat
   - pip list
+  - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - pip list
