@@ -110,5 +110,8 @@ script:
   - coverage run --parallel-mode $exe cat
   - pip list
   - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
+  - brew rm gdal
+  - brew rm numpy
+  - 'ls -l /usr/local/lib/python2.7/site-packages/numpy/ || :'
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
   - pip list
