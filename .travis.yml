@@ -87,6 +87,8 @@ install:
   - hash -r
   - which ruby
   - which gem
+  - brew rm gdal
+  - brew rm numpy
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
