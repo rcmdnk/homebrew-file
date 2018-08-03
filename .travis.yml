@@ -87,6 +87,7 @@ install:
   - hash -r
   - which ruby
   - which gem
+  - brew rm postgis
   - brew rm gdal
   - brew rm numpy
 before_script:
