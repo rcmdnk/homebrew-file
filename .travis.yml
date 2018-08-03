@@ -90,6 +90,7 @@ install:
   - 'brew rm postgis || :'
   - 'brew rm gdal || :'
   - 'brew rm numpy || :'
+  - 'brew cask rm java || :'
 before_script:
   - installed_brew=$(which brew-file)
   - brewprefix=$(brew --prefix)
