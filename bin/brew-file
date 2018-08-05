@@ -544,9 +544,9 @@ class BrewInfo:
                                 os.listdir(tap_path))))
         path = tap_path + "/Formula"
         if os.path.isdir(path):
-            packs  += list(map(lambda x: x.replace(".rb", ""),
-                               filter(lambda y: y.endswith(".rb"),
-                                      os.listdir(path))))
+            packs += list(map(lambda x: x.replace(".rb", ""),
+                              filter(lambda y: y.endswith(".rb"),
+                                     os.listdir(path))))
         return sorted(packs)
 
     def get_tap_casks(self, tap):
@@ -1000,7 +1000,7 @@ class BrewFile:
     def verbose(self):
         try:
             v = self.opt["verbose"]
-        except:  # pragma: no cover
+        except KeyError:  # pragma: no cover
             v = 10
         return v
 
@@ -1090,18 +1090,18 @@ class BrewFile:
             b.write()
 
     def get(self, name, only_ext=False):
-        l = self.brewinfo.get(name)
-        if type(l) == list:
+        list_copy = self.brewinfo.get(name)
+        if type(list_copy) == list:
             if only_ext:
-                del l[:]
+                del list_copy[:]
             for b in self.brewinfo_ext:
-                l += b.get(name)
-        elif type(l) == dict:
+                list_copy += b.get(name)
+        elif type(list_copy) == dict:
             if only_ext:
-                l.clear()
+                list_copy.clear()
             for b in self.brewinfo_ext:
-                l.update(b.get(name))
-        return l
+                list_copy.update(b.get(name))
+        return list_copy
 
     def remove_pack(self, name, package):
         if package in self.brewinfo.get(name):
@@ -1170,7 +1170,7 @@ class BrewFile:
         """helper to check and create GitHub repository."""
         try:
             from urllib2 import urlopen, HTTPError
-        except:
+        except ImportError:
             from urllib.request import urlopen
             from urllib.error import HTTPError
 
@@ -1874,14 +1874,14 @@ class BrewFile:
         # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
         # Keep it in main list in any case.
-        for l in ["brew", "cask", "cask_nocask", "pip", "gem", "appstore"]:
-            if l == "cask_nocask":
+        for name in ["brew", "cask", "cask_nocask", "pip", "gem", "appstore"]:
+            if name == "cask_nocask":
                 i = "cask"
             else:
-                i = l
-            for p in self.brewinfo.get(l+"_list"):
+                i = name
+            for p in self.brewinfo.get(name+"_list"):
                 if p in self.get(i+"_input", True):
-                    self.brewinfo.remove(l+"_list", p)
+                    self.brewinfo.remove(name+"_list", p)
 
         # Keep file in main Brewfile
         self.brewinfo.file_list.extend(self.brewinfo.file_input)
@@ -2088,7 +2088,7 @@ class BrewFile:
             n_uninstall = 0
             try:
                 from urllib2 import quote
-            except:
+            except ImportError:
                 from urllib.parse import quote
 
             for p in self.get("appstore_list"):
@@ -3160,7 +3160,9 @@ def main():
                  caskonly_parser, appstore_parser, dryrun_parser, yn_parser,
                  verbose_parser, help_parser],
         formatter_class=argparse.RawTextHelpFormatter,
-        description=__description__)
+        description=__description__,
+        epilog="Check https://homebrew-file.readthedocs.io for more details."
+    )
 
     subparsers = parser.add_subparsers(
         title="subcommands", metavar="[command]", help="", dest="command")
@@ -3217,7 +3219,8 @@ def main():
         "clean_non_request", description=help, help=help,
         parents=min_parsers+[dryrun_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull, install,\n"\
+    help = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"\
+           "install,\n"\
            "init and push.\n"\
            "In addition, pull and push\n"\
            "will be done if the repository is assigned.\n"\
@@ -3250,8 +3253,7 @@ def main():
     help = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -h/--help\nPrint Help (this message) and exit.\n\n"\
-        "Check https://homebrew-file.readthedocs.io for more details."
+    help = "or -h/--help\nPrint Help (this message) and exit."
     subparsers.add_parser("help", description=help, help=help,
                           formatter_class=argparse.RawTextHelpFormatter)
 
