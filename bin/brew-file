@@ -2233,8 +2233,8 @@ class BrewFile:
             print(cmd0)
             print(cmd1)
         else:
-            self.proc(cmd0, False)
-            self.proc(cmd1, False)
+            self.proc(cmd0, True, True)
+            self.proc(cmd1, True, True)
 
         if self.opt["dryrun"]:
             # Dry run message
