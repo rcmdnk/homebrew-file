@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.1.3"
-__date__ = "8/Jun/2018"
+__version__ = "v6.1.5"
+__date__ = "26/Aug/2018"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2227,18 +2227,20 @@ class BrewFile:
 
         # Clean up cashe
         self.banner("# Clean up cache")
-        cmd0 = "brew cleanup --force"
+        cmd0 = "brew cleanup"
         cmd1 = "rm -rf " + self.brew_val("cache")
         if self.opt["dryrun"]:
             print(cmd0)
             print(cmd1)
+        else:
+            self.proc(cmd0, False)
+            self.proc(cmd1, False)
+
+        if self.opt["dryrun"]:
             # Dry run message
             self.banner("# This is dry run.\n"
                         "# If you want to enforce cleanup, use '-C':\n"
                         "#     $ " + __prog__ + " clean -C")
-        else:
-            self.proc(cmd0, False)
-            self.proc(cmd1, False)
 
     def install(self):
         """Install"""
