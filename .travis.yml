@@ -91,6 +91,7 @@ install:
   - 'brew rm gdal || :'
   - 'brew rm numpy || :'
   - 'brew cask rm java || :'
+  - 'brew cask install java || :'
   - rm -rf /usr/local/Caskroom/java/
 before_script:
   - installed_brew=$(which brew-file)
