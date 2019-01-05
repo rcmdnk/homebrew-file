@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.1.6"
-__date__ = "19/Oct/2018"
+__version__ = "v6.1.7"
+__date__ = "05/Jan/2019"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -618,7 +618,7 @@ class BrewInfo:
 
         opt = ""
         installed = self.get_installed(package, package_info)
-        if len(installed["used_options"]) > 0:
+        if "used_options" in installed and len(installed["used_options"]) > 0:
             opt = " " + " ".join(installed["used_options"])
         for k, v in package_info["versions"].items():
             if installed["version"] == v and k != "stable":
