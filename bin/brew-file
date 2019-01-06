@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.1.7"
-__date__ = "05/Jan/2019"
+__version__ = "v6.1.8"
+__date__ = "06/Jan/2019"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -587,7 +587,7 @@ class BrewInfo:
         if type(package_info) != dict:  # pragma: no cover
             package_info = self.get_info(package)[package]
 
-        installed = {}
+        installed = package_info["installed"][0]
         version = ""
         if package_info["linked_keg"] is None:
             version = self.helper.proc("ls -l " +
@@ -600,9 +600,7 @@ class BrewInfo:
         else:
             version = package_info["linked_keg"]
 
-        if version == "":
-            installed = package_info["installed"][0]
-        else:
+        if version != "":
             for i in package_info["installed"]:
                 if i["version"] == version:
                     installed = i
@@ -618,7 +616,7 @@ class BrewInfo:
 
         opt = ""
         installed = self.get_installed(package, package_info)
-        if "used_options" in installed and len(installed["used_options"]) > 0:
+        if len(installed["used_options"]) > 0:
             opt = " " + " ".join(installed["used_options"])
         for k, v in package_info["versions"].items():
             if installed["version"] == v and k != "stable":
