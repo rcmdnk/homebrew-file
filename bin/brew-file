@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v6.1.8"
-__date__ = "06/Jan/2019"
+__version__ = "v6.1.9"
+__date__ = "07/Jan/2019"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -602,7 +602,7 @@ class BrewInfo:
 
         if version != "":
             for i in package_info["installed"]:
-                if i["version"] == version:
+                if i["version"].replace(".reinstall", "") == version:
                     installed = i
                     break
         return installed
