@@ -211,7 +211,7 @@ class BrewHelper:
             return
         pre = post = ""
         if color != "" and sys.stdout.isatty():
-            if color in self.colors.keys():
+            if color in self.colors:
                 pre = "\033[" + self.colors[color] + ";1m"
                 post = "\033[m"
         print(pre + text + post)
@@ -2581,7 +2581,7 @@ class BrewFile:
                         os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
                 aname = app.replace(".app", "")
-                if aname in appstore_list.keys():  # pragma: no cover
+                if aname in appstore_list:  # pragma: no cover
                     tap = "appstore"
                     installed = False
                     if appstore_list[aname][0] != "":
@@ -2590,14 +2590,13 @@ class BrewFile:
                     else:
                         name = ""
                     check = "appstore"
-                elif app in casks.keys() or\
-                        app.split(".")[0] in casks.keys():
-                    app_key = app if app in casks.keys() else app.split(".")[0]
+                elif app in casks or app.split(".")[0] in casks:
+                    app_key = app if app in casks else app.split(".")[0]
                     tap = casks[app_key][1]
                     installed = casks[app_key][2]
                     name = casks[app_key][0]
                     for a in filter(lambda k: casks[k][0] == name,
-                                    casks.keys()):
+                                    casks):
                         casks[a][3] = True
                     casks[app_key][3] = True
                     if installed or name != "":
@@ -2616,7 +2615,7 @@ class BrewFile:
                                             nonapp_casks):
                                 nonapp_casks.remove(c)
                             for a in filter(lambda k: casks[k][0] == name,
-                                            casks.keys()):
+                                            casks):
                                 casks[a][3] = True
                     name = ""
                     if installed:
@@ -2759,13 +2758,13 @@ class BrewFile:
                                     app_path.replace(os.environ["HOME"], "~"))
                 out.writeln("")
 
-        if len(brew_apps.keys()) > 0:
+        if len(brew_apps) > 0:
             out.writeln("# Apps installed by brew install command")
             if "" in brew_apps:
                 for (name, app_path, opt) in brew_apps[""]:
                     out.writeln("brew " + name + " " + opt + " # " +
                                 app_path.replace(os.environ["HOME"], "~"))
-            for tap in [x for x in brew_apps.keys() if x != ""]:
+            for tap in [x for x in brew_apps if x != ""]:
                 out.writeln("tap " + tap)
                 for (name, app_path, opt) in brew_apps[tap]:
                     out.writeln("brew " + name + " " + opt + " # " +
@@ -3286,7 +3285,7 @@ def main():
             args = [ns.command] + args
         else:
             for a in args:
-                if a in subparsers.choices.keys():
+                if a in subparsers.choices:
                     args.remove(a)
                     args = [a] + args
                     break
