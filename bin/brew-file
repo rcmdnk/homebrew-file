@@ -1218,8 +1218,7 @@ class BrewFile:
                 if ret != 0:
                     self.proc("easy_install pip")
                 self.proc("pip install requests")
-                print("Now please run `brew file set_repo` again.")
-                exit(0)
+                import requests
 
         import json
         url = "https://api.github.com/user/repos"
