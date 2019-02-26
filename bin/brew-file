@@ -26,6 +26,12 @@ __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
 
+def is_mac():
+    import platform
+    if platform.system() == "Darwin":
+        return True
+    return False
+
 def my_decode(word):  # pragma: no cover
     """Decode when python3 is used."""
 
@@ -751,6 +757,8 @@ class BrewInfo:
                             out.writeln(cmd_install + pack)
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
+                if not is_mac():
+                    continue
                 tap_casks = self.get_tap_casks(t)
                 for p in self.cask_list:
                     if p in tap_casks:
@@ -785,20 +793,21 @@ class BrewInfo:
                 out.writeln(cmd_gem + pack)
 
         # Casks
-        if len(self.cask_list) > 0:
+        if is_mac() and len(self.cask_list) > 0:
             out.writeln("\n# Other Cask applications")
             for c in self.cask_list:
                 out.writeln(cmd_cask + self.packout(c))
 
         # Installed by cask, but cask files were not found...
-        if len(self.cask_nocask_list) > 0:  # pragma: no cover
+        if is_mac() and len(self.cask_nocask_list) > 0:  # pragma: no cover
             out.writeln("\n# Below applications were installed by Cask,")
             out.writeln("# but do not have corresponding casks.\n")
             for c in self.cask_nocask_list:
                 out.writeln(cmd_cask_nocask + self.packout(c))
 
         # App Store applications
-        if self.helper.opt["appstore"] and len(self.appstore_list) > 0:
+        if is_mac() and self.helper.opt["appstore"] \
+                and len(self.appstore_list) > 0:
             out.writeln("\n# App Store applications")
             for a in self.appstore_list:
                 out.writeln(cmd_appstore + self.mas_pack(a))
@@ -1590,6 +1599,10 @@ class BrewFile:
 
     def check_cask_cmd(self, force=False):
         """Check cask is installed or not"""
+        if not is_mac():
+            print("Cask is not available on Linux!")
+            sys.exit(1)
+
         if self.opt["is_cask_cmd"]:
             return True
         if os.path.isdir(self.brewinfo.get_tap_path(self.opt["cask_repo"])):
@@ -1609,6 +1622,10 @@ class BrewFile:
 
     def check_mas_cmd(self, force=False):
         """Check mas is installed or not"""
+        if not is_mac():
+            print("mas is not available on Linux!")
+            sys.exit(1)
+
         if self.opt["is_mas_cmd"] != 0:
             return self.opt["is_mas_cmd"]
 
@@ -1844,18 +1861,21 @@ class BrewFile:
         self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
-        for p in self.get_cask_list()[1]:
-            if len(p.split()) == 1:
-                self.brewinfo.cask_list.append(p)
-            else:  # pragma: no cover
-                self.warn("The cask file of " + p +
-                          " doesn't exist.", 0)
-                self.warn("Please check later.\n\n", 0)
-                self.brewinfo.cask_nocask_list.append(p)
+        if is_mac():
+            for p in self.get_cask_list()[1]:
+                if len(p.split()) == 1:
+                    self.brewinfo.cask_list.append(p)
+                else:  # pragma: no cover
+                    self.warn("The cask file of " + p +
+                              " doesn't exist.", 0)
+                    self.warn("Please check later.\n\n", 0)
+                    self.brewinfo.cask_nocask_list.append(p)
 
         # App Store
-        if self.opt["appstore"]:
-            self.brewinfo.set_val("appstore_list", self.get_appstore_list())
+        if is_mac():
+            if self.opt["appstore"]:
+                self.brewinfo.set_val("appstore_list",
+                                      self.get_appstore_list())
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input"""
@@ -2130,7 +2150,7 @@ class BrewFile:
                 self.proc(cmd, True, True, False)
 
         # Clean up cask packages
-        if len(self.get("cask_list")) > 0:
+        if is_mac() and len(self.get("cask_list")) > 0:
             self.banner("# Clean up cask packages")
             for p in self.get("cask_list"):
                 if p in self.get("cask_input"):
@@ -2144,7 +2164,7 @@ class BrewFile:
                 self.remove_pack("cask_list", p)
 
         # Skip clean up cask at tap if any cask packages exist
-        if len(self.get("cask_list")) > 0:
+        if is_mac() and len(self.get("cask_list")) > 0:
             self.remove_pack("tap_list", self.opt["cask_repo"])
 
         # Clean up pip packages
@@ -2211,11 +2231,12 @@ class BrewFile:
                         break
                 if not untapflag:
                     continue
-                for tc in self.brewinfo.get_tap_casks(p):
-                    if tc in self.get("cask_input"):
-                        # Keep the Tap as related cask is remained
-                        untapflag = False
-                        break
+                if is_mac():
+                    for tc in self.brewinfo.get_tap_casks(p):
+                        if tc in self.get("cask_input"):
+                            # Keep the Tap as related cask is remained
+                            untapflag = False
+                            break
                 if not untapflag:
                     continue
                 cmd = "brew untap " + p
@@ -2260,12 +2281,14 @@ class BrewFile:
             self.proc("brew tap " + p)
 
         # Cask
-        for p in self.get("cask_input"):
-            if p in self.get("cask_list"):
-                continue
-            self.check_cask_cmd(True)
-            self.proc("brew cask install --force " + p)
+        if is_mac():
+            for p in self.get("cask_input"):
+                if p in self.get("cask_list"):
+                    continue
+                self.check_cask_cmd(True)
+                self.proc("brew cask install --force " + p)
 
+        # pip/gem/brew
         if not self.opt["caskonly"]:
             # pip
             for p in self.get("pip_input"):
@@ -2334,7 +2357,7 @@ class BrewFile:
                     reinit = 1
 
         # App Store
-        if self.opt["appstore"]:  # pragma: no cover
+        if is_mac() and self.opt["appstore"]:  # pragma: no cover
             mas_flag = 0
             for p in self.get("appstore_input"):
                 if p in self.get("appstore_list"):
@@ -2475,6 +2498,10 @@ class BrewFile:
 
     def check_cask(self):
         """Check applications for Cask"""
+        if not is_mac():
+            print("Cask is not available on Linux!")
+            sys.exit(1)
+
         import re
         self.banner("# Starting to check applications for Cask...")
 
