@@ -3377,7 +3377,10 @@ def main():
         print(__prog__ + " " + __version__ + " " + __date__)
         sys.exit(0)
 
-    b.execute()
+    try:
+        b.execute()
+    except KeyboardInterrupt:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
