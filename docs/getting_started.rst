@@ -83,12 +83,20 @@ If you use GitHub, you can make it with brew-file::
 
     $ brew set_repo
 
-    Set repository, "non" for local Brewfile.
-    <user>/<repo> for GitHub repository,
-    or full path for the repository:
+    Set repository,
+    "non" (or empty) for local Brewfile (/Users/user/.config/brewfile/Brewfile),
+    /path/to/repo for local git repository,
+    https://your/git/repository (or ssh://user@server.project.git) for git repository,
+    or (<user>/)<repo> for github repository,
+    or full path for other git repository:
 
 Give a name like ``rcmdnk/Brewfile`` (will be recognized as a GitHub repository),
 or such ``git@github.com:rcmdnk/Brewfile``.
+(or give just ``Brwefile``, if you have user name in your ``.gitconfig``.)
+
+You can set any of other git repositories of local or other hosting sites.
+
+For GitHub case, it will create new repository if it does not exist.
 
 Then, initialize **Brewfile**::
 
