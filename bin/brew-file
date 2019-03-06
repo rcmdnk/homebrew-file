@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v7.0.0"
-__date__ = "26/Feb/2019"
+__version__ = "v7.0.1"
+__date__ = "6/Mar/2019"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -31,6 +31,7 @@ def is_mac():
     if platform.system() == "Darwin":
         return True
     return False
+
 
 def my_decode(word):  # pragma: no cover
     """Decode when python3 is used."""
@@ -1123,7 +1124,24 @@ class BrewFile:
         return self.opt["repo"].split("/")[-1].split(".git")[0]
 
     def user_name(self):
-        return self.opt["repo"].split("/")[-2].split(":")[-1]
+        try:
+            user = self.opt["repo"].split("/")[-2].split(":")[-1]
+        except Exception:
+            user = self.proc(
+                "git config --get github.user", False, False, True, False)[1]
+            if len(user) > 0:
+                user = user[0]
+            else:
+                user = self.proc(
+                    "git config --get user.name", False, False, True, False)[1]
+                if len(user) > 0:
+                    user = user[0]
+                else:
+                    user = ""
+            if user == "":
+                self.err("Can not find git (github) user name")
+                exit(1)
+        return user
 
     def input_dir(self):
         return os.path.dirname(self.opt["input"])
@@ -1161,39 +1179,27 @@ class BrewFile:
                        "\"Prepared by " + __prog__ + "\""])
             self.proc("git push -u origin master")
 
-    def clone_repo(self):
+    def clone_repo(self, exit_on_err=True):
         ret = self.proc("git clone " + self.opt["repo"] + " \"" +
                         self.brewinfo.get_dir() + "\"",
                         True, True, False)[0]
         if ret != 0:  # pragma: no cover
-            self.err(
-                "can't clone " + self.opt["repo"] + ".\n"
-                "please check the repository, or reset with\n"
-                "    $ " + __prog__ + " set_repo", 0)
-            sys.exit(ret)
-
+            if exit_on_err:
+                self.err(
+                    "can nott clone " + self.opt["repo"] + ".\n"
+                    "please check the repository, or reset with\n"
+                    "    $ " + __prog__ + " set_repo", 0)
+                sys.exit(ret)
+            else:
+                return False
         self.init_repo()
+        return True
 
     def check_github_repo(self):  # pragma: no cover
         """helper to check and create GitHub repository."""
-        try:
-            from urllib2 import urlopen, HTTPError
-        except ImportError:
-            from urllib.request import urlopen
-            from urllib.error import HTTPError
-
-        url = "https://github.com/" + self.user_name() + "/" + self.repo_name()
 
         # Check if the repository already exists or not.
-        exist_repo = True
-        try:
-            urlopen(url)
-        except HTTPError:
-            exist_repo = False
-
-        # Clone if exists
-        if exist_repo:
-            self.clone_repo()
+        if self.clone_repo(exit_on_err=False):
             return
 
         # Create new repository #
@@ -1272,13 +1278,12 @@ class BrewFile:
         self.clone_repo()
 
     def check_repo(self):
-        """Check input file for GitHub repository."""
-        import re
-        self.brewinfo.set_file(self.opt["input"])
-
+        """Check input file for Git repository."""
         # Check input file
         if not os.path.exists(self.opt["input"]):
             return
+
+        self.brewinfo.set_file(self.opt["input"])
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
@@ -1286,6 +1291,7 @@ class BrewFile:
         lines = f.readlines()
         f.close()
         for l in lines:
+            import re
             if re.match(" *git ", l) is None:
                 continue
             git_line = l.split()
@@ -1296,10 +1302,13 @@ class BrewFile:
             return
 
         # Check repository name and add git@github.com: if necessary
-        if (not self.opt["repo"].startswith("git://") and
-                not self.opt["repo"].startswith("git@") and
-                not self.opt["repo"].startswith("http")):
-            self.opt["repo"] = "git@github.com:" + self.opt["repo"]
+        if ("@" not in self.opt["repo"] and
+                not self.opt["repo"].startswith("git://") and
+                not self.opt["repo"].startswith("http://") and
+                not self.opt["repo"].startswith("file:///") and
+                not self.opt["repo"].startswith("/")):
+            self.opt["repo"] = "git@github.com:" + self.user_name() \
+                + "/" + self.repo_name()
 
         # Set Brewfile in the repository
         self.brewinfo.set_file(self.repo_file())
@@ -1312,7 +1321,7 @@ class BrewFile:
             return
 
         # Check and prepare repository
-        if self.opt["repo"].find("github") != -1:
+        if "github" in self.opt["repo"]:
             self.check_github_repo()
         else:  # pragma: no cover
             self.clone_repo()
@@ -1773,7 +1782,7 @@ class BrewFile:
                     ("/".join(x.split("/")[:-3]).split(".app")[0])
                     for x in glob.glob(d + "/*/Contents/_MASReceipt/receipt")]
             # Another method
-            # Sometime it can't find applications which have not been used?
+            # Sometime it can not find applications which have not been used?
             # (ret, app_tmp) = self.proc(
             #     "mdfind 'kMDItemAppStoreHasReceipt=1'", False, False)
             for a in apps_tmp:
@@ -1943,7 +1952,10 @@ class BrewFile:
             print("\nSet repository,\n" +
                   "\"non\" (or empty) for local Brewfile " +
                   "(" + self.opt["input"] + "),\n" +
-                  "<user>/<repo> for github repository,")
+                  "/path/to/repo for local git repository,\n"
+                  "https://your/git/repository "
+                  "(or ssh://user@server.project.git) for git repository,\n"
+                  "or (<user>/)<repo> for github repository,")
             self.opt["repo"] = my_input(
                 "or full path for other git repository: ")
             self.banner("# Set Brewfile repository as " +
@@ -3027,10 +3039,10 @@ class BrewFile:
 
 
 def main():
+    import argparse
+
     # Prepare BrewFile
     b = BrewFile()
-
-    import argparse
 
     # Pre Parser
     pre_parser = argparse.ArgumentParser(
@@ -3210,7 +3222,8 @@ def main():
         "dump",
         parents=min_parsers+[link_parser, repo_parser],
         formatter_class=argparse.RawTextHelpFormatter)
-    help = "or -s/--set_repo\nSet BREWFILE repository (e.g. rcmdnk/Brewfile)."
+    help = "or -s/--set_repo\nSet BREWFILE repository "\
+           "(e.g. rcmdnk/Brewfile or full path to your repository)."
     subparsers.add_parser(
         "set_repo", description=help, help=help,
         parents=min_parsers+[repo_parser],
