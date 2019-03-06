@@ -159,11 +159,11 @@ script:
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew cask install firefox
-  - coverage run --parallel-mode $exe brew install macvim --without-python # Application installed by brew command, instead of cask
+  - coverage run --parallel-mode $exe brew install macvim  # Application installed by brew command, instead of cask
   - coverage run --parallel-mode $exe brew cask list
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
-  - coverage run --parallel-mode $exe brew untap caskroom/cask
+  - coverage run --parallel-mode $exe brew untap homebrew/cask
   - coverage run --parallel-mode $exe casklist -V 0
   # Wrong file/command tests
   - 'coverage run --parallel-mode $exe -f BrewfileWrong pull -y -V 2 || :'
