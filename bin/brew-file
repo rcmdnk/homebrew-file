@@ -1155,14 +1155,13 @@ class BrewFile:
             self.user_name() + "_" + self.repo_name() + "/" + self.input_file()
 
     def init_repo(self):
-        os.chdir(self.brewinfo.get_dir())
+        dirname = self.brewinfo.get_dir()
+        os.chdir(dirname)
         branches = self.proc("git branch", False, False, True, True)[1]
         if len(branches) != 0:
             return
 
         self.info("Initialize the repository with README.md/Brewfile.", 1)
-        self.info("$ cd " + self.brewinfo.get_dir(), 1)
-        os.chdir(self.brewinfo.get_dir())
         if not os.path.exists("README.md"):
             f = open("README.md", "w")
             f.write(
@@ -1277,6 +1276,14 @@ class BrewFile:
         # Clone and initialize
         self.clone_repo()
 
+    def check_local_repo(self):
+        dirname = self.opt["repo"].replace("file:///", "")
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
+        os.chdir(dirname)
+        self.proc("git init --bare")
+        self.clone_repo()
+
     def check_repo(self):
         """Check input file for Git repository."""
         # Check input file
@@ -1312,10 +1319,8 @@ class BrewFile:
 
         # Set Brewfile in the repository
         self.brewinfo.set_file(self.repo_file())
-        if self.brewinfo.check_file():
-            return
 
-        # If repository is empty, initialize it.
+        # If repository does not have a branch, make it
         if self.brewinfo.check_dir():
             self.init_repo()
             return
@@ -1323,6 +1328,9 @@ class BrewFile:
         # Check and prepare repository
         if "github" in self.opt["repo"]:
             self.check_github_repo()
+        elif (self.opt["repo"].startswith("file:///")
+              or self.opt["repo"].startswith("/")):
+            self.check_local_repo()
         else:  # pragma: no cover
             self.clone_repo()
 
@@ -1331,7 +1339,7 @@ class BrewFile:
                 self.opt["repo"].startswith("http")):
             self.info(
                 "You are using repository of %s" % self.opt["repo"] +
-                "\nUse git protocol (git@...) to push your Brewfile update.",
+                "\nUse ssh protocol to push your Brewfile update.",
                 0)
             return False
         name = self.proc("git config user.name", False, False, False, True)[1]
