@@ -375,10 +375,10 @@ class BrewInfo:
         for t in self.tap_list:
             if t == "homebrew/core":
                 core = 1
+            elif t in ["caskroom/cask", "homebrew/cask"]:
+                cask = 1
             elif t.startswith("homebrew/"):
                 homebrew_taps.append(t)
-            elif t == "caskroom/cask":
-                cask = 1
             elif t.startswith("caskroom/"):
                 cask_taps.append(t)
             else:
@@ -391,7 +391,7 @@ class BrewInfo:
             self.tap_list.append("homebrew/core")
         self.tap_list += homebrew_taps
         if cask == 1:
-            self.tap_list.append("caskroom/cask")
+            self.tap_list.append("homebrew/cask")
         self.tap_list += cask_taps
         self.tap_list += other_taps
 

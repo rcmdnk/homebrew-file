@@ -18,7 +18,7 @@ in your setup file (e.g. **.bashrc**), like:
    export HOMEBREW_BREWFILE=~/.brewfile
 
 You can also modify the default installation locations of Cask packages.
-To make this settings, it is the same as issuing `How to Use Homebrew-cask#Options <https://github.com/caskroom/homebrew-cask/blob/master/USAGE.md#options>`_.
+To make this settings, it is the same as issuing `How to Use Homebrew-cask#Options <https://github.com/homebrew/homebrew-cask/blob/master/USAGE.md#options>`_.
 You might want to add the following line to your **.bashrc** or **.zshenv**:
 
 .. code-block:: sh
@@ -44,7 +44,7 @@ Normally, you don't need to modify anything on Brewdler's ``Brewfile`` for Brew-
 Example::
 
     # Tap repositories and their packages
-    tap caskroom/cask
+    tap homebrew/cask
     brew 'brew-cask'
     # install brew-cask # install is same as "brew". Quotes are not mandatory.
 
@@ -73,7 +73,7 @@ brew             ``brew install X``
 install          Same as ``brew``
 tap              ``brew tap X``
 tapall           ``brew tap X``, and installs all packages of Formulae in the tap.
-cask             ``brew cask install X``. Require `caskroom/homebrew-cask <https://github.com/caskroom/homebrew-cask/>`_. (It will be installed automatically.)
+cask             ``brew cask install X``. Require `homebrew/homebrew-cask <https://github.com/homebrew/homebrew-cask/>`_. (It will be installed automatically.)
 pip              `brew pip X`. Require `hanxue/brew-pip <https://github.com/hanxue/brew-pip>`_. (It will be installed automatically.)
 gem              ``brew gem install X``. Require `sportngin/brew-gem <https://github.com/sportngin/brew-gem>`_. (It will be installed automatically.)
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
@@ -133,7 +133,7 @@ then you can put Host specific packages in **~/.Brewfile**.
 Other example: `Add an option to ignore appstore apps · Issue #22 · rcmdnk/homebrew-file <https://github.com/rcmdnk/homebrew-file/issues/22>`_
 
 You don't need to ``brew install`` by hand.
-As written above, ``tap 'caskroom/cask'`` is can be dropped
+As written above, ``tap 'homebrew/cask'`` is can be dropped
 because ``cask 'firefox'`` triggers it.
 
 Some packages such macvim has Application (MacVim.app).
@@ -199,7 +199,7 @@ This command makes ``Caskfile.txt``, which is like::
     ### Please copy these lines to your Brewfile and use with `brew bundle`.
 
     ### tap and install Cask (remove comment if necessary).
-    #tap caskroom/cask
+    #tap homebrew/cask
     #install brew-cask
 
     ### Apps installed by Cask in /Applications
