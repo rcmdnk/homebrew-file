@@ -1,8 +1,8 @@
 # Before commands
 before echo before
 
-# caskroom/cask
-tap caskroom/cask
+# homebrew/cask
+tap homebrew/cask
 cask install iterm2
 tap rcmdnk/rcmdnkcask
 cask install font-migu1m
