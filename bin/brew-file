@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v7.0.2"
-__date__ = "6/Mar/2019"
+__version__ = "v7.0.3"
+__date__ = "11/Jan/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -761,7 +761,7 @@ class BrewInfo:
                 if not is_mac():
                     continue
                 tap_casks = self.get_tap_casks(t)
-                for p in self.cask_list:
+                for p in self.cask_list[:]:
                     if p in tap_casks:
                         first_tap_pack_write(out, isfirst, False,
                                              isfirst_pack, t, cmd_tap)
@@ -3326,7 +3326,7 @@ def main():
         if ns.command is not None:
             args = [ns.command] + args
         else:
-            for a in args:
+            for a in args[:]:
                 if a in subparsers.choices:
                     args.remove(a)
                     args = [a] + args
