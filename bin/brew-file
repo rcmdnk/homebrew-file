@@ -170,7 +170,7 @@ class BrewHelper:
             cmd = shlex.split(cmd)
         cmd_orig = " ".join(["$"] + cmd)
         if cmd[0] == "brew":
-            cmd = ["bash", "-c", " ".join(["command"] + cmd)]
+            cmd[0] = self.opt["brew_cmd"]
         if print_cmd:
             self.info(cmd_orig, verbose)
         if shell:
@@ -886,6 +886,7 @@ class BrewFile:
         self.opt["gem_pack"] = "brew-gem"
         self.opt["my_editor"] = os.environ.get("EDITOR", "vim")
         self.opt["is_brew_cmd"] = False
+        self.opt["brew_cmd"] = ""
         self.opt["is_cask_cmd"] = False
         self.opt["cask_cmd_installed"] = False
         self.opt["mas_cmd"] = "mas"
@@ -1591,10 +1592,19 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew"""
-        if self.proc("which brew", False, False, False, verbose=1)[0] != 0:
+        if self.opt["is_brew_cmd"]:
+            return True
+
+        ret, cmd = self.proc("which brew", False, False, False, verbose=1)
+        if ret == 0:
+            self.opt["brew_cmd"] = cmd[0]
+            self.opt["is_brew_cmd"] = True
+            return True
+
+        if ret != 0:
             print("Homebrew has not been installed, install now...")
-            cmd = "curl -O https://raw.githubusercontent.com/" +\
-                  "Homebrew/install/master/install"
+            cmd = "curl -O https://raw.githubusercontent.com/" \
+                + "Homebrew/install/master/install"
             self.proc(cmd, True, True, False, verbose=0)
             cmd = "ruby install"
             self.proc(cmd, True, True, False, verbose=0)
@@ -1605,6 +1615,13 @@ class BrewFile:
                 self.warn("\n\nCheck brew environment and fix problems\n"
                           "# You can check with:\n"
                           "#     $ brew doctor", 0)
+                return False
+            ret, cmd = self.proc("which brew", False, False, False, verbose=1)
+            if ret == 0:
+                self.opt["brew_cmd"] = cmd[0]
+                self.opt["is_brew_cmd"] = True
+                return True
+        return False
 
     def check_cask_cmd(self, force=False):
         """Check cask is installed or not"""
