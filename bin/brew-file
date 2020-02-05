@@ -851,9 +851,6 @@ class BrewFile:
             os.environ.get("HOMEBREW_BRWEFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
-        # First check Homebrew
-        self.check_brew_cmd()
-
         # Other default values
         self.opt["command"] = ""
         self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE", "")
@@ -902,6 +899,10 @@ class BrewFile:
         self.opt["brew_packages"] = ""
         self.opt["homebrew_ruby"] = False
 
+        # Check Homebrew
+        self.check_brew_cmd()
+
+        # Check Homebrew variables
         cask_opts = self.parse_env_opts(
             "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""})
 
