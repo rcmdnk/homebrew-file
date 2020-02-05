@@ -170,7 +170,7 @@ class BrewHelper:
             cmd = shlex.split(cmd)
         cmd_orig = " ".join(["$"] + cmd)
         if cmd[0] == "brew":
-            cmd = ["bash", "-i", "-c", " ".join(["command"] + cmd)]
+            cmd = ["bash", "-c", " ".join(["command"] + cmd)]
         if print_cmd:
             self.info(cmd_orig, verbose)
         if shell:
