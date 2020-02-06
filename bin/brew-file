@@ -269,6 +269,7 @@ class BrewInfo:
         self.gem_list_opt = {}
 
         self.brew_list = []
+        self.brew_full_list = []
         self.tap_list = []
         self.cask_list = []
         self.pip_list = []
@@ -296,6 +297,7 @@ class BrewInfo:
             "pip_list_opt": self.pip_list_opt,
             "gem_list_opt": self.gem_list_opt,
             "brew_list": self.brew_list,
+            "brew_full_list": self.brew_full_list,
             "tap_list": self.tap_list,
             "cask_list": self.cask_list,
             "cask_nocask_list": self.cask_nocask_list,
@@ -353,6 +355,7 @@ class BrewInfo:
         self.gem_list_opt.clear()
 
         del self.brew_list[:]
+        del self.brew_full_list[:]
         del self.tap_list[:]
         del self.cask_list[:]
         del self.cask_nocask_list[:]
@@ -393,6 +396,7 @@ class BrewInfo:
         self.tap_list = core_tap + brew_taps + cask_tap + other_taps
 
         self.brew_list.sort()
+        self.brew_full_list.sort()
         self.cask_list.sort()
         self.pip_list.sort()
         self.gem_list.sort()
@@ -1837,6 +1841,8 @@ class BrewFile:
         if not self.opt["caskonly"]:
             info = self.brewinfo.get_info()
             full_list = self.proc("brew list", False, False)[1]
+            del self.brewinfo.brew_full_list[:]
+            self.brewinfo.brew_full_list.extend(full_list)
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
@@ -2350,9 +2356,10 @@ class BrewFile:
             # Brew
             for p in self.get("brew_input"):
                 cmd = "install"
-                if p in self.get("brew_list"):
-                    if sorted(self.get("brew_input_opt")[p].split()) == \
-                            sorted(self.get("brew_list_opt")[p].split()):
+                if p in self.get("brew_full_list"):
+                    if p not in self.get("brew_list_opt") \
+                            or sorted(self.get("brew_input_opt")[p].split()) \
+                            == sorted(self.get("brew_list_opt")[p].split()):
                         continue
                     else:
                         cmd = "reinstall"
