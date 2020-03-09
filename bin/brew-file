@@ -19,8 +19,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v7.1.1"
-__date__ = "6/Feb/2020"
+__version__ = "v7.1.2"
+__date__ = "9/Mar/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -690,12 +690,12 @@ class BrewInfo:
             out.writeln("  brew_installed=0")
             out.writeln("  echo Homebrew is not installed!")
             out.writeln("  echo Install now...")
-            out.writeln("  echo ruby -e \\\"\$\(curl -fsSL "
+            out.writeln("  echo /bin/bash -c \\\"\$\(curl -fsSL "
                         "https://raw.githubusercontent.com/Homebrew/"
-                        "install/master/install\)\\\"")
-            out.writeln("  ruby -e \"$(curl -fsSL "
+                        "install/master/install.sh\)\\\"")
+            out.writeln("  /bin/bash -c \"$(curl -fsSL "
                         "https://raw.githubusercontent.com/Homebrew/"
-                        "install/master/install)\"")
+                        "install/master/install.sh)\"")
             out.writeln("  echo")
             out.writeln("fi")
             out.writeln("#BREWFILE_ENDIGNORE")
@@ -1609,9 +1609,11 @@ class BrewFile:
         if ret != 0:
             print("Homebrew has not been installed, install now...")
             cmd = "curl -O https://raw.githubusercontent.com/" \
-                + "Homebrew/install/master/install"
+                + "Homebrew/install/master/install.sh"
             self.proc(cmd, True, True, False, verbose=0)
-            cmd = "ruby install"
+            cmd = "bash install.sh"
+            self.proc(cmd, True, True, False, verbose=0)
+            cmd = "rm -f install.sh"
             self.proc(cmd, True, True, False, verbose=0)
             ret, lines = self.proc("brew doctor", True, True, False, verbose=0)
             if ret != 0:
