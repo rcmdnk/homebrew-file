@@ -25,7 +25,6 @@ env:
     #- coveralls=python-coveralls
     - CONFIGDIR="$HOME/.config/brewfile"
   matrix:
-    - PYTHON_VERSION="python2"
     - PYTHON_VERSION="python3"
 before_install:
   - echo $TRAVIS_PULL_REQUEST

@@ -1,14 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
 Brew-file: Manager for packages of Homebrew
 https://github.com/rcmdnk/homebrew-file
 
-requirement: Python 2.7 or later
+requirement: Python 3.7 or later
 """
-
-from __future__ import print_function
 
 import os
 import sys
@@ -19,8 +17,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v7.1.2"
-__date__ = "9/Mar/2020"
+__version__ = "v8.0.0"
+__date__ = "30/Apr/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -31,24 +29,6 @@ def is_mac():
     if platform.system() == "Darwin":
         return True
     return False
-
-
-def my_decode(word):
-    """Decode when python3 is used."""
-
-    if sys.version_info.major > 2:
-        return word.decode()
-
-    return word
-
-
-def my_input(word):
-    """Input method compatibility."""
-
-    if sys.version_info.major > 2:
-        return input(word)
-
-    return raw_input(word)
 
 
 def open_output_file(name, mode="w"):
@@ -151,7 +131,7 @@ class BrewHelper:
 
     def readstdout(self, proc):
         while True:
-            line = my_decode(proc.stdout.readline()).rstrip()
+            line = proc.stdout.readline().decode().rstrip()
             code = proc.poll()
             if line == '':
                 if code is not None:
@@ -997,13 +977,13 @@ class BrewFile:
         yes = ["yes", "y", ""]
         no = ["no", "n"]
 
-        yn = my_input(question + " [y/n]: ").lower()
+        yn = input(question + " [y/n]: ").lower()
         while True:
             if yn in yes:
                 return True
             if yn in no:
                 return False
-            yn = my_input("Answer with yes (y) or no (n): ").lower()
+            yn = input("Answer with yes (y) or no (n): ").lower()
 
     def verbose(self):
         try:
@@ -1255,7 +1235,7 @@ class BrewFile:
 
         if not is_ok:
             # Try with two-factor code
-            twofac = my_input("GitHub two-factor code: ")
+            twofac = input("GitHub two-factor code: ")
             headers.update({"X-Github-OTP": twofac})
             while True:
                 r = requests.post(url=url, data=json.dumps(data),
@@ -1983,7 +1963,7 @@ class BrewFile:
                   "https://your/git/repository "
                   "(or ssh://user@server.project.git) for git repository,\n"
                   "or (<user>/)<repo> for github repository,")
-            self.opt["repo"] = my_input(
+            self.opt["repo"] = input(
                 "or full path for other git repository: ")
             self.banner("# Set Brewfile repository as "
                         + self.opt["repo"])
@@ -3329,17 +3309,6 @@ def main():
 
     if sys.argv[1] == "brew":
         args = sys.argv[1:]
-        if [x for x in args if x.startswith("-")]:
-            v = sys.version_info
-            if v.major == 2 and (v.minor < 7
-                                 or (v.minor == 7 and v.micro < 7)):
-                print("`brew-file brew ...` with option is available "
-                      "only with Python 2.7.7 or later.\n"
-                      "(Such Yosemite's default is 2.7.6.)\n"
-                      "You can easily install newer version with Homebrew, "
-                      "like:\n"
-                      "    $ brew install python")
-                sys.exit(1)
     else:
         (ns, args) = pre_parser.parse_known_args()
         if ns.command is not None:
