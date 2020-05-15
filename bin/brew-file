@@ -17,8 +17,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.0.0"
-__date__ = "30/Apr/2020"
+__version__ = "v8.0.1"
+__date__ = "15/May/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1434,9 +1434,9 @@ class BrewFile:
                 if v.find("/") != -1 or v.find("tar.gz") != -1 or\
                         v.find(".zip") != -1:
                     # lock packages
-                    sys.exit(0)
+                    pass
                 elif v in ["-h", "--help", "--version"]:
-                    sys.exit(0)
+                    pass
                 elif v in ["-u", "--upgrade"]:
                     pip_upgrade = True
                 elif v in ["-k", "--keg-only", "-v", "--verbose"]:
@@ -1979,6 +1979,7 @@ class BrewFile:
 
     def set_brewfile_local(self):
         """Set Brewfile to local file"""
+        self.opt["repo"] = ""
         self.initialize(False, False)
 
     def initialize(self, check=True, check_input=True):
@@ -1986,7 +1987,7 @@ class BrewFile:
         if self.opt["initialized"]:
             return
 
-        if check == 1:
+        if check:
             if not os.path.exists(self.opt["input"]):
                 ans = self.ask_yn("Do you want to set a repository (y)? "
                                   "((n) for local Brewfile).")
@@ -2959,7 +2960,7 @@ class BrewFile:
             self.set_brewfile_local()
             sys.exit(0)
 
-        # Change brewfile if it is repository's one.
+        # Change brewfile if it is repository's one or not.
         self.check_repo()
 
         # Do pull/push for the repository.
@@ -3211,7 +3212,8 @@ def main():
     help_doc = "Install packages in BREWFILE."
     subparsers.add_parser("install", description=help_doc, help=help_doc,
                           **subparser_options)
-    help_doc = "Execute brew command, and update BREWFILE."
+    help_doc = "Execute brew command, and update BREWFILE.\n"\
+        "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     subparsers.add_parser("brew", description=help_doc, help=help_doc,
                           parents=min_parsers, add_help=False,
                           formatter_class=argparse.RawTextHelpFormatter)
@@ -3307,7 +3309,14 @@ def main():
         print("Refer https://homebrew-file.readthedocs.io for more details.")
         sys.exit(1)
 
-    if sys.argv[1] == "brew":
+    if sys.argv[1] in ("pip", "gem") or (
+        len(sys.argv) > 2 and sys.argv[1] == "brew" and
+            sys.argv[2] in ("pip", "gem")):
+        if sys.argv[1] == "brew":
+            args = sys.argv[1:]
+        else:
+            args = ["brew"] + sys.argv[1:]
+    elif sys.argv[1] == "brew":
         args = sys.argv[1:]
     else:
         (ns, args) = pre_parser.parse_known_args()
@@ -3340,7 +3349,7 @@ def main():
     elif b.opt["command"] == "commands":
         commands = ["install", "brew", "init", "dump", "set_repo", "set_local",
                     "pull", "push", "clean", "clean_non_request", "update",
-                    "edit", "cat", "casklist", "test",
+                    "edit", "cat", "casklist", "test", "pip", "gem",
                     "get_files", "commands", "version", "help"]
         commands_hyphen = ["-i", "--init", "-s", "--set_repo", "--set_local",
                            "-c", "--clean", "--clean_non_request", "-u",

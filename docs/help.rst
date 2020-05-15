@@ -66,6 +66,7 @@ Help message of brew-file:
       [command]
         install             Install packages in BREWFILE.
         brew                Execute brew command, and update BREWFILE.
+                            Use 'brew noinit <brew command>' to suppress Brewfile initialization.
         init                or dump/-i/--init
                             Initialize/Update BREWFILE with installed packages.
         set_repo            or -s/--set_repo
