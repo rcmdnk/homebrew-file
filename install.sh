@@ -6,6 +6,11 @@ if ! which brew >& /dev/null;then
   echo Install now...
   echo /bin/bash -c \"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh\)\"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  ret=$?
+  if [ $ret -ne 0 ];then
+    echo Failed to install Homebrew... please check your environment
+    exit $ret
+  fi
   echo
 fi
 
