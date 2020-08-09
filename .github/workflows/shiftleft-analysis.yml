@@ -4,7 +4,9 @@
 name: ShiftLeft Scan
 
 # This section configures the trigger for the workflow. Feel free to customize depending on your convention
-on: push
+on:
+  push:
+  pull_request:
 
 jobs:
   Scan-Build:
@@ -12,11 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+      with:
+        # We must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head.
+        fetch-depth: 2
     # Instructions
     # 1. Setup JDK, Node.js, Python etc depending on your project type
     # 2. Compile or build the project before invoking scan
     #    Example: mvn compile, or npm install or pip install goes here
     # 3. Invoke ShiftLeft Scan with the github token. Leave the workspace empty to use relative url
+    # If this run was triggered by a pull request event, then checkout
+    # the head of the pull request instead of the merge commit.
+    - run: git checkout HEAD^2
+      if: ${{ github.event_name == 'pull_request' }}
 
     - name: Perform ShiftLeft Scan
       uses: ShiftLeftSecurity/scan-action@master
