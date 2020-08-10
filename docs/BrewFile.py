@@ -10,6 +10,7 @@ requirement: Python 3.7 or later
 
 import os
 import sys
+import re
 
 __prog__ = os.path.basename(__file__)
 __description__ = __doc__
@@ -17,8 +18,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.0.0"
-__date__ = "30/Apr/2020"
+__version__ = "v8.0.1"
+__date__ = "15/May/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -48,6 +49,16 @@ def to_bool(val):
         if val.lower() == "true":
             return True
     return False
+
+
+def get_shell_env(val):
+    return os.environ.get(val.strip('${}'), "")
+
+
+def parse_shell_env(val):
+    for r in re.findall(r'(\${[^}]+}|\$[^{.\s/\$]+(?=[.\s/\$]|\$[^{]+$))', val):
+        val = val.replace(r, get_shell_env(r))
+    return val
 
 
 class Tee:
@@ -141,7 +152,7 @@ class BrewHelper:
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_err=True, separate_err=False, print_err=True, shell=False,
+             exit_on_err=True, separate_err=False, print_err=True,
              verbose=1, env={}):
         """ Get process output."""
         import shlex
@@ -153,8 +164,6 @@ class BrewHelper:
             cmd[0] = self.opt["brew_cmd"]
         if print_cmd:
             self.info(cmd_orig, verbose)
-        if shell:
-            cmd = ' '.join(cmd)
         all_env = os.environ.copy()
         for k, v in env.items():
             all_env[k] = v
@@ -168,7 +177,7 @@ class BrewHelper:
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=all_env, shell=shell)
+                                 env=all_env)
             if separate_err and not print_err:
                 stderr.close()
             for line in self.readstdout(p):
@@ -424,7 +433,6 @@ class BrewInfo:
 
         lines = f.readlines()
         f.close()
-        import re
         is_ignore = False
         self.tap_input.append("direct")
         for l in lines:
@@ -438,10 +446,7 @@ class BrewInfo:
                     re.match(" *#", l) is not None:
                 continue
             args = l.replace("'", "").replace('"', "").\
-                replace(",", " ").replace("[", "").replace("]", "")
-            args = self.helper.proc('echo \\"' + args + '\\"', False, False,
-                                    False, True, True, shell=True
-                                    )[1][0].split()
+                replace(",", " ").replace("[", "").replace("]", "").split()
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
             if len(args) > 2 and p in ["tap", "cask", "pip", "gem"]:
@@ -503,7 +508,7 @@ class BrewInfo:
                 self.appstore_input.append(re.sub("^ *appstore *", "", l).
                                            strip().strip("'").strip('"'))
             elif cmd == "file" or cmd.lower() == "brewfile":
-                self.file_input.append(p)
+                self.file_input.append(parse_shell_env(p))
             elif cmd == "before":
                 self.before_input.append(excmd)
             elif cmd == "after":
@@ -562,8 +567,9 @@ class BrewInfo:
             package = "--installed"
         import json
         infotmp = json.loads(
-            self.helper.proc("brew info --json=v1 " + package, False, False,
-                             True, True)[1][0])
+            self.helper.proc("brew info --json=v1 " + package, print_cmd=False,
+                             print_out=False, exit_on_err=True,
+                             separate_err=True)[1][0])
         info = {}
         for i in infotmp:
             info[i["name"]] = i
@@ -577,10 +583,10 @@ class BrewInfo:
         installed = package_info["installed"][0]
         version = ""
         if package_info["linked_keg"] is None:
-            version = self.helper.proc("ls -l "
-                                       + self.helper.brew_val("prefix")
-                                       + "/opt/" + package,
-                                       False, False, False, False)[1][0]
+            version = self.helper.proc(
+                "ls -l " + self.helper.brew_val("prefix") + "/opt/" + package,
+                print_cmd=False, print_out=False, exit_on_err=False,
+                separate_err=False)[1][0]
             version = version.split("/")[-1]
             if "No such file or directory" in version:
                 version = ""
@@ -615,7 +621,6 @@ class BrewInfo:
 
     def convert_option(self, opt):
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
-            import re
             opt = ", args: [" + ", ".join(
                 ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
         return opt
@@ -813,11 +818,13 @@ class BrewInfo:
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
-            self.helper.proc("chmod 755 %s" % self.get_file(), False, False,
-                             False)
+            self.helper.proc(
+                "chmod 755 %s" % self.get_file(), print_cmd=False,
+                print_out=False, exit_on_err=False)
         else:
-            self.helper.proc("chmod 644 %s" % self.get_file(), False, False,
-                             False)
+            self.helper.proc(
+                "chmod 644 %s" % self.get_file(), print_cmd=False,
+                print_out=False, exit_on_err=False)
 
 
 class BrewFile:
@@ -1107,12 +1114,14 @@ class BrewFile:
             user = self.opt["repo"].split("/")[-2].split(":")[-1]
         except Exception:
             user = self.proc(
-                "git config --get github.user", False, False, True, False)[1]
+                "git config --get github.user", print_cmd=False,
+                print_out=False, exit_on_err=True, separate_err=False)[1]
             if user:
                 user = user[0]
             else:
                 user = self.proc(
-                    "git config --get user.name", False, False, True, False)[1]
+                    "git config --get user.name", print_cmd=False,
+                    print_out=False, exit_on_err=True, separate_err=False)[1]
                 if user:
                     user = user[0]
                 else:
@@ -1136,7 +1145,8 @@ class BrewFile:
     def init_repo(self):
         dirname = self.brewinfo.get_dir()
         os.chdir(dirname)
-        branches = self.proc("git branch", False, False, True, True)[1]
+        branches = self.proc("git branch", print_cmd=False, print_out=False,
+                             exit_on_err=True, separate_err=True)[1]
         if branches:
             return
 
@@ -1158,9 +1168,9 @@ class BrewFile:
             self.proc("git push -u origin master")
 
     def clone_repo(self, exit_on_err=True):
-        ret = self.proc("git clone " + self.opt["repo"] + " \""
-                        + self.brewinfo.get_dir() + "\"",
-                        True, True, False)[0]
+        ret = self.proc(
+            "git clone " + self.opt["repo"] + " \"" + self.brewinfo.get_dir()
+            + "\"", print_cmd=True, print_out=True, exit_on_err=False)[0]
         if ret != 0:
             if exit_on_err:
                 self.err(
@@ -1198,7 +1208,8 @@ class BrewFile:
                 print("Please prepare Brewfile repository.")
                 exit(0)
             else:
-                ret = self.proc("pip --version", False, False, False)
+                ret = self.proc("pip --version", print_cmd=False,
+                                print_out=False, exit_on_err=False)
                 if ret != 0:
                     self.proc("easy_install pip")
                 self.proc("pip install requests")
@@ -1277,7 +1288,6 @@ class BrewFile:
         lines = f.readlines()
         f.close()
         for l in lines:
-            import re
             if re.match(" *git ", l) is None:
                 continue
             git_line = l.split()
@@ -1320,9 +1330,12 @@ class BrewFile:
                 "You are using repository of %s" % self.opt["repo"]
                 + "\nUse ssh protocol to push your Brewfile update.", 0)
             return False
-        name = self.proc("git config user.name", False, False, False, True)[1]
+        name = self.proc("git config user.name", print_cmd=False,
+                         print_out=False, exit_on_err=False,
+                         separate_err=True)[1]
         email = self.proc(
-            "git config user.email", False, False, False, True)[1]
+            "git config user.email", print_cmd=False, print_out=False,
+            exit_on_err=False, separate_err=True)[1]
         if not name or not email:
             self.warn(
                 "You don't have user/email information in your .gitconfig.\n"
@@ -1398,7 +1411,8 @@ class BrewFile:
                 self.opt["args"].append("--homebrew-ruby")
 
         ret = self.proc(
-            [exe] + self.opt["args"], False, True, False, env=env)[0]
+            [exe] + self.opt["args"], print_cmd=False, print_out=True,
+            exit_on_err=False, env=env)[0]
 
         if ret != 0 or noinit:
             sys.exit(ret)
@@ -1546,7 +1560,7 @@ class BrewFile:
                     else:
                         self.brewinfo.brew_input_opt[p] = ""
                     for p_dep in self.proc(
-                            "brew deps " + p, False, False)[1]:
+                        "brew deps " + p, print_cmd=False, print_out=False)[1]:
                         if p_dep not in self.get(input_list) \
                                 and (not(self.opt["leaves"]
                                          and self.opt["on_request"])
@@ -1580,7 +1594,8 @@ class BrewFile:
         if self.opt["is_brew_cmd"]:
             return True
 
-        ret, cmd = self.proc("which brew", False, False, False, verbose=1)
+        ret, cmd = self.proc("which brew", print_cmd=False, print_out=False,
+                             exit_on_err=False, verbose=1)
         if ret == 0:
             self.opt["brew_cmd"] = cmd[0]
             self.opt["is_brew_cmd"] = True
@@ -1590,12 +1605,17 @@ class BrewFile:
             print("Homebrew has not been installed, install now...")
             cmd = "curl -O https://raw.githubusercontent.com/" \
                 + "Homebrew/install/master/install.sh"
-            self.proc(cmd, True, True, False, verbose=0)
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
+                      verbose=0)
             cmd = "bash install.sh"
-            self.proc(cmd, True, True, False, verbose=0)
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
+                      verbose=0)
             cmd = "rm -f install.sh"
-            self.proc(cmd, True, True, False, verbose=0)
-            ret, lines = self.proc("brew doctor", True, True, False, verbose=0)
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
+                      verbose=0)
+            ret, lines = self.proc("brew doctor", print_cmd=True,
+                                   print_out=True, exit_on_err=False,
+                                   verbose=0)
             if ret != 0:
                 for l in lines:
                     sys.stdout.write(l)
@@ -1603,7 +1623,9 @@ class BrewFile:
                           "# You can check with:\n"
                           "#     $ brew doctor", 0)
                 return False
-            ret, cmd = self.proc("which brew", False, False, False, verbose=1)
+            ret, cmd = self.proc("which brew", print_cmd=False,
+                                 print_out=False, exit_on_err=False,
+                                 verbose=1)
             if ret == 0:
                 self.opt["brew_cmd"] = cmd[0]
                 self.opt["is_brew_cmd"] = True
@@ -1622,7 +1644,7 @@ class BrewFile:
             self.opt["is_cask_cmd"] = True
             return True
         ret = self.proc(["brew", "tap", self.opt["cask_repo"]],
-                        True, True, False)[0]
+                        print_cmd=True, print_out=True, exit_on_err=False)[0]
         if ret != 0:
             self.err("\nFailed to install " +
                      self.opt["cask_repo"] + "\n", 0)
@@ -1642,9 +1664,11 @@ class BrewFile:
         if self.opt["is_mas_cmd"] != 0:
             return self.opt["is_mas_cmd"]
 
-        if self.proc("type mas", False, False, False)[0] != 0:
-            sw_vers = self.proc("sw_vers -productVersion",
-                                False, False, False)[1][0].split(".")
+        if self.proc("type mas", print_cmd=False, print_out=False,
+                     exit_on_err=False)[0] != 0:
+            sw_vers = self.proc(
+                "sw_vers -productVersion", print_cmd=False, print_out=False,
+                exit_on_err=False)[1][0].split(".")
             if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10
                                         and int(sw_vers[1]) < 11):
                 self.warn("You are using older OS X. mas is not used.", 3)
@@ -1661,7 +1685,8 @@ class BrewFile:
                     self.opt["is_mas_cmd"] = -2
                     return self.opt["is_mas_cmd"]
             ret = self.proc(["brew", "install", self.opt["mas_formula"]],
-                            True, True, False)[0]
+                            print_cmd=True, print_out=True,
+                            exit_on_err=False)[0]
             if ret != 0:
                 self.err("\nFailed to install "
                          + self.opt["mas_formula"] + "\n", 0)
@@ -1672,7 +1697,8 @@ class BrewFile:
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ""
 
-        if self.proc(self.opt["mas_cmd"], False, False, False)[0] != 0:
+        if self.proc(self.opt["mas_cmd"], print_cmd=False, print_out=False,
+                     exit_on_err=False)[0] != 0:
             # fail?
             self.opt["is_mas_cmd"] = -1
             return self.opt["is_mas_cmd"]
@@ -1682,7 +1708,8 @@ class BrewFile:
         is_tmux = os.environ.get("TMUX", "")
         if is_tmux != "":
             if self.proc("type reattach-to-user-namespace",
-                         False, False, False)[0] != 0:
+                         print_cmd=False, print_out=False,
+                         exit_on_err=False)[0] != 0:
                 if not force:
                     ans = self.ask_yn(
                         "You need %s in tmux. Do you want to install it?" %
@@ -1692,9 +1719,9 @@ class BrewFile:
                         self.warn("    $ brew install %s"
                                   % (self.opt["reattach_formula"]))
                         return self.opt["is_mas_cmd"]
-                ret = self.proc(["brew", "install",
-                                 self.opt["reattach_formula"]],
-                                True, True, False)[0]
+                ret = self.proc(
+                    ["brew", "install", self.opt["reattach_formula"]],
+                    print_cmd=True, print_out=True, exit_on_err=False)[0]
                 if ret != 0:
                     self.err("\nFailed to install "
                              + self.opt["reattach_formula"] + "\n", 0)
@@ -1713,7 +1740,8 @@ class BrewFile:
         """Check pip is installed or not"""
         if self.opt["is_pip_cmd"]:
             return True
-        if self.proc("brew pip -h", False, False, False)[0] == 0:
+        if self.proc("brew pip -h", print_cmd=False, print_out=False,
+                     exit_on_err=False)[0] == 0:
             self.opt["is_pip_cmd"] = True
             return True
         self.info(self.opt["pip_pack"] + " has not been installed.")
@@ -1725,8 +1753,9 @@ class BrewFile:
                 self.warn("    $ brew install %s" % (self.opt["pip_pack"]))
                 return self.opt["is_pip_cmd"]
 
-        ret = self.proc(["brew", "install", self.opt["pip_pack"]],
-                        True, True, False)[0]
+        ret = self.proc(
+            ["brew", "install", self.opt["pip_pack"]],
+            print_cmd=True, print_out=True, exit_on_err=False)[0]
         if ret != 0:
             self.err("\nFailed to install "
                      + self.opt["pip_pack"] + "\n", 0)
@@ -1742,7 +1771,8 @@ class BrewFile:
         """Check gem is installed or not"""
         if self.opt["is_gem_cmd"]:
             return True
-        if self.proc("brew gem -h", False, False, False)[0] == 0:
+        if self.proc("brew gem -h", print_cmd=False, print_out=False,
+                     exit_on_err=False)[0] == 0:
             self.opt["is_gem_cmd"] = True
             return True
         self.info(self.opt["gem_pack"] + " has not been installed.")
@@ -1756,7 +1786,7 @@ class BrewFile:
                 return self.opt["is_gem_cmd"]
 
         ret = self.proc(["brew", "install", self.opt["gem_pack"]],
-                        True, True, False)[0]
+                        print_cmd=True, print_out=True, exit_on_err=False)[0]
         if ret != 0:
             self.err("\nFailed to install "
                      + self.opt["gem_pack"] + "\n", 0)
@@ -1774,8 +1804,8 @@ class BrewFile:
         apps = []
 
         if self.check_mas_cmd(True) == 1:
-            lines = self.proc(self.opt["mas_cmd"] + " list", False, False,
-                              separate_err=True)[1]
+            lines = self.proc(self.opt["mas_cmd"] + " list", print_cmd=False,
+                              print_out=False, separate_err=True)[1]
             apps = sorted(lines, key=lambda x: " ".join(x.split()[1:]).lower())
             if apps and apps[0] == "No installed apps found":
                 apps = []
@@ -1789,11 +1819,12 @@ class BrewFile:
             # Another method
             # Sometime it can not find applications which have not been used?
             # (ret, app_tmp) = self.proc(
-            #     "mdfind 'kMDItemAppStoreHasReceipt=1'", False, False)
+            #     "mdfind 'kMDItemAppStoreHasReceipt=1'", print_cmd=False,
+            #     print_out=False)
             for a in apps_tmp:
                 apps_id = self.proc(
                     "mdls -name kMDItemAppStoreAdamID -raw '%s.app'" % a,
-                    False, False)[1][0]
+                    print_cmd=False, print_out=False)[1][0]
                 apps.append("%s %s" %
                             (apps_id, a.split("/")[-1].split(".app")[0]))
 
@@ -1804,8 +1835,8 @@ class BrewFile:
 
         if not self.check_cask_cmd(force):
             return (False, [])
-        lines = self.proc("brew cask list", False, False, separate_err=True,
-                          print_err=False)[1]
+        lines = self.proc("brew cask list", print_cmd=False, print_out=False,
+                          separate_err=True, print_err=False)[1]
         packages = []
         for l in lines:
             if "Warning: nothing to list" in l or "=>" in l or "->" in l:
@@ -1822,7 +1853,8 @@ class BrewFile:
         # Brew packages
         if not self.opt["caskonly"]:
             info = self.brewinfo.get_info()
-            full_list = self.proc("brew list", False, False)[1]
+            full_list = self.proc("brew list", print_cmd=False,
+                                  print_out=False)[1]
             del self.brewinfo.brew_full_list[:]
             self.brewinfo.brew_full_list.extend(full_list)
             if self.opt["on_request"]:
@@ -1869,7 +1901,7 @@ class BrewFile:
                     self.brewinfo.get_option(p, info[p])
 
         # Taps
-        lines = self.proc("brew tap", False, False,
+        lines = self.proc("brew tap", print_cmd=False, print_out=False,
                           env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]
 
         self.brewinfo.set_val("tap_list", lines)
@@ -1923,7 +1955,6 @@ class BrewFile:
 
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
-        import re
 
         # Check input file
         if os.path.exists(self.opt["input"]):
@@ -2084,7 +2115,7 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, False, True)
+                    self.proc(cmd, print_cmd=False, print_out=True)
 
         if self.opt["dryrun"]:
             self.banner("# This is dry run.\n"
@@ -2117,7 +2148,8 @@ class BrewFile:
         # Clean up App Store applications
         if self.opt["appstore"] and self.get("appstore_list"):
             self.banner("# Clean up App Store applications")
-            uninstall = self.proc("type uninstall", False, False, False)
+            uninstall = self.proc("type uninstall", print_cmd=False,
+                                  print_out=False, exit_on_err=False)
             if uninstall == 0:
                 cmd = "sudo uninstall"
             else:
@@ -2165,7 +2197,8 @@ class BrewFile:
                     print(cmd)
                 self.remove_pack("appstore_list", p)
             if not self.opt["dryrun"] and n_uninstall > 0:
-                self.proc(cmd, True, True, False)
+                self.proc(cmd, print_cmd=True, print_out=True,
+                          exit_on_err=False)
 
         # Clean up cask packages
         if is_mac() and self.get("cask_list"):
@@ -2178,7 +2211,7 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, True, True)
+                    self.proc(cmd, print_cmd=True, print_out=True)
                 self.remove_pack("cask_list", p)
 
         # Skip clean up cask at tap if any cask packages exist
@@ -2195,7 +2228,8 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, True, True, False)
+                    self.proc(cmd, print_cmd=True, print_out=True,
+                              exit_on_err=False)
                 self.remove_pack("pip_list", p)
                 self.remove_pack("pip_list_opt", p)
         # Skip clean up brew-pip at brew if any pip packages exist
@@ -2213,7 +2247,8 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, True, True, False)
+                    self.proc(cmd, print_cmd=True, print_out=True,
+                              exit_on_err=False)
                 self.remove_pack("gem_list", p)
                 self.remove_pack("gem_list_opt", p)
         # Skip clean up brew-gem at brew if any gem packages exist
@@ -2233,7 +2268,7 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, False, True)
+                    self.proc(cmd, print_cmd=False, print_out=True)
 
         # Clean up tap packages
         if self.get("tap_list"):
@@ -2261,7 +2296,7 @@ class BrewFile:
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, True, True)
+                    self.proc(cmd, print_cmd=True, print_out=True)
 
         # Clean up cashe
         self.banner("# Clean up cache")
@@ -2271,8 +2306,8 @@ class BrewFile:
             print(cmd0)
             print(cmd1)
         else:
-            self.proc(cmd0, True, True)
-            self.proc(cmd1, True, True)
+            self.proc(cmd0, print_cmd=True, print_out=True)
+            self.proc(cmd1, print_cmd=True, print_out=True)
 
         if self.opt["dryrun"]:
             # Dry run message
@@ -2451,7 +2486,8 @@ class BrewFile:
         tap_cands = []
         name_cands = []
         lines = self.proc([cask_namer, '"' + app.split("/")[-1].lower() + '"'],
-                          False, False, False)[1]
+                          print_cmd=False, print_out=False,
+                          exit_on_err=False)[1]
         for l in lines:
             if l.find("Proposed token") != -1:
                 name_cands.append(l.split()[2])
@@ -2498,8 +2534,8 @@ class BrewFile:
         if os.path.isfile(self.brew_val("repository")
                           + "/Library/Formula/" + name + ".rb"):
             if isinstance(self.opt["brew_packages"], str):
-                self.opt["brew_packages"] = self.proc("brew list", False,
-                                                      False)[1]
+                self.opt["brew_packages"] = self.proc(
+                    "brew list", print_cmd=False, print_out=False)[1]
             if name in self.opt["brew_packages"]:
                 check = "brew"
                 opt = self.brewinfo.get_option(name)
@@ -2519,7 +2555,6 @@ class BrewFile:
             print("Cask is not available on Linux!")
             sys.exit(1)
 
-        import re
         self.banner("# Starting to check applications for Cask...")
 
         # First, get App Store applications
@@ -2542,7 +2577,7 @@ class BrewFile:
         # Set cask directories and reset application information list
         taps = list(filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
-            self.proc("brew tap", False, False,
+            self.proc("brew tap", print_cmd=False, print_out=False,
                       env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]))
         apps = dict([d, {True: [], False: []}]
                     for d in taps + ["", "appstore"])
@@ -2897,7 +2932,8 @@ class BrewFile:
         packs = self.get("brew_list")
         self.pack_deps = {}
         for p in packs:
-            deps = self.proc("brew deps --1 " + p, False, False)[1]
+            deps = self.proc("brew deps --1 " + p, print_cmd=False,
+                             print_out=False)[1]
             self.pack_deps[p] = []
             for d in deps:
                 if d in packs:
@@ -3365,7 +3401,7 @@ def main():
         print("options:", " ".join(options))
         sys.exit(0)
     elif b.opt["command"] == "version":
-        b.proc("brew -v", False)
+        b.proc("brew -v", print_cmd=False)
         print(__prog__ + " " + __version__ + " " + __date__)
         sys.exit(0)
 
