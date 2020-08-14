@@ -676,7 +676,7 @@ class BrewInfo:
             out.writeln("  brew_installed=0")
             out.writeln("  echo Homebrew is not installed!")
             out.writeln("  echo Install now...")
-            out.writeln("  echo /bin/bash -c \"\$\(curl -fsSL "
+            out.writeln("  echo /bin/bash -c \\\"\$\(curl -fsSL "
                         "https://raw.githubusercontent.com/Homebrew/"
                         "install/master/install.sh\)\\\"")
             out.writeln("  /bin/bash -c \"$(curl -fsSL "
