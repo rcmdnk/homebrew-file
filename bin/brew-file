@@ -676,9 +676,9 @@ class BrewInfo:
             out.writeln("  brew_installed=0")
             out.writeln("  echo Homebrew is not installed!")
             out.writeln("  echo Install now...")
-            out.writeln("  echo /bin/bash -c \\\"\$\(curl -fsSL "
+            out.writeln("  echo /bin/bash -c \\\"\\$\\(curl -fsSL "
                         "https://raw.githubusercontent.com/Homebrew/"
-                        "install/master/install.sh\)\\\"")
+                        "install/master/install.sh\\)\\\"")
             out.writeln("  /bin/bash -c \"$(curl -fsSL "
                         "https://raw.githubusercontent.com/Homebrew/"
                         "install/master/install.sh)\"")
@@ -2619,7 +2619,7 @@ class BrewFile:
                     elif re.search("^ *app ", line):
                         cask_app = re.sub("^ *app ", "",
                                           line).strip('"\' ').split("/")[-1]
-                    elif re.search("\.app", line):
+                    elif re.search("\\.app", line):
                         cask_app = line.split(".app")[0].split("/")[-1].\
                             split("'")[-1].split('"')[-1]
                     elif re.search("^ *pkg ", line):
