@@ -2631,7 +2631,8 @@ class BrewFile:
                     if not noinst and re.search("^ *version ", line):
                         if os.path.isdir(
                                 self.opt["caskroom"] + "/" + cask + "/"
-                                + re.sub("^ *version ", "", line).strip('"\': ')):
+                                + re.sub("^ *version ", "", line).strip(
+                                    '"\': ')):
                             installed = True
                 if noinst:
                     if not cask_apps:
