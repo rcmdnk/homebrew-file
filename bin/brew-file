@@ -1132,7 +1132,7 @@ class BrewFile:
                     user = ""
             if user == "":
                 self.err("Can not find git (github) user name")
-                exit(1)
+                sys.exit(1)
         return user
 
     def input_dir(self):
@@ -1199,7 +1199,7 @@ class BrewFile:
               + self.repo_name() + " doesn't exist.")
         ans = self.ask_yn("do you want to create the repository?")
         if not ans:
-            exit(0)
+            sys.exit(0)
 
         # Try to create w/o two-factor code
         try:
@@ -1210,7 +1210,7 @@ class BrewFile:
             ans = self.ask_yn("Do you want to install now?")
             if not ans:
                 print("Please prepare Brewfile repository.")
-                exit(0)
+                sys.exit(0)
             else:
                 ret = self.proc("pip --version", print_cmd=False,
                                 print_out=False, exit_on_err=False)
