@@ -8,9 +8,20 @@ https://github.com/rcmdnk/homebrew-file
 requirement: Python 3.7 or later
 """
 
+import argparse
+import copy
+import getpass
+import glob
+import json
 import os
-import sys
+import platform
 import re
+import shlex
+import shutil
+import subprocess
+import sys
+from io import StringIO
+from urllib.parse import quote
 
 __prog__ = os.path.basename(__file__)
 __description__ = __doc__
@@ -26,7 +37,6 @@ __status__ = "Prototype"
 
 
 def is_mac():
-    import platform
     if platform.system() == "Darwin":
         return True
     return False
@@ -71,10 +81,6 @@ class Tee:
     def __init__(self, out1, out2=sys.stdout, use2=True):
         """__init__"""
 
-        try:
-            from cStringIO import StringIO
-        except ImportError:
-            from io import StringIO
         if isinstance(out1, str):
             self.out1name = out1
             self.out1 = StringIO()
@@ -151,16 +157,13 @@ class BrewHelper:
             if line == '':
                 if code is not None:
                     break
-                else:
-                    continue
+                continue
             yield line
 
     def proc(self, cmd, print_cmd=True, print_out=True,
              exit_on_err=True, separate_err=False, print_err=True,
              verbose=1, env={}):
         """ Get process output."""
-        import shlex
-        import subprocess
         if not isinstance(cmd, list):
             cmd = shlex.split(cmd)
         cmd_orig = " ".join(["$"] + cmd)
@@ -401,7 +404,6 @@ class BrewInfo:
             else x.split()[0])
 
     def get(self, name):
-        import copy
         return copy.deepcopy(self.list_dic[name])
 
     def remove(self, name, package):
@@ -569,7 +571,6 @@ class BrewInfo:
     def get_info(self, package=""):
         if package == "":
             package = "--installed"
-        import json
         infotmp = json.loads(
             self.helper.proc("brew info --json=v1 " + package, print_cmd=False,
                              print_out=False, exit_on_err=True,
@@ -1025,7 +1026,6 @@ class BrewFile:
 
     def remove(self, path):
         """Helper to remove file/directory."""
-        import shutil
         if os.path.islink(path) or os.path.isfile(path):
             os.remove(path)
         elif os.path.isdir(path):
@@ -1219,7 +1219,6 @@ class BrewFile:
                 self.proc("pip install requests")
                 import requests
 
-        import json
         url = "https://api.github.com/user/repos"
         description = "package list for Homebrew"
         data = {"name": self.repo_name(), "description": description,
@@ -1228,7 +1227,6 @@ class BrewFile:
         is_ok = True
 
         # Check password
-        import getpass
         password = getpass.getpass("GitHub password: ")
 
         while True:
@@ -1815,7 +1813,6 @@ class BrewFile:
             if apps and apps[0] == "No installed apps found":
                 apps = []
         else:
-            import glob
             apps_tmp = []
             for d in self.opt["appdirlist"]:
                 apps_tmp += [
@@ -1874,7 +1871,6 @@ class BrewFile:
             elif self.opt["leaves"]:
                 leaves = self.brewinfo.get_leaves()
             else:
-                import copy
                 leaves = copy.deepcopy(full_list)
 
             for p in self.opt["top_packages"].split(","):
@@ -2095,14 +2091,11 @@ class BrewFile:
     def edit_brewfile(self):
         """Edit brewfiles"""
         if not self.editor:
-            import shlex
             self.editor = shlex.split(self.opt["my_editor"])
-        import subprocess
         subprocess.call(self.editor + self.get_files())
 
     def cat_brewfile(self):
         """Cat brewfiles"""
-        import subprocess
         subprocess.call(["cat"] + self.get_files())
 
     def clean_non_request(self):
@@ -2161,10 +2154,6 @@ class BrewFile:
             else:
                 cmd = "sudo rm -rf"
             n_uninstall = 0
-            try:
-                from urllib2 import quote
-            except ImportError:
-                from urllib.parse import quote
 
             for p in self.get("appstore_list"):
                 identifier = p.split()[0]
@@ -3086,8 +3075,6 @@ class BrewFile:
 
 
 def main():
-    import argparse
-
     # Prepare BrewFile
     b = BrewFile()
 
