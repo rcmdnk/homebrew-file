@@ -113,7 +113,7 @@ e.g.
 
 If you have::
 
-    file ./${HOST}.Brewfile
+    file ./${HOSTNAME}.Brewfile
 
 in main ``Brewfile``, and prepare files like::
 
@@ -122,6 +122,8 @@ in main ``Brewfile``, and prepare files like::
 in the same directory,
 then ``brew-file`` picks up **Host1.Brewfile** for Host1,
 and **Host2.Brewfile** for Host2, etc...
+
+You can use environment variables and `HOSTNAME` (`HOSNAME` is not an environment variable in some systems, but it will be recognized in brew-file).
 
 Or if you just have::
 

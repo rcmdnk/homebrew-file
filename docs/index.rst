@@ -19,7 +19,9 @@ Welcome to homebrew-file's documentation!
 
 Brewfile manager for `Homebrew <http://brew.sh/>`_ at OS X.
 
-It is similar to [homebrew-bundle](https://github.com/Homebrew/homebrew-bundle) command,
+It is similar to
+`homebrew-bundle <https://github.com/Homebrew/homebrew-bundle>`_
+command,
 but brew-file has more abilities:
 
 - Automatic Brewfile update at install/uninstall.
