@@ -61,18 +61,11 @@ def to_bool(val):
     return False
 
 
-def get_shell_env(val):
-    val_name = val.strip('\'"${}')
-    if val_name == 'HOSTNAME':
-        return os.uname()[1]
-    return os.environ.get(val_name.strip('${}'), "")
-
-
-def parse_shell_env(val):
-    for r in re.findall(r'(\${[^}]+}|\$[^{.\s/\$]+(?=[.\s/\$]|\$[^{]+$))',
-                        val):
-        val = val.replace(r, get_shell_env(r))
-    return val
+def expandpath(val):
+    f = os.path.expandvars(os.path.expanduser(val))
+    for h in ('$HOSTNAME', '${HOSTNAME}'):
+        f = f.replace(h, os.uname()[1])
+    return f
 
 
 class Tee:
@@ -514,7 +507,7 @@ class BrewInfo:
                 self.appstore_input.append(re.sub("^ *appstore *", "", line).
                                            strip().strip("'").strip('"'))
             elif cmd == "file" or cmd.lower() == "brewfile":
-                self.file_input.append(parse_shell_env(p))
+                self.file_input.append(p)
             elif cmd == "before":
                 self.before_input.append(excmd)
             elif cmd == "after":
@@ -1067,11 +1060,12 @@ class BrewFile:
     def read(self, brewinfo):
         brewinfo.read()
         for f in brewinfo.get("file_input"):
-            f = os.path.expandvars(os.path.expanduser(f))
+            f = expandpath(f)
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
             else:
-                b = BrewInfo(self.helper, brewinfo.get_dir() + "/" + f)
+                b = BrewInfo(self.helper,
+                             brewinfo.get_dir() + "/"+ f.lstrip('./'))
             self.brewinfo_ext.append(b)
             self.read(b)
 
@@ -2390,10 +2384,7 @@ class BrewFile:
                             cmdtmp = line.split()
                             cmd = []
                             for c in cmdtmp:
-                                if c.startswith("~/"):
-                                    cmd.append(os.path.expanduser(c))
-                                else:
-                                    cmd.append(c)
+                                cmd.append(expandpath(c))
                             self.proc(cmd)
                     if line.find("brew linkapps") != -1:
                         if self.opt["link"]:
