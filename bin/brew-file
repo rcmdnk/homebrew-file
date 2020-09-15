@@ -637,8 +637,8 @@ class BrewInfo:
         return pack
 
     def write(self):
-        # Prepare output
-        out = Tee(self.get_file(), sys.stdout, self.helper.opt["verbose"] > 1)
+        output_prefix = ""
+        output = ""
 
         # commands for each format
         if self.helper.opt["form"] in ["file", "none"]:
@@ -667,21 +667,24 @@ class BrewInfo:
             cmd_file = "#file "
         elif self.helper.opt["form"] in ["command", "cmd"]:
             # Shebang for command format
-            out.writeln("#!/usr/bin/env bash\n")
-            out.writeln("#BREWFILE_IGNORE")
-            out.writeln("if ! which brew >& /dev/null;then")
-            out.writeln("  brew_installed=0")
-            out.writeln("  echo Homebrew is not installed!")
-            out.writeln("  echo Install now...")
-            out.writeln("  echo /bin/bash -c \\\"\\$\\(curl -fsSL "
-                        "https://raw.githubusercontent.com/Homebrew/"
-                        "install/master/install.sh\\)\\\"")
-            out.writeln("  /bin/bash -c \"$(curl -fsSL "
-                        "https://raw.githubusercontent.com/Homebrew/"
-                        "install/master/install.sh)\"")
-            out.writeln("  echo")
-            out.writeln("fi")
-            out.writeln("#BREWFILE_ENDIGNORE")
+            output_prefix += """#!/usr/bin/env bash
+
+#BREWFILE_IGNORE
+if ! which brew >& /dev/null;then
+  brew_installed=0
+  echo Homebrew is not installed!
+  echo Install now...
+  echo /bin/bash -c \\\"\\$\\(curl -fsSL
+https://raw.githubusercontent.com/Homebrew/
+install/master/install.sh\\)\\\
+  /bin/bash -c \"$(curl -fsSL
+https://raw.githubusercontent.com/Homebrew/
+install/master/install.sh)\
+  echo
+fi
+#BREWFILE_ENDIGNORE
+
+"""
 
             cmd_before = ""
             cmd_after = ""
@@ -700,31 +703,36 @@ class BrewInfo:
 
         # Before commands
         if self.before_input:
-            out.writeln("# Before commands")
+            output += "# Before commands\n"
             for c in self.before_input:
-                out.writeln(cmd_before + c)
+                output += cmd_before + c + "\n"
 
         # Taps
         if self.tap_list:
             isfirst = True
 
-            def first_tap_pack_write(out, isfirst, direct_first, isfirst_pack,
-                                     tap, cmd_tap):
+            def first_tap_pack_write(isfirst, direct_first, isfirst_pack, tap,
+                                     cmd_tap):
+                output = ""
                 if isfirst:
-                    out.writeln("\n# tap repositories and their packages")
+                    output += "\n# tap repositories and their packages\n"
                 if not direct_first and isfirst_pack:
-                    out.writeln("\n" + cmd_tap + self.packout(tap))
+                    output += "\n" + cmd_tap + self.packout(tap) + "\n"
+                return output
 
             for t in self.tap_list:
                 isfirst_pack = True
                 direct_first = False
+                tap_packs = self.get_tap_packs(t)
+
                 if t == "direct":
+                    if not tap_packs:
+                        continue
                     direct_first = True
 
-                tap_packs = self.get_tap_packs(t)
                 if not self.helper.opt["caskonly"]:
-                    first_tap_pack_write(out, isfirst, direct_first,
-                                         isfirst_pack, t, cmd_tap)
+                    output += first_tap_pack_write(isfirst, direct_first,
+                                                   isfirst_pack, t, cmd_tap)
                     isfirst = isfirst_pack = False
 
                     for p in self.brew_list[:]:
@@ -732,10 +740,10 @@ class BrewInfo:
                                 ".rb", "") in tap_packs:
                             if direct_first:
                                 direct_first = False
-                                out.writeln("\n## " + "Direct install")
+                                output += "\n## " + "Direct install\n"
                             pack = self.packout(p) +\
                                 self.convert_option(self.brew_list_opt[p])
-                            out.writeln(cmd_install + pack)
+                            output += cmd_install + pack + "\n"
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
                 if not is_mac():
@@ -743,76 +751,81 @@ class BrewInfo:
                 tap_casks = self.get_tap_casks(t)
                 for p in self.cask_list[:]:
                     if p in tap_casks:
-                        first_tap_pack_write(out, isfirst, False,
-                                             isfirst_pack, t, cmd_tap)
+                        output += first_tap_pack_write(
+                            isfirst, False,isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
-                        out.writeln(cmd_cask + self.packout(p))
+                        output += cmd_cask + self.packout(p) + "\n"
                         self.cask_list.remove(p)
 
         # Brew packages
         if not self.helper.opt["caskonly"] and self.brew_list:
-            out.writeln("\n# Other Homebrew packages")
+            output += "\n# Other Homebrew packages\n"
             for p in self.brew_list:
                 pack = self.packout(p) +\
                     self.convert_option(self.brew_list_opt[p])
-                out.writeln(cmd_install + pack)
+                output += cmd_install + pack + "\n"
 
         # pip packages
         if not self.helper.opt["caskonly"] and self.pip_list:
-            out.writeln("\n# Other pip packages")
+            output += "\n# Other pip packages\n"
             for p in self.pip_list:
                 pack = self.packout(p)
                 if len(self.pip_list_opt[p]) == 1:
                     pack = pack + "=" + self.pip_list_opt[p][0].strip()
-                out.writeln(cmd_pip + pack)
+                output += cmd_pip + pack + "\n"
 
         # gem packages
         if not self.helper.opt["caskonly"] and self.gem_list:
-            out.writeln("\n# Other gem packages")
+            output += "\n# Other gem packages\n"
             for p in self.gem_list:
                 pack = self.packout(p) + self.gem_list_opt[p]
-                out.writeln(cmd_gem + pack)
+                output += cmd_gem + pack + "\n"
 
         # Casks
         if is_mac() and self.cask_list:
-            out.writeln("\n# Other Cask applications")
+            output += "\n# Other Cask applications\n"
             for c in self.cask_list:
-                out.writeln(cmd_cask + self.packout(c))
+                output += cmd_cask + self.packout(c) + "\n"
 
         # Installed by cask, but cask files were not found...
         if is_mac() and self.cask_nocask_list:
-            out.writeln("\n# Below applications were installed by Cask,")
-            out.writeln("# but do not have corresponding casks.\n")
+            output += "\n# Below applications were installed by Cask,\n"
+            output += "# but do not have corresponding casks.\n\n"
             for c in self.cask_nocask_list:
-                out.writeln(cmd_cask_nocask + self.packout(c))
+                output += cmd_cask_nocask + self.packout(c) + "\n"
 
         # App Store applications
         if is_mac() and self.helper.opt["appstore"] \
                 and self.appstore_list:
-            out.writeln("\n# App Store applications")
+            output += "\n# App Store applications\n"
             for a in self.appstore_list:
-                out.writeln(cmd_appstore + self.mas_pack(a))
+                output += cmd_appstore + self.mas_pack(a) + "\n"
 
         # Additional files
         if self.file_list:
-            out.writeln("\n# Additional files")
+            output += "\n# Additional files\n"
             for f in self.file_list:
-                out.writeln(cmd_file + self.packout(f))
+                output += cmd_file + self.packout(f) + "\n"
 
         # Other commands
         if self.cmd_input:
-            out.writeln("\n# Other commands")
+            output += "\n# Other commands\n"
             for c in self.cmd_input:
-                out.writeln(cmd_other + c)
+                output += cmd_other + c + "\n"
 
         # After commands
         if self.after_input:
-            out.writeln("\n# After commands")
+            output += "\n# After commands\n"
             for c in self.after_input:
-                out.writeln(cmd_after + c)
+                output += cmd_after + c + "\n"
 
-        # Close Brewfile
-        out.close()
+        # Write to Brewfile
+        if output:
+            output = output_prefix + output
+            out = Tee(self.get_file(), sys.stdout,
+                      self.helper.opt["verbose"] > 1)
+            out.write(output)
+            out.close()
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
