@@ -2153,54 +2153,67 @@ class BrewFile:
 
         # Clean up App Store applications
         if self.opt["appstore"] and self.get("appstore_list"):
+            mas_flag = None
             self.banner("# Clean up App Store applications")
-            uninstall = self.proc("type uninstall", print_cmd=False,
-                                  print_out=False, exit_on_err=False)
-            if uninstall == 0:
-                cmd = "sudo uninstall"
-            else:
-                cmd = "sudo rm -rf"
-            n_uninstall = 0
 
             for p in self.get("appstore_list"):
                 identifier = p.split()[0]
-                if identifier.isdigit() and len(identifier) == 9:
+                if identifier.isdigit():
                     package = " ".join(p.split()[1:])
                 else:
                     identifier = ""
                     package = p
+                if re.match(".*\(\d+\.\d+.*\)$", package):
+                    package = ' '.join(package.split(' ')[:-1])
+
                 isinput = False
                 for pi in self.get("appstore_input"):
                     i_identifier = pi.split()[0]
-                    if i_identifier.isdigit() and len(i_identifier) == 9:
+                    if i_identifier.isdigit():
                         i_package = " ".join(pi.split()[1:])
                     else:
                         i_identifier = ""
                         i_package = pi
-                    if package == i_package:
+                    if re.match(".*\(\d+\.\d+.*\)$", i_package):
+                        i_package = ' '.join(i_package.split(' ')[:-1])
+                    if (identifier != "" and identifier == i_identifier) \
+                            or package == i_package:
                         isinput = True
                         break
                 if isinput:
                     continue
-                tmpcmd = cmd
-                package = " ".join(p.split()[1:])
-                for d in self.opt["appdirlist"]:
-                    a = "%s/%s.app" % (d, package)
-                    if os.path.isdir(a):
-                        if uninstall == 0:
-                            cmd += " file:///" + quote(a)
-                        else:
-                            cmd += " '%s'" % a
+
+                if mas_flag is None:
+                    mas_flag = self.check_mas_cmd(True)
+                if identifier and mas_flag:
+                    cmd = "sudo " + self.opt["mas_cmd"] + " uninstall " \
+                        + identifier
+                else:
+                    uninstall = self.proc("type uninstall", print_cmd=False,
+                                          print_out=False, exit_on_err=False)
+                    if uninstall == 0:
+                        cmd = "sudo uninstall"
+                    else:
+                        cmd = "sudo rm -rf"
+                    tmpcmd = cmd
+                    for d in self.opt["appdirlist"]:
+                        a = "%s/%s.app" % (d, package)
+                        if os.path.isdir(a):
+                            if uninstall == 0:
+                                cmd += " file:///" + quote(a)
+                            else:
+                                cmd += " '%s'" % a
+                            continue
+                    if cmd == tmpcmd:
+                        self.warn(f"Package {package} was not found: nothing to do.\n")
+                        self.remove_pack("appstore_list", p)
                         continue
-                if cmd == tmpcmd:
-                    continue
-                n_uninstall += 1
                 if self.opt["dryrun"]:
                     print(cmd)
+                else:
+                  self.proc(cmd, print_cmd=True, print_out=True,
+                            exit_on_err=False)
                 self.remove_pack("appstore_list", p)
-            if not self.opt["dryrun"] and n_uninstall > 0:
-                self.proc(cmd, print_cmd=True, print_out=True,
-                          exit_on_err=False)
 
         # Clean up cask packages
         if is_mac() and self.get("cask_list"):
@@ -2411,7 +2424,7 @@ class BrewFile:
 
         # App Store
         if is_mac() and self.opt["appstore"]:
-            mas_flag = 0
+            mas_flag = None
             for p in self.get("appstore_input"):
                 if p in self.get("appstore_list"):
                     continue
@@ -2434,10 +2447,10 @@ class BrewFile:
                         break
                 if islist:
                     continue
-                if mas_flag == 0:
-                    mas_flag = self.check_mas_cmd(True)
                 self.info("Installing " + package)
                 if identifier != "":
+                    if mas_flag is None:
+                        mas_flag = self.check_mas_cmd(True)
                     if mas_flag == 1:
                         self.proc(self.opt["mas_cmd"] + " install "
                                   + identifier)
