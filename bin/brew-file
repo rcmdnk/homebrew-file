@@ -61,6 +61,17 @@ def to_bool(val):
     return False
 
 
+def to_num(val):
+    if isinstance(val, bool):
+        return int(val)
+    if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
+        return int(val)
+    if isinstance(val, str):
+        if val.lower() == "true":
+            return 1
+    return 0
+
+
 def expandpath(val):
     f = os.path.expandvars(os.path.expanduser(val))
     for h in ('$HOSTNAME', '${HOSTNAME}'):
@@ -928,8 +939,11 @@ class BrewFile:
         # fontdir may be used for application search, too
         self.opt["fontdir"] = cask_opts["--fontdir"]
 
-        self.opt["appstore"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", True))
+        self.opt["appstore"] = to_num(
+            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1))
+
+        self.opt["no_appstore"] = to_num(
+            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1))
 
         gem_opts = self.parse_env_opts("HOMEBREW_GEM_OPTS")
         if "--homebrew-ruby" in gem_opts:
@@ -983,6 +997,14 @@ class BrewFile:
             self.opt[k] = int(self.opt[k])
         for k in self.float_opts:
             self.opt[k] = float(self.opt[k])
+
+        # fix appstore option
+        appstore = 1
+        if self.opt["appstore"] != -1:
+            appstore = self.opt["appstore"]
+        elif not self.opt["no_appstore"]:
+            appstore = 0
+        self.opt["appstore"] = to_num(appstore)
 
         self.brewinfo.set_file(self.opt["input"])
 
@@ -1429,7 +1451,8 @@ class BrewFile:
             exe + self.opt["args"], print_cmd=False, print_out=True,
             exit_on_err=False, env=env)
 
-        if (noinit or (cmd == "mas" and not self.opt["appstore"])) \
+        if (noinit or (cmd == "mas" and subcmd != "uninstall"
+                       and self.opt["appstore"] != 1)) \
                 or (ret != 0 and "Not installed" not in ' '.join(lines)
                     and "No installed keg or cask with the name"
                     not in ' '.join(lines)):
@@ -1887,7 +1910,7 @@ class BrewFile:
             packages.append(line)
         return (True, packages)
 
-    def get_list(self):
+    def get_list(self, force_appstore_list=False):
         """Get List"""
 
         # Clear lists
@@ -1962,9 +1985,15 @@ class BrewFile:
 
         # App Store
         if is_mac():
-            if self.opt["appstore"]:
+            if self.opt["appstore"] == 1 \
+                    or (self.opt["appstore"] == 2 and force_appstore_list):
                 self.brewinfo.set_val("appstore_list",
                                       self.get_appstore_list())
+            elif self.opt["appstore"] == 2:
+                self.check_input_file()
+                self.read_all()
+                self.brewinfo.set_val("appstore_list",
+                                      self.get("appstore_input"))
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input"""
@@ -2185,7 +2214,7 @@ class BrewFile:
             add_dependncies(p)
 
         # Clean up App Store applications
-        if self.opt["appstore"] and self.get("appstore_list"):
+        if self.opt["appstore"] ==1 and self.get("appstore_list"):
             self.banner("# Clean up App Store applications")
 
             for p in self.get("appstore_list"):
@@ -3078,16 +3107,15 @@ class BrewFile:
             self.clean_non_request()
             sys.exit(0)
 
-        # Get list for cleanup/install
-        self.get_list()
-
         # Cleanup
         if self.opt["command"] == "clean":
+            self.get_list()
             self.cleanup()
             sys.exit(0)
 
         # Install
         if self.opt["command"] == "install":
+            self.get_list(force_appstore_list=True)
             self.install()
             sys.exit(0)
 
@@ -3233,11 +3261,19 @@ def main():
 
     appstore_parser = argparse.ArgumentParser(add_help=False)
     appstore_parser.add_argument(
-        "--no_appstore", action="store_false", default=b.opt["appstore"],
-        dest="appstore", help="Don't check AppStore applications.\n"
-        "(For other than casklist command.)\n"
-        "You can set input file by environmental variable:\n"
+        "--appstore", action="store", default=b.opt["appstore"],
+        dest="appstore", help="Set AppStore application check level.\n"
+        "0: do not check,\n1: check and manage,\n"
+        "2: check for installation,"
+        "but do not add to Brewfile when Apps are added.\n"
+        "You can set the level by environmental variable:\n"
         "    export HOMEBREW_BRWEFILE_APPSTORE=0")
+
+    no_appstore_parser = argparse.ArgumentParser(add_help=False)
+    no_appstore_parser.add_argument(
+        "--no_appstore", action="store_false", default=b.opt["no_appstore"],
+        dest="no_appstore", help="Set AppStore application check level to 0.\n"
+        "(legacy option, works same as '--appstore 0'.)\n")
 
     dryrun_parser = argparse.ArgumentParser(add_help=False)
     dryrun_parser.add_argument(
@@ -3262,7 +3298,8 @@ def main():
 
     min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
                    on_request_parser, top_packages_parser, appstore_parser,
-                   caskonly_parser, yn_parser, verbose_parser]
+                   no_appstore_parser, caskonly_parser, yn_parser,
+                   verbose_parser]
     subparser_options = {
         "parents": min_parsers,
         "formatter_class": argparse.RawTextHelpFormatter}
@@ -3273,8 +3310,8 @@ def main():
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  on_request_parser, top_packages_parser,
                  noupgradeatupdate_parser, repo_parser, link_parser,
-                 caskonly_parser, appstore_parser, dryrun_parser, yn_parser,
-                 verbose_parser, help_parser],
+                 caskonly_parser, appstore_parser, no_appstore_parser,
+                 dryrun_parser, yn_parser, verbose_parser, help_parser],
         formatter_class=argparse.RawTextHelpFormatter,
         description=__description__,
         epilog="Check https://homebrew-file.readthedocs.io for more details."
@@ -3432,8 +3469,8 @@ def main():
         options = ["-f", "--file", "-b", "--backup",
                    "-F", "--format", "--form", "--leaves", "--on_request",
                    "--top_packages", "-U", "--noupgrade", "-r", "--repo", "-n",
-                   "--nolink", "--caskonly", "--no_appstore", "-C",
-                   "-y", "--yes", "-V", "--verbose"]
+                   "--nolink", "--caskonly", "--appstore", "--no_appstore",
+                   "-C", "-y", "--yes", "-V", "--verbose"]
         print("commands:", " ".join(commands))
         print("commands_hyphen:", " ".join(commands_hyphen))
         print("options:", " ".join(options))

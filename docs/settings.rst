@@ -13,6 +13,6 @@ Following environmental variables can be used.
    HOMEBREW_BREWFILE_ON_REQUEST   | Set 1 if you want to list up only packages installed on request. If it is set 1, it is given priority over `LEAVES` option. Note: This list can be changed if packages installed by brew-file in new machine. (some "on_request" package could be installed as "as_dependencies" of others before being installed on request.)| 0
    HOMEBREW_BREWFILE_TOP_PACKAGES | Packages which are listed in Brewfile even if `leaves` is used and they are under dependencies. (Useful for such `go`, which is used by itself, but some packages depend on it, too.) | \"\"
    HOMEBREW_BREWFILE_VERBOSE      | Set verbose level. | 1
-   HOMEBREW_BREWFILE_APPSTORE     | Set 0 you don't want to list up AppStore applications Brewfile. | 1
+   HOMEBREW_BREWFILE_APPSTORE     | Set Appstore application management level. 0: do not, 1: manage fully, 2: use list to install, but do not update by init command even if new App is added (but package is removed from the list at ``brew file brew mas uninstall <app id>``).| 1
    HOMEBREW_CASK_OPTS             | This is `Cask's option <https://github.com/homebrew/homebrew-cask/blob/master/USAGE.md>`_ to set cask environment. If appdir or fontdir is set with these options, Brew-file uses these values in it. | \"\"
    HOMEBREW_GEM_OPTS              | This is `brew-gem's option <https://github.com/sportngin/brew-gem/blob/master/README.md>`_ to set Ruby environment. | \"\"

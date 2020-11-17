@@ -11,7 +11,7 @@ _brew_file_options () {
   local commands_hyphen="-i --init -s --set_repo --set_local -c --clean --clean_non_request -u --update -e \
     --edit --cat --test --commands -v --version -h --help"
   local options="-f --file -b --backup -F --format --form --leaves --on_request -U --noupgrade \
-    -r --repo -n --nolink --caskonly --no_appstore -C -y --yes -V --verbose"
+    -r --repo -n --nolink --caskonly --appstore --no_appstore -C -y --yes -V --verbose"
   if [ "$1" = "commands" ];then
     echo $commands
   elif [ "$1" = "commands_hyphen" ];then
