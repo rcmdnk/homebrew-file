@@ -75,8 +75,8 @@ brew () {
     fi
   fi
 
-  # Remove noinit option
-  if [ "$1" = "noinit" ];then
+  # Remove noinit option for pure brew command
+  if [ "$exe" = "command brew" ] &&  [ "$1" = "noinit" ];then
     shift
   fi
 
