@@ -15,28 +15,28 @@ brew () {
     fi
   fi
 
-  # Check args
-  nargs=0
-  for a in "$@";do
-    if [[ ! "$a" =~ ^- ]];then
-      ((nargs++))
-    fi
-  done
-  cmd=$1
-  cmd2=$2
-
-  # No auto update for tap listing
-  env=""
-  if [ "$cmd" = "tap" ] && [ $nargs -eq 1 ];then
-    env="HOMEBREW_NO_AUTO_UPDATE=1"
-  fi
-
   # Set exe
   exe="command brew"
 
   # Do wrap
   if [ $wrap -eq 1 ];then
     if type -a brew-file >/dev/null 2>&1;then
+      # Check args
+      nargs=0
+      for a in "$@";do
+        if [[ ! "$a" =~ ^- ]];then
+          ((nargs++))
+        fi
+      done
+      cmd=$1
+      cmd2=$2
+
+      # No auto update for tap listing
+      env=""
+      if [ "$cmd" = "tap" ] && [ $nargs -eq 1 ];then
+        env="HOMEBREW_NO_AUTO_UPDATE=1"
+      fi
+
       case "$cmd" in
         # brew install/uninstall/tap/pip/gem
         instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
@@ -71,6 +71,7 @@ brew () {
               exe="brew-file"
             fi
           fi
+          ;;
       esac
     fi
   fi
@@ -130,3 +131,43 @@ if [ -n "$ZSH_VERSION" ];then
 else
   complete -o bashdefault -o default -F _brew_completion_wrap brew
 fi
+
+# mas command wrapper for brew-file
+mas () {
+  # Emulate ksh / local options if zsh
+  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+
+  # Check if do wrap or not
+  wrap=1
+  v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
+  if [ "${v[0]}" -eq 2 ];then
+    if [ "${v[1]}" -lt 7 ];then
+      wrap=0
+    elif [ "${v[1]}" -eq 7 ] && [ "${v[2]}" -le 6 ];then
+      wrap=0
+    fi
+  fi
+
+  # Set exe
+  exe="command mas"
+
+  # Do wrap
+  if [ $wrap -eq 1 ];then
+    if type -a brew-file >/dev/null 2>&1;then
+      # Check args
+      cmd=$1
+
+      case "$cmd" in
+        purchase|install|uninstall)
+          exe="brew-file brew mas"
+          ;;
+        *)
+          ;;
+      esac
+    fi
+  fi
+
+  # Execute command
+  eval $exe "$@"
+  return $?
+}

@@ -2,10 +2,11 @@ brew-wrap
 =========
 
 If you want to automatically update Brewfile after ``brew install/uninstall``,
+or ``mas install/uninstall``
 please use ``brew-wrap``.
 
 `homebrew-file/etc/brew-wrap <https://github.com/rcmdnk/homebrew-file/blob/master/etc/brew-wrap>`_
-has a wrapper function ``brew``.
+has a wrapper function ``brew``/``mas``.
 
 Features:
 
@@ -29,7 +30,7 @@ To enable it, just read this file in your ``.bashrc`` or any of your setup file:
      source $(brew --prefix)/etc/brew-wrap
    fi
 
-``brew`` function in ``brew-wrap`` executes original ``brew``
+``brew``/``mas`` function in ``brew-wrap`` executes original ``brew``/``mas``
 if ``brew-file`` is not included.
 
 Therefore, you can safely uninstall/re-install brew-file
@@ -54,6 +55,6 @@ as same as ``brew-file`` command.
 
    Previously, ``brew-wrap`` was in ``bin/brew-wrap``,
    and it was used like ``alias brew="brew-wrap"``.
-   
+
    If you have this obsolete setting, please delete and renew as above.
-   
+
