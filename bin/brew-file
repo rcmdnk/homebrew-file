@@ -1355,16 +1355,8 @@ class BrewFile:
             return False
         return True
 
-    def repomgr(self, cmd=""):
+    def repomgr(self, cmd="pull"):
         """Helper of repository management."""
-        pull = False
-        push = False
-        if cmd == "pull":
-            pull = True
-            push = False
-        elif cmd == "push":
-            pull = False
-            push = True
 
         # Check the repository
         if self.opt["repo"] == "":
@@ -1379,17 +1371,20 @@ class BrewFile:
         # pull/push
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
-        if pull:
-            self.proc("git pull")
-            return
-        if push:
+
+        ret, lines = self.proc("git status -s -u no", print_cmd=False,
+                               print_out=False, exit_on_err=True)
+        if ret != 0:
+            self.err('\n'.join(lines))
+            sys.exit(ret)
+        if (lines):
             if self.check_gitconfig():
                 self.proc("git add -A")
                 self.proc(["git", "commit", "-m",
                            "\"Update the package list\""],
                           exit_on_err=False)
-                self.proc("git push")
-            return
+
+        self.proc(f"git {cmd}")
 
     def brew_cmd(self):
         noinit = False
