@@ -1397,7 +1397,7 @@ class BrewFile:
             noinit = True
             self.opt["args"].remove("noinit")
 
-        exe = "brew"
+        exe = ["brew"]
         cmd = self.opt["args"][0] if self.opt["args"] else ""
         subcmd = self.opt["args"][1] if len(self.opt["args"]) > 1 else ""
         args = self.opt["args"]
@@ -1406,24 +1406,38 @@ class BrewFile:
             self.check_cask_cmd(True)
         elif cmd == "pip":
             self.opt["args"].pop(0)
-            exe = "brew-pip"
+            exe = ["brew-pip"]
             self.check_pip_cmd(True)
             env["HOMEBREW_CELLAR"] = os.environ.get(
                 "HOMEBREW_CELLAR",
                 self.brew_val("cellar"))
         elif cmd == "gem":
-            exe = "brew-gem"
+            exe = ["brew-gem"]
             self.opt["args"].pop(0)
             self.check_gem_cmd(True)
             if self.opt["homebrew_ruby"] and\
                     "--homebrew-ruby" not in self.opt["args"]:
                 self.opt["args"].append("--homebrew-ruby")
+        elif cmd == "mas":
+            exe = ["mas"]
+            self.opt["args"].pop(0)
+            if subcmd == "uninstall":
+                exe = ["sudo", "mas"]
+            package = self.opt["args"][1:] if len(self.opt["args"]) > 1 else ""
+            if self.check_mas_cmd(True) != 1:
+                self.err("\n'mas' command is not available.\n")
+                if package:
+                    self.err("Please install 'mas' or "
+                             f"{subcmd} {' '.join(package)} manually", 0)
 
-        ret = self.proc(
-            [exe] + self.opt["args"], print_cmd=False, print_out=True,
-            exit_on_err=False, env=env)[0]
+        ret, lines = self.proc(
+            exe + self.opt["args"], print_cmd=False, print_out=True,
+            exit_on_err=False, env=env)
 
-        if ret != 0 or noinit:
+        if (noinit or (cmd == "mas" and not self.opt["appstore"])) \
+                or (ret != 0 and "Not installed" not in ' '.join(lines)
+                    and "No installed keg or cask with the name"
+                    not in ' '.join(lines)):
             sys.exit(ret)
 
         if cmd in ["cask"]:
@@ -1436,22 +1450,24 @@ class BrewFile:
 
         if cmd not in ["instal", "install", "reinstall", "tap",
                        "rm", "remove", "uninstall", "untap", "cask",
-                       "pip", "gem"] \
+                       "pip", "gem", "mas"] \
                 or nargs == 0 \
                 or (cmd == "cask" and subcmd not in
                     ["instal", "install", "rm", "remove", "uninstall"]) \
                 or (cmd == "gem" and subcmd not in
-                    ["instal", "install", "uninstall"]):
+                    ["instal", "install", "uninstall"]) \
+                or (cmd == "mas" and subcmd not in
+                    ["purchase", "install", "uninstall"]):
             # Not install/remove command, no init.
             sys.exit(0)
 
         global_opts = []
         packages = []
         opts = {}
-        if cmd in ["gem"]:
+        if cmd == "gem":
             packages.append(args[0])
             opts[packages[0]] = args[1:]
-        elif cmd in ["pip"]:
+        elif cmd == "pip":
             pip_upgrade = False
             for v in args:
                 if v.find("/") != -1 or v.find("tar.gz") != -1 or\
@@ -1471,6 +1487,13 @@ class BrewFile:
                         opts[p_array[0]] = [p_array[1]]
                     else:
                         opts[p_array[0]] = []
+        elif cmd == "mas":
+            if subcmd in ["purchase", "install"]:
+                appstore_packages = {x.split()[0]: x
+                                     for x in self.get_appstore_list()}
+                packages = [appstore_packages[x] for x in args]
+            else:
+                packages = args
         else:
             for v in args:
                 if v.startswith("-"):
@@ -1489,7 +1512,9 @@ class BrewFile:
                 or (cmd == "cask" and subcmd
                     in ["rm", "remove", "uninstall"])
                 or (cmd == "pip" and pip_upgrade)
-                or (cmd == "gem" and subcmd in ["uninstall"])):
+                or (cmd == "gem" and subcmd in ["uninstall"])
+                or (cmd == "mas" and subcmd in ["uninstall"])
+                ):
             for p in packages:
                 input_list = "brew_input"
                 if cmd == "cask":
@@ -1500,9 +1525,16 @@ class BrewFile:
                 elif p.startswith("gem-") or cmd == "gem":
                     input_list = "gem_input"
                     p = p.replace("gem-", "")
+                elif cmd == "mas":
+                    input_list = "appstore_input"
                 is_removed = False
                 for bi in self.get(input_list):
-                    if p == bi or p == bi.split("/")[-1].replace(".rb", ""):
+                    if input_list == "appstore_input":
+                        if p.split()[0] == bi.split()[0]:
+                            self.remove_pack("appstore_input", bi)
+                            is_removed = True
+                            break
+                    elif p == bi or p == bi.split("/")[-1].replace(".rb", ""):
                         self.remove_pack(input_list, bi)
                         if input_list == "brew_input":
                             self.remove_pack("brew_input_opt", bi)
@@ -1517,7 +1549,9 @@ class BrewFile:
                     self.warn("Try 'brew file init' to clean up Brewfile")
         if (cmd in ["instal", "install", "reinstall", "pip"]
                 or (cmd == "cask" and subcmd in ["instal", "install"])
-                or (cmd == "gem" and subcmd in ["instal", "install"])):
+                or (cmd == "gem" and subcmd in ["instal", "install"])
+                or (cmd == "mas" and subcmd in ["purchase", "install"])
+                ):
             input_list = "brew_input"
             if cmd == "cask":
                 input_list = "cask_input"
@@ -1525,6 +1559,8 @@ class BrewFile:
                 input_list = "pip_input"
             elif cmd == "gem":
                 input_list = "gem_input"
+            elif cmd == "mas":
+                input_list = "appstore_input"
             for p in packages:
                 porig = p
                 psplit = p.split("/")
@@ -1561,6 +1597,8 @@ class BrewFile:
                             " " + " ".join(opts[porig]).strip()
                     else:
                         self.brewinfo.gem_input_opt[p] = ""
+                elif cmd == "mas":
+                    self.brewinfo.appstore_input.append(p)
                 else:
                     self.brewinfo.brew_input.append(p)
                     if opts[porig]:
@@ -2153,7 +2191,6 @@ class BrewFile:
 
         # Clean up App Store applications
         if self.opt["appstore"] and self.get("appstore_list"):
-            mas_flag = None
             self.banner("# Clean up App Store applications")
 
             for p in self.get("appstore_list"):
@@ -2183,9 +2220,7 @@ class BrewFile:
                 if isinput:
                     continue
 
-                if mas_flag is None:
-                    mas_flag = self.check_mas_cmd(True)
-                if identifier and mas_flag:
+                if identifier and self.check_mas_cmd(True) == 1:
                     cmd = "sudo " + self.opt["mas_cmd"] + " uninstall " \
                         + identifier
                 else:
@@ -2424,7 +2459,6 @@ class BrewFile:
 
         # App Store
         if is_mac() and self.opt["appstore"]:
-            mas_flag = None
             for p in self.get("appstore_input"):
                 if p in self.get("appstore_list"):
                     continue
@@ -2449,9 +2483,7 @@ class BrewFile:
                     continue
                 self.info("Installing " + package)
                 if identifier != "":
-                    if mas_flag is None:
-                        mas_flag = self.check_mas_cmd(True)
-                    if mas_flag == 1:
+                    if self.check_mas_cmd(True) == 1:
                         self.proc(self.opt["mas_cmd"] + " install "
                                   + identifier)
                     else:
