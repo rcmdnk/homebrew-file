@@ -1900,7 +1900,7 @@ class BrewFile:
 
         if not self.check_cask_cmd(force):
             return (False, [])
-        lines = self.proc("brew cask list", print_cmd=False, print_out=False,
+        lines = self.proc("brew list --cask", print_cmd=False, print_out=False,
                           separate_err=True, print_err=False)[1]
         packages = []
         for line in lines:
@@ -3128,7 +3128,7 @@ class BrewFile:
             if not self.opt["noupgradeatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --fetch-HEAD")
-                self.proc("brew cask upgrade")
+                self.proc("brew upgrade --cask")
             if self.opt["repo"] != "":
                 self.repomgr("pull")
             self.install()
