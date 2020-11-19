@@ -1911,7 +1911,7 @@ class BrewFile:
         return (True, packages)
 
     def get_list(self, force_appstore_list=False):
-        """Get List"""
+        """Get Installed Package List"""
 
         # Clear lists
         self.brewinfo.clear_list()
@@ -2195,6 +2195,9 @@ class BrewFile:
         if self.opt["dryrun"]:
             self.banner("# This is dry run.")
 
+        # Get installed package list
+        self.get_list()
+
         # Check up packages in the input file
         self.read_all()
         info = self.brewinfo.get_info()
@@ -2393,6 +2396,9 @@ class BrewFile:
         """Install"""
         # Reinit flag
         reinit = 0
+
+        # Get installed package list
+        self.get_list(force_appstore_list=True)
 
         # Check packages in the input file
         self.read_all()
@@ -3109,13 +3115,11 @@ class BrewFile:
 
         # Cleanup
         if self.opt["command"] == "clean":
-            self.get_list()
             self.cleanup()
             sys.exit(0)
 
         # Install
         if self.opt["command"] == "install":
-            self.get_list(force_appstore_list=True)
             self.install()
             sys.exit(0)
 
