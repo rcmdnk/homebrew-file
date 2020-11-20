@@ -1990,8 +1990,8 @@ class BrewFile:
                 self.brewinfo.set_val("appstore_list",
                                       self.get_appstore_list())
             elif self.opt["appstore"] == 2:
-                self.check_input_file()
-                self.read_all()
+                if self.brewinfo.check_file():
+                    self.read_all()
                 self.brewinfo.set_val("appstore_list",
                                       self.get("appstore_input"))
 
@@ -2024,6 +2024,15 @@ class BrewFile:
         self.brewinfo.file_list.extend(self.brewinfo.file_input)
         self.input_to_list(only_ext=True)
 
+    def input_backup(self):
+        if self.opt["backup"] != "":
+            os.rename(self.opt["input"], self.opt["backup"])
+            self.info("Old input file was moved to " + self.opt["backup"], 1)
+        else:
+            ans = self.ask_yn("Do you want to overwrite it?")
+            if not ans:
+                sys.exit(0)
+
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
 
@@ -2047,14 +2056,7 @@ class BrewFile:
                     print("git repository for Brewfile is already set as "
                           + prev_repo + ".")
 
-            if self.opt["backup"] != "":
-                ans = self.ask_yn("Do you want to overwrite it?")
-                if ans:
-                    os.rename(self.opt["input"], self.opt["backup"])
-                    self.info("Ok, old input file was moved to "
-                              + self.opt["backup"], 1)
-                else:
-                    sys.exit(0)
+            self.input_backup()
 
         # Get repository
         if self.opt["repo"] == "":
@@ -2101,15 +2103,7 @@ class BrewFile:
                           + ".")
                 else:
                     print(self.opt["input"] + " is already there.")
-                    if self.opt["backup"] != "":
-                        os.rename(self.opt["input"], self.opt["backup"])
-                    else:
-                        ans = self.ask_yn("Do you want to overwrite it?")
-                        if ans:
-                            self.info("Ok, old input file was moved to "
-                                      + self.opt["backup"], 1)
-                        else:
-                            sys.exit(0)
+                    self.input_backup()
 
         # Get installed package list
         self.get_list()
