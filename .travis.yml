@@ -112,8 +112,8 @@ script:
   - rm $brewfile
   - coverage run --parallel-mode $exe update -C -y
   - coverage run --parallel-mode $exe init -f ~/mkdirtest/Brewfile -r git://github.com/$testrepo -y
-  - echo 'file $V1${V2}$V3/$V4.$V5.test' > BrewfileEnv
-  - 'V1=X1 && V2=X2 && V3=X3 && V4=X4 && V5=X5 && test $(coverage run --parallel-mode $exe -f BrewfileEnv get_files|tr -d "\n") = "BrewfileEnvX1X2X3/X4.X5.test"'
+  - echo 'file ~/$HOSTNAME/$V1${V2}$V3${V4}/$V5.$V6.test' > BrewfileEnv
+  - 'test "$(echo $(V1=X1 V2=X2 V5=X5 V6=X6 coverage run --parallel-mode $exe -f BrewfileEnv get_files|tr "\n" " "))" = "BrewfileEnv $HOME/$HOSTNAME/X1X2/X5.X6.test"'
   # brew command checks
   - coverage run --parallel-mode $exe brew help
   - coverage run --parallel-mode $exe brew noinit list
