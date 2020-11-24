@@ -861,7 +861,7 @@ class BrewFile:
 
         # Prepare helper, need verbose first
         self.opt["verbose"] = int(
-            os.environ.get("HOMEBREW_BRWEFILE_VERBOSE", 1))
+            os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
         # Other default values
@@ -3265,7 +3265,7 @@ def main():
         "2: check for installation,"
         "but do not add to Brewfile when Apps are added.\n"
         "You can set the level by environmental variable:\n"
-        "    export HOMEBREW_BRWEFILE_APPSTORE=0")
+        "    export HOMEBREW_BREWFILE_APPSTORE=0")
 
     no_appstore_parser = argparse.ArgumentParser(add_help=False)
     no_appstore_parser.add_argument(

@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.0.5"
-__date__ = "14/Sep/2020"
+__version__ = "v8.1.0"
+__date__ = "20/Nov/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -861,7 +861,7 @@ class BrewFile:
 
         # Prepare helper, need verbose first
         self.opt["verbose"] = int(
-            os.environ.get("HOMEBREW_BRWEFILE_VERBOSE", 1))
+            os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
         # Other default values
@@ -1900,7 +1900,7 @@ class BrewFile:
 
         if not self.check_cask_cmd(force):
             return (False, [])
-        lines = self.proc("brew cask list", print_cmd=False, print_out=False,
+        lines = self.proc("brew list --cask", print_cmd=False, print_out=False,
                           separate_err=True, print_err=False)[1]
         packages = []
         for line in lines:
@@ -1911,7 +1911,7 @@ class BrewFile:
         return (True, packages)
 
     def get_list(self, force_appstore_list=False):
-        """Get List"""
+        """Get Installed Package List"""
 
         # Clear lists
         self.brewinfo.clear_list()
@@ -1990,8 +1990,8 @@ class BrewFile:
                 self.brewinfo.set_val("appstore_list",
                                       self.get_appstore_list())
             elif self.opt["appstore"] == 2:
-                self.check_input_file()
-                self.read_all()
+                if self.brewinfo.check_file():
+                    self.read_all()
                 self.brewinfo.set_val("appstore_list",
                                       self.get("appstore_input"))
 
@@ -2024,6 +2024,15 @@ class BrewFile:
         self.brewinfo.file_list.extend(self.brewinfo.file_input)
         self.input_to_list(only_ext=True)
 
+    def input_backup(self):
+        if self.opt["backup"] != "":
+            os.rename(self.opt["input"], self.opt["backup"])
+            self.info("Old input file was moved to " + self.opt["backup"], 1)
+        else:
+            ans = self.ask_yn("Do you want to overwrite it?")
+            if not ans:
+                sys.exit(0)
+
     def set_brewfile_repo(self):
         """Set Brewfile repository"""
 
@@ -2047,14 +2056,7 @@ class BrewFile:
                     print("git repository for Brewfile is already set as "
                           + prev_repo + ".")
 
-            if self.opt["backup"] != "":
-                ans = self.ask_yn("Do you want to overwrite it?")
-                if ans:
-                    os.rename(self.opt["input"], self.opt["backup"])
-                    self.info("Ok, old input file was moved to "
-                              + self.opt["backup"], 1)
-                else:
-                    sys.exit(0)
+            self.input_backup()
 
         # Get repository
         if self.opt["repo"] == "":
@@ -2101,15 +2103,7 @@ class BrewFile:
                           + ".")
                 else:
                     print(self.opt["input"] + " is already there.")
-                    if self.opt["backup"] != "":
-                        os.rename(self.opt["input"], self.opt["backup"])
-                    else:
-                        ans = self.ask_yn("Do you want to overwrite it?")
-                        if ans:
-                            self.info("Ok, old input file was moved to "
-                                      + self.opt["backup"], 1)
-                        else:
-                            sys.exit(0)
+                    self.input_backup()
 
         # Get installed package list
         self.get_list()
@@ -2194,6 +2188,9 @@ class BrewFile:
         """Clean up."""
         if self.opt["dryrun"]:
             self.banner("# This is dry run.")
+
+        # Get installed package list
+        self.get_list()
 
         # Check up packages in the input file
         self.read_all()
@@ -2393,6 +2390,9 @@ class BrewFile:
         """Install"""
         # Reinit flag
         reinit = 0
+
+        # Get installed package list
+        self.get_list(force_appstore_list=True)
 
         # Check packages in the input file
         self.read_all()
@@ -3109,13 +3109,11 @@ class BrewFile:
 
         # Cleanup
         if self.opt["command"] == "clean":
-            self.get_list()
             self.cleanup()
             sys.exit(0)
 
         # Install
         if self.opt["command"] == "install":
-            self.get_list(force_appstore_list=True)
             self.install()
             sys.exit(0)
 
@@ -3124,7 +3122,7 @@ class BrewFile:
             if not self.opt["noupgradeatupdate"]:
                 self.proc("brew update")
                 self.proc("brew upgrade --fetch-HEAD")
-                self.proc("brew cask upgrade")
+                self.proc("brew upgrade --cask")
             if self.opt["repo"] != "":
                 self.repomgr("pull")
             self.install()
@@ -3267,7 +3265,7 @@ def main():
         "2: check for installation,"
         "but do not add to Brewfile when Apps are added.\n"
         "You can set the level by environmental variable:\n"
-        "    export HOMEBREW_BRWEFILE_APPSTORE=0")
+        "    export HOMEBREW_BREWFILE_APPSTORE=0")
 
     no_appstore_parser = argparse.ArgumentParser(add_help=False)
     no_appstore_parser.add_argument(

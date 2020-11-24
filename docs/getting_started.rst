@@ -92,7 +92,7 @@ If you use GitHub, you can make it with brew-file::
 
 Give a name like ``rcmdnk/Brewfile`` (will be recognized as a GitHub repository),
 or such ``git@github.com:rcmdnk/Brewfile``.
-(or give just ``Brwefile``, if you have user name in your ``.gitconfig``.)
+(or give just ``Brewfile``, if you have user name in your ``.gitconfig``.)
 
 You can set any of other git repositories of local or other hosting sites.
 
