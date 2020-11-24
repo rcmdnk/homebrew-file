@@ -72,11 +72,11 @@ def to_num(val):
     return 0
 
 
-def expandpath(val):
-    f = os.path.expandvars(os.path.expanduser(val))
-    for h in ('$HOSTNAME', '${HOSTNAME}'):
-        f = f.replace(h, os.uname()[1])
-    return f
+def expandpath(path):
+    return re.sub(r'(?<!\\)\$(\w+|\{([^}]*)\})',
+                  lambda x: os.environ.get(x.group(2) or x.group(1), ''),
+                  os.path.expanduser(path).replace('$HOSTNAME', os.uname()[1])
+                  .replace('${HOSTNAME}', os.uname()[1])).replace('\$', '$')
 
 
 class Tee:
