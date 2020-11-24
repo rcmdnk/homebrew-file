@@ -38,6 +38,11 @@ brew () {
       fi
 
       case "$cmd" in
+        # brew file
+        file)
+          shift
+          exe="brew-file"
+          ;;
         # brew install/uninstall/tap/pip/gem
         instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
           if [ $nargs -gt 1 ];then
