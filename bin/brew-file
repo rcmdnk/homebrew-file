@@ -3298,9 +3298,10 @@ def main():
                    on_request_parser, top_packages_parser, appstore_parser,
                    no_appstore_parser, caskonly_parser, yn_parser,
                    verbose_parser]
+    formatter = argparse.RawTextHelpFormatter
     subparser_options = {
         "parents": min_parsers,
-        "formatter_class": argparse.RawTextHelpFormatter}
+        "formatter_class": formatter}
 
     # Main parser
     parser = argparse.ArgumentParser(
@@ -3310,7 +3311,7 @@ def main():
                  noupgradeatupdate_parser, repo_parser, link_parser,
                  caskonly_parser, appstore_parser, no_appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser, help_parser],
-        formatter_class=argparse.RawTextHelpFormatter,
+        formatter_class=formatter,
         description=__description__,
         epilog="Check https://homebrew-file.readthedocs.io for more details."
     )
@@ -3324,29 +3325,27 @@ def main():
     help_doc = "Execute brew command, and update BREWFILE.\n"\
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     subparsers.add_parser("brew", description=help_doc, help=help_doc,
-                          parents=min_parsers, add_help=False,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          add_help=False,
+                          **subparser_options)
     help_doc = "or dump/-i/--init\nInitialize/Update BREWFILE "\
         "with installed packages."
     subparsers.add_parser(
         "init", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     subparsers.add_parser(
         "dump",
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -s/--set_repo\nSet BREWFILE repository "\
         "(e.g. rcmdnk/Brewfile or full path to your repository)."
     subparsers.add_parser(
         "set_repo", description=help_doc, help=help_doc,
         parents=min_parsers + [repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or --set_local\nSet BREWFILE to local file."
-    subparsers.add_parser(
-        "set_local", description=help_doc, help=help_doc,
-        parents=min_parsers,
-        formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser("set_local", description=help_doc, help=help_doc,
+                          **subparser_options)
     help_doc = "Update BREWFILE from the repository."
     subparsers.add_parser("pull", description=help_doc, help=help_doc,
                           **subparser_options)
@@ -3359,10 +3358,9 @@ def main():
         "Cleanup cache (brew cleanup)\n"\
         "By default, cleanup runs as dry-run.\n"\
         "If you want to enforce cleanup, use '-C' option."
-    subparsers.add_parser(
-        "clean", description=help_doc, help=help_doc,
-        parents=min_parsers + [dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser("clean", description=help_doc, help=help_doc,
+                          parents=min_parsers + [dryrun_parser],
+                          formatter_class=formatter)
     help_doc = "or --clean_non_request.\n"\
         "Uninstall packages which were installed as dependencies \n"\
         "but parent packages of which were already uninstalled.\n"\
@@ -3371,7 +3369,7 @@ def main():
     subparsers.add_parser(
         "clean_non_request", description=help_doc, help=help_doc,
         parents=min_parsers + [dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"\
         "install,\n"\
         "init and push.\n"\
@@ -3382,33 +3380,35 @@ def main():
         "update", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, noupgradeatupdate_parser,
                                dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "or --cat\nShow contents of input files."
     subparsers.add_parser("cat", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "Check applications for Cask."
     subparsers.add_parser("casklist", description=help_doc, help=help_doc,
                           parents=[verbose_parser],
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or --test. Used for test."
     subparsers.add_parser("test", description=help_doc, help=help_doc,
-                          parents=min_parsers,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          **subparser_options)
     help_doc = "Get Brewfile's full path, including additional files."
     subparsers.add_parser("get_files", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "or --commands\nShow commands."
     subparsers.add_parser("commands", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or -h/--help\nPrint Help (this message) and exit."
     subparsers.add_parser("help", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
 
     if len(sys.argv) == 1:
         parser.print_usage()
