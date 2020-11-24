@@ -309,12 +309,6 @@ class BrewInfo:
         self.filename = filename
         self.helper = helper
 
-    def set_file(self, filename):
-        self.filename = filename
-
-    def get_file(self):
-        return self.filename
-
     def get_dir(self):
         return os.path.dirname(self.filename)
 
@@ -833,7 +827,7 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(self.get_file(), sys.stdout,
+            out = Tee(self.filename, sys.stdout,
                       self.helper.opt["verbose"] > 1)
             out.write(output)
             out.close()
@@ -841,11 +835,11 @@ fi
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
             self.helper.proc(
-                "chmod 755 %s" % self.get_file(), print_cmd=False,
+                "chmod 755 %s" % self.filename, print_cmd=False,
                 print_out=False, exit_on_err=False)
         else:
             self.helper.proc(
-                "chmod 644 %s" % self.get_file(), print_cmd=False,
+                "chmod 644 %s" % self.filename, print_cmd=False,
                 print_out=False, exit_on_err=False)
 
 
@@ -1006,7 +1000,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.set_file(self.opt["input"])
+        self.brewinfo.filename = self.opt["input"]
 
     def ask_yn(self, question):
         """Helper for yes/no."""
@@ -1099,8 +1093,12 @@ class BrewFile:
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
             else:
-                b = BrewInfo(self.helper,
-                             brewinfo.get_dir() + "/"+ f.lstrip('./'))
+                this_dir = brewinfo.get_dir()
+                if not this_dir:
+                    path_prefix = './'
+                else:
+                    path_prefix = this_dir + '/'
+                b = BrewInfo(self.helper, path_prefix + f.lstrip('./'))
             self.brewinfo_ext.append(b)
             self.read(b)
 
@@ -1111,10 +1109,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo.get_file())
+        self.banner("# Initialize " + self.brewinfo.filename)
         self.brewinfo.write()
         for b in self.brewinfo_ext:
-            self.banner("# Initialize " + b.get_file())
+            self.banner("# Initialize " + b.filename)
             b.write()
 
     def get(self, name, only_ext=False):
@@ -1192,7 +1190,7 @@ class BrewFile:
                 "Managed by "
                 "[homebrew-file](https://github.com/rcmdnk/homebrew-file).")
             f.close()
-        open(self.brewinfo.get_file(), "a").close()
+        open(self.brewinfo.filename, "a").close()
 
         if self.check_gitconfig():
             self.proc("git add -A")
@@ -1311,7 +1309,7 @@ class BrewFile:
         if not os.path.exists(self.opt["input"]):
             return
 
-        self.brewinfo.set_file(self.opt["input"])
+        self.brewinfo.filename = self.opt["input"]
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
@@ -1338,7 +1336,7 @@ class BrewFile:
                 + "/" + self.repo_name()
 
         # Set Brewfile in the repository
-        self.brewinfo.set_file(self.repo_file())
+        self.brewinfo.filename = self.repo_file()
 
         # If repository does not have a branch, make it
         if self.brewinfo.check_dir():
@@ -2121,7 +2119,7 @@ class BrewFile:
 
     def initialize_write(self):
         self.write()
-        self.banner("# You can edit " + self.brewinfo.get_file() + " with:\n"
+        self.banner("# You can edit " + self.brewinfo.filename + " with:\n"
                     "#     $ " + __prog__ + " edit")
         self.opt["initialized"] = True
 
@@ -2130,7 +2128,7 @@ class BrewFile:
 
         if not self.brewinfo.check_file():
             self.warn(
-                "Input file " + self.brewinfo.get_file() + " is not found.", 0)
+                "Input file " + self.brewinfo.filename + " is not found.", 0)
             ans = self.ask_yn(
                 "Do you want to initialize from installed packages?")
             if ans:
@@ -2139,14 +2137,14 @@ class BrewFile:
 
             self.err("Ok, please prepare brewfile", 0)
             self.err("or you can initialize "
-                     + self.brewinfo.get_file() + " with:", 0)
+                     + self.brewinfo.filename + " with:", 0)
             self.err("    $ " + __prog__ + " init", 0)
             sys.exit(1)
 
     def get_files(self, is_print=False):
         """Get Brewfiles"""
         self.read_all()
-        files = [x.get_file() for x in [self.brewinfo] + self.brewinfo_ext]
+        files = [x.filename for x in [self.brewinfo] + self.brewinfo_ext]
         if is_print:
             print("\n".join(files))
         return files
@@ -3040,7 +3038,7 @@ class BrewFile:
         print("read input:", len(self.brewinfo.brew_input))
         self.brewinfo.clear()
         print("read input cleared:", len(self.brewinfo.brew_input))
-        self.brewinfo.set_file("/test/not/correct/file/path")
+        self.brewinfo.filename = "/test/not/correct/file/path"
         self.brewinfo.read()
         self.brewinfo.check_dir()
         self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
