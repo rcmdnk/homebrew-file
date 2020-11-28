@@ -68,13 +68,8 @@ brew () {
           fi
           ;;
         *)
-          # Use brew-file directly for brew-file commands
-          if ! echo " $(echo $(command brew commands\
-              |grep -v -e "Built-in commands" -e "External commands" -e "^$")) "\
-              |grep -q -- " $1";then
-            if echo " $(brew-file commands) "|grep -q -- " $1 ";then
-              exe="brew-file"
-            fi
+          if echo " brew init dump set_repo set_local pull push clean clean_non_request casklist pip gem get_files version "|grep -q -- " $1 ";then
+            exe="brew-file"
           fi
           ;;
       esac
