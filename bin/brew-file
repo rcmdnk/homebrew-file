@@ -2225,7 +2225,7 @@ class BrewFile:
                 else:
                     identifier = ""
                     package = p
-                if re.match(".*\(\d+\.\d+.*\)$", package):
+                if re.match(r".*\(\d+\.\d+.*\)$", package):
                     package = ' '.join(package.split(' ')[:-1])
 
                 isinput = False
@@ -2236,7 +2236,7 @@ class BrewFile:
                     else:
                         i_identifier = ""
                         i_package = pi
-                    if re.match(".*\(\d+\.\d+.*\)$", i_package):
+                    if re.match(r".*\(\d+\.\d+.*\)$", i_package):
                         i_package = ' '.join(i_package.split(' ')[:-1])
                     if (identifier != "" and identifier == i_identifier) \
                             or package == i_package:
