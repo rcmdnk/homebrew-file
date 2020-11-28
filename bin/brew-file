@@ -76,7 +76,7 @@ def expandpath(path):
     return re.sub(r'(?<!\\)\$(\w+|\{([^}]*)\})',
                   lambda x: os.environ.get(x.group(2) or x.group(1), ''),
                   os.path.expanduser(path).replace('$HOSTNAME', os.uname()[1])
-                  .replace('${HOSTNAME}', os.uname()[1])).replace('\$', '$')
+                  .replace('${HOSTNAME}', os.uname()[1])).replace('\\$', '$')
 
 
 class Tee:
@@ -757,7 +757,7 @@ fi
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
-                            isfirst, False,isfirst_pack, t, cmd_tap)
+                            isfirst, False, isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
                         output += cmd_cask + self.packout(p) + "\n"
                         self.cask_list.remove(p)
@@ -1529,8 +1529,7 @@ class BrewFile:
                     in ["rm", "remove", "uninstall"])
                 or (cmd == "pip" and pip_upgrade)
                 or (cmd == "gem" and subcmd in ["uninstall"])
-                or (cmd == "mas" and subcmd in ["uninstall"])
-                ):
+                or (cmd == "mas" and subcmd in ["uninstall"])):
             for p in packages:
                 input_list = "brew_input"
                 if cmd == "cask":
@@ -1566,8 +1565,7 @@ class BrewFile:
         if (cmd in ["instal", "install", "reinstall", "pip"]
                 or (cmd == "cask" and subcmd in ["instal", "install"])
                 or (cmd == "gem" and subcmd in ["instal", "install"])
-                or (cmd == "mas" and subcmd in ["purchase", "install"])
-                ):
+                or (cmd == "mas" and subcmd in ["purchase", "install"])):
             input_list = "brew_input"
             if cmd == "cask":
                 input_list = "cask_input"
@@ -2209,7 +2207,7 @@ class BrewFile:
             add_dependncies(p)
 
         # Clean up App Store applications
-        if self.opt["appstore"] ==1 and self.get("appstore_list"):
+        if self.opt["appstore"] == 1 and self.get("appstore_list"):
             self.banner("# Clean up App Store applications")
 
             for p in self.get("appstore_list"):
@@ -2259,14 +2257,15 @@ class BrewFile:
                                 cmd += " '%s'" % a
                             continue
                     if cmd == tmpcmd:
-                        self.warn(f"Package {package} was not found: nothing to do.\n")
+                        self.warn(f"Package {package} was not found:"
+                                  "nothing to do.\n")
                         self.remove_pack("appstore_list", p)
                         continue
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                  self.proc(cmd, print_cmd=True, print_out=True,
-                            exit_on_err=False)
+                    self.proc(cmd, print_cmd=True, print_out=True,
+                              exit_on_err=False)
                 self.remove_pack("appstore_list", p)
 
         # Clean up cask packages
