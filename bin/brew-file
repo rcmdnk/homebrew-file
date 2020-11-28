@@ -1426,6 +1426,10 @@ class BrewFile:
             env["HOMEBREW_CELLAR"] = os.environ.get(
                 "HOMEBREW_CELLAR",
                 self.brew_val("cellar"))
+            if ("rm" in self.opt["args"] or "remove" in self.opt["args"]
+                    or "uninsatll" in self.opt["args"]):
+                if "--ignore-dependencies" not in self.opt["args"]:
+                    self.opt["args"].append("--ignore-dependencies")
         elif cmd == "gem":
             exe = ["brew-gem"]
             self.opt["args"].pop(0)
@@ -1433,6 +1437,10 @@ class BrewFile:
             if self.opt["homebrew_ruby"] and\
                     "--homebrew-ruby" not in self.opt["args"]:
                 self.opt["args"].append("--homebrew-ruby")
+            if ("rm" in self.opt["args"] or "remove" in self.opt["args"]
+                    or "uninsatll" in self.opt["args"]):
+                if "--ignore-dependencies" not in self.opt["args"]:
+                    self.opt["args"].append("--ignore-dependencies")
         elif cmd == "mas":
             exe = ["mas"]
             self.opt["args"].pop(0)

@@ -47,14 +47,6 @@ brew () {
         instal|install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
           if [ $nargs -gt 1 ];then
             exe="brew-file brew"
-            if [ "$cmd" = "rm" ] || [ "$cmd" = "remove" ] || [ "$cmd" = "uninstall" ];then
-              if echo "$@"|grep -q -e "pip-" -e "gem-";then
-                if ! echo "$@"|grep -q -- "--ignore-dependencies";then
-                  shift
-                  exe="brew-file brew $cmd --ignore-dependencies"
-                fi
-              fi
-            fi
           fi
           ;;
         # brew cask install/uninstall
