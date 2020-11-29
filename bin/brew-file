@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.1.1"
-__date__ = "25/Nov/2020"
+__version__ = "v8.2.0"
+__date__ = "29/Nov/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -888,7 +888,8 @@ class BrewFile:
         self.opt["mas_formula"] = "mas"
         self.opt["pip_pack"] = "brew-pip"
         self.opt["gem_pack"] = "brew-gem"
-        self.opt["my_editor"] = os.environ.get("EDITOR", "vim")
+        self.opt["my_editor"] = os.environ.get(
+            "HOMEBREW_BREWFILE_EDITOR", os.environ.get("EDITOR", "vim"))
         self.opt["is_brew_cmd"] = False
         self.opt["brew_cmd"] = ""
         self.opt["is_cask_cmd"] = False
