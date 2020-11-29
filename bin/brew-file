@@ -3324,7 +3324,9 @@ def main():
     subparsers = parser.add_subparsers(
         title="subcommands", metavar="[command]", help="", dest="command")
 
-    help_doc = "Install packages in BREWFILE."
+    help_doc = "Install packages in BREWFILE if no <package> is given.\n"\
+        "If <package> is given, the package is installed and it is added\n"\
+        "in BREWFILE."
     subparsers.add_parser("install", description=help_doc, help=help_doc,
                           **subparser_options)
     help_doc = "Execute brew command, and update BREWFILE.\n"\
@@ -3447,6 +3449,10 @@ def main():
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
     args.update({"args": args_tmp})
+    if args['command'] in ('install') and args['args']:
+        cmd = args['command']
+        args['command'] = 'brew'
+        args['args'].insert(0, cmd)
 
     b.set_args(**args)
 

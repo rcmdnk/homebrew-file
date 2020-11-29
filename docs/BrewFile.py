@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.1.0"
-__date__ = "20/Nov/2020"
+__version__ = "v8.1.1"
+__date__ = "25/Nov/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -72,11 +72,11 @@ def to_num(val):
     return 0
 
 
-def expandpath(val):
-    f = os.path.expandvars(os.path.expanduser(val))
-    for h in ('$HOSTNAME', '${HOSTNAME}'):
-        f = f.replace(h, os.uname()[1])
-    return f
+def expandpath(path):
+    return re.sub(r'(?<!\\)\$(\w+|\{([^}]*)\})',
+                  lambda x: os.environ.get(x.group(2) or x.group(1), ''),
+                  os.path.expanduser(path).replace('$HOSTNAME', os.uname()[1])
+                  .replace('${HOSTNAME}', os.uname()[1])).replace('\\$', '$')
 
 
 class Tee:
@@ -308,12 +308,6 @@ class BrewInfo:
         }
         self.filename = filename
         self.helper = helper
-
-    def set_file(self, filename):
-        self.filename = filename
-
-    def get_file(self):
-        return self.filename
 
     def get_dir(self):
         return os.path.dirname(self.filename)
@@ -763,7 +757,7 @@ fi
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
-                            isfirst, False,isfirst_pack, t, cmd_tap)
+                            isfirst, False, isfirst_pack, t, cmd_tap)
                         isfirst = isfirst_pack = False
                         output += cmd_cask + self.packout(p) + "\n"
                         self.cask_list.remove(p)
@@ -833,7 +827,7 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(self.get_file(), sys.stdout,
+            out = Tee(self.filename, sys.stdout,
                       self.helper.opt["verbose"] > 1)
             out.write(output)
             out.close()
@@ -841,11 +835,11 @@ fi
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
             self.helper.proc(
-                "chmod 755 %s" % self.get_file(), print_cmd=False,
+                "chmod 755 %s" % self.filename, print_cmd=False,
                 print_out=False, exit_on_err=False)
         else:
             self.helper.proc(
-                "chmod 644 %s" % self.get_file(), print_cmd=False,
+                "chmod 644 %s" % self.filename, print_cmd=False,
                 print_out=False, exit_on_err=False)
 
 
@@ -1006,7 +1000,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.set_file(self.opt["input"])
+        self.brewinfo.filename = self.opt["input"]
 
     def ask_yn(self, question):
         """Helper for yes/no."""
@@ -1099,8 +1093,12 @@ class BrewFile:
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
             else:
-                b = BrewInfo(self.helper,
-                             brewinfo.get_dir() + "/"+ f.lstrip('./'))
+                this_dir = brewinfo.get_dir()
+                if not this_dir:
+                    path_prefix = './'
+                else:
+                    path_prefix = this_dir + '/'
+                b = BrewInfo(self.helper, path_prefix + f.lstrip('./'))
             self.brewinfo_ext.append(b)
             self.read(b)
 
@@ -1111,10 +1109,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo.get_file())
+        self.banner("# Initialize " + self.brewinfo.filename)
         self.brewinfo.write()
         for b in self.brewinfo_ext:
-            self.banner("# Initialize " + b.get_file())
+            self.banner("# Initialize " + b.filename)
             b.write()
 
     def get(self, name, only_ext=False):
@@ -1192,7 +1190,7 @@ class BrewFile:
                 "Managed by "
                 "[homebrew-file](https://github.com/rcmdnk/homebrew-file).")
             f.close()
-        open(self.brewinfo.get_file(), "a").close()
+        open(self.brewinfo.filename, "a").close()
 
         if self.check_gitconfig():
             self.proc("git add -A")
@@ -1311,7 +1309,7 @@ class BrewFile:
         if not os.path.exists(self.opt["input"]):
             return
 
-        self.brewinfo.set_file(self.opt["input"])
+        self.brewinfo.filename = self.opt["input"]
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
@@ -1338,7 +1336,7 @@ class BrewFile:
                 + "/" + self.repo_name()
 
         # Set Brewfile in the repository
-        self.brewinfo.set_file(self.repo_file())
+        self.brewinfo.filename = self.repo_file()
 
         # If repository does not have a branch, make it
         if self.brewinfo.check_dir():
@@ -1428,6 +1426,10 @@ class BrewFile:
             env["HOMEBREW_CELLAR"] = os.environ.get(
                 "HOMEBREW_CELLAR",
                 self.brew_val("cellar"))
+            if ("rm" in self.opt["args"] or "remove" in self.opt["args"]
+                    or "uninsatll" in self.opt["args"]):
+                if "--ignore-dependencies" not in self.opt["args"]:
+                    self.opt["args"].append("--ignore-dependencies")
         elif cmd == "gem":
             exe = ["brew-gem"]
             self.opt["args"].pop(0)
@@ -1435,6 +1437,10 @@ class BrewFile:
             if self.opt["homebrew_ruby"] and\
                     "--homebrew-ruby" not in self.opt["args"]:
                 self.opt["args"].append("--homebrew-ruby")
+            if ("rm" in self.opt["args"] or "remove" in self.opt["args"]
+                    or "uninsatll" in self.opt["args"]):
+                if "--ignore-dependencies" not in self.opt["args"]:
+                    self.opt["args"].append("--ignore-dependencies")
         elif cmd == "mas":
             exe = ["mas"]
             self.opt["args"].pop(0)
@@ -1531,8 +1537,7 @@ class BrewFile:
                     in ["rm", "remove", "uninstall"])
                 or (cmd == "pip" and pip_upgrade)
                 or (cmd == "gem" and subcmd in ["uninstall"])
-                or (cmd == "mas" and subcmd in ["uninstall"])
-                ):
+                or (cmd == "mas" and subcmd in ["uninstall"])):
             for p in packages:
                 input_list = "brew_input"
                 if cmd == "cask":
@@ -1568,8 +1573,7 @@ class BrewFile:
         if (cmd in ["instal", "install", "reinstall", "pip"]
                 or (cmd == "cask" and subcmd in ["instal", "install"])
                 or (cmd == "gem" and subcmd in ["instal", "install"])
-                or (cmd == "mas" and subcmd in ["purchase", "install"])
-                ):
+                or (cmd == "mas" and subcmd in ["purchase", "install"])):
             input_list = "brew_input"
             if cmd == "cask":
                 input_list = "cask_input"
@@ -2121,7 +2125,7 @@ class BrewFile:
 
     def initialize_write(self):
         self.write()
-        self.banner("# You can edit " + self.brewinfo.get_file() + " with:\n"
+        self.banner("# You can edit " + self.brewinfo.filename + " with:\n"
                     "#     $ " + __prog__ + " edit")
         self.opt["initialized"] = True
 
@@ -2130,7 +2134,7 @@ class BrewFile:
 
         if not self.brewinfo.check_file():
             self.warn(
-                "Input file " + self.brewinfo.get_file() + " is not found.", 0)
+                "Input file " + self.brewinfo.filename + " is not found.", 0)
             ans = self.ask_yn(
                 "Do you want to initialize from installed packages?")
             if ans:
@@ -2139,14 +2143,14 @@ class BrewFile:
 
             self.err("Ok, please prepare brewfile", 0)
             self.err("or you can initialize "
-                     + self.brewinfo.get_file() + " with:", 0)
+                     + self.brewinfo.filename + " with:", 0)
             self.err("    $ " + __prog__ + " init", 0)
             sys.exit(1)
 
     def get_files(self, is_print=False):
         """Get Brewfiles"""
         self.read_all()
-        files = [x.get_file() for x in [self.brewinfo] + self.brewinfo_ext]
+        files = [x.filename for x in [self.brewinfo] + self.brewinfo_ext]
         if is_print:
             print("\n".join(files))
         return files
@@ -2211,7 +2215,7 @@ class BrewFile:
             add_dependncies(p)
 
         # Clean up App Store applications
-        if self.opt["appstore"] ==1 and self.get("appstore_list"):
+        if self.opt["appstore"] == 1 and self.get("appstore_list"):
             self.banner("# Clean up App Store applications")
 
             for p in self.get("appstore_list"):
@@ -2221,7 +2225,7 @@ class BrewFile:
                 else:
                     identifier = ""
                     package = p
-                if re.match(".*\(\d+\.\d+.*\)$", package):
+                if re.match(r".*\(\d+\.\d+.*\)$", package):
                     package = ' '.join(package.split(' ')[:-1])
 
                 isinput = False
@@ -2232,7 +2236,7 @@ class BrewFile:
                     else:
                         i_identifier = ""
                         i_package = pi
-                    if re.match(".*\(\d+\.\d+.*\)$", i_package):
+                    if re.match(r".*\(\d+\.\d+.*\)$", i_package):
                         i_package = ' '.join(i_package.split(' ')[:-1])
                     if (identifier != "" and identifier == i_identifier) \
                             or package == i_package:
@@ -2261,14 +2265,15 @@ class BrewFile:
                                 cmd += " '%s'" % a
                             continue
                     if cmd == tmpcmd:
-                        self.warn(f"Package {package} was not found: nothing to do.\n")
+                        self.warn(f"Package {package} was not found:"
+                                  "nothing to do.\n")
                         self.remove_pack("appstore_list", p)
                         continue
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                  self.proc(cmd, print_cmd=True, print_out=True,
-                            exit_on_err=False)
+                    self.proc(cmd, print_cmd=True, print_out=True,
+                              exit_on_err=False)
                 self.remove_pack("appstore_list", p)
 
         # Clean up cask packages
@@ -3040,7 +3045,7 @@ class BrewFile:
         print("read input:", len(self.brewinfo.brew_input))
         self.brewinfo.clear()
         print("read input cleared:", len(self.brewinfo.brew_input))
-        self.brewinfo.set_file("/test/not/correct/file/path")
+        self.brewinfo.filename = "/test/not/correct/file/path"
         self.brewinfo.read()
         self.brewinfo.check_dir()
         self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
@@ -3298,9 +3303,10 @@ def main():
                    on_request_parser, top_packages_parser, appstore_parser,
                    no_appstore_parser, caskonly_parser, yn_parser,
                    verbose_parser]
+    formatter = argparse.RawTextHelpFormatter
     subparser_options = {
         "parents": min_parsers,
-        "formatter_class": argparse.RawTextHelpFormatter}
+        "formatter_class": formatter}
 
     # Main parser
     parser = argparse.ArgumentParser(
@@ -3310,7 +3316,7 @@ def main():
                  noupgradeatupdate_parser, repo_parser, link_parser,
                  caskonly_parser, appstore_parser, no_appstore_parser,
                  dryrun_parser, yn_parser, verbose_parser, help_parser],
-        formatter_class=argparse.RawTextHelpFormatter,
+        formatter_class=formatter,
         description=__description__,
         epilog="Check https://homebrew-file.readthedocs.io for more details."
     )
@@ -3318,35 +3324,35 @@ def main():
     subparsers = parser.add_subparsers(
         title="subcommands", metavar="[command]", help="", dest="command")
 
-    help_doc = "Install packages in BREWFILE."
+    help_doc = "Install packages in BREWFILE if no <package> is given.\n"\
+        "If <package> is given, the package is installed and it is added\n"\
+        "in BREWFILE."
     subparsers.add_parser("install", description=help_doc, help=help_doc,
                           **subparser_options)
     help_doc = "Execute brew command, and update BREWFILE.\n"\
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     subparsers.add_parser("brew", description=help_doc, help=help_doc,
-                          parents=min_parsers, add_help=False,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          add_help=False,
+                          **subparser_options)
     help_doc = "or dump/-i/--init\nInitialize/Update BREWFILE "\
         "with installed packages."
     subparsers.add_parser(
         "init", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     subparsers.add_parser(
         "dump",
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -s/--set_repo\nSet BREWFILE repository "\
         "(e.g. rcmdnk/Brewfile or full path to your repository)."
     subparsers.add_parser(
         "set_repo", description=help_doc, help=help_doc,
         parents=min_parsers + [repo_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or --set_local\nSet BREWFILE to local file."
-    subparsers.add_parser(
-        "set_local", description=help_doc, help=help_doc,
-        parents=min_parsers,
-        formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser("set_local", description=help_doc, help=help_doc,
+                          **subparser_options)
     help_doc = "Update BREWFILE from the repository."
     subparsers.add_parser("pull", description=help_doc, help=help_doc,
                           **subparser_options)
@@ -3359,10 +3365,9 @@ def main():
         "Cleanup cache (brew cleanup)\n"\
         "By default, cleanup runs as dry-run.\n"\
         "If you want to enforce cleanup, use '-C' option."
-    subparsers.add_parser(
-        "clean", description=help_doc, help=help_doc,
-        parents=min_parsers + [dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+    subparsers.add_parser("clean", description=help_doc, help=help_doc,
+                          parents=min_parsers + [dryrun_parser],
+                          formatter_class=formatter)
     help_doc = "or --clean_non_request.\n"\
         "Uninstall packages which were installed as dependencies \n"\
         "but parent packages of which were already uninstalled.\n"\
@@ -3371,7 +3376,7 @@ def main():
     subparsers.add_parser(
         "clean_non_request", description=help_doc, help=help_doc,
         parents=min_parsers + [dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"\
         "install,\n"\
         "init and push.\n"\
@@ -3382,33 +3387,35 @@ def main():
         "update", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, noupgradeatupdate_parser,
                                dryrun_parser],
-        formatter_class=argparse.RawTextHelpFormatter)
+        formatter_class=formatter)
     help_doc = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "or --cat\nShow contents of input files."
     subparsers.add_parser("cat", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "Check applications for Cask."
     subparsers.add_parser("casklist", description=help_doc, help=help_doc,
                           parents=[verbose_parser],
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or --test. Used for test."
     subparsers.add_parser("test", description=help_doc, help=help_doc,
-                          parents=min_parsers,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          **subparser_options)
     help_doc = "Get Brewfile's full path, including additional files."
     subparsers.add_parser("get_files", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          parents=[file_parser],
+                          formatter_class=formatter)
     help_doc = "or --commands\nShow commands."
     subparsers.add_parser("commands", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
     help_doc = "or -h/--help\nPrint Help (this message) and exit."
     subparsers.add_parser("help", description=help_doc, help=help_doc,
-                          formatter_class=argparse.RawTextHelpFormatter)
+                          formatter_class=formatter)
 
     if len(sys.argv) == 1:
         parser.print_usage()
@@ -3442,6 +3449,10 @@ def main():
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
     args.update({"args": args_tmp})
+    if args['command'] in ('install') and args['args']:
+        cmd = args['command']
+        args['command'] = 'brew'
+        args['args'].insert(0, cmd)
 
     b.set_args(**args)
 

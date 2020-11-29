@@ -10,15 +10,15 @@ Help message of brew-file:
                      [--caskonly] [--appstore APPSTORE] [--no_appstore] [-C] [-y]
                      [-V VERBOSE] [-h]
                      [command] ...
-    
+
     Brew-file: Manager for packages of Homebrew
     https://github.com/rcmdnk/homebrew-file
-    
+
     requirement: Python 3.7 or later
-    
+
     optional arguments:
       -f INPUT, --file INPUT
-                            Set input file (default: /Users/kaneda.michiru/.config/brewfile/Brewfile).
+                            Set input file (default: ~/.config/brewfile/Brewfile).
                             You can set input file by environmental variable,
                             HOMEBREW_BREWFILE, like:
                                 export HOMEBREW_BREWFILE=~/.brewfile
@@ -66,10 +66,12 @@ Help message of brew-file:
       -V VERBOSE, --verbose VERBOSE
                             Verbose level 0/1/2
       -h, --help            Print Help (this message) and exit.
-    
+
     subcommands:
       [command]
-        install             Install packages in BREWFILE.
+        install             Install packages in BREWFILE if no <package> is given.
+                            If <package> is given, the package is installed and it is added
+                            in BREWFILE.
         brew                Execute brew command, and update BREWFILE.
                             Use 'brew noinit <brew command>' to suppress Brewfile initialization.
         init                or dump/-i/--init
@@ -111,5 +113,5 @@ Help message of brew-file:
                             Show version.
         help                or -h/--help
                             Print Help (this message) and exit.
-    
+
     Check https://homebrew-file.readthedocs.io for more details.
