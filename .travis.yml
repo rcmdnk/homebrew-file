@@ -2,7 +2,7 @@ language: objective-c
 os: osx
 # xcode11.2 for macOS 10.14
 # [Building an Objective-C Project - Travis CI](https://docs.travis-ci.com/user/languages/objective-c/)
-osx_image: xcode11.2
+osx_image: xcode12.2
 # Python version is not available for OSX
 # [Python runtime is not yet available on OS X · Issue #2312 · travis-ci/travis-ci](https://github.com/travis-ci/travis-ci/issues/2312)
 #language: python
