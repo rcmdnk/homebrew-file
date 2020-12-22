@@ -43,7 +43,7 @@ install:
   - testrepodir=${testaccount}_${testreponame}
   - testrepofulldir=$CONFIGDIR/$testrepodir
   - testfile=$testrepofulldir/Brewfile
-  - brew list > brewlist.orig
+  - brew list --formula > brewlist.orig
   - brew install rcmdnk/file/brew-file
   - cd ../
   - echo $TRAVIS_PULL_REQUEST
@@ -87,7 +87,7 @@ install:
   - 'brew rm numpy || :'
   - 'brew rm maven || :'
   - 'brew rm carthage || :'
-  - 'brew cask rm java || :'
+  - 'brew rm java || :'
   - rm -rf /usr/local/Caskroom/java/
 before_script:
   - installed_brew=$(which brew-file)
@@ -101,10 +101,10 @@ script:
   - coverage run --parallel-mode $exe help
   - coverage run --parallel-mode $exe commands
   - 'coverage run --parallel-mode $exe || :'
-  - coverage run --parallel-mode $exe brew list >/dev/null
+  - coverage run --parallel-mode $exe brew list --formula >/dev/null
   - mkdir -p $(dirname "$brewfile")
   - touch "$brewfile"
-  - brew list
+  - brew list --formula
   - coverage run --parallel-mode $exe init -y
   - coverage run --parallel-mode $exe cat
   - coverage run --parallel-mode $exe update -y -V 2 # better to use verbose mode, because the update takes so long time that travis will end up with no output error if no output is written out at update...
@@ -136,14 +136,14 @@ script:
   - coverage run --parallel-mode $exe brew untap rcmdnk/mytest
   - coverage run --parallel-mode $exe brew install rcmdnk/mytest/mytest2 --HEAD
   - 'coverage run --parallel-mode $exe brew untap rcmdnk/notexist || :'
-  - coverage run --parallel-mode $exe brew cask install appcleaner
-  - coverage run --parallel-mode $exe brew cask install appcleaner
-  - coverage run --parallel-mode $exe brew cask rm appcleaner
-  - command brew cask install appcleaner
-  - coverage run --parallel-mode $exe brew cask rm appcleaner
+  - coverage run --parallel-mode $exe brew install appcleaner
+  - coverage run --parallel-mode $exe brew install appcleaner
+  - coverage run --parallel-mode $exe brew rm appcleaner
+  - command brew install appcleaner
+  - coverage run --parallel-mode $exe brew rm appcleaner
   - coverage run --parallel-mode $exe brew pip -h
   - coverage run --parallel-mode $exe brew pip pep8
-  - coverage run --parallel-mode $exe brew list
+  - coverage run --parallel-mode $exe brew list --formula
   - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies pip-pep8
   - coverage run --parallel-mode $exe brew pip -u -v django==1.2 >/dev/null
   - coverage run --parallel-mode $exe brew rm brew-pip
@@ -155,9 +155,9 @@ script:
 #  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-ruby-prof
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
-  - coverage run --parallel-mode $exe brew cask install firefox
+  - coverage run --parallel-mode $exe brew install firefox
   - coverage run --parallel-mode $exe brew install macvim  # Application installed by brew command, instead of cask
-  - coverage run --parallel-mode $exe brew cask list
+  - coverage run --parallel-mode $exe brew list
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
   - coverage run --parallel-mode $exe brew untap homebrew/cask
@@ -192,7 +192,7 @@ script:
   - echo $TRAVIS_PULL_REQUEST
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ];then coverage run --parallel-mode $exe update -y; fi'
     #  - coverage run --parallel-mode $exe brew rm wget
-  - command brew cask install google-chrome
+  - command brew install google-chrome
   - coverage run --parallel-mode $exe casklist -V 2
   - cp Brewfile $testfile
   - coverage run --parallel-mode $exe brew untap rcmdnk/rcmdnkcask
@@ -203,7 +203,7 @@ script:
   - coverage run --parallel-mode $exe install --no_appstore -F brewdler
   - echo "appstore 'KeyNotes'" >> $testfile
   - echo "file 'BrewfileExt'" >> $testfile
-  - coverage run --parallel-mode $exe -F brewdler brew cask uninstall google-chrome
+  - coverage run --parallel-mode $exe -F brewdler brew uninstall google-chrome
   - cat "$testrepofulldir/Brewfile"
   # command format tests
   - coverage run --parallel-mode $exe init -F command -y -V 2
@@ -216,13 +216,13 @@ script:
   - echo "brew bash" >> $testfile
   - while read p;do echo "brew $p" >> $testfile;done < brewlist.orig
   - coverage run --parallel-mode $exe clean
-  - coverage run --parallel-mode $exe brew cask list
+  - coverage run --parallel-mode $exe brew list
   - $exe get_files
   - cat $($exe get_files)
-  - brew list
+  - brew list --formula
   - coverage run --parallel-mode $exe clean -C -V 2
   - coverage run --parallel-mode $exe init -y -V 2
-  - coverage run --parallel-mode $exe brew cask install firefox
+  - coverage run --parallel-mode $exe brew install firefox
   - coverage run --parallel-mode $exe clean -C
   # Wrong command test
   - echo "wrong command" > $testfile
@@ -233,7 +233,7 @@ script:
   # Test with brew-wrap
   - source $(brew --prefix)/etc/brew-wrap
   - type brew
-  - brew list
+  - brew list --formula
   - brew install hub
   - brew noinit install stow
   # send coverage result to coveralls
