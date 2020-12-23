@@ -116,7 +116,7 @@ script:
   - 'test "$(echo $(V1=X1 V2=X2 V5=X5 V6=X6 coverage run --parallel-mode $exe -f BrewfileEnv get_files|tr "\n" " "))" = "BrewfileEnv $HOME/$HOSTNAME/X1X2/X5.X6.test"'
   # brew command checks
   - coverage run --parallel-mode $exe brew help
-  - coverage run --parallel-mode $exe brew noinit list
+  - coverage run --parallel-mode $exe brew noinit list --formula
   - coverage run --parallel-mode $exe brew info bash
     #  - coverage run --parallel-mode $exe brew install wget --HEAD --with-iri
   - coverage run --parallel-mode $exe -i -y -V 0
@@ -157,7 +157,7 @@ script:
   # Cask tests
   - coverage run --parallel-mode $exe brew install firefox
   - coverage run --parallel-mode $exe brew install macvim  # Application installed by brew command, instead of cask
-  - coverage run --parallel-mode $exe brew list
+  - coverage run --parallel-mode $exe brew list --formula
   - coverage run --parallel-mode $exe edit
   - coverage run --parallel-mode $exe casklist -V 2
   - coverage run --parallel-mode $exe brew untap homebrew/cask
@@ -216,7 +216,7 @@ script:
   - echo "brew bash" >> $testfile
   - while read p;do echo "brew $p" >> $testfile;done < brewlist.orig
   - coverage run --parallel-mode $exe clean
-  - coverage run --parallel-mode $exe brew list
+  - coverage run --parallel-mode $exe brew list --formula
   - $exe get_files
   - cat $($exe get_files)
   - brew list --formula
