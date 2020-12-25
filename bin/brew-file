@@ -1483,7 +1483,7 @@ class BrewFile:
         # with same `brew install` command
         # Then, need to check the package is Formula or Cask
         # It may add similar delays as full initialization...
-        self.initialize()
+        self.initialize(check=False)
 
         #global_opts = []
         #packages = []
@@ -2063,7 +2063,7 @@ class BrewFile:
     def set_brewfile_local(self):
         """Set Brewfile to local file"""
         self.opt["repo"] = ""
-        self.initialize(False, False)
+        self.initialize(check=False, check_input=False)
 
     def initialize(self, check=True, check_input=True):
         """Initialize Brewfile"""
@@ -2113,7 +2113,7 @@ class BrewFile:
             ans = self.ask_yn(
                 "Do you want to initialize from installed packages?")
             if ans:
-                self.initialize(False)
+                self.initialize(check=False)
                 return
 
             self.err("Ok, please prepare brewfile", 0)
@@ -3103,7 +3103,7 @@ class BrewFile:
             self.install()
             if not self.opt["dryrun"]:
                 self.cleanup()
-            self.initialize(False)
+            self.initialize(check=False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
             sys.exit(0)
