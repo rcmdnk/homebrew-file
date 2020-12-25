@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.3.1"
-__date__ = "23/Dec/2020"
+__version__ = "v8.3.2"
+__date__ = "25/Dec/2020"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1479,179 +1479,185 @@ class BrewFile:
             # Not install/remove command, no init.
             sys.exit(0)
 
-        global_opts = []
-        packages = []
-        opts = {}
-        if cmd == "gem":
-            packages.append(args[0])
-            opts[packages[0]] = args[1:]
-        elif cmd == "pip":
-            pip_upgrade = False
-            for v in args:
-                if v.find("/") != -1 or v.find("tar.gz") != -1 or\
-                        v.find(".zip") != -1:
-                    # lock packages
-                    pass
-                elif v in ["-h", "--help", "--version"]:
-                    pass
-                elif v in ["-u", "--upgrade"]:
-                    pip_upgrade = True
-                elif v in ["-k", "--keg-only", "-v", "--verbose"]:
-                    pass
-                elif not v.startswith("-"):
-                    p_array = v.split("=")
-                    packages.append(p_array[0])
-                    if len(p_array) > 1:
-                        opts[p_array[0]] = [p_array[1]]
-                    else:
-                        opts[p_array[0]] = []
-        elif cmd == "mas":
-            if subcmd in ["purchase", "install"]:
-                appstore_packages = {x.split()[0]: x
-                                     for x in self.get_appstore_list()}
-                packages = [appstore_packages[x] for x in args]
-            else:
-                packages = args
-        else:
-            for v in args:
-                if v.startswith("-"):
-                    if not packages:
-                        global_opts.append(v)
-                    else:
-                        opts[packages[-1]].append(v)
-                else:
-                    packages.append(v)
-                    opts[packages[-1]] = []
+        # Use full initialize as brew 2.7.0 can install both Formula and Cask
+        # with same `brew install` command
+        # Then, need to check the package is Formula or Cask
+        # It may add similar delays as full initialization...
+        self.initialize()
 
-        if self.brewinfo.check_file():
-            self.read_all()
+        #global_opts = []
+        #packages = []
+        #opts = {}
+        #if cmd == "gem":
+        #    packages.append(args[0])
+        #    opts[packages[0]] = args[1:]
+        #elif cmd == "pip":
+        #    pip_upgrade = False
+        #    for v in args:
+        #        if v.find("/") != -1 or v.find("tar.gz") != -1 or\
+        #                v.find(".zip") != -1:
+        #            # lock packages
+        #            pass
+        #        elif v in ["-h", "--help", "--version"]:
+        #            pass
+        #        elif v in ["-u", "--upgrade"]:
+        #            pip_upgrade = True
+        #        elif v in ["-k", "--keg-only", "-v", "--verbose"]:
+        #            pass
+        #        elif not v.startswith("-"):
+        #            p_array = v.split("=")
+        #            packages.append(p_array[0])
+        #            if len(p_array) > 1:
+        #                opts[p_array[0]] = [p_array[1]]
+        #            else:
+        #                opts[p_array[0]] = []
+        #elif cmd == "mas":
+        #    if subcmd in ["purchase", "install"]:
+        #        appstore_packages = {x.split()[0]: x
+        #                             for x in self.get_appstore_list()}
+        #        packages = [appstore_packages[x] for x in args]
+        #    else:
+        #        packages = args
+        #else:
+        #    for v in args:
+        #        if v.startswith("-"):
+        #            if not packages:
+        #                global_opts.append(v)
+        #            else:
+        #                opts[packages[-1]].append(v)
+        #        else:
+        #            packages.append(v)
+        #            opts[packages[-1]] = []
 
-        if (cmd in ["rm", "remove", "uninstall", "reinstall"]
-                or (cmd == "cask" and subcmd
-                    in ["rm", "remove", "uninstall"])
-                or (cmd == "pip" and pip_upgrade)
-                or (cmd == "gem" and subcmd in ["uninstall"])
-                or (cmd == "mas" and subcmd in ["uninstall"])):
-            for p in packages:
-                input_list = "brew_input"
-                if cmd == "cask":
-                    input_list = "cask_input"
-                elif p.startswith("pip-") or cmd == "pip":
-                    input_list = "pip_input"
-                    p = p.replace("pip-", "")
-                elif p.startswith("gem-") or cmd == "gem":
-                    input_list = "gem_input"
-                    p = p.replace("gem-", "")
-                elif cmd == "mas":
-                    input_list = "appstore_input"
-                is_removed = False
-                for bi in self.get(input_list):
-                    if input_list == "appstore_input":
-                        if p.split()[0] == bi.split()[0]:
-                            self.remove_pack("appstore_input", bi)
-                            is_removed = True
-                            break
-                    elif p == bi or p == bi.split("/")[-1].replace(".rb", ""):
-                        self.remove_pack(input_list, bi)
-                        if input_list == "brew_input":
-                            self.remove_pack("brew_input_opt", bi)
-                        elif input_list == "pip_input":
-                            self.remove_pack("pip_input_opt", bi)
-                        elif input_list == "gem_input":
-                            self.remove_pack("gem_input_opt", bi)
-                        is_removed = True
-                        break
-                if cmd not in ["reinstall", "pip"] and not is_removed:
-                    self.warn(p + " is not in Brewfile.")
-                    self.warn("Try 'brew file init' to clean up Brewfile")
-        if (cmd in ["instal", "install", "reinstall", "pip"]
-                or (cmd == "cask" and subcmd in ["instal", "install"])
-                or (cmd == "gem" and subcmd in ["instal", "install"])
-                or (cmd == "mas" and subcmd in ["purchase", "install"])):
-            input_list = "brew_input"
-            if cmd == "cask":
-                input_list = "cask_input"
-            elif cmd == "pip":
-                input_list = "pip_input"
-            elif cmd == "gem":
-                input_list = "gem_input"
-            elif cmd == "mas":
-                input_list = "appstore_input"
-            for p in packages:
-                porig = p
-                psplit = p.split("/")
-                t = ""
-                if psplit:
-                    if len(psplit) == 3 and not p.startswith("http") and\
-                            not p.startswith("ftp") and not p.startswith("/"):
-                        p = psplit[-1]
-                        t = "/".join(psplit[:-1])
-                    else:
-                        t = "direct"
-                if p in self.get(input_list) or\
-                        p.split("/")[-1].replace(".rb", "")\
-                        in self.get(input_list):
-                    self.warn(p + " is already in Brewfile.")
-                    self.warn("Do 'brew file init' to clean up Brewfile")
-                    continue
-                if cmd == "cask":
-                    self.brewinfo.cask_input.append(p)
-                    self.brewinfo.cask_input.sort()
-                elif cmd == "pip":
-                    self.brewinfo.pip_input.append(p)
-                    self.brewinfo.pip_input.sort()
-                    if opts[porig]:
-                        self.brewinfo.pip_input_opt[p] =\
-                            " " + " ".join(opts[porig]).strip()
-                    else:
-                        self.brewinfo.pip_input_opt[p] = ""
-                elif cmd == "gem":
-                    self.brewinfo.gem_input.append(p)
-                    self.brewinfo.gem_input.sort()
-                    if opts[porig]:
-                        self.brewinfo.gem_input_opt[p] =\
-                            " " + " ".join(opts[porig]).strip()
-                    else:
-                        self.brewinfo.gem_input_opt[p] = ""
-                elif cmd == "mas":
-                    self.brewinfo.appstore_input.append(p)
-                else:
-                    self.brewinfo.brew_input.append(p)
-                    if opts[porig]:
-                        self.brewinfo.brew_input_opt[p] =\
-                            " " + " ".join(opts[porig]).strip()
-                    else:
-                        self.brewinfo.brew_input_opt[p] = ""
-                    for p_dep in self.proc(
-                            "brew deps " + p, print_cmd=False,
-                            print_out=False)[1]:
-                        if p_dep not in self.get(input_list) \
-                                and (not(self.opt["leaves"]
-                                         and self.opt["on_request"])
-                                     or p_dep in
-                                     self.opt["top_packages"].split(",")):
-                            self.brewinfo.brew_input.append(p_dep)
-                            self.brewinfo.brew_input_opt[p_dep] = ""
-                    self.brewinfo.brew_input.sort()
-                if t != "" and t not in self.get("tap_input"):
-                    self.brewinfo.tap_input.append(t)
-                    self.brewinfo.tap_input.sort()
-        elif cmd == "tap":
-            for p in packages:
-                if p in self.get("tap_input"):
-                    self.warn(p + " is already in Brewfile.")
-                    self.warn("Do 'brew file init' to clean up Brewfile")
-                self.brewinfo.tap_input.append(p)
-            self.brewinfo.tap_input.sort()
-        elif cmd == "untap":
-            for p in packages:
-                if p not in self.get("tap_input"):
-                    self.warn(p + " is not in Brewfile.")
-                    self.warn("Do 'brew file init' to clean up Brewfile")
-                self.remove_pack("tap_input", p)
+        #if self.brewinfo.check_file():
+        #    self.read_all()
 
-        self.input_to_list()
-        self.initialize_write()
+        #if (cmd in ["rm", "remove", "uninstall", "reinstall"]
+        #        or (cmd == "cask" and subcmd
+        #            in ["rm", "remove", "uninstall"])
+        #        or (cmd == "pip" and pip_upgrade)
+        #        or (cmd == "gem" and subcmd in ["uninstall"])
+        #        or (cmd == "mas" and subcmd in ["uninstall"])):
+        #    for p in packages:
+        #        input_list = "brew_input"
+        #        if cmd == "cask":
+        #            input_list = "cask_input"
+        #        elif p.startswith("pip-") or cmd == "pip":
+        #            input_list = "pip_input"
+        #            p = p.replace("pip-", "")
+        #        elif p.startswith("gem-") or cmd == "gem":
+        #            input_list = "gem_input"
+        #            p = p.replace("gem-", "")
+        #        elif cmd == "mas":
+        #            input_list = "appstore_input"
+        #        is_removed = False
+        #        for bi in self.get(input_list):
+        #            if input_list == "appstore_input":
+        #                if p.split()[0] == bi.split()[0]:
+        #                    self.remove_pack("appstore_input", bi)
+        #                    is_removed = True
+        #                    break
+        #            elif p == bi or p == bi.split("/")[-1].replace(".rb", ""):
+        #                self.remove_pack(input_list, bi)
+        #                if input_list == "brew_input":
+        #                    self.remove_pack("brew_input_opt", bi)
+        #                elif input_list == "pip_input":
+        #                    self.remove_pack("pip_input_opt", bi)
+        #                elif input_list == "gem_input":
+        #                    self.remove_pack("gem_input_opt", bi)
+        #                is_removed = True
+        #                break
+        #        if cmd not in ["reinstall", "pip"] and not is_removed:
+        #            self.warn(p + " is not in Brewfile.")
+        #            self.warn("Try 'brew file init' to clean up Brewfile")
+        #if (cmd in ["instal", "install", "reinstall", "pip"]
+        #        or (cmd == "cask" and subcmd in ["instal", "install"])
+        #        or (cmd == "gem" and subcmd in ["instal", "install"])
+        #        or (cmd == "mas" and subcmd in ["purchase", "install"])):
+        #    input_list = "brew_input"
+        #    if cmd == "cask":
+        #        input_list = "cask_input"
+        #    elif cmd == "pip":
+        #        input_list = "pip_input"
+        #    elif cmd == "gem":
+        #        input_list = "gem_input"
+        #    elif cmd == "mas":
+        #        input_list = "appstore_input"
+        #    for p in packages:
+        #        porig = p
+        #        psplit = p.split("/")
+        #        t = ""
+        #        if psplit:
+        #            if len(psplit) == 3 and not p.startswith("http") and\
+        #                    not p.startswith("ftp") and not p.startswith("/"):
+        #                p = psplit[-1]
+        #                t = "/".join(psplit[:-1])
+        #            else:
+        #                t = "direct"
+        #        if p in self.get(input_list) or\
+        #                p.split("/")[-1].replace(".rb", "")\
+        #                in self.get(input_list):
+        #            self.warn(p + " is already in Brewfile.")
+        #            self.warn("Do 'brew file init' to clean up Brewfile")
+        #            continue
+        #        if cmd == "cask":
+        #            self.brewinfo.cask_input.append(p)
+        #            self.brewinfo.cask_input.sort()
+        #        elif cmd == "pip":
+        #            self.brewinfo.pip_input.append(p)
+        #            self.brewinfo.pip_input.sort()
+        #            if opts[porig]:
+        #                self.brewinfo.pip_input_opt[p] =\
+        #                    " " + " ".join(opts[porig]).strip()
+        #            else:
+        #                self.brewinfo.pip_input_opt[p] = ""
+        #        elif cmd == "gem":
+        #            self.brewinfo.gem_input.append(p)
+        #            self.brewinfo.gem_input.sort()
+        #            if opts[porig]:
+        #                self.brewinfo.gem_input_opt[p] =\
+        #                    " " + " ".join(opts[porig]).strip()
+        #            else:
+        #                self.brewinfo.gem_input_opt[p] = ""
+        #        elif cmd == "mas":
+        #            self.brewinfo.appstore_input.append(p)
+        #        else:
+        #            self.brewinfo.brew_input.append(p)
+        #            if opts[porig]:
+        #                self.brewinfo.brew_input_opt[p] =\
+        #                    " " + " ".join(opts[porig]).strip()
+        #            else:
+        #                self.brewinfo.brew_input_opt[p] = ""
+        #            for p_dep in self.proc(
+        #                    "brew deps " + p, print_cmd=False,
+        #                    print_out=False)[1]:
+        #                if p_dep not in self.get(input_list) \
+        #                        and (not(self.opt["leaves"]
+        #                                 and self.opt["on_request"])
+        #                             or p_dep in
+        #                             self.opt["top_packages"].split(",")):
+        #                    self.brewinfo.brew_input.append(p_dep)
+        #                    self.brewinfo.brew_input_opt[p_dep] = ""
+        #            self.brewinfo.brew_input.sort()
+        #        if t != "" and t not in self.get("tap_input"):
+        #            self.brewinfo.tap_input.append(t)
+        #            self.brewinfo.tap_input.sort()
+        #elif cmd == "tap":
+        #    for p in packages:
+        #        if p in self.get("tap_input"):
+        #            self.warn(p + " is already in Brewfile.")
+        #            self.warn("Do 'brew file init' to clean up Brewfile")
+        #        self.brewinfo.tap_input.append(p)
+        #    self.brewinfo.tap_input.sort()
+        #elif cmd == "untap":
+        #    for p in packages:
+        #        if p not in self.get("tap_input"):
+        #            self.warn(p + " is not in Brewfile.")
+        #            self.warn("Do 'brew file init' to clean up Brewfile")
+        #        self.remove_pack("tap_input", p)
+
+        #self.input_to_list()
+        #self.initialize_write()
 
     def check_brew_cmd(self):
         """Check Homebrew"""
@@ -3118,8 +3124,9 @@ def main():
     b = BrewFile()
 
     # Pre Parser
-    pre_parser = argparse.ArgumentParser(
-        add_help=False, usage=__prog__ + "...")
+    arg_parser_opts = {'add_help': False, 'allow_abbrev': False}
+    pre_parser = argparse.ArgumentParser(usage=__prog__ + "...",
+                                         **arg_parser_opts)
     group = pre_parser.add_mutually_exclusive_group()
     group.add_argument("-i", "--init", action="store_const",
                        dest="command", const="init")
@@ -3143,7 +3150,7 @@ def main():
                        dest="command", const="version")
 
     # Parent parser
-    file_parser = argparse.ArgumentParser(add_help=False)
+    file_parser = argparse.ArgumentParser(**arg_parser_opts)
     file_parser.add_argument(
         "-f", "--file", action="store", dest="input",
         default=b.opt["input"],
@@ -3152,7 +3159,7 @@ def main():
              "HOMEBREW_BREWFILE, like:\n"
              "    export HOMEBREW_BREWFILE=~/.brewfile")
 
-    backup_parser = argparse.ArgumentParser(add_help=False)
+    backup_parser = argparse.ArgumentParser(**arg_parser_opts)
     backup_parser.add_argument(
         "-b", "--backup", action="store", dest="backup",
         default=b.opt["backup"],
@@ -3162,7 +3169,7 @@ def main():
              " HOMEBREW_BREWFILE_BACKUP, like:\n"
              "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup")
 
-    format_parser = argparse.ArgumentParser(add_help=False)
+    format_parser = argparse.ArgumentParser(**arg_parser_opts)
     format_parser.add_argument(
         "-F", "--format", "--form", action="store", dest="form",
         default=b.opt["form"],
@@ -3175,7 +3182,7 @@ def main():
              "command or cmd    : brew install vim --HEAD --with-lua\n"
              "  Can be used as a shell script.\n")
 
-    leaves_parser = argparse.ArgumentParser(add_help=False)
+    leaves_parser = argparse.ArgumentParser(**arg_parser_opts)
     leaves_parser.add_argument(
         "--leaves", action="store_true", default=b.opt["leaves"],
         dest="leaves",
@@ -3184,7 +3191,7 @@ def main():
              " HOMEBREW_BREWFILE_LEAVES, like:\n"
              "    export HOMEBREW_BREWFILE_LEAVES=1")
 
-    on_request_parser = argparse.ArgumentParser(add_help=False)
+    on_request_parser = argparse.ArgumentParser(**arg_parser_opts)
     on_request_parser.add_argument(
         "--on_request", action="store_true", default=b.opt["on_request"],
         dest="on_request",
@@ -3194,7 +3201,7 @@ def main():
              " HOMEBREW_BREWFILE_ON_REQUEST, like:\n"
              "    export HOMEBREW_BREWFILE_ON_REQUEST=1")
 
-    top_packages_parser = argparse.ArgumentParser(add_help=False)
+    top_packages_parser = argparse.ArgumentParser(**arg_parser_opts)
     top_packages_parser.add_argument(
         "--top_packages", action="store", default=b.opt["top_packages"],
         dest="top_packages",
@@ -3204,29 +3211,29 @@ def main():
              " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
              "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
 
-    noupgradeatupdate_parser = argparse.ArgumentParser(add_help=False)
+    noupgradeatupdate_parser = argparse.ArgumentParser(**arg_parser_opts)
     noupgradeatupdate_parser.add_argument(
         "-U", "--noupgrade", action="store_true",
         default=b.opt["noupgradeatupdate"], dest="noupgradeatupdate",
         help="Do not execute `brew update/brew upgrade`"
              " at `brew file update`.")
 
-    repo_parser = argparse.ArgumentParser(add_help=False)
+    repo_parser = argparse.ArgumentParser(**arg_parser_opts)
     repo_parser.add_argument(
         "-r", "--repo", action="store", default=b.opt["repo"], dest="repo",
         help="Set repository name. Use with set_repo.")
 
-    link_parser = argparse.ArgumentParser(add_help=False)
+    link_parser = argparse.ArgumentParser(**arg_parser_opts)
     link_parser.add_argument(
         "-n", "--nolink", action="store_false", default=b.opt["link"],
         dest="link", help="Don't make links for Apps.")
 
-    caskonly_parser = argparse.ArgumentParser(add_help=False)
+    caskonly_parser = argparse.ArgumentParser(**arg_parser_opts)
     caskonly_parser.add_argument(
         "--caskonly", action="store_true", default=b.opt["caskonly"],
         dest="caskonly", help="Write out only cask related packages")
 
-    appstore_parser = argparse.ArgumentParser(add_help=False)
+    appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     appstore_parser.add_argument(
         "--appstore", action="store", default=b.opt["appstore"],
         dest="appstore", help="Set AppStore application check level.\n"
@@ -3236,29 +3243,29 @@ def main():
         "You can set the level by environmental variable:\n"
         "    export HOMEBREW_BREWFILE_APPSTORE=0")
 
-    no_appstore_parser = argparse.ArgumentParser(add_help=False)
+    no_appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     no_appstore_parser.add_argument(
         "--no_appstore", action="store_false", default=b.opt["no_appstore"],
         dest="no_appstore", help="Set AppStore application check level to 0.\n"
         "(legacy option, works same as '--appstore 0'.)\n")
 
-    dryrun_parser = argparse.ArgumentParser(add_help=False)
+    dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
     dryrun_parser.add_argument(
         "-C", action="store_false", default=b.opt["dryrun"],
         dest="dryrun", help="Run clean as non dry-run mode.\n"
         "Use this option to run clean at update command, too.")
 
-    yn_parser = argparse.ArgumentParser(add_help=False)
+    yn_parser = argparse.ArgumentParser(**arg_parser_opts)
     yn_parser.add_argument(
         "-y", "--yes", action="store_true", default=b.opt["yn"],
         dest="yn", help="Answer yes to all yes/no questions.")
 
-    verbose_parser = argparse.ArgumentParser(add_help=False)
+    verbose_parser = argparse.ArgumentParser(**arg_parser_opts)
     verbose_parser.add_argument("-V", "--verbose", action="store",
                                 default=b.opt["verbose"],
                                 dest="verbose", help="Verbose level 0/1/2")
 
-    help_parser = argparse.ArgumentParser(add_help=False)
+    help_parser = argparse.ArgumentParser(**arg_parser_opts)
     help_parser.add_argument("-h", "--help", action="store_true",
                              default=False, dest="help",
                              help="Print Help (this message) and exit.")
@@ -3268,13 +3275,11 @@ def main():
                    no_appstore_parser, caskonly_parser, yn_parser,
                    verbose_parser]
     formatter = argparse.RawTextHelpFormatter
-    subparser_options = {
-        "parents": min_parsers,
-        "formatter_class": formatter}
+    subparser_opts = {'formatter_class': formatter, 'allow_abbrev': False}
 
     # Main parser
     parser = argparse.ArgumentParser(
-        add_help=False, prog=__prog__,
+        prog=__prog__,
         parents=[file_parser, backup_parser, format_parser, leaves_parser,
                  on_request_parser, top_packages_parser,
                  noupgradeatupdate_parser, repo_parser, link_parser,
@@ -3282,7 +3287,8 @@ def main():
                  dryrun_parser, yn_parser, verbose_parser, help_parser],
         formatter_class=formatter,
         description=__description__,
-        epilog="Check https://homebrew-file.readthedocs.io for more details."
+        epilog="Check https://homebrew-file.readthedocs.io for more details.",
+        **arg_parser_opts
     )
 
     subparsers = parser.add_subparsers(
@@ -3292,37 +3298,36 @@ def main():
         "If <package> is given, the package is installed and it is added\n"\
         "in BREWFILE."
     subparsers.add_parser("install", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "Execute brew command, and update BREWFILE.\n"\
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     subparsers.add_parser("brew", description=help_doc, help=help_doc,
-                          add_help=False,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "or dump/-i/--init\nInitialize/Update BREWFILE "\
         "with installed packages."
     subparsers.add_parser(
         "init", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=formatter)
+        **subparser_opts)
     subparsers.add_parser(
         "dump",
         parents=min_parsers + [link_parser, repo_parser],
-        formatter_class=formatter)
+        **subparser_opts)
     help_doc = "or -s/--set_repo\nSet BREWFILE repository "\
         "(e.g. rcmdnk/Brewfile or full path to your repository)."
     subparsers.add_parser(
         "set_repo", description=help_doc, help=help_doc,
         parents=min_parsers + [repo_parser],
-        formatter_class=formatter)
+        **subparser_opts)
     help_doc = "or --set_local\nSet BREWFILE to local file."
     subparsers.add_parser("set_local", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "Update BREWFILE from the repository."
     subparsers.add_parser("pull", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "Push your BREWFILE to the repository."
     subparsers.add_parser("push", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "or -c/--clean\nCleanup.\n"\
         "Uninstall packages not in the list.\n"\
         "Untap packages not in the list.\n"\
@@ -3331,7 +3336,7 @@ def main():
         "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser("clean", description=help_doc, help=help_doc,
                           parents=min_parsers + [dryrun_parser],
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or --clean_non_request.\n"\
         "Uninstall packages which were installed as dependencies \n"\
         "but parent packages of which were already uninstalled.\n"\
@@ -3340,7 +3345,7 @@ def main():
     subparsers.add_parser(
         "clean_non_request", description=help_doc, help=help_doc,
         parents=min_parsers + [dryrun_parser],
-        formatter_class=formatter)
+        **subparser_opts)
     help_doc = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"\
         "install,\n"\
         "init and push.\n"\
@@ -3351,35 +3356,35 @@ def main():
         "update", description=help_doc, help=help_doc,
         parents=min_parsers + [link_parser, noupgradeatupdate_parser,
                                dryrun_parser],
-        formatter_class=formatter)
+        **subparser_opts)
     help_doc = "or -e/--edit\nEdit input files."
     subparsers.add_parser("edit", description=help_doc, help=help_doc,
                           parents=[file_parser],
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or --cat\nShow contents of input files."
     subparsers.add_parser("cat", description=help_doc, help=help_doc,
                           parents=[file_parser],
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "Check applications for Cask."
     subparsers.add_parser("casklist", description=help_doc, help=help_doc,
                           parents=[verbose_parser],
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or --test. Used for test."
     subparsers.add_parser("test", description=help_doc, help=help_doc,
-                          **subparser_options)
+                          parents=min_parsers, **subparser_opts)
     help_doc = "Get Brewfile's full path, including additional files."
     subparsers.add_parser("get_files", description=help_doc, help=help_doc,
                           parents=[file_parser],
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or --commands\nShow commands."
     subparsers.add_parser("commands", description=help_doc, help=help_doc,
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or -v/--version\nShow version."
     subparsers.add_parser("version", description=help_doc, help=help_doc,
-                          formatter_class=formatter)
+                          **subparser_opts)
     help_doc = "or -h/--help\nPrint Help (this message) and exit."
     subparsers.add_parser("help", description=help_doc, help=help_doc,
-                          formatter_class=formatter)
+                          **subparser_opts)
 
     if len(sys.argv) == 1:
         parser.print_usage()
