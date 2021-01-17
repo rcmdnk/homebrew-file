@@ -43,8 +43,8 @@ brew () {
           shift
           exe="brew-file"
           ;;
-        # brew install/uninstall/tap/pip/gem
-        install|reinstall|tap|pip|gem|rm|remove|uninstall|untap)
+        # brew install/uninstall/tap
+        install|reinstall|tap|rm|remove|uninstall|untap)
           if [ $nargs -gt 1 ];then
             exe="brew-file brew"
           fi
@@ -60,7 +60,7 @@ brew () {
           fi
           ;;
         *)
-          if echo " brew init dump set_repo set_local pull push clean clean_non_request casklist pip gem get_files version "|grep -q -- " $1 ";then
+          if echo " brew init dump set_repo set_local pull push clean clean_non_request casklist get_files version "|grep -q -- " $1 ";then
             exe="brew-file"
           fi
           ;;

@@ -81,7 +81,6 @@ install:
   - brew install ruby
   - hash -r
   - which ruby
-  - which gem
   - 'brew rm postgis || :'
   - 'brew rm gdal || :'
   - 'brew rm numpy || :'
@@ -141,18 +140,7 @@ script:
   - coverage run --parallel-mode $exe brew rm appcleaner
   - command brew install appcleaner
   - coverage run --parallel-mode $exe brew rm appcleaner
-  - coverage run --parallel-mode $exe brew pip -h
-  - coverage run --parallel-mode $exe brew pip pep8
   - coverage run --parallel-mode $exe brew list --formula
-  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies pip-pep8
-  - coverage run --parallel-mode $exe brew pip -u -v django==1.2 >/dev/null
-  - coverage run --parallel-mode $exe brew rm brew-pip
-# brew gem install shows "Operation not permitted" error at travis
-#  - coverage run --parallel-mode $exe brew gem install ruby-prof
-#  - coverage run --parallel-mode $exe brew gem uninstall ruby-prof
-#  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-ruby-prof
-#  - coverage run --parallel-mode $exe brew gem install ruby-prof 0.16.0
-#  - coverage run --parallel-mode $exe brew uninstall --ignore-dependencies gem-ruby-prof
   - 'coverage run --parallel-mode $exe brew wrong_cmd -V 0|| :'
   # Cask tests
   - coverage run --parallel-mode $exe brew install firefox

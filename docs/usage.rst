@@ -25,12 +25,6 @@ You might want to add the following line to your **.bashrc** or **.zshenv**:
 
     export HOMEBREW_CASK_OPTS="--appdir=$HOME/MyApplications"
 
-Similarly, you can specify the environment for brew-gem.  The following will tell brew-gem to use the Ruby installed by Homebrew itself:
-
-.. code-block:: sh
-
-    export HOMEBREW_GEM_OPTS="--homebrew-ruby"
-
 If there is no ``Brewfile``, Brew-file will ask you if you want to initialize ``Brewfile``
 with installed packages or not.
 You can also make it with ``install`` (``-i``) subcommand.
@@ -74,8 +68,6 @@ install          Same as ``brew``
 tap              ``brew tap X``
 tapall           ``brew tap X``, and installs all packages of Formulae in the tap.
 cask             ``brew cask install X``. Require `homebrew/homebrew-cask <https://github.com/homebrew/homebrew-cask/>`_. (It will be installed automatically.)
-pip              ``brew pip X``. Require `hanxue/brew-pip <https://github.com/hanxue/brew-pip>`_. (It will be installed automatically.)
-gem              ``brew gem install X``. Require `sportngin/brew-gem <https://github.com/sportngin/brew-gem>`_. (It will be installed automatically.)
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
 file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
 brewfile         Same as ``file``.

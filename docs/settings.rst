@@ -16,4 +16,3 @@ Following environmental variables can be used.
    HOMEBREW_BREWFILE_VERBOSE      | Set verbose level. | 1
    HOMEBREW_BREWFILE_APPSTORE     | Set Appstore application management level. 0: do not, 1: manage fully, 2: use list to install, but do not update by init command even if new App is added (but package is removed from the list at ``brew file brew mas uninstall <app id>``).| 1
    HOMEBREW_CASK_OPTS             | This is `Cask's option <https://github.com/homebrew/homebrew-cask/blob/master/USAGE.md>`_ to set cask environment. If appdir or fontdir is set with these options, Brew-file uses these values in it. | \"\"
-   HOMEBREW_GEM_OPTS              | This is `brew-gem's option <https://github.com/sportngin/brew-gem/blob/master/README.md>`_ to set Ruby environment. | \"\"

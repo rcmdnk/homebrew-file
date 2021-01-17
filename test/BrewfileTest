@@ -10,14 +10,6 @@ cask install font-migu1m
 # rcmdnk/rcmdnkpac
 tapall rcmdnk/rcmdnkpac
 
-## pip
-#install brew-pip
-pip gcalcli
-
-## gem
-#install brew-gem
-#gem ruby-prof
-
 # App Store applications
 appstore Keynote
 
