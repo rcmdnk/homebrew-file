@@ -209,7 +209,7 @@ script:
   - brew list --formula
   - coverage run --parallel-mode $exe clean -C -V 2
   - coverage run --parallel-mode $exe init -y -V 2
-  - coverage run --parallel-mode $exe brew install firefox
+  - coverage run --parallel-mode $exe brew install Homebrew/cask/firefox
   - coverage run --parallel-mode $exe clean -C
   # Wrong command test
   - echo "wrong command" > $testfile
