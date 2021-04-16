@@ -155,12 +155,9 @@ class BrewHelper:
                        "lightblue": 36, "white": 37}
 
     def readstdout(self, proc):
-        while True:
-            line = proc.stdout.readline().decode().rstrip()
-            code = proc.poll()
+        for line in iter(proc.stdout.readline, ''):
+            line = line.rstrip()
             if line == '':
-                if code is not None:
-                    break
                 continue
             yield line
 
@@ -188,7 +185,7 @@ class BrewHelper:
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=all_env)
+                                 text=True, env=all_env)
             if separate_err and not print_err:
                 stderr.close()
             for line in self.readstdout(p):
@@ -534,9 +531,9 @@ class BrewInfo:
         if package == "":
             package = "--installed"
         infotmp = json.loads(
-            self.helper.proc("brew info --json=v1 " + package, print_cmd=False,
-                             print_out=False, exit_on_err=True,
-                             separate_err=True)[1][0])
+            ''.join(self.helper.proc("brew info --json=v1 " + package,
+                                     print_cmd=False, print_out=False,
+                                     exit_on_err=True, separate_err=True)[1]))
         info = {}
         for i in infotmp:
             info[i["name"]] = i
