@@ -1309,7 +1309,7 @@ class BrewFile:
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
 
-        ret, lines = self.proc("git status -s -u no", print_cmd=False,
+        ret, lines = self.proc("git status -s -uno", print_cmd=False,
                                print_out=False, exit_on_err=True)
         if ret != 0:
             self.err('\n'.join(lines))
