@@ -1,6 +1,9 @@
 Usage
 =====
 
+Brewfile
+--------
+
 Brew-file manages packages installed by Homebrew.
 It also supports `brew-cask <https://github.com/phinze/homebrew-cask>`_
 and other Homebrew subcommand installers.
@@ -146,15 +149,20 @@ If you want edit ``Brewfile``, use ``edit`` option.
    you may make empty ``Brewfile`` (Be careful, ``brew -c -C`` remove all packages :scream:).
    Therefore I recommend you to do ``brew file -i`` at first if you don't have ``Brewfile``.
 
+
+Manage Brewfile with Git
+------------------------
+
 You can maintain your ``Brewfile`` at the git repository.
-First, make new repository at GitHub (or other git server).
+First, make new repository at GitHub (or other git server),
+which has a file named ``Brewfile``.
 
 Then, set the repository by::
 
     $ brew file set_repo -r <repository>
 
 It will clone the repository.
-If the repository has a file named ``Brewfile``, the file will be used instead of
+The content of ``Brewfile`` in the repository will be used instead of
 ``~/.config/brewfile/Brewfile``.
 (then ``~/.config/brewfile/Brewfile`` will have this repository information.)
 
@@ -182,6 +190,10 @@ and want to use ``brew file update``.
 
 Otherwise, please be careful to use ``brew file update``,
 because it deletes what you installed, but you have not registered in ``Brewfile``.
+
+
+Check Apps
+----------
 
 If you want to check your Apps for Cask, use::
 

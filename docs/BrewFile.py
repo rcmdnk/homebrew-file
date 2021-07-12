@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.3.2"
-__date__ = "25/Dec/2020"
+__version__ = "v8.3.5"
+__date__ = "23/Apr/2021"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -155,12 +155,9 @@ class BrewHelper:
                        "lightblue": 36, "white": 37}
 
     def readstdout(self, proc):
-        while True:
-            line = proc.stdout.readline().decode().rstrip()
-            code = proc.poll()
+        for line in iter(proc.stdout.readline, ''):
+            line = line.rstrip()
             if line == '':
-                if code is not None:
-                    break
                 continue
             yield line
 
@@ -188,7 +185,7 @@ class BrewHelper:
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 env=all_env)
+                                 text=True, env=all_env)
             if separate_err and not print_err:
                 stderr.close()
             for line in self.readstdout(p):
@@ -534,9 +531,9 @@ class BrewInfo:
         if package == "":
             package = "--installed"
         infotmp = json.loads(
-            self.helper.proc("brew info --json=v1 " + package, print_cmd=False,
-                             print_out=False, exit_on_err=True,
-                             separate_err=True)[1][0])
+            ''.join(self.helper.proc("brew info --json=v1 " + package,
+                                     print_cmd=False, print_out=False,
+                                     exit_on_err=True, separate_err=True)[1]))
         info = {}
         for i in infotmp:
             info[i["name"]] = i
@@ -1144,76 +1141,81 @@ class BrewFile:
         # Create new repository #
         print("GitHub repository: " + self.user_name() + "/"
               + self.repo_name() + " doesn't exist.")
-        ans = self.ask_yn("do you want to create the repository?")
-        if not ans:
-            sys.exit(0)
+        print("Please create the repository first, then try again")
+        # Disable direct repository creating for now
+        # https://github.com/rcmdnk/homebrew-file/issues/104
+        sys.exit(0)
 
-        # Try to create w/o two-factor code
-        try:
-            import requests
-        except ImportError:
-            print("To create a repository, "
-                  + "you need to install 'requests' module.")
-            ans = self.ask_yn("Do you want to install now?")
-            if not ans:
-                print("Please prepare Brewfile repository.")
-                sys.exit(0)
-            else:
-                ret = self.proc("pip --version", print_cmd=False,
-                                print_out=False, exit_on_err=False)
-                if ret != 0:
-                    self.proc("easy_install pip")
-                self.proc("pip install requests")
-                import requests
+        #ans = self.ask_yn("do you want to create the repository?")
+        #if not ans:
+        #    sys.exit(0)
 
-        url = "https://api.github.com/user/repos"
-        description = "package list for Homebrew"
-        data = {"name": self.repo_name(), "description": description,
-                "auto_init": "true"}
-        headers = {}
-        is_ok = True
+        ## Try to create w/o two-factor code
+        #try:
+        #    import requests
+        #except ImportError:
+        #    print("To create a repository, "
+        #          + "you need to install 'requests' module.")
+        #    ans = self.ask_yn("Do you want to install now?")
+        #    if not ans:
+        #        print("Please prepare Brewfile repository.")
+        #        sys.exit(0)
+        #    else:
+        #        ret = self.proc("pip --version", print_cmd=False,
+        #                        print_out=False, exit_on_err=False)
+        #        if ret != 0:
+        #            self.proc("easy_install pip")
+        #        self.proc("pip install requests")
+        #        import requests
 
-        # Check password
-        password = getpass.getpass("GitHub password: ")
+        #url = "https://api.github.com/user/repos"
+        #description = "package list for Homebrew"
+        #data = {"name": self.repo_name(), "description": description,
+        #        "auto_init": "true"}
+        #headers = {}
+        #is_ok = True
 
-        while True:
-            r = requests.post(url=url, data=json.dumps(data),
-                              auth=(self.user_name(), password),
-                              headers=headers)
-            if r.ok:
-                break
-            if r.json()["message"] == "Bad credentials":
-                password = getpass.getpass(
-                    "\033[31;1mWrong password!\033[0m GitHub password: ")
-                continue
-            if r.json()["message"] ==\
-                    "Must specify two-factor authentication OTP code.":
-                is_ok = False
-                break
-            self.err(r.json()["message"])
-            sys.exit(1)
+        ## Check password
+        #password = getpass.getpass("GitHub password: ")
 
-        if not is_ok:
-            # Try with two-factor code
-            twofac = input("GitHub two-factor code: ")
-            headers.update({"X-Github-OTP": twofac})
-            while True:
-                r = requests.post(url=url, data=json.dumps(data),
-                                  auth=(self.user_name(), password),
-                                  headers=headers)
-                if r.ok:
-                    break
-                if r.json()["message"] ==\
-                        "Must specify two-factor authentication OTP code.":
-                    twofac = getpass.getpass("\033[31;1mWrong code!\033[0m "
-                                             "GitHub two-factor code: ")
-                    headers.update({"X-Github-OTP": twofac})
-                    continue
-                self.err(r.json()["message"], 0)
-                sys.exit(1)
+        #while True:
+        #    r = requests.post(url=url, data=json.dumps(data),
+        #                      auth=(self.user_name(), password),
+        #                      headers=headers)
+        #    if r.ok:
+        #        break
+        #    if r.json()["message"] == "Bad credentials":
+        #        password = getpass.getpass(
+        #            "\033[31;1mWrong password!\033[0m GitHub password: ")
+        #        continue
+        #    if r.json()["message"] ==\
+        #            "Must specify two-factor authentication OTP code.":
+        #        is_ok = False
+        #        break
+        #    self.err(r.json()["message"])
+        #    sys.exit(1)
 
-        # Clone and initialize
-        self.clone_repo()
+        #if not is_ok:
+        #    # Try with two-factor code
+        #    twofac = input("GitHub two-factor code: ")
+        #    headers.update({"X-Github-OTP": twofac})
+        #    while True:
+        #        r = requests.post(url=url, data=json.dumps(data),
+        #                          auth=(self.user_name(), password),
+        #                          headers=headers)
+        #        if r.ok:
+        #            break
+        #        if r.json()["message"] ==\
+        #                "Must specify two-factor authentication OTP code.":
+        #            twofac = getpass.getpass("\033[31;1mWrong code!\033[0m "
+        #                                     "GitHub two-factor code: ")
+        #            headers.update({"X-Github-OTP": twofac})
+        #            continue
+        #        self.err(r.json()["message"], 0)
+        #        sys.exit(1)
+
+        ## Clone and initialize
+        #self.clone_repo()
 
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
@@ -1312,7 +1314,7 @@ class BrewFile:
         self.info("$ cd " + self.brewinfo.get_dir(), 1)
         os.chdir(self.brewinfo.get_dir())
 
-        ret, lines = self.proc("git status -s -u no", print_cmd=False,
+        ret, lines = self.proc("git status -s -uno", print_cmd=False,
                                print_out=False, exit_on_err=True)
         if ret != 0:
             self.err('\n'.join(lines))
@@ -2117,7 +2119,7 @@ class BrewFile:
             for p in self.get("cask_input"):
                 if p in self.get("cask_list"):
                     continue
-                self.proc("brew install --force " + p)
+                self.proc("brew install --cask --force " + p)
 
         # brew
         if not self.opt["caskonly"]:
