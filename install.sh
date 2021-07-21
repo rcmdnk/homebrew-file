@@ -12,10 +12,17 @@ if ! which brew >& /dev/null;then
     exit $ret
   fi
   echo
+
+  for path in /home/linuxbrew/.linuxbrew $HOME/.linuxbrew /opt/homebrew /usr/local;do
+    if [ -f "$path/bin" ];then
+      PATH="$path/bin/brew"
+    fi
+  done
 fi
 
 echo
 echo Install Brew-file...
+
 brew install rcmdnk/file/brew-file
 
 if [ $brew_installed -eq 0 ];then
