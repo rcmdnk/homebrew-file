@@ -4,8 +4,8 @@ if ! which brew >& /dev/null;then
   brew_installed=0
   echo Homebrew is not installed!
   echo Install now...
-  echo /bin/bash -c \"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh\)\"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  echo /bin/bash -c \"\$\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh\)\"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   ret=$?
   if [ $ret -ne 0 ];then
     echo Failed to install Homebrew... please check your environment
