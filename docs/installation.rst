@@ -7,7 +7,10 @@ Install Homebrew-file with Homebrew::
 
 or you can use install script::
 
-    $ curl -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh |sh
+    $ curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
+    $ chmod 755 ./install.sh
+    $ ./install.sh
+    $ rm -f install.sh
 
 which installs Homebrew itself, too, if it is not installed.
 
