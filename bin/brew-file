@@ -1590,9 +1590,12 @@ class BrewFile:
 
         if self.proc(self.opt["mas_cmd"], print_cmd=False, print_out=False,
                      exit_on_err=False)[0] != 0:
-            # fail?
-            self.opt["is_mas_cmd"] = -1
-            return self.opt["is_mas_cmd"]
+            sys.exit(1)
+
+        if self.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
+                     print_out=False, exit_on_err=False)[0] != 0:
+            self.err("\nPlease sign in to the App Store", 0)
+            sys.exit(1)
 
         self.opt["is_mas_cmd"] = 1
 
