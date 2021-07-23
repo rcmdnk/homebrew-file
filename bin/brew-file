@@ -10,7 +10,6 @@ requirement: Python 3.7 or later
 
 import argparse
 import copy
-import getpass
 import glob
 import json
 import os
@@ -186,7 +185,7 @@ class BrewHelper:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
                                  text=True, env=all_env)
-            if separate_err and not print_err:
+            if hasattr(stderr, 'close'):
                 stderr.close()
             for line in self.readstdout(p):
                 lines.append(line)
@@ -607,17 +606,17 @@ class BrewInfo:
         output = ""
 
         # commands for each format
-        if self.helper.opt["form"] in ["file", "none"]:
-            cmd_before = "before "
-            cmd_after = "after "
-            cmd_other = ""
-            cmd_install = "brew "
-            cmd_tap = "tap "
-            cmd_cask = "cask "
-            cmd_cask_nocask = "#cask "
-            cmd_appstore = "appstore "
-            cmd_file = "file "
-        elif self.helper.opt["form"] in ["brewdler", "bundle"]:
+        # if self.helper.opt["form"] in ["file", "none"]:
+        cmd_before = "before "
+        cmd_after = "after "
+        cmd_other = ""
+        cmd_install = "brew "
+        cmd_tap = "tap "
+        cmd_cask = "cask "
+        cmd_cask_nocask = "#cask "
+        cmd_appstore = "appstore "
+        cmd_file = "file "
+        if self.helper.opt["form"] in ["brewdler", "bundle"]:
             cmd_before = "#before "
             cmd_after = "#after "
             cmd_other = "#"
@@ -1238,7 +1237,7 @@ class BrewFile:
             self.clone_repo()
 
         # pull/push
-        self.info("$ cd " + self.brewinfo.get_dir(), 1)
+        self.info(f"$ cd {self.brewinfo.get_dir()}", 1)
         os.chdir(self.brewinfo.get_dir())
 
         ret, lines = self.proc("git status -s -uno", print_cmd=False,
@@ -1465,7 +1464,7 @@ class BrewFile:
 
         return apps
 
-    def get_cask_list(self, force=False):
+    def get_cask_list(self):
         """Get Cask List"""
 
         lines = self.proc("brew list --cask", print_cmd=False, print_out=False,
@@ -1707,7 +1706,7 @@ class BrewFile:
         """Edit brewfiles"""
         if not self.editor:
             self.editor = shlex.split(self.opt["my_editor"])
-        subprocess.call(self.editor + self.get_files())
+        subprocess.call(f"{self.editor} {self.get_files()}")
 
     def cat_brewfile(self):
         """Cat brewfiles"""
@@ -2118,24 +2117,23 @@ class BrewFile:
 
         # Get cask list, force to install brew-cask
         # if it has not been installed.
-        installed_casks = self.get_cask_list(True)[1]
+        installed_casks = self.get_cask_list()[1]
 
         # Set cask directories and reset application information list
         taps = list(filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
             self.proc("brew tap", print_cmd=False, print_out=False,
                       env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]))
-        apps = dict([d, {True: [], False: []}]
-                    for d in taps + ["", "appstore"])
+        apps = {d: {True: [], False: []} for d in taps + ["", "appstore"]}
         brew_apps = {}
 
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
-        apps_check = {"cask": dict([d, 0] for d in app_dirs),
-                      "has_cask": dict([d, 0] for d in app_dirs),
-                      "brew": dict([d, 0] for d in app_dirs),
-                      "appstore": dict([d, 0] for d in app_dirs),
-                      "no_cask": dict([d, 0] for d in app_dirs)}
+        apps_check = {"cask": {d: 0 for d in app_dirs},
+                      "has_cask": {d: 0 for d in app_dirs},
+                      "brew": {d: 0 for d in app_dirs},
+                      "appstore": {d: 0 for d in app_dirs},
+                      "no_cask": {d: 0 for d in app_dirs}}
 
         # Load casks
         casks = {}
@@ -2206,6 +2204,8 @@ class BrewFile:
                         if not x.startswith(".") and x != "Utilities"
                         and os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
+                tap = ""
+                opt = ""
                 aname = app.replace(".app", "")
                 if aname in appstore_list:
                     tap = "appstore"
