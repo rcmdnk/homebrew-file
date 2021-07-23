@@ -1548,12 +1548,12 @@ class BrewFile:
 
     def check_mas_cmd(self, force=False):
         """Check mas is installed or not"""
+        if self.opt["is_mas_cmd"] != 0:
+            return self.opt["is_mas_cmd"]
+
         if not is_mac():
             print("mas is not available on Linux!")
             sys.exit(1)
-
-        if self.opt["is_mas_cmd"] != 0:
-            return self.opt["is_mas_cmd"]
 
         if self.proc("type mas", print_cmd=False, print_out=False,
                      exit_on_err=False)[0] != 0:
