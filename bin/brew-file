@@ -655,7 +655,7 @@ fi
             cmd_tap = "brew tap "
             cmd_cask = "brew install "
             cmd_cask_nocask = "#brew install "
-            cmd_appstore = "mas install "
+            cmd_appstore = "mas purchase "
             cmd_file = "#file "
 
         # sort
@@ -2189,7 +2189,7 @@ class BrewFile:
                 self.info("Installing " + package)
                 if identifier != "":
                     if self.check_mas_cmd(True) == 1:
-                        self.proc(self.opt["mas_cmd"] + " install "
+                        self.proc(self.opt["mas_cmd"] + " purchase "
                                   + identifier)
                     else:
                         self.info("Please install %s from AppStore." %
