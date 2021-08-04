@@ -772,7 +772,7 @@ fi
                 output += cmd_main + self.packout(f) + "\n"
 
         # Additional files
-        if self.file_list:
+        if len(self.file_list) > len(self.main_list):
             output += "\n# Additional files\n"
             for f in self.file_list:
                 if f not in self.main_list:
