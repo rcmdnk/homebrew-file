@@ -1041,6 +1041,7 @@ class BrewFile:
         brewinfo.read()
         files = brewinfo.get_files()
         for f in files['ext']:
+            is_next_main = f in files['main']
             f = expandpath(f)
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
@@ -1052,7 +1053,7 @@ class BrewFile:
                     path_prefix = this_dir + '/'
                 b = BrewInfo(self.helper, path_prefix + f.lstrip('./'))
             self.brewinfo_ext.append(b)
-            if main is not None and f in files['main']:
+            if main is not None and is_next_main:
                 main = b
                 main_tmp = self.read(b, True)
             else:
