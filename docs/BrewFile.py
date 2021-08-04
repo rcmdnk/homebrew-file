@@ -28,7 +28,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.5.0"
+__version__ = "v8.5.1"
 __date__ = "04/Aug/2021"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -71,11 +71,23 @@ def to_num(val):
     return 0
 
 
+shell_envs = {
+    'HOSTNAME': os.uname().nodename,
+    'HOSTTYPE': os.uname().machine,
+    'OSTYPE': subprocess.run(["bash", "-c", "echo $OSTYPE"],
+                             capture_output=True, text=True).stdout.strip()
+}
+
+
 def expandpath(path):
+    path = os.path.expanduser(path)
+    for k in shell_envs:
+        for kk in [f"${k}", f"${{{k}}}"]:
+            if kk in path:
+                path = path.replace(kk, shell_envs[k])
     return re.sub(r'(?<!\\)\$(\w+|\{([^}]*)\})',
                   lambda x: os.environ.get(x.group(2) or x.group(1), ''),
-                  os.path.expanduser(path).replace('$HOSTNAME', os.uname()[1])
-                  .replace('${HOSTNAME}', os.uname()[1])).replace('\\$', '$')
+                  os.path.expanduser(path)).replace('\\$', '$')
 
 
 class Tee:
