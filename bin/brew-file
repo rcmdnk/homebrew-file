@@ -1764,7 +1764,7 @@ class BrewFile:
         """Edit brewfiles"""
         if not self.editor:
             self.editor = shlex.split(self.opt["my_editor"])
-        subprocess.call(f"{self.editor} {self.get_files()}")
+        subprocess.call(self.editor + self.get_files())
 
     def cat_brewfile(self):
         """Cat brewfiles"""
