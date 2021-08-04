@@ -10,7 +10,6 @@ requirement: Python 3.7 or later
 
 import argparse
 import copy
-import getpass
 import glob
 import json
 import os
@@ -29,8 +28,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.4.0"
-__date__ = "12/Jul/2021"
+__version__ = "v8.5.0"
+__date__ = "04/Aug/2021"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -186,7 +185,7 @@ class BrewHelper:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
                                  text=True, env=all_env)
-            if separate_err and not print_err:
+            if hasattr(stderr, 'close'):
                 stderr.close()
             for line in self.readstdout(p):
                 lines.append(line)
@@ -251,6 +250,7 @@ class BrewInfo:
         self.tap_input = []
         self.cask_input = []
         self.appstore_input = []
+        self.main_input = []
         self.file_input = []
 
         self.before_input = []
@@ -264,6 +264,7 @@ class BrewInfo:
         self.tap_list = []
         self.cask_list = []
         self.appstore_list = []
+        self.main_list = []
         self.file_list = []
 
         self.cask_nocask_list = []
@@ -274,6 +275,7 @@ class BrewInfo:
             "tap_input": self.tap_input,
             "cask_input": self.cask_input,
             "appstore_input": self.appstore_input,
+            "main_input": self.main_input,
             "file_input": self.file_input,
             "before_input": self.before_input,
             "after_input": self.after_input,
@@ -285,6 +287,7 @@ class BrewInfo:
             "cask_list": self.cask_list,
             "cask_nocask_list": self.cask_nocask_list,
             "appstore_list": self.appstore_list,
+            "main_list": self.main_list,
             "file_list": self.file_list,
         }
         self.filename = filename
@@ -314,6 +317,7 @@ class BrewInfo:
         del self.tap_input[:]
         del self.cask_input[:]
         del self.appstore_input[:]
+        del self.main_input[:]
         del self.file_input[:]
 
         del self.before_input[:]
@@ -329,15 +333,18 @@ class BrewInfo:
         del self.cask_list[:]
         del self.cask_nocask_list[:]
         del self.appstore_list[:]
+        del self.main_list[:]
         del self.file_list[:]
 
     def input_to_list(self):
+        self.clear_list()
         self.clear_list()
         self.brew_list.extend(self.brew_input)
         self.brew_list_opt.update(self.brew_input_opt)
         self.tap_list.extend(self.tap_input)
         self.cask_list.extend(self.cask_input)
         self.appstore_list.extend(self.appstore_input)
+        self.main_list.extend(self.main_input)
         self.file_list.extend(self.file_input)
 
     def sort(self):
@@ -361,6 +368,7 @@ class BrewInfo:
         self.brew_list.sort()
         self.brew_full_list.sort()
         self.cask_list.sort()
+        self.main_list.sort()
         self.file_list.sort()
         self.cask_nocask_list.sort()
 
@@ -370,6 +378,11 @@ class BrewInfo:
 
     def get(self, name):
         return copy.deepcopy(self.list_dic[name])
+
+    def get_files(self):
+        files = {'main': self.get('main_input')}
+        files.update({'ext': self.get('file_input')})
+        return files
 
     def remove(self, name, package):
         if isinstance(self.list_dic[name], list):
@@ -387,7 +400,8 @@ class BrewInfo:
 
     def add(self, name, val):
         if isinstance(self.list_dic[name], list):
-            self.list_dic[name].extend(val)
+            self.list_dic[name].extend(
+                [x for x in val if x not in self.list_dic[name]])
         elif isinstance(self.list_dic[name], dict):
             self.list_dic[name].update(val)
 
@@ -472,6 +486,9 @@ class BrewInfo:
             elif cmd in ("appstore", "mas"):
                 self.appstore_input.append(re.sub("^ *appstore *", "", line).
                                            strip().strip("'").strip('"'))
+            elif cmd == "main":
+                self.main_input.append(p)
+                self.file_input.append(p)
             elif cmd == "file" or cmd.lower() == "brewfile":
                 self.file_input.append(p)
             elif cmd == "before":
@@ -607,17 +624,18 @@ class BrewInfo:
         output = ""
 
         # commands for each format
-        if self.helper.opt["form"] in ["file", "none"]:
-            cmd_before = "before "
-            cmd_after = "after "
-            cmd_other = ""
-            cmd_install = "brew "
-            cmd_tap = "tap "
-            cmd_cask = "cask "
-            cmd_cask_nocask = "#cask "
-            cmd_appstore = "appstore "
-            cmd_file = "file "
-        elif self.helper.opt["form"] in ["brewdler", "bundle"]:
+        # if self.helper.opt["form"] in ["file", "none"]:
+        cmd_before = "before "
+        cmd_after = "after "
+        cmd_other = ""
+        cmd_install = "brew "
+        cmd_tap = "tap "
+        cmd_cask = "cask "
+        cmd_cask_nocask = "#cask "
+        cmd_appstore = "appstore "
+        cmd_main = "main "
+        cmd_file = "file "
+        if self.helper.opt["form"] in ["brewdler", "bundle"]:
             cmd_before = "#before "
             cmd_after = "#after "
             cmd_other = "#"
@@ -626,6 +644,7 @@ class BrewInfo:
             cmd_cask = "cask "
             cmd_cask_nocask = "#cask "
             cmd_appstore = "mas "
+            cmd_main = "#main "
             cmd_file = "#file "
         elif self.helper.opt["form"] in ["command", "cmd"]:
             # Shebang for command format
@@ -655,7 +674,8 @@ fi
             cmd_tap = "brew tap "
             cmd_cask = "brew install "
             cmd_cask_nocask = "#brew install "
-            cmd_appstore = "mas install "
+            cmd_appstore = "mas purchase "
+            cmd_main = "#main "
             cmd_file = "#file "
 
         # sort
@@ -745,11 +765,18 @@ fi
             for a in self.appstore_list:
                 output += cmd_appstore + self.mas_pack(a) + "\n"
 
+        # Main file
+        if self.main_list:
+            output += "\n# Main file\n"
+            for f in self.main_list:
+                output += cmd_main + self.packout(f) + "\n"
+
         # Additional files
-        if self.file_list:
+        if len(self.file_list) > len(self.main_list):
             output += "\n# Additional files\n"
             for f in self.file_list:
-                output += cmd_file + self.packout(f) + "\n"
+                if f not in self.main_list:
+                    output += cmd_file + self.packout(f) + "\n"
 
         # Other commands
         if self.cmd_input:
@@ -876,6 +903,7 @@ class BrewFile:
 
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext = []
+        self.brewinfo_main = self.brewinfo
         self.opt["read"] = False
 
         self.pack_deps = {}
@@ -989,23 +1017,31 @@ class BrewFile:
     def read_all(self, force=False):
         if not force and self.opt["read"]:
             return
-        del self.brewinfo_ext[:]
-        self.read(self.brewinfo)
+        self.brewinfo_ext = [self.brewinfo]
+        self.brewinfo_main = self.read(self.brewinfo, is_main=True)
+        if self.brewinfo_main in self.brewinfo_ext:
+            self.brewinfo_ext.remove(self.brewinfo_main)
         if self.opt["mas_cmd_installed"]:
             p = os.path.basename(self.opt["mas_formula"])
             if p not in self.get("brew_input"):
-                self.brewinfo.brew_input.append(p)
-                self.brewinfo.brew_input_opt[p] = ""
+                self.brewinfo_main.brew_input.append(p)
+                self.brewinfo_main.brew_input_opt[p] = ""
         if self.opt["reattach_cmd_installed"]:
             p = os.path.basename(self.opt["reattach_formula"])
             if p not in self.get("brew_input"):
-                self.brewinfo.brew_input.append(p)
-                self.brewinfo.brew_input_opt[p] = ""
+                self.brewinfo_main.brew_input.append(p)
+                self.brewinfo_main.brew_input_opt[p] = ""
         self.opt["read"] = True
 
-    def read(self, brewinfo):
+    def read(self, brewinfo, is_main=False):
+        if is_main:
+            main = brewinfo
+        else:
+            main = None
         brewinfo.read()
-        for f in brewinfo.get("file_input"):
+        files = brewinfo.get_files()
+        for f in files['ext']:
+            is_next_main = f in files['main']
             f = expandpath(f)
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
@@ -1017,23 +1053,41 @@ class BrewFile:
                     path_prefix = this_dir + '/'
                 b = BrewInfo(self.helper, path_prefix + f.lstrip('./'))
             self.brewinfo_ext.append(b)
-            self.read(b)
+            if main is not None and is_next_main:
+                main = b
+                main_tmp = self.read(b, True)
+            else:
+                main_tmp = self.read(b, False)
+            if main_tmp is not None:
+                main = main_tmp
+        return main
+
+    def list_to_main(self):
+        if self.brewinfo == self.brewinfo_main:
+            return
+        self.brewinfo_main.add("brew_list", self.brewinfo.brew_list)
+        self.brewinfo_main.add("brew_full_list", self.brewinfo.brew_list)
+        self.brewinfo_main.add("tap_list", self.brewinfo.tap_list)
+        self.brewinfo_main.add("cask_list", self.brewinfo.cask_list)
+        self.brewinfo_main.add("cask_nocask_list", self.brewinfo.cask_list)
+        self.brewinfo_main.add("appstore_list", self.brewinfo.appstore_list)
+        self.brewinfo_main.add("brew_list_opt", self.brewinfo.brew_list_opt)
 
     def input_to_list(self, only_ext=False):
         if not only_ext:
-            self.brewinfo.input_to_list()
+            self.brewinfo_main.input_to_list()
         for b in self.brewinfo_ext:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo.filename)
-        self.brewinfo.write()
+        self.banner("# Initialize " + self.brewinfo_main.filename)
+        self.brewinfo_main.write()
         for b in self.brewinfo_ext:
             self.banner("# Initialize " + b.filename)
             b.write()
 
     def get(self, name, only_ext=False):
-        list_copy = self.brewinfo.get(name)
+        list_copy = self.brewinfo_main.get(name)
         if isinstance(list_copy, list):
             if only_ext:
                 del list_copy[:]
@@ -1047,8 +1101,8 @@ class BrewFile:
         return list_copy
 
     def remove_pack(self, name, package):
-        if package in self.brewinfo.get(name):
-            self.brewinfo.remove(name, package)
+        if package in self.brewinfo_main.get(name):
+            self.brewinfo_main.remove(name, package)
         else:
             for b in self.brewinfo_ext:
                 if package in b.get(name):
@@ -1142,80 +1196,7 @@ class BrewFile:
         print("GitHub repository: " + self.user_name() + "/"
               + self.repo_name() + " doesn't exist.")
         print("Please create the repository first, then try again")
-        # Disable direct repository creating for now
-        # https://github.com/rcmdnk/homebrew-file/issues/104
-        sys.exit(0)
-
-        #ans = self.ask_yn("do you want to create the repository?")
-        #if not ans:
-        #    sys.exit(0)
-
-        ## Try to create w/o two-factor code
-        #try:
-        #    import requests
-        #except ImportError:
-        #    print("To create a repository, "
-        #          + "you need to install 'requests' module.")
-        #    ans = self.ask_yn("Do you want to install now?")
-        #    if not ans:
-        #        print("Please prepare Brewfile repository.")
-        #        sys.exit(0)
-        #    else:
-        #        ret = self.proc("pip --version", print_cmd=False,
-        #                        print_out=False, exit_on_err=False)
-        #        if ret != 0:
-        #            self.proc("easy_install pip")
-        #        self.proc("pip install requests")
-        #        import requests
-
-        #url = "https://api.github.com/user/repos"
-        #description = "package list for Homebrew"
-        #data = {"name": self.repo_name(), "description": description,
-        #        "auto_init": "true"}
-        #headers = {}
-        #is_ok = True
-
-        ## Check password
-        #password = getpass.getpass("GitHub password: ")
-
-        #while True:
-        #    r = requests.post(url=url, data=json.dumps(data),
-        #                      auth=(self.user_name(), password),
-        #                      headers=headers)
-        #    if r.ok:
-        #        break
-        #    if r.json()["message"] == "Bad credentials":
-        #        password = getpass.getpass(
-        #            "\033[31;1mWrong password!\033[0m GitHub password: ")
-        #        continue
-        #    if r.json()["message"] ==\
-        #            "Must specify two-factor authentication OTP code.":
-        #        is_ok = False
-        #        break
-        #    self.err(r.json()["message"])
-        #    sys.exit(1)
-
-        #if not is_ok:
-        #    # Try with two-factor code
-        #    twofac = input("GitHub two-factor code: ")
-        #    headers.update({"X-Github-OTP": twofac})
-        #    while True:
-        #        r = requests.post(url=url, data=json.dumps(data),
-        #                          auth=(self.user_name(), password),
-        #                          headers=headers)
-        #        if r.ok:
-        #            break
-        #        if r.json()["message"] ==\
-        #                "Must specify two-factor authentication OTP code.":
-        #            twofac = getpass.getpass("\033[31;1mWrong code!\033[0m "
-        #                                     "GitHub two-factor code: ")
-        #            headers.update({"X-Github-OTP": twofac})
-        #            continue
-        #        self.err(r.json()["message"], 0)
-        #        sys.exit(1)
-
-        ## Clone and initialize
-        #self.clone_repo()
+        sys.exit(1)
 
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
@@ -1311,7 +1292,7 @@ class BrewFile:
             self.clone_repo()
 
         # pull/push
-        self.info("$ cd " + self.brewinfo.get_dir(), 1)
+        self.info(f"$ cd {self.brewinfo.get_dir()}", 1)
         os.chdir(self.brewinfo.get_dir())
 
         ret, lines = self.proc("git status -s -uno", print_cmd=False,
@@ -1378,130 +1359,7 @@ class BrewFile:
             # Not install/remove command, no init.
             sys.exit(0)
 
-        # Use full initialize as brew 2.7.0 can install both Formula and Cask
-        # with same `brew install` command
-        # Then, need to check the package is Formula or Cask
-        # It may add similar delays as full initialization...
         self.initialize(check=False)
-
-        #global_opts = []
-        #packages = []
-        #opts = {}
-        #if cmd == "mas":
-        #    if subcmd in ["purchase", "install"]:
-        #        appstore_packages = {x.split()[0]: x
-        #                             for x in self.get_appstore_list()}
-        #        packages = [appstore_packages[x] for x in args]
-        #    else:
-        #        packages = args
-        #else:
-        #    for v in args:
-        #        if v.startswith("-"):
-        #            if not packages:
-        #                global_opts.append(v)
-        #            else:
-        #                opts[packages[-1]].append(v)
-        #        else:
-        #            packages.append(v)
-        #            opts[packages[-1]] = []
-
-        #if self.brewinfo.check_file():
-        #    self.read_all()
-
-        #if (cmd in ["rm", "remove", "uninstall", "reinstall"]
-        #        or (cmd == "cask" and subcmd
-        #            in ["rm", "remove", "uninstall"])
-        #        or (cmd == "mas" and subcmd in ["uninstall"])):
-        #    for p in packages:
-        #        input_list = "brew_input"
-        #        if cmd == "cask":
-        #            input_list = "cask_input"
-        #        elif cmd == "mas":
-        #            input_list = "appstore_input"
-        #        is_removed = False
-        #        for bi in self.get(input_list):
-        #            if input_list == "appstore_input":
-        #                if p.split()[0] == bi.split()[0]:
-        #                    self.remove_pack("appstore_input", bi)
-        #                    is_removed = True
-        #                    break
-        #            elif p == bi or p == bi.split("/")[-1].replace(".rb", ""):
-        #                self.remove_pack(input_list, bi)
-        #                if input_list == "brew_input":
-        #                    self.remove_pack("brew_input_opt", bi)
-        #                is_removed = True
-        #                break
-        #        if cmd not in ["reinstall"] and not is_removed:
-        #            self.warn(p + " is not in Brewfile.")
-        #            self.warn("Try 'brew file init' to clean up Brewfile")
-        #if (cmd in ["instal", "install", "reinstall"]
-        #        or (cmd == "cask" and subcmd in ["instal", "install"])
-        #        or (cmd == "gem" and subcmd in ["instal", "install"])
-        #        or (cmd == "mas" and subcmd in ["purchase", "install"])):
-        #    input_list = "brew_input"
-        #    if cmd == "cask":
-        #        input_list = "cask_input"
-        #    elif cmd == "mas":
-        #        input_list = "appstore_input"
-        #    for p in packages:
-        #        porig = p
-        #        psplit = p.split("/")
-        #        t = ""
-        #        if psplit:
-        #            if len(psplit) == 3 and not p.startswith("http") and\
-        #                    not p.startswith("ftp") and not p.startswith("/"):
-        #                p = psplit[-1]
-        #                t = "/".join(psplit[:-1])
-        #            else:
-        #                t = "direct"
-        #        if p in self.get(input_list) or\
-        #                p.split("/")[-1].replace(".rb", "")\
-        #                in self.get(input_list):
-        #            self.warn(p + " is already in Brewfile.")
-        #            self.warn("Do 'brew file init' to clean up Brewfile")
-        #            continue
-        #        if cmd == "cask":
-        #            self.brewinfo.cask_input.append(p)
-        #            self.brewinfo.cask_input.sort()
-        #        elif cmd == "mas":
-        #            self.brewinfo.appstore_input.append(p)
-        #        else:
-        #            self.brewinfo.brew_input.append(p)
-        #            if opts[porig]:
-        #                self.brewinfo.brew_input_opt[p] =\
-        #                    " " + " ".join(opts[porig]).strip()
-        #            else:
-        #                self.brewinfo.brew_input_opt[p] = ""
-        #            for p_dep in self.proc(
-        #                    "brew deps " + p, print_cmd=False,
-        #                    print_out=False)[1]:
-        #                if p_dep not in self.get(input_list) \
-        #                        and (not(self.opt["leaves"]
-        #                                 and self.opt["on_request"])
-        #                             or p_dep in
-        #                             self.opt["top_packages"].split(",")):
-        #                    self.brewinfo.brew_input.append(p_dep)
-        #                    self.brewinfo.brew_input_opt[p_dep] = ""
-        #            self.brewinfo.brew_input.sort()
-        #        if t != "" and t not in self.get("tap_input"):
-        #            self.brewinfo.tap_input.append(t)
-        #            self.brewinfo.tap_input.sort()
-        #elif cmd == "tap":
-        #    for p in packages:
-        #        if p in self.get("tap_input"):
-        #            self.warn(p + " is already in Brewfile.")
-        #            self.warn("Do 'brew file init' to clean up Brewfile")
-        #        self.brewinfo.tap_input.append(p)
-        #    self.brewinfo.tap_input.sort()
-        #elif cmd == "untap":
-        #    for p in packages:
-        #        if p not in self.get("tap_input"):
-        #            self.warn(p + " is not in Brewfile.")
-        #            self.warn("Do 'brew file init' to clean up Brewfile")
-        #        self.remove_pack("tap_input", p)
-
-        #self.input_to_list()
-        #self.initialize_write()
 
     def check_brew_cmd(self):
         """Check Homebrew"""
@@ -1548,12 +1406,12 @@ class BrewFile:
 
     def check_mas_cmd(self, force=False):
         """Check mas is installed or not"""
+        if self.opt["is_mas_cmd"] != 0:
+            return self.opt["is_mas_cmd"]
+
         if not is_mac():
             print("mas is not available on Linux!")
             sys.exit(1)
-
-        if self.opt["is_mas_cmd"] != 0:
-            return self.opt["is_mas_cmd"]
 
         if self.proc("type mas", print_cmd=False, print_out=False,
                      exit_on_err=False)[0] != 0:
@@ -1590,9 +1448,12 @@ class BrewFile:
 
         if self.proc(self.opt["mas_cmd"], print_cmd=False, print_out=False,
                      exit_on_err=False)[0] != 0:
-            # fail?
-            self.opt["is_mas_cmd"] = -1
-            return self.opt["is_mas_cmd"]
+            sys.exit(1)
+
+        if self.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
+                     print_out=False, exit_on_err=False)[0] != 0:
+            self.err("\nPlease sign in to the App Store", 0)
+            sys.exit(1)
 
         self.opt["is_mas_cmd"] = 1
 
@@ -1658,7 +1519,7 @@ class BrewFile:
 
         return apps
 
-    def get_cask_list(self, force=False):
+    def get_cask_list(self):
         """Get Cask List"""
 
         lines = self.proc("brew list --cask", print_cmd=False, print_out=False,
@@ -1744,14 +1605,14 @@ class BrewFile:
         """Remove duplications between brewinfo.list to extra files' input"""
 
         # Cleanup extra files
-        for b in self.brewinfo_ext:
+        for b in self.brewinfo_ext + [self.brewinfo_main]:
             for line in ["brew", "tap", "cask", "appstore"]:
                 for p in b.get(line + "_input"):
                     if p not in self.brewinfo.get(line + "_list"):
                         b.remove(line + "_input", p)
 
-        # Copy input to list for extra files.
-        self.input_to_list(only_ext=True)
+        # Copy list to main file
+        self.list_to_main()
 
         # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
@@ -1761,12 +1622,15 @@ class BrewFile:
                 i = "cask"
             else:
                 i = name
-            for p in self.brewinfo.get(name + "_list"):
+            for p in self.brewinfo_main.get(name + "_list"):
                 if p in self.get(i + "_input", True):
-                    self.brewinfo.remove(name + "_list", p)
+                    self.brewinfo_main.remove(name + "_list", p)
 
-        # Keep file in main Brewfile
-        self.brewinfo.file_list.extend(self.brewinfo.file_input)
+        # Keep mian/file in main Brewfile
+        self.brewinfo_main.add("main_list", self.brewinfo_main.main_input)
+        self.brewinfo_main.add("file_list", self.brewinfo_main.file_input)
+
+        # Copy input to list for extra files.
         self.input_to_list(only_ext=True)
 
     def input_backup(self):
@@ -1891,7 +1755,7 @@ class BrewFile:
     def get_files(self, is_print=False):
         """Get Brewfiles"""
         self.read_all()
-        files = [x.filename for x in [self.brewinfo] + self.brewinfo_ext]
+        files = [x.filename for x in [self.brewinfo_main] + self.brewinfo_ext]
         if is_print:
             print("\n".join(files))
         return files
@@ -2186,7 +2050,7 @@ class BrewFile:
                 self.info("Installing " + package)
                 if identifier != "":
                     if self.check_mas_cmd(True) == 1:
-                        self.proc(self.opt["mas_cmd"] + " install "
+                        self.proc(self.opt["mas_cmd"] + " purchase "
                                   + identifier)
                     else:
                         self.info("Please install %s from AppStore." %
@@ -2311,24 +2175,23 @@ class BrewFile:
 
         # Get cask list, force to install brew-cask
         # if it has not been installed.
-        installed_casks = self.get_cask_list(True)[1]
+        installed_casks = self.get_cask_list()[1]
 
         # Set cask directories and reset application information list
         taps = list(filter(
             lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
             self.proc("brew tap", print_cmd=False, print_out=False,
                       env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]))
-        apps = dict([d, {True: [], False: []}]
-                    for d in taps + ["", "appstore"])
+        apps = {d: {True: [], False: []} for d in taps + ["", "appstore"]}
         brew_apps = {}
 
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
-        apps_check = {"cask": dict([d, 0] for d in app_dirs),
-                      "has_cask": dict([d, 0] for d in app_dirs),
-                      "brew": dict([d, 0] for d in app_dirs),
-                      "appstore": dict([d, 0] for d in app_dirs),
-                      "no_cask": dict([d, 0] for d in app_dirs)}
+        apps_check = {"cask": {d: 0 for d in app_dirs},
+                      "has_cask": {d: 0 for d in app_dirs},
+                      "brew": {d: 0 for d in app_dirs},
+                      "appstore": {d: 0 for d in app_dirs},
+                      "no_cask": {d: 0 for d in app_dirs}}
 
         # Load casks
         casks = {}
@@ -2399,6 +2262,8 @@ class BrewFile:
                         if not x.startswith(".") and x != "Utilities"
                         and os.path.isdir(d + "/" + x)]:
                 check = "no_cask"
+                tap = ""
+                opt = ""
                 aname = app.replace(".app", "")
                 if aname in appstore_list:
                     tap = "appstore"
