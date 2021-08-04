@@ -72,6 +72,7 @@ tap              ``brew tap X``
 tapall           ``brew tap X``, and installs all packages of Formulae in the tap.
 cask             ``brew cask install X``. Require `homebrew/homebrew-cask <https://github.com/homebrew/homebrew-cask/>`_. (It will be installed automatically.)
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
+main             Main file. If it exists, new packages will be written to the main file instead of the top file.
 file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
 brewfile         Same as ``file``.
 before           Execute ``X`` at the beginning of the install.
@@ -91,7 +92,7 @@ If you use ``tapall``, Brew-file does ``brew install`` for all Formulae in the r
 in addition to do ``tap`` the repository.
 
 If you want to divide the list into several files.
-If the main ``Brewfile`` has ``file`` or ``brewfile`` commands,
+If the top ``Brewfile`` has ``main``, ``file`` or ``brewfile`` commands,
 then corresponding argument is used as an external file.
 The path can be an absolute or a relative.
 If you use a relative path, like .``/Brewfile2``,
@@ -100,6 +101,9 @@ where the main ``Brewfile`` is.
 
 You can use a nest of ``file``, too.
 The relative path starts from the parent file's directory.
+
+You can also use nested ``main``,
+though it should be no more than once in one Brewfile.
 
 For the path, such ``~`` is translated into ``$HOME``,
 and any environmental variables can be used.
