@@ -265,9 +265,9 @@ You may also want to have each machine specific packages.
 
 In this case, ```main``` command is useful.
 
-First, make Brewfile with common packages:
+First, make Brewfile with common packages::
 
-.. Brewfile:: sh
+.. code-block:: sh
 
     tap homebrew/core
     brew bash
@@ -291,7 +291,7 @@ If you have new packages which are common in ``Brewfile.A`` and ``Brewfile.B``,
 edit these files and move the packages into ``Brewfile``.
 
 If you want to have package lists for each platform,
-it may useful to have ``main`` command like:
+it may useful to have ``main`` command like::
 
     main ./Brewfile.$OSTYPE.$PLATFORM
 
@@ -308,9 +308,9 @@ Share Brewfile with your colleagues
 If you are working with in a group, it is good to have a common Brewfile
 to share the development environment.
 
-In this case, make ``Brewfile`` like:
+In this case, make ``Brewfile`` like::
 
-.. Brewfile:: sh
+.. code-block:: sh
 
     tap homebrew/core
     brew bash
