@@ -254,3 +254,75 @@ You can find applications which were installed manually,
 but can be managed by Cask under "Apps not installed by Cask, but installed in...".
 
 If you want to manage them with ``Brewfile``, just copy above lines w/o "#" for these Apps.
+
+Use machine specific Brewfile
+-----------------------------
+
+You can share Brewfile at different machines
+by using Dropbox or Git repository `Getting Started <https://homebrew-file.readthedocs.io/en/latest/getting_started.html>`_.
+
+You may also want to have each machine specific packages.
+
+In this case, ```main``` command is useful.
+
+First, make Brewfile with common packages:
+
+.. Brewfile:: sh
+
+    tap homebrew/core
+    brew bash
+    brew neovim
+
+    main ./Brewfile.$HOSTNAME
+
+and share it for each machine.
+
+Then, install packages at the machine A.
+
+If you set `brew-warp <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_
+or run ``brew file init``,
+new packages will be written into ``Brewfile.A``
+in the same directory as ``Brewfile``.
+
+If you install packages at the machine B,
+then new packages will be written into ``Brewfile.B``.
+
+If you have new packages which are common in ``Brewfile.A`` and ``Brewfile.B``,
+edit these files and move the packages into ``Brewfile``.
+
+If you want to have package lists for each platform,
+it may useful to have ``main`` command like:
+
+    main ./Brewfile.$OSTYPE.$PLATFORM
+
+This will make unique names like:
+
+* macOS, M1 (arm environment): ``Brewfile.darwin.arm64``
+* macOS, Intel or x86_64 environment at M1: ``Brewfile.darwin.x86_64``
+* Linux, 64 bit: ``Brwefile.linux.x86_64``
+* Cygwin, 64 bit: ``Brwefile.cygwin.x86_64``
+
+Share Brewfile with your colleagues
+-----------------------------------
+
+If you are working with in a group, it is good to have a common Brewfile
+to share the development environment.
+
+In this case, make ``Brewfile`` like:
+
+.. Brewfile:: sh
+
+    tap homebrew/core
+    brew bash
+    brew neovim
+    ...
+
+    main ~/.config/MyBrewfile
+
+Then, maintain ``Brewfile`` for the group.
+It is useful to share it by GitHub.
+Each developer can update the environment by `brew file update`.
+
+In addition, each developer can install his/her necessary packages
+and maintain them by ``MyBrewfile``.
+
