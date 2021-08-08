@@ -1,7 +1,7 @@
 Brew-file
 =========
 
-[![Build Status](https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.org/rcmdnk/homebrew-file)
+[![Build Status](https://travis-ci.com/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.com/rcmdnk/homebrew-file)
 [![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/homebrew-file/badge/?version=latest)](http://homebrew-file.readthedocs.io/en/latest/?badge=latest)
 
