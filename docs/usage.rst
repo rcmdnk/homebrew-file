@@ -263,7 +263,7 @@ by using Dropbox or Git repository `Getting Started <https://homebrew-file.readt
 
 You may also want to have each machine specific packages.
 
-In this case, ```main``` command is useful.
+In this case, ``main`` command is useful.
 
 First, make Brewfile with common packages:
 
