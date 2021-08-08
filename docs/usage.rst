@@ -265,7 +265,7 @@ You may also want to have each machine specific packages.
 
 In this case, ```main``` command is useful.
 
-First, make Brewfile with common packages::
+First, make Brewfile with common packages:
 
 .. code-block:: sh
 
@@ -308,7 +308,7 @@ Share Brewfile with your colleagues
 If you are working with in a group, it is good to have a common Brewfile
 to share the development environment.
 
-In this case, make ``Brewfile`` like::
+In this case, make ``Brewfile`` like:
 
 .. code-block:: sh
 
@@ -321,7 +321,7 @@ In this case, make ``Brewfile`` like::
 
 Then, maintain ``Brewfile`` for the group.
 It is useful to share it by GitHub.
-Each developer can update the environment by `brew file update`.
+Each developer can update the environment by ``brew file update``.
 
 In addition, each developer can install his/her necessary packages
 and maintain them by ``MyBrewfile``.
