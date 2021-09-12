@@ -107,8 +107,8 @@ though it should be no more than once in one Brewfile.
 For the path, such ``~`` is translated into ``$HOME``,
 and any environmental variables can be used.
 
-You can also some shell variables: ``HOSTNAME``, ``HOSTTYPE`` and ``OSTYPE``.
-Inaddition, ``PLATFORM``, which is platform identifier like
+You can also some shell variables: ``$HOSTNAME``, ``$HOSTTYPE`` and ``$OSTYPE``.
+Inaddition, ``$PLATFORM``, which is platform identifier like
 darwin, linux, or win32.
 
 e.g.
