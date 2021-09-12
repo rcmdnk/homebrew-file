@@ -33,7 +33,6 @@ with installed packages or not.
 You can also make it with ``install`` (``-i``) subcommand.
 
 With ``install`` subcommand, Brew-file tries to install packages listed in ``Brewfile``.
-If any packages managed with Homebrew Cask are listed, brew-cask is also installed automatically.
 
 ``Brewfile`` convention is similar as Brewdler.
 Normally, you don't need to modify anything on Brewdler's ``Brewfile`` for Brew-file
@@ -41,19 +40,19 @@ Normally, you don't need to modify anything on Brewdler's ``Brewfile`` for Brew-
 Example::
 
     # Tap repositories and their packages
-    tap homebrew/cask
-    brew 'brew-cask'
-    # install brew-cask # install is same as "brew". Quotes are not mandatory.
+    tap rcmdnk/file
+    brew brew-file
 
-    tapall rcmdnk/file # This will trigger `brew install brew-file`, too
+    # This will install all packages in rcmdnkpac
+    tapall rcmdnk/rcmdnkpac
 
-    # Cask packages
-    cask firefox
-    #cask install firefox # "cask install" is same as "cask"
-
-    # Other Homebrew packages
+    # Homebrew packages
     brew mercurial
     brew macvim --with-lua
+
+    # Cask packages
+    tap homebrew/cask
+    cask bettertouchtool
 
     # Additional files
     file ~/.Brewfile
@@ -70,7 +69,7 @@ brew             ``brew install X``
 install          Same as ``brew``
 tap              ``brew tap X``
 tapall           ``brew tap X``, and installs all packages of Formulae in the tap.
-cask             ``brew cask install X``. Require `homebrew/homebrew-cask <https://github.com/homebrew/homebrew-cask/>`_. (It will be installed automatically.)
+cask             ``brew install --cask X``.
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
 main             Main file. If it exists, new packages will be written to the main file instead of the top file.
 file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
@@ -134,10 +133,6 @@ then you can put Host specific packages in **~/.Brewfile**.
 (If the file doesn't exist, ``brew-file`` just ignores it.)
 
 Other example: `Add an option to ignore appstore apps · Issue #22 · rcmdnk/homebrew-file <https://github.com/rcmdnk/homebrew-file/issues/22>`_
-
-You don't need to ``brew install`` by hand.
-As written above, ``tap 'homebrew/cask'`` is can be dropped
-because ``cask 'firefox'`` triggers it.
 
 Some packages such macvim has Application (MacVim.app).
 If you want to install them to Applications area,
