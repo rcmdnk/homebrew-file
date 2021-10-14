@@ -20,6 +20,12 @@ Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` comm
       source $(brew --prefix)/etc/brew-wrap
     fi
 
+Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command::
+
+    if test -f (brew --prefix)/etc/brew-wrap
+      source (brew --prefix)/etc/brew-wrap.fish
+    end
+
 **brew-wrap** wraps the original ``brew`` command
 for an automatic update of **Brewfile** when you execute
 such a ``brew install`` or ``brew uninstall``.
