@@ -16,13 +16,17 @@ which installs Homebrew itself, too, if it is not installed.
 
 Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` command::
 
+.. code-block:: sh
+
     if [ -f $(brew --prefix)/etc/brew-wrap ];then
       source $(brew --prefix)/etc/brew-wrap
     fi
 
 Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command::
 
-    if test -f (brew --prefix)/etc/brew-wrap
+.. code-block:: sh
+
+    if test -f (brew --prefix)/etc/brew-wrap.fish
       source (brew --prefix)/etc/brew-wrap.fish
     end
 

@@ -22,13 +22,21 @@ Features:
 
     * But you can use ``brew -e`` or ``brew --edit`` to edit **Brewfile**.
 
-To enable it, just read this file in your ``.bashrc`` or any of your setup file:
+To enable it, just read this file in your **.bashrc** or **.zshrc**::
 
 .. code-block:: sh
 
    if [ -f $(brew --prefix)/etc/brew-wrap ];then
      source $(brew --prefix)/etc/brew-wrap
    fi
+
+Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command::
+
+.. code-block:: sh
+
+    if test -f (brew --prefix)/etc/brew-wrap.fish
+      source (brew --prefix)/etc/brew-wrap.fish
+    end
 
 ``brew``/``mas`` function in ``brew-wrap`` executes original ``brew``/``mas``
 if ``brew-file`` is not included.
