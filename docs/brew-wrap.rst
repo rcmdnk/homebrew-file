@@ -22,7 +22,7 @@ Features:
 
     * But you can use ``brew -e`` or ``brew --edit`` to edit **Brewfile**.
 
-To enable it, just read this file in your **.bashrc** or **.zshrc**::
+To enable it, just read this file in your **.bashrc** or **.zshrc**:
 
 .. code-block:: sh
 
@@ -30,7 +30,7 @@ To enable it, just read this file in your **.bashrc** or **.zshrc**::
      source $(brew --prefix)/etc/brew-wrap
    fi
 
-Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command::
+Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command:
 
 .. code-block:: sh
 
