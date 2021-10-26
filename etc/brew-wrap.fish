@@ -6,12 +6,10 @@ function brew
   # Check if do wrap or not
   set wrap 1
   set v (python --version 2>&1|cut -d" " -f2|sed 's/\./\n/g')
-  if test $v[1] -eq 2
-    if test $v[2] -lt 7
-      set wrap 0
-    elif test $v[2] -eq 7 && test $v[3] -le 6
-      set wrap 0
-    end
+  if test $v[1] -lt 3
+    set wrap 0
+  elif test $v[2] -lt 6
+    set wrap 0
   end
 
   # Set exe

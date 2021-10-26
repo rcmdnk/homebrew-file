@@ -7,12 +7,10 @@ brew () {
   # Check if do wrap or not
   wrap=1
   v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
-  if [ "${v[0]}" -eq 2 ];then
-    if [ "${v[1]}" -lt 7 ];then
-      wrap=0
-    elif [ "${v[1]}" -eq 7 ] && [ "${v[2]}" -le 6 ];then
-      wrap=0
-    fi
+  if [ "${v[0]}" -lt 3 ];then
+    wrap=0
+  elif [ "${v[1]}" -lt 6 ];then
+    wrap=0
   fi
 
   # Set exe
@@ -132,12 +130,10 @@ mas () {
   # Check if do wrap or not
   wrap=1
   v=($(python --version 2>&1|cut -d" " -f2|sed 's/\./ /g'))
-  if [ "${v[0]}" -eq 2 ];then
-    if [ "${v[1]}" -lt 7 ];then
-      wrap=0
-    elif [ "${v[1]}" -eq 7 ] && [ "${v[2]}" -le 6 ];then
-      wrap=0
-    fi
+  if [ "${v[0]}" -lt 3 ];then
+    wrap=0
+  elif [ "${v[1]}" -lt 6 ];then
+    wrap=0
   fi
 
   # Set exe
