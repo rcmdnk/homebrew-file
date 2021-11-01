@@ -104,12 +104,16 @@ The relative path starts from the parent file's directory.
 You can also use nested ``main``,
 though it should be no more than once in one Brewfile.
 
-For the path, such ``~`` is translated into ``$HOME``,
-and any environmental variables can be used.
-
-You can also some shell variables: ``$HOSTNAME``, ``$HOSTTYPE`` and ``$OSTYPE``.
+For the path, such ``~`` is translated into ``$HOME``.
+You can use some shell variables: ``$HOSTNAME``, ``$HOSTTYPE`` and ``$OSTYPE``.
 Inaddition, ``$PLATFORM``, which is platform identifier like
 darwin, linux, or win32.
+
+If you use `brew-warp <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_,
+any environmental variables can be used.
+
+Environmental variables are not translated if you do not use brew-wrap or
+call brew directly like ``command brew``.
 
 e.g.
 
