@@ -112,8 +112,12 @@ darwin, linux, or win32.
 If you use `brew-warp <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_,
 any environmental variables can be used.
 
-Environmental variables are not translated if you do not use brew-wrap or
-call brew directly like ``command brew``.
+.. warning::
+
+    Environmental variables are not translated if you do not use brew-wrap or
+    call brew directly like ``command brew``.
+    Only ``~``, ``$HOME``, ``$HOSTNAME``, ``$HOSTTYPE``, ``$OSTYPE``, and ``$PLATFORM``
+    are translated in these cases.
 
 e.g.
 
