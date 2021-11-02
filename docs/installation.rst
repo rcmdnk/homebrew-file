@@ -14,7 +14,7 @@ or you can use install script::
 
 which installs Homebrew itself, too, if it is not installed.
 
-Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` command::
+Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` command:
 
 .. code-block:: sh
 
@@ -22,7 +22,7 @@ Then, add following lines in you **.bashrc** or **.zshrc** to wrap ``brew`` comm
       source $(brew --prefix)/etc/brew-wrap
     fi
 
-Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command::
+Or, for Fish Shell add the following lines in your **config.fish** to wrap ``brew`` command:
 
 .. code-block:: sh
 
