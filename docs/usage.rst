@@ -109,7 +109,7 @@ You can use some shell variables: ``$HOSTNAME``, ``$HOSTTYPE`` and ``$OSTYPE``.
 Inaddition, ``$PLATFORM``, which is platform identifier like
 darwin, linux, or win32.
 
-If you use `brew-warp <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_,
+If you use `brew-wrap <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_,
 any environmental variables can be used.
 
 .. warning::
@@ -282,7 +282,7 @@ and share it for each machine.
 
 Then, install packages at the machine A.
 
-If you set `brew-warp <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_
+If you set `brew-wrap <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_
 or run ``brew file init``,
 new packages will be written into ``Brewfile.A``
 in the same directory as ``Brewfile``.
@@ -302,8 +302,8 @@ This will make unique names like:
 
 * macOS, M1 (arm environment): ``Brewfile.darwin.arm64``
 * macOS, Intel or x86_64 environment at M1: ``Brewfile.darwin.x86_64``
-* Linux, 64 bit: ``Brwefile.linux.x86_64``
-* Cygwin, 64 bit: ``Brwefile.cygwin.x86_64``
+* Linux, 64 bit: ``Brewfile.linux.x86_64``
+* Cygwin, 64 bit: ``Brewfile.cygwin.x86_64``
 
 Share Brewfile with your colleagues
 -----------------------------------
