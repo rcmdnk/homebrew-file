@@ -5,21 +5,22 @@ brew () {
   [ -z "$ZSH_VERSION" ] || emulate -L ksh
 
   # Set exe
-  exe="command brew"
+  local exe="command brew"
 
   # Do wrap
   # Check args
-  nargs=0
+  local nargs=0
+  local a
   for a in "$@";do
     if [[ ! "$a" =~ ^- ]];then
       ((nargs++))
     fi
   done
-  cmd=$1
-  cmd2=$2
+  local cmd=$1
+  local cmd2=$2
 
   # No auto update for tap listing
-  env=""
+  local env=""
   if [ "$cmd" = "tap" ] && [ $nargs -eq 1 ];then
     env="HOMEBREW_NO_AUTO_UPDATE=1"
   fi
@@ -59,8 +60,20 @@ brew () {
   fi
 
   # Execute command
+  local brewfile=$(cat $(brew-file get_files))
   eval $env $exe "$@"
+  ret=$?
+
+  # Commands after brew command
+  if ! diff <(echo "$brewfile") <(cat $(brew-file get_files)) >/dev/null;then
+    _post_brewfile_update
+  fi
+
   return $?
+}
+
+_post_brewfile_update () {
+  :
 }
 
 # Wrap the brew command completion, to use the completion on `brew file`.
