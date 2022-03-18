@@ -60,7 +60,7 @@ brew () {
   fi
 
   # Execute command
-  local brewfile=$(cat $(brew-file get_files))
+  local brewfile=$(cat $(brew-file get_files)) 2>/dev/null # supress warnings for non-existant brewfiles
   eval $env $exe "$@"
   ret=$?
 
