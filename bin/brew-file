@@ -28,8 +28,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.5.9"
-__date__ = "15/Mar/2022"
+__version__ = "v8.5.10"
+__date__ = "20/Mar/2022"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -911,6 +911,8 @@ class BrewFile:
         self.opt["no_appstore"] = to_num(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1))
 
+        self.opt["all_files"] = False
+
         self.int_opts = ["verbose"]
         self.float_opts = []
 
@@ -1767,10 +1769,11 @@ class BrewFile:
             self.err("    $ " + __prog__ + " init", 0)
             sys.exit(1)
 
-    def get_files(self, is_print=False):
+    def get_files(self, is_print=False, all_files=False):
         """Get Brewfiles"""
         self.read_all()
-        files = [x.filename for x in [self.brewinfo_main] + self.brewinfo_ext]
+        files = [x.filename for x in [self.brewinfo_main] + self.brewinfo_ext
+                 if all_files or os.path.exists(x.filename)]
         if is_print:
             print("\n".join(files))
         return files
@@ -2651,7 +2654,7 @@ class BrewFile:
 
         # Get files
         if self.opt["command"] == "get_files":
-            self.get_files(is_print=True)
+            self.get_files(is_print=True, all_files=self.opt["all_files"])
             sys.exit(0)
 
         # Cleanup
@@ -2826,6 +2829,12 @@ def main():
         dest="no_appstore", help="Set AppStore application check level to 0.\n"
         "(legacy option, works same as '--appstore 0'.)\n")
 
+    all_files_parser = argparse.ArgumentParser(**arg_parser_opts)
+    all_files_parser.add_argument(
+        "--all_files", action="store_true", default=b.opt["all_files"],
+        dest="all_files",
+        help="Show all files including non-existing files.\n")
+
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
     dryrun_parser.add_argument(
         "-C", action="store_false", default=b.opt["dryrun"],
@@ -2951,7 +2960,7 @@ def main():
                           parents=min_parsers, **subparser_opts)
     help_doc = "Get Brewfile's full path, including additional files."
     subparsers.add_parser("get_files", description=help_doc, help=help_doc,
-                          parents=[file_parser],
+                          parents=[file_parser, all_files_parser],
                           **subparser_opts)
     help_doc = "or --commands\nShow commands."
     subparsers.add_parser("commands", description=help_doc, help=help_doc,
@@ -3018,7 +3027,7 @@ def main():
                    "-F", "--format", "--form", "--leaves", "--on_request",
                    "--top_packages", "-U", "--noupgrade", "-r", "--repo", "-n",
                    "--nolink", "--caskonly", "--appstore", "--no_appstore",
-                   "-C", "-y", "--yes", "-V", "--verbose"]
+                   "--all_files", "-C", "-y", "--yes", "-V", "--verbose"]
         print("commands:", " ".join(commands))
         print("commands_hyphen:", " ".join(commands_hyphen))
         print("options:", " ".join(options))

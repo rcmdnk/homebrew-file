@@ -60,12 +60,12 @@ brew () {
   fi
 
   # Execute command
-  local brewfile=$(cat $(brew-file get_files))
+  local brewfile=$(brew-file cat)
   eval $env $exe "$@"
   ret=$?
 
   # Commands after brew command
-  if ! diff <(echo "$brewfile") <(cat $(brew-file get_files)) >/dev/null;then
+  if ! diff <(echo "$brewfile") <(brew-file cat) >/dev/null;then
     _post_brewfile_update
   fi
 
