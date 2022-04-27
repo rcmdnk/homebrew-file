@@ -65,7 +65,7 @@ brew () {
   ret=$?
 
   # Commands after brew command
-  if ! diff <(echo "$brewfile") <(brew-file cat) >/dev/null;then
+  if ! command diff <(echo "$brewfile") <(brew-file cat) >/dev/null;then
     _post_brewfile_update
   fi
 
