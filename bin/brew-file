@@ -43,8 +43,7 @@ def is_mac():
 
 def open_output_file(name, mode="w"):
     """Helper function to open a file even if it doesn't exist."""
-    if os.path.dirname(name) != "" and \
-            not os.path.exists(os.path.dirname(name)):
+    if os.path.dirname(name) != "" and not os.path.exists(os.path.dirname(name)):
         os.makedirs(os.path.dirname(name))
     return open(name, mode)
 
@@ -72,11 +71,12 @@ def to_num(val):
 
 
 shell_envs = {
-    'HOSTNAME': os.uname().nodename,
-    'HOSTTYPE': os.uname().machine,
-    'OSTYPE': subprocess.run(["bash", "-c", "echo $OSTYPE"],
-                             capture_output=True, text=True).stdout.strip(),
-    'PLATFORM': sys.platform
+    "HOSTNAME": os.uname().nodename,
+    "HOSTTYPE": os.uname().machine,
+    "OSTYPE": subprocess.run(
+        ["bash", "-c", "echo $OSTYPE"], capture_output=True, text=True
+    ).stdout.strip(),
+    "PLATFORM": sys.platform,
 }
 
 
@@ -86,9 +86,11 @@ def expandpath(path):
         for kk in [f"${k}", f"${{{k}}}"]:
             if kk in path:
                 path = path.replace(kk, shell_envs[k])
-    return re.sub(r'(?<!\\)\$(\w+|\{([^}]*)\})',
-                  lambda x: os.environ.get(x.group(2) or x.group(1), ''),
-                  os.path.expanduser(path)).replace('\\$', '$')
+    return re.sub(
+        r"(?<!\\)\$(\w+|\{([^}]*)\})",
+        lambda x: os.environ.get(x.group(2) or x.group(1), ""),
+        os.path.expanduser(path),
+    ).replace("\\$", "$")
 
 
 class Tee:
@@ -162,21 +164,38 @@ class BrewHelper:
 
     def __init__(self, opt):
         self.opt = opt
-        self.colors = {"black": "30", "red": "31", "green": "32",
-                       "yellow": "33", "blue": "34", "magenta": "35",
-                       "lightblue": 36, "white": 37}
+        self.colors = {
+            "black": "30",
+            "red": "31",
+            "green": "32",
+            "yellow": "33",
+            "blue": "34",
+            "magenta": "35",
+            "lightblue": 36,
+            "white": 37,
+        }
 
     def readstdout(self, proc):
-        for line in iter(proc.stdout.readline, ''):
+        for line in iter(proc.stdout.readline, ""):
             line = line.rstrip()
-            if line == '':
+            if line == "":
                 continue
             yield line
 
-    def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_err=True, separate_err=False, print_err=True,
-             verbose=1, env={}):
-        """ Get process output."""
+    def proc(
+        self,
+        cmd,
+        print_cmd=True,
+        print_out=True,
+        exit_on_err=True,
+        separate_err=False,
+        print_err=True,
+        verbose=1,
+        env=None,
+    ):
+        """Get process output."""
+        if env is None:
+            env = {}
         if not isinstance(cmd, list):
             cmd = shlex.split(cmd)
         cmd_orig = " ".join(["$"] + cmd)
@@ -193,12 +212,13 @@ class BrewHelper:
                 if print_err:
                     stderr = None
                 else:
-                    stderr = open(os.devnull, 'w')
+                    stderr = open(os.devnull, "w")
             else:
                 stderr = subprocess.STDOUT
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                 text=True, env=all_env)
-            if hasattr(stderr, 'close'):
+            p = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=stderr, text=True, env=all_env
+            )
+            if hasattr(stderr, "close"):
                 stderr.close()
             for line in self.readstdout(p):
                 lines.append(line)
@@ -243,8 +263,7 @@ class BrewHelper:
         for line in text.split("\n"):
             if width < len(line):
                 width = len(line)
-        self.out("\n" + "#" * width + "\n" + text + "\n" + "#" * width + "\n",
-                 verbose)
+        self.out("\n" + "#" * width + "\n" + text + "\n" + "#" * width + "\n", verbose)
 
     def brew_val(self, name):
         if name not in self.opt:
@@ -386,15 +405,15 @@ class BrewInfo:
         self.cask_nocask_list.sort()
 
         self.appstore_list.sort(
-            key=lambda x: x.split()[1].lower() if len(x.split()) > 1
-            else x.split()[0])
+            key=lambda x: x.split()[1].lower() if len(x.split()) > 1 else x.split()[0]
+        )
 
     def get(self, name):
         return copy.deepcopy(self.list_dic[name])
 
     def get_files(self):
-        files = {'main': self.get('main_input')}
-        files.update({'ext': self.get('file_input')})
+        files = {"main": self.get("main_input")}
+        files.update({"ext": self.get("file_input")})
         return files
 
     def remove(self, name, package):
@@ -413,8 +432,7 @@ class BrewInfo:
 
     def add(self, name, val):
         if isinstance(self.list_dic[name], list):
-            self.list_dic[name].extend(
-                [x for x in val if x not in self.list_dic[name]])
+            self.list_dic[name].extend([x for x in val if x not in self.list_dic[name]])
         elif isinstance(self.list_dic[name], dict):
             self.list_dic[name].update(val)
 
@@ -440,11 +458,16 @@ class BrewInfo:
                 is_ignore = True
             if is_ignore:
                 continue
-            if re.match(" *$", line) is not None or\
-                    re.match(" *#", line) is not None:
+            if re.match(" *$", line) is not None or re.match(" *#", line) is not None:
                 continue
-            args = line.replace("'", "").replace('"', "").\
-                replace(",", " ").replace("[", "").replace("]", "").split()
+            args = (
+                line.replace("'", "")
+                .replace('"', "")
+                .replace(",", " ")
+                .replace("[", "")
+                .replace("]", "")
+                .split()
+            )
             cmd = args[0]
             p = args[1] if len(args) > 1 else ""
             if len(args) > 2 and p in ["tap", "cask"]:
@@ -453,8 +476,7 @@ class BrewInfo:
                 p = args[1]
                 if self.helper.opt["form"] == "none":
                     self.helper.opt["form"] = "cmd"
-            if len(args) > 2 and cmd in ["brew", "cask"] and \
-                    p == "install":
+            if len(args) > 2 and cmd in ["brew", "cask"] and p == "install":
                 args.pop(1)
                 p = args[1]
                 if self.helper.opt["form"] == "none":
@@ -478,7 +500,7 @@ class BrewInfo:
 
             if cmd in ("brew", "install"):
                 self.brew_input.append(p)
-                self.brew_input_opt[p] = (opt)
+                self.brew_input_opt[p] = opt
             elif cmd == "tap":
                 self.tap_input.append(p)
             elif cmd == "tapall":
@@ -490,15 +512,16 @@ class BrewInfo:
                     self.cask_input.append(tp)
             elif cmd == "cask":
                 self.cask_input.append(p)
-            elif cmd == "mas" and line.find(',') != -1:
+            elif cmd == "mas" and line.find(",") != -1:
                 if self.helper.opt["form"] == "none":
                     self.helper.opt["form"] = "bundle"
                 p = line.split()[1].strip(",").strip("'").strip('"')
                 pid = line.split()[3]
-                self.appstore_input.append(pid + ' ' + p)
+                self.appstore_input.append(pid + " " + p)
             elif cmd in ("appstore", "mas"):
-                self.appstore_input.append(re.sub("^ *appstore *", "", line).
-                                           strip().strip("'").strip('"'))
+                self.appstore_input.append(
+                    re.sub("^ *appstore *", "", line).strip().strip("'").strip('"')
+                )
             elif cmd == "main":
                 self.main_input.append(p)
                 self.file_input.append(p)
@@ -518,8 +541,14 @@ class BrewInfo:
 
         tap_user = os.path.dirname(tap)
         tap_repo = os.path.basename(tap)
-        return self.helper.brew_val("repository") + "/Library/Taps" +\
-            "/" + tap_user + "/homebrew-" + tap_repo
+        return (
+            self.helper.brew_val("repository")
+            + "/Library/Taps"
+            + "/"
+            + tap_user
+            + "/homebrew-"
+            + tap_repo
+        )
 
     def get_tap_packs(self, tap):
         """Helper for tap configuration file"""
@@ -527,14 +556,20 @@ class BrewInfo:
         tap_path = self.get_tap_path(tap)
         if not os.path.isdir(tap_path):
             return packs
-        packs = list(map(lambda x: x.replace(".rb", ""),
-                         filter(lambda y: y.endswith(".rb"),
-                                os.listdir(tap_path))))
+        packs = list(
+            map(
+                lambda x: x.replace(".rb", ""),
+                filter(lambda y: y.endswith(".rb"), os.listdir(tap_path)),
+            )
+        )
         path = tap_path + "/Formula"
         if os.path.isdir(path):
-            packs += list(map(lambda x: x.replace(".rb", ""),
-                              filter(lambda y: y.endswith(".rb"),
-                                     os.listdir(path))))
+            packs += list(
+                map(
+                    lambda x: x.replace(".rb", ""),
+                    filter(lambda y: y.endswith(".rb"), os.listdir(path)),
+                )
+            )
         return sorted(packs)
 
     def get_tap_casks(self, tap):
@@ -545,9 +580,14 @@ class BrewInfo:
             return casks
         path = tap_path + "/Casks"
         if os.path.isdir(path):
-            casks = list(map(lambda x: x.replace(".rb", ""),
-                             filter(lambda y: y.endswith(".rb"),
-                                    os.listdir(tap_path + "/Casks"))))
+            casks = list(
+                map(
+                    lambda x: x.replace(".rb", ""),
+                    filter(
+                        lambda y: y.endswith(".rb"), os.listdir(tap_path + "/Casks")
+                    ),
+                )
+            )
         return sorted(casks)
 
     def get_leaves(self):
@@ -561,9 +601,16 @@ class BrewInfo:
         if package == "":
             package = "--installed"
         infotmp = json.loads(
-            ''.join(self.helper.proc("brew info --json=v1 " + package,
-                                     print_cmd=False, print_out=False,
-                                     exit_on_err=True, separate_err=True)[1]))
+            "".join(
+                self.helper.proc(
+                    "brew info --json=v1 " + package,
+                    print_cmd=False,
+                    print_out=False,
+                    exit_on_err=True,
+                    separate_err=True,
+                )[1]
+            )
+        )
         info = {}
         for i in infotmp:
             info[i["name"]] = i
@@ -579,8 +626,11 @@ class BrewInfo:
         if package_info["linked_keg"] is None:
             version = self.helper.proc(
                 "ls -l " + self.helper.brew_val("prefix") + "/opt/" + package,
-                print_cmd=False, print_out=False, exit_on_err=False,
-                separate_err=False)[1][0]
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+                separate_err=False,
+            )[1][0]
             version = version.split("/")[-1]
             if "No such file or directory" in version:
                 version = ""
@@ -615,8 +665,11 @@ class BrewInfo:
 
     def convert_option(self, opt):
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
-            opt = ", args: [" + ", ".join(
-                ["'" + re.sub("^--", "", x) + "'" for x in opt.split()]) + "]"
+            opt = (
+                ", args: ["
+                + ", ".join(["'" + re.sub("^--", "", x) + "'" for x in opt.split()])
+                + "]"
+            )
         return opt
 
     def packout(self, pack):
@@ -629,7 +682,7 @@ class BrewInfo:
             pack_split = pack.split()
             pid = pack_split[0]
             name = pack_split[1:]
-            return "'" + ' '.join(name) + "', id: " + pid
+            return "'" + " ".join(name) + "', id: " + pid
         return pack
 
     def write(self):
@@ -704,8 +757,7 @@ fi
         if self.tap_list:
             isfirst = True
 
-            def first_tap_pack_write(isfirst, direct_first, isfirst_pack, tap,
-                                     cmd_tap):
+            def first_tap_pack_write(isfirst, direct_first, isfirst_pack, tap, cmd_tap):
                 output = ""
                 if isfirst:
                     output += "\n# tap repositories and their packages\n"
@@ -724,18 +776,19 @@ fi
                     direct_first = True
 
                 if not self.helper.opt["caskonly"]:
-                    output += first_tap_pack_write(isfirst, direct_first,
-                                                   isfirst_pack, t, cmd_tap)
+                    output += first_tap_pack_write(
+                        isfirst, direct_first, isfirst_pack, t, cmd_tap
+                    )
                     isfirst = isfirst_pack = False
 
                     for p in self.brew_list[:]:
-                        if p.split("/")[-1].replace(
-                                ".rb", "") in tap_packs:
+                        if p.split("/")[-1].replace(".rb", "") in tap_packs:
                             if direct_first:
                                 direct_first = False
                                 output += "\n## " + "Direct install\n"
-                            pack = self.packout(p) +\
-                                self.convert_option(self.brew_list_opt[p])
+                            pack = self.packout(p) + self.convert_option(
+                                self.brew_list_opt[p]
+                            )
                             output += cmd_install + pack + "\n"
                             self.brew_list.remove(p)
                             del self.brew_list_opt[p]
@@ -745,7 +798,8 @@ fi
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
-                            isfirst, False, isfirst_pack, t, cmd_tap)
+                            isfirst, False, isfirst_pack, t, cmd_tap
+                        )
                         isfirst = isfirst_pack = False
                         output += cmd_cask + self.packout(p) + "\n"
                         self.cask_list.remove(p)
@@ -754,8 +808,7 @@ fi
         if not self.helper.opt["caskonly"] and self.brew_list:
             output += "\n# Other Homebrew packages\n"
             for p in self.brew_list:
-                pack = self.packout(p) +\
-                    self.convert_option(self.brew_list_opt[p])
+                pack = self.packout(p) + self.convert_option(self.brew_list_opt[p])
                 output += cmd_install + pack + "\n"
 
         # Casks
@@ -772,8 +825,7 @@ fi
                 output += cmd_cask_nocask + self.packout(c) + "\n"
 
         # App Store applications
-        if is_mac() and self.helper.opt["appstore"] \
-                and self.appstore_list:
+        if is_mac() and self.helper.opt["appstore"] and self.appstore_list:
             output += "\n# App Store applications\n"
             for a in self.appstore_list:
                 output += cmd_appstore + self.mas_pack(a) + "\n"
@@ -806,20 +858,25 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(self.filename, sys.stdout,
-                      self.helper.opt["verbose"] > 1)
+            out = Tee(self.filename, sys.stdout, self.helper.opt["verbose"] > 1)
             out.write(output)
             out.close()
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
             self.helper.proc(
-                "chmod 755 %s" % self.filename, print_cmd=False,
-                print_out=False, exit_on_err=False)
+                "chmod 755 %s" % self.filename,
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+            )
         else:
             self.helper.proc(
-                "chmod 644 %s" % self.filename, print_cmd=False,
-                print_out=False, exit_on_err=False)
+                "chmod 644 %s" % self.filename,
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+            )
 
 
 class BrewFile:
@@ -833,8 +890,7 @@ class BrewFile:
         self.opt = {}
 
         # Prepare helper, need verbose first
-        self.opt["verbose"] = int(
-            os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
+        self.opt["verbose"] = int(os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
 
         # Other default values
@@ -843,18 +899,16 @@ class BrewFile:
         brewfile_config = os.environ["HOME"] + "/.config/brewfile/Brewfile"
         brewfile_home = os.environ["HOME"] + "/.brewfile/Brewfile"
         if self.opt["input"] == "":
-            if not os.path.isfile(brewfile_config) and\
-                    os.path.isfile(brewfile_home):
+            if not os.path.isfile(brewfile_config) and os.path.isfile(brewfile_home):
                 self.opt["input"] = brewfile_home
             else:
                 self.opt["input"] = brewfile_config
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
-        self.opt["leaves"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
+        self.opt["leaves"] = to_bool(os.environ.get("HOMEBREW_BREWFILE_LEAVES", False))
         self.opt["on_request"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_ON_REQUEST", False))
-        self.opt["top_packages"] = os.environ.get(
-            "HOMEBREW_BREWFILE_TOP_PACKAGES", "")
+            os.environ.get("HOMEBREW_BREWFILE_ON_REQUEST", False)
+        )
+        self.opt["top_packages"] = os.environ.get("HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         self.opt["form"] = "none"
         self.opt["repo"] = ""
         self.opt["noupgradeatupdate"] = False
@@ -866,7 +920,8 @@ class BrewFile:
         self.opt["reattach_formula"] = "reattach-to-user-namespace"
         self.opt["mas_formula"] = "mas"
         self.opt["my_editor"] = os.environ.get(
-            "HOMEBREW_BREWFILE_EDITOR", os.environ.get("EDITOR", "vim"))
+            "HOMEBREW_BREWFILE_EDITOR", os.environ.get("EDITOR", "vim")
+        )
         self.opt["is_brew_cmd"] = False
         self.opt["brew_cmd"] = ""
         self.opt["mas_cmd"] = "mas"
@@ -883,33 +938,35 @@ class BrewFile:
 
         # Check Homebrew variables
         cask_opts = self.parse_env_opts(
-            "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""})
+            "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""}
+        )
 
-        if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and\
-                os.path.isdir("/opt/homebrew-cask/Caskroom"):
+        if not os.path.isdir(self.brew_val("prefix") + "/Caskroom") and os.path.isdir(
+            "/opt/homebrew-cask/Caskroom"
+        ):
             self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
         else:
-            self.opt["caskroom"] =\
-                self.brew_val("prefix") + "/Caskroom"
-        self.opt["appdir"] = cask_opts["--appdir"].rstrip("/") \
-            if cask_opts["--appdir"] != ""\
+            self.opt["caskroom"] = self.brew_val("prefix") + "/Caskroom"
+        self.opt["appdir"] = (
+            cask_opts["--appdir"].rstrip("/")
+            if cask_opts["--appdir"] != ""
             else os.environ["HOME"] + "/Applications"
-        self.opt["appdirlist"] = ["/Applications",
-                                  os.environ["HOME"] + "/Applications"]
+        )
+        self.opt["appdirlist"] = ["/Applications", os.environ["HOME"] + "/Applications"]
         if self.opt["appdir"].rstrip("/") not in self.opt["appdirlist"]:
             self.opt["appdirlist"].append(self.opt["appdir"])
-        self.opt["appdirlist"] += [x.rstrip("/") + "/Utilities"
-                                   for x in self.opt["appdirlist"]]
-        self.opt["appdirlist"] = [x for x in self.opt["appdirlist"]
-                                  if os.path.isdir(x)]
+        self.opt["appdirlist"] += [
+            x.rstrip("/") + "/Utilities" for x in self.opt["appdirlist"]
+        ]
+        self.opt["appdirlist"] = [x for x in self.opt["appdirlist"] if os.path.isdir(x)]
         # fontdir may be used for application search, too
         self.opt["fontdir"] = cask_opts["--fontdir"]
 
-        self.opt["appstore"] = to_num(
-            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1))
+        self.opt["appstore"] = to_num(os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1))
 
         self.opt["no_appstore"] = to_num(
-            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1))
+            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1)
+        )
 
         self.opt["all_files"] = False
 
@@ -940,15 +997,19 @@ class BrewFile:
 
             # these can be flags ("--flag") or values ("--key=value")
             # but not weirdness ("--foo=bar=baz")
-            user_opts = {key.lower(): value for (key, value) in
-                         [pair.partition("=")[::2] for pair in env_opts.split()
-                          if pair.count("=") < 2]}
+            user_opts = {
+                key.lower(): value
+                for (key, value) in [
+                    pair.partition("=")[::2]
+                    for pair in env_opts.split()
+                    if pair.count("=") < 2
+                ]
+            }
 
             if user_opts:
                 opts.update(user_opts)
             else:
-                self.warn("%s: \"%s\" is not a proper format." %
-                          (env_var, env_opts), 0)
+                self.warn('%s: "%s" is not a proper format.' % (env_var, env_opts), 0)
                 self.warn("Ignoring the value.\n", 0)
 
         return opts
@@ -997,13 +1058,29 @@ class BrewFile:
             v = 10
         return v
 
-    def proc(self, cmd, print_cmd=True, print_out=True,
-             exit_on_err=True, separate_err=False, print_err=True,
-             verbose=1, env={"HOMEBREW_NO_AUTO_UPDATE": "1"}):
+    def proc(
+        self,
+        cmd,
+        print_cmd=True,
+        print_out=True,
+        exit_on_err=True,
+        separate_err=False,
+        print_err=True,
+        verbose=1,
+        env=None,
+    ):
+        if env is None:
+            env = {"HOMEBREW_NO_AUTO_UPDATE": "1"}
         return self.helper.proc(
-            cmd=cmd, print_cmd=print_cmd, print_out=print_out,
-            exit_on_err=exit_on_err, separate_err=separate_err,
-            print_err=print_err, verbose=verbose, env=env)
+            cmd=cmd,
+            print_cmd=print_cmd,
+            print_out=print_out,
+            exit_on_err=exit_on_err,
+            separate_err=separate_err,
+            print_err=print_err,
+            verbose=verbose,
+            env=env,
+        )
 
     def info(self, text, verbose=2):
         self.helper.info(text, verbose)
@@ -1055,18 +1132,18 @@ class BrewFile:
             main = None
         brewinfo.read()
         files = brewinfo.get_files()
-        for f in files['ext']:
-            is_next_main = f in files['main']
+        for f in files["ext"]:
+            is_next_main = f in files["main"]
             f = expandpath(f)
             if os.path.isabs(f):
                 b = BrewInfo(self.helper, f)
             else:
                 this_dir = brewinfo.get_dir()
                 if not this_dir:
-                    path_prefix = './'
+                    path_prefix = "./"
                 else:
-                    path_prefix = this_dir + '/'
-                b = BrewInfo(self.helper, path_prefix + f.lstrip('./'))
+                    path_prefix = this_dir + "/"
+                b = BrewInfo(self.helper, path_prefix + f.lstrip("./"))
             self.brewinfo_ext.append(b)
             if main is not None and is_next_main:
                 main = b
@@ -1131,14 +1208,22 @@ class BrewFile:
             user = self.opt["repo"].split("/")[-2].split(":")[-1]
         except Exception:
             user = self.proc(
-                "git config --get github.user", print_cmd=False,
-                print_out=False, exit_on_err=False, separate_err=False)[1]
+                "git config --get github.user",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+                separate_err=False,
+            )[1]
             if user:
                 user = user[0]
             else:
                 user = self.proc(
-                    "git config --get user.name", print_cmd=False,
-                    print_out=False, exit_on_err=False, separate_err=False)[1]
+                    "git config --get user.name",
+                    print_cmd=False,
+                    print_out=False,
+                    exit_on_err=False,
+                    separate_err=False,
+                )[1]
                 if user:
                     user = user[0]
                 else:
@@ -1156,14 +1241,26 @@ class BrewFile:
 
     def repo_file(self):
         """Helper to build Brewfile path for the repository."""
-        return self.input_dir() + "/" +\
-            self.user_name() + "_" + self.repo_name() + "/" + self.input_file()
+        return (
+            self.input_dir()
+            + "/"
+            + self.user_name()
+            + "_"
+            + self.repo_name()
+            + "/"
+            + self.input_file()
+        )
 
     def init_repo(self):
         dirname = self.brewinfo.get_dir()
         os.chdir(dirname)
-        branches = self.proc("git branch", print_cmd=False, print_out=False,
-                             exit_on_err=True, separate_err=True)[1]
+        branches = self.proc(
+            "git branch",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=True,
+            separate_err=True,
+        )[1]
         if branches:
             return
 
@@ -1174,26 +1271,31 @@ class BrewFile:
                 "# " + self.repo_name() + "\n\n"
                 "Package list for [homebrew](http://brew.sh/).\n\n"
                 "Managed by "
-                "[homebrew-file](https://github.com/rcmdnk/homebrew-file).")
+                "[homebrew-file](https://github.com/rcmdnk/homebrew-file)."
+            )
             f.close()
         open(self.brewinfo.filename, "a").close()
 
         if self.check_gitconfig():
             self.proc("git add -A")
-            self.proc(["git", "commit", "-m",
-                       "\"Prepared by " + __prog__ + "\""])
+            self.proc(["git", "commit", "-m", '"Prepared by ' + __prog__ + '"'])
             self.proc("git push -u origin master")
 
     def clone_repo(self, exit_on_err=True):
         ret = self.proc(
-            "git clone " + self.opt["repo"] + " \"" + self.brewinfo.get_dir()
-            + "\"", print_cmd=True, print_out=True, exit_on_err=False)[0]
+            "git clone " + self.opt["repo"] + ' "' + self.brewinfo.get_dir() + '"',
+            print_cmd=True,
+            print_out=True,
+            exit_on_err=False,
+        )[0]
         if ret != 0:
             if exit_on_err:
                 self.err(
                     "can nott clone " + self.opt["repo"] + ".\n"
                     "please check the repository, or reset with\n"
-                    "    $ " + __prog__ + " set_repo", 0)
+                    "    $ " + __prog__ + " set_repo",
+                    0,
+                )
                 sys.exit(ret)
             else:
                 return False
@@ -1208,8 +1310,13 @@ class BrewFile:
             return
 
         # Create new repository #
-        print("GitHub repository: " + self.user_name() + "/"
-              + self.repo_name() + " doesn't exist.")
+        print(
+            "GitHub repository: "
+            + self.user_name()
+            + "/"
+            + self.repo_name()
+            + " doesn't exist."
+        )
         print("Please create the repository first, then try again")
         sys.exit(1)
 
@@ -1245,13 +1352,16 @@ class BrewFile:
             return
 
         # Check repository name and add git@github.com: if necessary
-        if ("@" not in self.opt["repo"]
-                and not self.opt["repo"].startswith("git://")
-                and not self.opt["repo"].startswith("http://")
-                and not self.opt["repo"].startswith("file:///")
-                and not self.opt["repo"].startswith("/")):
-            self.opt["repo"] = "git@github.com:" + self.user_name() \
-                + "/" + self.repo_name()
+        if (
+            "@" not in self.opt["repo"]
+            and not self.opt["repo"].startswith("git://")
+            and not self.opt["repo"].startswith("http://")
+            and not self.opt["repo"].startswith("file:///")
+            and not self.opt["repo"].startswith("/")
+        ):
+            self.opt["repo"] = (
+                "git@github.com:" + self.user_name() + "/" + self.repo_name()
+            )
 
         # Set Brewfile in the repository
         self.brewinfo.filename = self.repo_file()
@@ -1264,32 +1374,44 @@ class BrewFile:
         # Check and prepare repository
         if "github" in self.opt["repo"]:
             self.check_github_repo()
-        elif (self.opt["repo"].startswith("file:///")
-              or self.opt["repo"].startswith("/")):
+        elif self.opt["repo"].startswith("file:///") or self.opt["repo"].startswith(
+            "/"
+        ):
             self.check_local_repo()
         else:
             self.clone_repo()
 
     def check_gitconfig(self):
-        if (self.opt["repo"].startswith("git://")
-                or self.opt["repo"].startswith("http")):
+        if self.opt["repo"].startswith("git://") or self.opt["repo"].startswith("http"):
             self.info(
                 "You are using repository of %s" % self.opt["repo"]
-                + "\nUse ssh protocol to push your Brewfile update.", 0)
+                + "\nUse ssh protocol to push your Brewfile update.",
+                0,
+            )
             return False
-        name = self.proc("git config user.name", print_cmd=False,
-                         print_out=False, exit_on_err=False,
-                         separate_err=True)[1]
+        name = self.proc(
+            "git config user.name",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+            separate_err=True,
+        )[1]
         email = self.proc(
-            "git config user.email", print_cmd=False, print_out=False,
-            exit_on_err=False, separate_err=True)[1]
+            "git config user.email",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+            separate_err=True,
+        )[1]
         if not name or not email:
             self.warn(
                 "You don't have user/email information in your .gitconfig.\n"
                 "To commit and push your update, run\n"
                 '  git config --global user.email "you@example.com"\n'
                 '  git config --global user.name "Your Name"\n'
-                'and try again.', 0)
+                "and try again.",
+                0,
+            )
             return False
         return True
 
@@ -1310,17 +1432,19 @@ class BrewFile:
         self.info(f"$ cd {self.brewinfo.get_dir()}", 1)
         os.chdir(self.brewinfo.get_dir())
 
-        ret, lines = self.proc("git status -s -uno", print_cmd=False,
-                               print_out=False, exit_on_err=True)
+        ret, lines = self.proc(
+            "git status -s -uno", print_cmd=False, print_out=False, exit_on_err=True
+        )
         if ret != 0:
-            self.err('\n'.join(lines))
+            self.err("\n".join(lines))
             sys.exit(ret)
-        if (lines):
+        if lines:
             if self.check_gitconfig():
                 self.proc("git add -A")
-                self.proc(["git", "commit", "-m",
-                           "\"Update the package list\""],
-                          exit_on_err=False)
+                self.proc(
+                    ["git", "commit", "-m", '"Update the package list"'],
+                    exit_on_err=False,
+                )
 
         self.proc(f"git {cmd}")
 
@@ -1344,18 +1468,28 @@ class BrewFile:
             if self.check_mas_cmd(True) != 1:
                 self.err("\n'mas' command is not available.\n")
                 if package:
-                    self.err("Please install 'mas' or "
-                             f"{subcmd} {' '.join(package)} manually", 0)
+                    self.err(
+                        "Please install 'mas' or "
+                        f"{subcmd} {' '.join(package)} manually",
+                        0,
+                    )
 
         ret, lines = self.proc(
-            exe + self.opt["args"], print_cmd=False, print_out=True,
-            exit_on_err=False, env=env)
+            exe + self.opt["args"],
+            print_cmd=False,
+            print_out=True,
+            exit_on_err=False,
+            env=env,
+        )
 
-        if (noinit or (cmd == "mas" and subcmd != "uninstall"
-                       and self.opt["appstore"] != 1)) \
-                or (ret != 0 and "Not installed" not in ' '.join(lines)
-                    and "No installed keg or cask with the name"
-                    not in ' '.join(lines)):
+        if (
+            noinit
+            or (cmd == "mas" and subcmd != "uninstall" and self.opt["appstore"] != 1)
+        ) or (
+            ret != 0
+            and "Not installed" not in " ".join(lines)
+            and "No installed keg or cask with the name" not in " ".join(lines)
+        ):
             sys.exit(ret)
 
         if cmd in ["cask"]:
@@ -1364,13 +1498,27 @@ class BrewFile:
             args = self.opt["args"][1:]
         nargs = len(args)
 
-        if cmd not in ["instal", "install", "reinstall", "tap",
-                       "rm", "remove", "uninstall", "untap", "cask", "mas"] \
-                or nargs == 0 \
-                or (cmd == "cask" and subcmd not in
-                    ["instal", "install", "rm", "remove", "uninstall"]) \
-                or (cmd == "mas" and subcmd not in
-                    ["purchase", "install", "uninstall"]):
+        if (
+            cmd
+            not in [
+                "instal",
+                "install",
+                "reinstall",
+                "tap",
+                "rm",
+                "remove",
+                "uninstall",
+                "untap",
+                "cask",
+                "mas",
+            ]
+            or nargs == 0
+            or (
+                cmd == "cask"
+                and subcmd not in ["instal", "install", "rm", "remove", "uninstall"]
+            )
+            or (cmd == "mas" and subcmd not in ["purchase", "install", "uninstall"])
+        ):
             # Not install/remove command, no init.
             sys.exit(0)
 
@@ -1381,8 +1529,9 @@ class BrewFile:
         if self.opt["is_brew_cmd"]:
             return True
 
-        ret, cmd = self.proc("which brew", print_cmd=False, print_out=False,
-                             exit_on_err=False, verbose=1)
+        ret, cmd = self.proc(
+            "which brew", print_cmd=False, print_out=False, exit_on_err=False, verbose=1
+        )
         if ret == 0:
             self.opt["brew_cmd"] = cmd[0]
             self.opt["is_brew_cmd"] = True
@@ -1390,29 +1539,39 @@ class BrewFile:
 
         if ret != 0:
             print("Homebrew has not been installed, install now...")
-            cmd = "curl -O https://raw.githubusercontent.com/" \
+            cmd = (
+                "curl -O https://raw.githubusercontent.com/"
                 + "Homebrew/install/master/install.sh"
-            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
-                      verbose=0)
+            )
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False, verbose=0)
             cmd = "bash install.sh"
-            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
-                      verbose=0)
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False, verbose=0)
             cmd = "rm -f install.sh"
-            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False,
-                      verbose=0)
-            ret, lines = self.proc("brew doctor", print_cmd=True,
-                                   print_out=True, exit_on_err=False,
-                                   verbose=0)
+            self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False, verbose=0)
+            ret, lines = self.proc(
+                "brew doctor",
+                print_cmd=True,
+                print_out=True,
+                exit_on_err=False,
+                verbose=0,
+            )
             if ret != 0:
                 for line in lines:
                     sys.stdout.write(line)
-                self.warn("\n\nCheck brew environment and fix problems\n"
-                          "# You can check with:\n"
-                          "#     $ brew doctor", 0)
+                self.warn(
+                    "\n\nCheck brew environment and fix problems\n"
+                    "# You can check with:\n"
+                    "#     $ brew doctor",
+                    0,
+                )
                 return False
-            ret, cmd = self.proc("which brew", print_cmd=False,
-                                 print_out=False, exit_on_err=False,
-                                 verbose=1)
+            ret, cmd = self.proc(
+                "which brew",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+                verbose=1,
+            )
             if ret == 0:
                 self.opt["brew_cmd"] = cmd[0]
                 self.opt["is_brew_cmd"] = True
@@ -1428,32 +1587,40 @@ class BrewFile:
             print("mas is not available on Linux!")
             sys.exit(1)
 
-        if self.proc("type mas", print_cmd=False, print_out=False,
-                     exit_on_err=False)[0] != 0:
+        if (
+            self.proc("type mas", print_cmd=False, print_out=False, exit_on_err=False)[
+                0
+            ]
+            != 0
+        ):
             sw_vers = self.proc(
-                "sw_vers -productVersion", print_cmd=False, print_out=False,
-                exit_on_err=False)[1][0].split(".")
-            if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10
-                                        and int(sw_vers[1]) < 11):
+                "sw_vers -productVersion",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+            )[1][0].split(".")
+            if int(sw_vers[0]) < 10 or (int(sw_vers[0]) == 10 and int(sw_vers[1]) < 11):
                 self.warn("You are using older OS X. mas is not used.", 3)
                 self.opt["is_mas_cmd"] = -1
                 return self.opt["is_mas_cmd"]
             self.info(self.opt["mas_formula"] + " has not been installed.")
             if not force:
-                ans = self.ask_yn("Do you want to install %s?" %
-                                  self.opt["mas_formula"])
+                ans = self.ask_yn(
+                    "Do you want to install %s?" % self.opt["mas_formula"]
+                )
                 if not ans:
                     self.warn("If you need it, please do:")
-                    self.warn("    $ brew install %s"
-                              % (self.opt["mas_formula"]))
+                    self.warn("    $ brew install %s" % (self.opt["mas_formula"]))
                     self.opt["is_mas_cmd"] = -2
                     return self.opt["is_mas_cmd"]
-            ret = self.proc(["brew", "install", self.opt["mas_formula"]],
-                            print_cmd=True, print_out=True,
-                            exit_on_err=False)[0]
+            ret = self.proc(
+                ["brew", "install", self.opt["mas_formula"]],
+                print_cmd=True,
+                print_out=True,
+                exit_on_err=False,
+            )[0]
             if ret != 0:
-                self.err("\nFailed to install "
-                         + self.opt["mas_formula"] + "\n", 0)
+                self.err("\nFailed to install " + self.opt["mas_formula"] + "\n", 0)
                 self.opt["is_mas_cmd"] = -1
                 return self.opt["is_mas_cmd"]
             p = os.path.basename(self.opt["mas_formula"])
@@ -1461,13 +1628,17 @@ class BrewFile:
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ""
 
-        if self.proc(self.opt["mas_cmd"], print_cmd=False, print_out=False,
-                     exit_on_err=False)[0] != 0:
+        if (
+            self.proc(
+                self.opt["mas_cmd"], print_cmd=False, print_out=False, exit_on_err=False
+            )[0]
+            != 0
+        ):
             sys.exit(1)
 
         # Disable check until this issue is solved:
         # https://github.com/mas-cli/mas#%EF%B8%8F-known-issues
-        #if self.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
+        # if self.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
         #             print_out=False, exit_on_err=False)[0] != 0:
         #    self.err("\nPlease sign in to the App Store", 0)
         #    sys.exit(1)
@@ -1476,24 +1647,36 @@ class BrewFile:
 
         is_tmux = os.environ.get("TMUX", "")
         if is_tmux != "":
-            if self.proc("type reattach-to-user-namespace",
-                         print_cmd=False, print_out=False,
-                         exit_on_err=False)[0] != 0:
+            if (
+                self.proc(
+                    "type reattach-to-user-namespace",
+                    print_cmd=False,
+                    print_out=False,
+                    exit_on_err=False,
+                )[0]
+                != 0
+            ):
                 if not force:
                     ans = self.ask_yn(
-                        "You need %s in tmux. Do you want to install it?" %
-                        self.opt["reattach_formula"])
+                        "You need %s in tmux. Do you want to install it?"
+                        % self.opt["reattach_formula"]
+                    )
                     if not ans:
                         self.warn("If you need it, please do:")
-                        self.warn("    $ brew install %s"
-                                  % (self.opt["reattach_formula"]))
+                        self.warn(
+                            "    $ brew install %s" % (self.opt["reattach_formula"])
+                        )
                         return self.opt["is_mas_cmd"]
                 ret = self.proc(
                     ["brew", "install", self.opt["reattach_formula"]],
-                    print_cmd=True, print_out=True, exit_on_err=False)[0]
+                    print_cmd=True,
+                    print_out=True,
+                    exit_on_err=False,
+                )[0]
                 if ret != 0:
-                    self.err("\nFailed to install "
-                             + self.opt["reattach_formula"] + "\n", 0)
+                    self.err(
+                        "\nFailed to install " + self.opt["reattach_formula"] + "\n", 0
+                    )
                     self.opt["is_mas_cmd"] = -1
                     return self.opt["is_mas_cmd"]
                 p = os.path.basename(self.opt["reattach_formula"])
@@ -1511,8 +1694,12 @@ class BrewFile:
         apps = []
 
         if self.check_mas_cmd(True) == 1:
-            lines = self.proc(self.opt["mas_cmd"] + " list", print_cmd=False,
-                              print_out=False, separate_err=True)[1]
+            lines = self.proc(
+                self.opt["mas_cmd"] + " list",
+                print_cmd=False,
+                print_out=False,
+                separate_err=True,
+            )[1]
             apps = sorted(lines, key=lambda x: " ".join(x.split()[1:]).lower())
             if apps and apps[0] == "No installed apps found":
                 apps = []
@@ -1521,7 +1708,8 @@ class BrewFile:
             for d in self.opt["appdirlist"]:
                 apps_tmp += [
                     ("/".join(x.split("/")[:-3]).split(".app")[0])
-                    for x in glob.glob(d + "/*/Contents/_MASReceipt/receipt")]
+                    for x in glob.glob(d + "/*/Contents/_MASReceipt/receipt")
+                ]
             # Another method
             # Sometime it can not find applications which have not been used?
             # (ret, app_tmp) = self.proc(
@@ -1530,21 +1718,26 @@ class BrewFile:
             for a in apps_tmp:
                 apps_id = self.proc(
                     "mdls -name kMDItemAppStoreAdamID -raw '%s.app'" % a,
-                    print_cmd=False, print_out=False)[1][0]
-                apps.append("%s %s" %
-                            (apps_id, a.split("/")[-1].split(".app")[0]))
+                    print_cmd=False,
+                    print_out=False,
+                )[1][0]
+                apps.append("%s %s" % (apps_id, a.split("/")[-1].split(".app")[0]))
 
         return apps
 
     def get_cask_list(self):
         """Get Cask List"""
 
-        lines = self.proc("brew list --cask", print_cmd=False, print_out=False,
-                          separate_err=True, print_err=False)[1]
+        lines = self.proc(
+            "brew list --cask",
+            print_cmd=False,
+            print_out=False,
+            separate_err=True,
+            print_err=False,
+        )[1]
         packages = []
         for line in lines:
-            if "Warning: nothing to list" in line or "=>" in line \
-                    or "->" in line:
+            if "Warning: nothing to list" in line or "=>" in line or "->" in line:
                 continue
             packages.append(line)
         return (True, packages)
@@ -1558,16 +1751,19 @@ class BrewFile:
         # Brew packages
         if not self.opt["caskonly"]:
             info = self.brewinfo.get_info()
-            full_list = self.proc("brew list --formula", print_cmd=False,
-                                  print_out=False)[1]
+            full_list = self.proc(
+                "brew list --formula", print_cmd=False, print_out=False
+            )[1]
             del self.brewinfo.brew_full_list[:]
             self.brewinfo.brew_full_list.extend(full_list)
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
                     installed = self.brewinfo.get_installed(p, info[p])
-                    if installed["installed_on_request"] is True or\
-                            installed["installed_on_request"] is None:
+                    if (
+                        installed["installed_on_request"] is True
+                        or installed["installed_on_request"] is None
+                    ):
                         leaves.append(p)
 
             elif self.opt["leaves"]:
@@ -1585,12 +1781,15 @@ class BrewFile:
                 if p not in leaves:
                     continue
                 self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] =\
-                    self.brewinfo.get_option(p, info[p])
+                self.brewinfo.brew_list_opt[p] = self.brewinfo.get_option(p, info[p])
 
         # Taps
-        lines = self.proc("brew tap", print_cmd=False, print_out=False,
-                          env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]
+        lines = self.proc(
+            "brew tap",
+            print_cmd=False,
+            print_out=False,
+            env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
+        )[1]
 
         self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
@@ -1601,22 +1800,20 @@ class BrewFile:
                 if len(p.split()) == 1:
                     self.brewinfo.cask_list.append(p)
                 else:
-                    self.warn("The cask file of " + p
-                              + " doesn't exist.", 0)
+                    self.warn("The cask file of " + p + " doesn't exist.", 0)
                     self.warn("Please check later.\n\n", 0)
                     self.brewinfo.cask_nocask_list.append(p)
 
         # App Store
         if is_mac():
-            if self.opt["appstore"] == 1 \
-                    or (self.opt["appstore"] == 2 and force_appstore_list):
-                self.brewinfo.set_val("appstore_list",
-                                      self.get_appstore_list())
+            if self.opt["appstore"] == 1 or (
+                self.opt["appstore"] == 2 and force_appstore_list
+            ):
+                self.brewinfo.set_val("appstore_list", self.get_appstore_list())
             elif self.opt["appstore"] == 2:
                 if self.brewinfo.check_file():
                     self.read_all()
-                self.brewinfo.set_val("appstore_list",
-                                      self.get("appstore_input"))
+                self.brewinfo.set_val("appstore_list", self.get("appstore_input"))
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input"""
@@ -1676,27 +1873,29 @@ class BrewFile:
                     prev_repo = git_line[1]
                     break
             if self.opt["repo"] == "":
-                print("Input file: " + self.opt["input"]
-                      + " is already there.")
+                print("Input file: " + self.opt["input"] + " is already there.")
                 if prev_repo != "":
-                    print("git repository for Brewfile is already set as "
-                          + prev_repo + ".")
+                    print(
+                        "git repository for Brewfile is already set as "
+                        + prev_repo
+                        + "."
+                    )
 
             self.input_backup()
 
         # Get repository
         if self.opt["repo"] == "":
-            print("\nSet repository,\n"
-                  "\"non\" (or empty) for local Brewfile "
-                  "(" + self.opt["input"] + "),\n"
-                  "/path/to/repo for local git repository,\n"
-                  "https://your/git/repository "
-                  "(or ssh://user@server.project.git) for git repository,\n"
-                  "or (<user>/)<repo> for github repository,")
-            self.opt["repo"] = input(
-                "or full path for other git repository: ")
-            self.banner("# Set Brewfile repository as "
-                        + self.opt["repo"])
+            print(
+                "\nSet repository,\n"
+                '"non" (or empty) for local Brewfile '
+                "(" + self.opt["input"] + "),\n"
+                "/path/to/repo for local git repository,\n"
+                "https://your/git/repository "
+                "(or ssh://user@server.project.git) for git repository,\n"
+                "or (<user>/)<repo> for github repository,"
+            )
+            self.opt["repo"] = input("or full path for other git repository: ")
+            self.banner("# Set Brewfile repository as " + self.opt["repo"])
 
         if self.opt["repo"] in ["non", ""]:
             self.set_brewfile_local()
@@ -1719,14 +1918,14 @@ class BrewFile:
 
         if check:
             if not os.path.exists(self.opt["input"]):
-                ans = self.ask_yn("Do you want to set a repository (y)? "
-                                  "((n) for local Brewfile).")
+                ans = self.ask_yn(
+                    "Do you want to set a repository (y)? " "((n) for local Brewfile)."
+                )
                 if ans:
                     self.set_brewfile_repo()
             else:
                 if self.opt["repo"] != "":
-                    print("You are using Brewfile of " + self.opt["repo"]
-                          + ".")
+                    print("You are using Brewfile of " + self.opt["repo"] + ".")
                 else:
                     print(self.opt["input"] + " is already there.")
                     self.input_backup()
@@ -1747,33 +1946,35 @@ class BrewFile:
 
     def initialize_write(self):
         self.write()
-        self.banner("# You can edit " + self.brewinfo.filename + " with:\n"
-                    "#     $ " + __prog__ + " edit")
+        self.banner(
+            "# You can edit " + self.brewinfo.filename + " with:\n"
+            "#     $ " + __prog__ + " edit"
+        )
         self.opt["initialized"] = True
 
     def check_input_file(self):
         """Check input file"""
 
         if not self.brewinfo.check_file():
-            self.warn(
-                "Input file " + self.brewinfo.filename + " is not found.", 0)
-            ans = self.ask_yn(
-                "Do you want to initialize from installed packages?")
+            self.warn("Input file " + self.brewinfo.filename + " is not found.", 0)
+            ans = self.ask_yn("Do you want to initialize from installed packages?")
             if ans:
                 self.initialize(check=False)
                 return
 
             self.err("Ok, please prepare brewfile", 0)
-            self.err("or you can initialize "
-                     + self.brewinfo.filename + " with:", 0)
+            self.err("or you can initialize " + self.brewinfo.filename + " with:", 0)
             self.err("    $ " + __prog__ + " init", 0)
             sys.exit(1)
 
     def get_files(self, is_print=False, all_files=False):
         """Get Brewfiles"""
         self.read_all()
-        files = [x.filename for x in [self.brewinfo_main] + self.brewinfo_ext
-                 if all_files or os.path.exists(x.filename)]
+        files = [
+            x.filename
+            for x in [self.brewinfo_main] + self.brewinfo_ext
+            if all_files or os.path.exists(x.filename)
+        ]
         if is_print:
             print("\n".join(files))
         return files
@@ -1807,9 +2008,11 @@ class BrewFile:
                     self.proc(cmd, print_cmd=False, print_out=True)
 
         if self.opt["dryrun"]:
-            self.banner("# This is dry run.\n"
-                        "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean_non_request -C")
+            self.banner(
+                "# This is dry run.\n"
+                "# If you want to enforce cleanup, use '-C':\n"
+                "#     $ " + __prog__ + " clean_non_request -C"
+            )
 
     def cleanup(self):
         """Clean up."""
@@ -1832,6 +2035,7 @@ class BrewFile:
                     self.brewinfo.brew_input.append(p)
                     self.brewinfo.brew_input_opt[p] = ""
                     add_dependncies(p)
+
         for p in self.get("brew_input"):
             if p not in info:
                 continue
@@ -1849,7 +2053,7 @@ class BrewFile:
                     identifier = ""
                     package = p
                 if re.match(r".*\(\d+\.\d+.*\)$", package):
-                    package = ' '.join(package.split(' ')[:-1])
+                    package = " ".join(package.split(" ")[:-1])
 
                 isinput = False
                 for pi in self.get("appstore_input"):
@@ -1860,20 +2064,24 @@ class BrewFile:
                         i_identifier = ""
                         i_package = pi
                     if re.match(r".*\(\d+\.\d+.*\)$", i_package):
-                        i_package = ' '.join(i_package.split(' ')[:-1])
-                    if (identifier != "" and identifier == i_identifier) \
-                            or package == i_package:
+                        i_package = " ".join(i_package.split(" ")[:-1])
+                    if (
+                        identifier != "" and identifier == i_identifier
+                    ) or package == i_package:
                         isinput = True
                         break
                 if isinput:
                     continue
 
                 if identifier and self.check_mas_cmd(True) == 1:
-                    cmd = "sudo " + self.opt["mas_cmd"] + " uninstall " \
-                        + identifier
+                    cmd = "sudo " + self.opt["mas_cmd"] + " uninstall " + identifier
                 else:
-                    uninstall = self.proc("type uninstall", print_cmd=False,
-                                          print_out=False, exit_on_err=False)
+                    uninstall = self.proc(
+                        "type uninstall",
+                        print_cmd=False,
+                        print_out=False,
+                        exit_on_err=False,
+                    )
                     if uninstall == 0:
                         cmd = "sudo uninstall"
                     else:
@@ -1888,15 +2096,15 @@ class BrewFile:
                                 cmd += " '%s'" % a
                             continue
                     if cmd == tmpcmd:
-                        self.warn(f"Package {package} was not found:"
-                                  "nothing to do.\n")
+                        self.warn(
+                            f"Package {package} was not found:" "nothing to do.\n"
+                        )
                         self.remove_pack("appstore_list", p)
                         continue
                 if self.opt["dryrun"]:
                     print(cmd)
                 else:
-                    self.proc(cmd, print_cmd=True, print_out=True,
-                              exit_on_err=False)
+                    self.proc(cmd, print_cmd=True, print_out=True, exit_on_err=False)
                 self.remove_pack("appstore_list", p)
 
         # Clean up cask packages
@@ -1971,9 +2179,11 @@ class BrewFile:
 
         if self.opt["dryrun"]:
             # Dry run message
-            self.banner("# This is dry run.\n"
-                        "# If you want to enforce cleanup, use '-C':\n"
-                        "#     $ " + __prog__ + " clean -C")
+            self.banner(
+                "# This is dry run.\n"
+                "# If you want to enforce cleanup, use '-C':\n"
+                "#     $ " + __prog__ + " clean -C"
+            )
 
     def install(self):
         """Install"""
@@ -2009,9 +2219,9 @@ class BrewFile:
             for p in self.get("brew_input"):
                 cmd = "install"
                 if p in self.get("brew_full_list"):
-                    if p not in self.get("brew_list_opt") \
-                            or sorted(self.get("brew_input_opt")[p].split()) \
-                            == sorted(self.get("brew_list_opt")[p].split()):
+                    if p not in self.get("brew_list_opt") or sorted(
+                        self.get("brew_input_opt")[p].split()
+                    ) == sorted(self.get("brew_list_opt")[p].split()):
                         continue
                     # Uninstall to install the package with new options
                     # `reinstall` does not accept options such a --HEAD.
@@ -2019,13 +2229,17 @@ class BrewFile:
                 ret, lines = self.proc(
                     "brew " + cmd + " " + p + self.get("brew_input_opt")[p]
                 )
-                ret, lines = self.proc("brew " + cmd + " " + p
-                                       + self.get("brew_input_opt")[p])
+                ret, lines = self.proc(
+                    "brew " + cmd + " " + p + self.get("brew_input_opt")[p]
+                )
                 if ret != 0:
-                    self.warn("Can not install " + p + "."
-                              "Please check the package name.\n"
-                              "" + p + " may be installed "
-                              "by using web direct formula.", 0)
+                    self.warn(
+                        "Can not install " + p + "."
+                        "Please check the package name.\n"
+                        "" + p + " may be installed "
+                        "by using web direct formula.",
+                        0,
+                    )
                     continue
                 for line in lines:
                     if line.find("ln -s") != -1:
@@ -2038,11 +2252,13 @@ class BrewFile:
                     if line.find("brew linkapps") != -1:
                         if self.opt["link"]:
                             self.proc("brew linkapps")
-                if p in self.get("brew_list") and\
-                        self.get("brew_input_opt")[p] !=\
-                        self.get("brew_list_opt")[p]:
-                    self.brewinfo.add("brew_input_opt",
-                                      {p: self.brewinfo.get_option(p)})
+                if (
+                    p in self.get("brew_list")
+                    and self.get("brew_input_opt")[p] != self.get("brew_list_opt")[p]
+                ):
+                    self.brewinfo.add(
+                        "brew_input_opt", {p: self.brewinfo.get_option(p)}
+                    )
                     reinit = 1
 
         # App Store
@@ -2073,18 +2289,20 @@ class BrewFile:
                 self.info("Installing " + package)
                 if identifier != "":
                     if self.check_mas_cmd(True) == 1:
-                        self.proc(self.opt["mas_cmd"] + " install "
-                                  + identifier)
+                        self.proc(self.opt["mas_cmd"] + " install " + identifier)
                     else:
-                        self.info("Please install %s from AppStore." %
-                                  package, 0)
+                        self.info("Please install %s from AppStore." % package, 0)
                         self.proc(
                             "open -W 'macappstore://itunes.apple.com/app/id%s'"
-                            % (identifier))
+                            % (identifier)
+                        )
                 else:
-                    self.warn("No id or wrong id information was given for "
-                              "AppStore App: %s.\n"
-                              "Please install it manually." % package, 0)
+                    self.warn(
+                        "No id or wrong id information was given for "
+                        "AppStore App: %s.\n"
+                        "Please install it manually." % package,
+                        0,
+                    )
 
         # Other commands
         for c in self.get("cmd_input"):
@@ -2095,31 +2313,38 @@ class BrewFile:
             self.proc(c)
 
         # Initialize if commands are installed
-        if self.opt["mas_cmd_installed"] \
-                or self.opt["reattach_cmd_installed"] \
-                or reinit:
-            self.opt["mas_cmd_installed"] \
-                = self.opt["reattach_cmd_installed"]
+        if (
+            self.opt["mas_cmd_installed"]
+            or self.opt["reattach_cmd_installed"]
+            or reinit
+        ):
+            self.opt["mas_cmd_installed"] = self.opt["reattach_cmd_installed"]
             self.input_to_list()
             self.initialize_write()
         return 0
 
-    def find_app(self, app, taps, casks, nonapp_casks,
-                 casks_noinst, nonapp_casks_noinst):
+    def find_app(
+        self, app, taps, casks, nonapp_casks, casks_noinst, nonapp_casks_noinst
+    ):
         """Helper function for Cask"""
-        cask_namer = self.brewinfo.get_tap_path(self.opt["cask_repo"]) +\
-            "/developer/bin/generate_cask_token"
+        cask_namer = (
+            self.brewinfo.get_tap_path(self.opt["cask_repo"])
+            + "/developer/bin/generate_cask_token"
+        )
         tap_cands = []
         name_cands = []
-        lines = self.proc([cask_namer, '"' + app.split("/")[-1].lower() + '"'],
-                          print_cmd=False, print_out=False,
-                          exit_on_err=False)[1]
+        lines = self.proc(
+            [cask_namer, '"' + app.split("/")[-1].lower() + '"'],
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+        )[1]
         for line in lines:
             if line.find("Proposed token") != -1:
                 name_cands.append(line.split()[2])
             if line.find("already exists") != -1:
                 for t in taps:
-                    tname = t.split('/')[0] + "/homebrew-" + t.split('/')[1]
+                    tname = t.split("/")[0] + "/homebrew-" + t.split("/")[1]
                     if line.split("'")[1].find(tname) != -1:
                         tap_cands.append(t)
                         break
@@ -2127,9 +2352,12 @@ class BrewFile:
             del name_cands[:]
 
         installed = False
-        clist = list(casks.values()) + nonapp_casks +\
-            [x for x_list in casks_noinst.values() for x in x_list] +\
-            nonapp_casks_noinst
+        clist = (
+            list(casks.values())
+            + nonapp_casks
+            + [x for x_list in casks_noinst.values() for x in x_list]
+            + nonapp_casks_noinst
+        )
         if name_cands and [x for x in clist if x[0] == name_cands[0] and x[2]]:
             installed = True
         else:
@@ -2147,8 +2375,13 @@ class BrewFile:
         elif installed:
             self.info("Installed by Cask:" + app + name_cands[0], 2)
         else:
-            self.info("Installed directly, instead of by Cask:"
-                      + app + ", Cask candidates: " + ", ".join(name_cands), 2)
+            self.info(
+                "Installed directly, instead of by Cask:"
+                + app
+                + ", Cask candidates: "
+                + ", ".join(name_cands),
+                2,
+            )
         return (tap_cands, installed, name_cands)
 
     def find_brew_app(self, name, tap):
@@ -2157,20 +2390,27 @@ class BrewFile:
         check = "has_cask"
         tap_brew = tap
         opt = ""
-        if os.path.isfile(self.brew_val("repository")
-                          + "/Library/Formula/" + name + ".rb"):
+        if os.path.isfile(
+            self.brew_val("repository") + "/Library/Formula/" + name + ".rb"
+        ):
             if isinstance(self.opt["brew_packages"], str):
                 self.opt["brew_packages"] = self.proc(
-                    "brew list --formula", print_cmd=False, print_out=False)[1]
+                    "brew list --formula", print_cmd=False, print_out=False
+                )[1]
             if name in self.opt["brew_packages"]:
                 check = "brew"
                 opt = self.brewinfo.get_option(name)
-                if os.path.islink(self.brew_val("repository")
-                                  + "/Library/Formula/" + name + ".rb"):
-                    link = os.readlink(self.brew_val("repository")
-                                       + "/Library/Formula/" + name + ".rb")
-                    tap_brew = link.replace("../Taps/", "").\
-                        replace("homebrew-").replace("/" + name + ".rb")
+                if os.path.islink(
+                    self.brew_val("repository") + "/Library/Formula/" + name + ".rb"
+                ):
+                    link = os.readlink(
+                        self.brew_val("repository") + "/Library/Formula/" + name + ".rb"
+                    )
+                    tap_brew = (
+                        link.replace("../Taps/", "")
+                        .replace("homebrew-")
+                        .replace("/" + name + ".rb")
+                    )
                 else:
                     tap_brew = ""
         return (check, tap_brew, opt)
@@ -2201,20 +2441,29 @@ class BrewFile:
         installed_casks = self.get_cask_list()[1]
 
         # Set cask directories and reset application information list
-        taps = list(filter(
-            lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
-            self.proc("brew tap", print_cmd=False, print_out=False,
-                      env={"HOMEBREW_NO_AUTO_UPDATE": "1"})[1]))
+        taps = list(
+            filter(
+                lambda t: os.path.isdir(self.brewinfo.get_tap_path(t) + "/Casks"),
+                self.proc(
+                    "brew tap",
+                    print_cmd=False,
+                    print_out=False,
+                    env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
+                )[1],
+            )
+        )
         apps = {d: {True: [], False: []} for d in taps + ["", "appstore"]}
         brew_apps = {}
 
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
-        apps_check = {"cask": {d: 0 for d in app_dirs},
-                      "has_cask": {d: 0 for d in app_dirs},
-                      "brew": {d: 0 for d in app_dirs},
-                      "appstore": {d: 0 for d in app_dirs},
-                      "no_cask": {d: 0 for d in app_dirs}}
+        apps_check = {
+            "cask": {d: 0 for d in app_dirs},
+            "has_cask": {d: 0 for d in app_dirs},
+            "brew": {d: 0 for d in app_dirs},
+            "appstore": {d: 0 for d in app_dirs},
+            "no_cask": {d: 0 for d in app_dirs},
+        }
 
         # Load casks
         casks = {}
@@ -2223,9 +2472,12 @@ class BrewFile:
         nonapp_casks_noinst = []
         for t in taps:
             d = self.brewinfo.get_tap_path(t) + "/Casks"
-            for cask in list(map(
+            for cask in list(
+                map(
                     lambda x: x.replace(".rb", ""),
-                    filter(lambda y: y.endswith(".rb"), os.listdir(d)))):
+                    filter(lambda y: y.endswith(".rb"), os.listdir(d)),
+                )
+            ):
                 cask_apps = []
                 installed = False
                 noinst = True
@@ -2236,54 +2488,71 @@ class BrewFile:
                 for line in content.split("\n"):
                     cask_app = ""
                     if re.search("^ *name ", line):
-                        cask_app = re.sub("^ *name ", "",
-                                          line).strip('"\' ') + ".app"
+                        cask_app = re.sub("^ *name ", "", line).strip("\"' ") + ".app"
                     elif re.search("^ *app ", line):
-                        cask_app = re.sub("^ *app ", "",
-                                          line).strip('"\' ').split("/")[-1]
+                        cask_app = (
+                            re.sub("^ *app ", "", line).strip("\"' ").split("/")[-1]
+                        )
                     elif re.search("\\.app", line):
-                        cask_app = line.split(".app")[0].split("/")[-1].\
-                            split("'")[-1].split('"')[-1]
+                        cask_app = (
+                            line.split(".app")[0]
+                            .split("/")[-1]
+                            .split("'")[-1]
+                            .split('"')[-1]
+                        )
                     elif re.search("^ *pkg ", line):
-                        cask_app = re.sub("^ *pkg ", "", line).strip('"\' ').\
-                            split("/")[-1].replace(".pkg", "")
+                        cask_app = (
+                            re.sub("^ *pkg ", "", line)
+                            .strip("\"' ")
+                            .split("/")[-1]
+                            .replace(".pkg", "")
+                        )
                     if cask_app != "" and cask_app not in cask_apps:
                         cask_apps.append(cask_app)
 
                     if not noinst and re.search("^ *version ", line):
                         if os.path.isdir(
-                                self.opt["caskroom"] + "/" + cask + "/"
-                                + re.sub("^ *version ", "", line).strip(
-                                    '"\': ')):
+                            self.opt["caskroom"]
+                            + "/"
+                            + cask
+                            + "/"
+                            + re.sub("^ *version ", "", line).strip("\"': ")
+                        ):
                             installed = True
                 if noinst:
                     if not cask_apps:
-                        nonapp_casks_noinst.append([cask, t, installed,
-                                                    False, content, cask_apps])
+                        nonapp_casks_noinst.append(
+                            [cask, t, installed, False, content, cask_apps]
+                        )
                     else:
                         for a in cask_apps:
                             if a in casks_noinst:
                                 casks_noinst[a].append(
-                                    [cask, t, installed, False,
-                                     content, cask_apps])
+                                    [cask, t, installed, False, content, cask_apps]
+                                )
                             else:
-                                casks_noinst[a] = [[cask, t, installed,
-                                                    False, content, cask_apps]]
+                                casks_noinst[a] = [
+                                    [cask, t, installed, False, content, cask_apps]
+                                ]
                 else:
                     if not cask_apps:
-                        nonapp_casks.append([cask, t, installed,
-                                             False, content, cask_apps])
+                        nonapp_casks.append(
+                            [cask, t, installed, False, content, cask_apps]
+                        )
                     else:
                         for a in cask_apps:
-                            casks[a] = [cask, t, installed, False,
-                                        content, cask_apps]
+                            casks[a] = [cask, t, installed, False, content, cask_apps]
 
         # Get applications
         napps = 0
         for d in app_dirs:
-            for app in [x for x in os.listdir(d)
-                        if not x.startswith(".") and x != "Utilities"
-                        and os.path.isdir(d + "/" + x)]:
+            for app in [
+                x
+                for x in os.listdir(d)
+                if not x.startswith(".")
+                and x != "Utilities"
+                and os.path.isdir(d + "/" + x)
+            ]:
                 check = "no_cask"
                 tap = ""
                 opt = ""
@@ -2292,8 +2561,13 @@ class BrewFile:
                     tap = "appstore"
                     installed = False
                     if appstore_list[aname][0] != "":
-                        name = appstore_list[aname][0] + " " + aname \
-                            + " " + appstore_list[aname][1]
+                        name = (
+                            appstore_list[aname][0]
+                            + " "
+                            + aname
+                            + " "
+                            + appstore_list[aname][1]
+                        )
                     else:
                         name = ""
                     check = "appstore"
@@ -2313,15 +2587,18 @@ class BrewFile:
                     if not app.endswith(".app"):
                         app_find = d + "/" + app
                     (tap_cands, installed, name_cands) = self.find_app(
-                        app_find, taps, casks, nonapp_casks,
-                        casks_noinst, nonapp_casks_noinst)
+                        app_find,
+                        taps,
+                        casks,
+                        nonapp_casks,
+                        casks_noinst,
+                        nonapp_casks_noinst,
+                    )
                     if name_cands:
                         for name in name_cands:
-                            for c in filter(lambda x, n=name: x[0] == n,
-                                            nonapp_casks):
+                            for c in filter(lambda x, n=name: x[0] == n, nonapp_casks):
                                 nonapp_casks.remove(c)
-                            for a in filter(lambda k, n=name: casks[k][0] == n,
-                                            casks):
+                            for a in filter(lambda k, n=name: casks[k][0] == n, casks):
                                 casks[a][3] = True
                     name = ""
                     if installed:
@@ -2330,22 +2607,19 @@ class BrewFile:
                         tap = tap_cands[0]
                     elif name_cands:
                         for n, t in zip(name_cands, tap_cands):
-                            (check, tap, opt) =\
-                                self.find_brew_app(n, t)
+                            (check, tap, opt) = self.find_brew_app(n, t)
                             if check == "brew":
                                 name = n
                                 break
                     if name == "":
                         if tap_cands:
                             for n, t in zip(name_cands, tap_cands):
-                                apps[t][installed].append(
-                                    (n, d + "/" + app, check))
+                                apps[t][installed].append((n, d + "/" + app, check))
                         else:
                             name = tap = ""
                 if check != "has_cask":
                     if check != "brew":
-                        apps[tap][installed].append(
-                            (name, d + "/" + app, check))
+                        apps[tap][installed].append((name, d + "/" + app, check))
                     else:
                         if tap not in brew_apps:
                             brew_apps[tap] = []
@@ -2358,135 +2632,187 @@ class BrewFile:
         out = Tee("Caskfile", sys.stdout, self.verbose() > 1)
 
         out.writeln("# Cask applications")
-        out.writeln("# Please copy these lines to your Brewfile"
-                    " and use with `" + __prog__ + " install`.\n")
+        out.writeln(
+            "# Please copy these lines to your Brewfile"
+            " and use with `" + __prog__ + " install`.\n"
+        )
 
         out.writeln("# Main tap repository for " + self.opt["cask_repo"])
         out.writeln("tap " + self.opt["cask_repo"])
         out.writeln("")
         if apps[self.opt["cask_repo"]][True]:
             out.writeln("# Apps installed by Cask in " + self.opt["cask_repo"])
-            for (name, app_path, check) in\
-                    sorted(apps[self.opt["cask_repo"]][True]):
+            for name, app_path, _ in sorted(apps[self.opt["cask_repo"]][True]):
                 if name not in casks_in_others:
-                    out.writeln("cask " + name + " # "
-                                + app_path.replace(os.environ["HOME"],
-                                                   "~"))
+                    out.writeln(
+                        "cask "
+                        + name
+                        + " # "
+                        + app_path.replace(os.environ["HOME"], "~")
+                    )
                     casks_in_others.append(name)
                 else:
-                    out.writeln("#cask " + name + " # "
-                                + app_path.replace(os.environ["HOME"],
-                                                   "~"))
+                    out.writeln(
+                        "#cask "
+                        + name
+                        + " # "
+                        + app_path.replace(os.environ["HOME"], "~")
+                    )
 
             out.writeln("")
 
-        if [x[0] for x in list(casks.values()) + nonapp_casks
-                if x[1] == self.opt["cask_repo"] and not x[3]]:
-            out.writeln("# Cask is found, but no applications are found "
-                        + "(could be fonts, system settins, "
-                        + "or installed in other directory.)")
+        if [
+            x[0]
+            for x in list(casks.values()) + nonapp_casks
+            if x[1] == self.opt["cask_repo"] and not x[3]
+        ]:
+            out.writeln(
+                "# Cask is found, but no applications are found "
+                + "(could be fonts, system settins, "
+                + "or installed in other directory.)"
+            )
             for name in sorted(
-                    x[0] for x in list(casks.values()) + nonapp_casks
-                    if x[1] == self.opt["cask_repo"] and x[2] and not x[3]):
+                x[0]
+                for x in list(casks.values()) + nonapp_casks
+                if x[1] == self.opt["cask_repo"] and x[2] and not x[3]
+            ):
                 if name not in casks_in_others:
                     out.writeln("cask " + name)
                     casks_in_others.append(name)
-            if [x[0] for x in list(casks.values()) + nonapp_casks
-                    if x[1] == self.opt["cask_repo"]
-                    and not x[2] and not x[3]]:
-                out.writeln(
-                    "\n# There are new version for following applications.")
-                for name in sorted(x[0] for x in list(casks.values())
-                                   + nonapp_casks
-                                   if x[1] == self.opt["cask_repo"]
-                                   and not x[2] and not x[3]):
+            if [
+                x[0]
+                for x in list(casks.values()) + nonapp_casks
+                if x[1] == self.opt["cask_repo"] and not x[2] and not x[3]
+            ]:
+                out.writeln("\n# There are new version for following applications.")
+                for name in sorted(
+                    x[0]
+                    for x in list(casks.values()) + nonapp_casks
+                    if x[1] == self.opt["cask_repo"] and not x[2] and not x[3]
+                ):
                     if name not in casks_in_others:
                         out.writeln("cask install " + name)
                         casks_in_others.append(name)
             out.writeln("")
 
         if apps[self.opt["cask_repo"]][False]:
-            out.writeln("# Apps installed directly instead of by Cask in "
-                        + self.opt["cask_repo"])
-            for (name, app_path, check) in\
-                    sorted(x for x in apps[self.opt["cask_repo"]][False]):
-                out.writeln("#cask " + name
-                            + " # " + app_path.replace(os.environ["HOME"],
-                                                       "~"))
+            out.writeln(
+                "# Apps installed directly instead of by Cask in "
+                + self.opt["cask_repo"]
+            )
+            for name, app_path, _ in sorted(
+                x for x in apps[self.opt["cask_repo"]][False]
+            ):
+                out.writeln(
+                    "#cask " + name + " # " + app_path.replace(os.environ["HOME"], "~")
+                )
             out.writeln("")
 
-        for t in filter(lambda x: x not in
-                        (self.opt["cask_repo"], "", "appstore"), taps):
+        for t in filter(
+            lambda x: x not in (self.opt["cask_repo"], "", "appstore"), taps
+        ):
             out.writeln("# Casks in " + t)
             out.writeln("tap " + t)
             out.writeln("")
             if apps[t][True]:
                 out.writeln("# Apps installed by Cask in " + t)
-                for (name, app_path, check) in sorted(apps[t][True]):
+                for name, app_path, _ in sorted(apps[t][True]):
                     if name not in casks_in_others:
-                        out.writeln("cask " + name + " # "
-                                    + app_path.replace(os.environ["HOME"],
-                                                       "~"))
+                        out.writeln(
+                            "cask "
+                            + name
+                            + " # "
+                            + app_path.replace(os.environ["HOME"], "~")
+                        )
                         casks_in_others.append(name)
                     else:
-                        out.writeln("#cask " + name + " # "
-                                    + app_path.replace(os.environ["HOME"],
-                                                       "~"))
+                        out.writeln(
+                            "#cask "
+                            + name
+                            + " # "
+                            + app_path.replace(os.environ["HOME"], "~")
+                        )
 
                 out.writeln("")
 
-            if [x[0] for x in list(casks.values()) + nonapp_casks
-                    if x[1] == t and not x[3]]:
-                out.writeln("# Cask is found, but no applications are found.\n"
-                            "# (fonts, system settins, "
-                            "or installed in other directory.)")
-                for name in sorted(x[0]
-                                   for x in list(casks.values()) + nonapp_casks
-                                   if x[1] == t and x[2] and not x[3]):
+            if [
+                x[0]
+                for x in list(casks.values()) + nonapp_casks
+                if x[1] == t and not x[3]
+            ]:
+                out.writeln(
+                    "# Cask is found, but no applications are found.\n"
+                    "# (fonts, system settins, "
+                    "or installed in other directory.)"
+                )
+                for name in sorted(
+                    x[0]
+                    for x in list(casks.values()) + nonapp_casks
+                    if x[1] == t and x[2] and not x[3]
+                ):
                     if name not in casks_in_others:
                         out.writeln("cask " + name)
                         casks_in_others.append(name)
-                if [x[0] for x in list(casks.values()) + nonapp_casks
-                        if x[1] == t and not x[2] and not x[3]]:
-                    out.writeln(
-                        "# There are new version for following applications.")
-                    for name in sorted(x[0]
-                                       for x in list(casks.values())
-                                       + nonapp_casks
-                                       if x[1] == t and not x[2] and not x[3]):
+                if [
+                    x[0]
+                    for x in list(casks.values()) + nonapp_casks
+                    if x[1] == t and not x[2] and not x[3]
+                ]:
+                    out.writeln("# There are new version for following applications.")
+                    for name in sorted(
+                        x[0]
+                        for x in list(casks.values()) + nonapp_casks
+                        if x[1] == t and not x[2] and not x[3]
+                    ):
                         if name not in casks_in_others:
                             out.writeln("cask " + name)
                             casks_in_others.append(name)
                 out.writeln("")
 
             if apps[t][False]:
-                out.writeln(
-                    "# Apps installed directly instead of by Cask in " + t)
-                for (name, app_path, check) in apps[t][False]:
-                    out.writeln("#cask " + name + " # "
-                                + app_path.replace(os.environ["HOME"], "~"))
+                out.writeln("# Apps installed directly instead of by Cask in " + t)
+                for name, app_path, _ in apps[t][False]:
+                    out.writeln(
+                        "#cask "
+                        + name
+                        + " # "
+                        + app_path.replace(os.environ["HOME"], "~")
+                    )
                 out.writeln("")
 
         if brew_apps:
             out.writeln("# Apps installed by brew install command")
             if "" in brew_apps:
                 for (name, app_path, opt) in brew_apps[""]:
-                    out.writeln("brew " + name + " " + opt + " # "
-                                + app_path.replace(os.environ["HOME"], "~"))
+                    out.writeln(
+                        "brew "
+                        + name
+                        + " "
+                        + opt
+                        + " # "
+                        + app_path.replace(os.environ["HOME"], "~")
+                    )
             for tap in [x for x in brew_apps if x != ""]:
                 out.writeln("tap " + tap)
                 for (name, app_path, opt) in brew_apps[tap]:
-                    out.writeln("brew " + name + " " + opt + " # "
-                                + app_path.replace(os.environ["HOME"], "~"))
+                    out.writeln(
+                        "brew "
+                        + name
+                        + " "
+                        + opt
+                        + " # "
+                        + app_path.replace(os.environ["HOME"], "~")
+                    )
             out.writeln("")
 
         if apps["appstore"][False]:
             out.writeln("# Apps installed from AppStore")
             for x in apps["appstore"][False]:
                 print(" ".join(x[0].split()[1:]).lower())
-            for (name, app_path, check) in sorted(
-                    apps["appstore"][False],
-                    key=lambda x: " ".join(x[0].split()[1:]).lower()):
+            for name, app_path, _ in sorted(
+                apps["appstore"][False],
+                key=lambda x: " ".join(x[0].split()[1:]).lower(),
+            ):
                 if name != "":
                     out.writeln("appstore " + name + " # " + app_path)
                 else:
@@ -2496,7 +2822,7 @@ class BrewFile:
         if apps[""][False]:
             out.writeln("# Apps installed but no casks are available")
             out.writeln("# (System applications or directory installed.)")
-            for (name, app_path, check) in apps[""][False]:
+            for _, app_path, _ in apps[""][False]:
                 out.writeln("# " + app_path)
 
         out.close()
@@ -2505,54 +2831,74 @@ class BrewFile:
         self.banner("# Summary")
         if self.verbose() > 0:
             print("Total:", napps, "apps have been checked.")
-            print("Apps in",
-                  [d.replace(os.environ["HOME"], "~") for d in app_dirs], "\n")
-            maxlen = max(len(x.replace(os.environ["HOME"], "~"))
-                         for x in app_dirs)
+            print(
+                "Apps in", [d.replace(os.environ["HOME"], "~") for d in app_dirs], "\n"
+            )
+            maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
             if sum(apps_check["cask"].values()) > 0:
                 print("Installed by Cask:")
                 for d in app_dirs:
                     if apps_check["cask"][d] == 0:
                         continue
-                    print("{0:<{1}s} : {2:d}".format(
-                        d.replace(os.environ["HOME"], "~"),
-                        maxlen, apps_check["cask"][d]))
+                    print(
+                        "{0:<{1}s} : {2:d}".format(
+                            d.replace(os.environ["HOME"], "~"),
+                            maxlen,
+                            apps_check["cask"][d],
+                        )
+                    )
                 print("")
             if sum(apps_check["brew"].values()) > 0:
                 print("Installed by brew install command")
                 for d in app_dirs:
                     if apps_check["brew"][d] == 0:
                         continue
-                    print("{0:<{1}s} : {2:d}".format(
-                        d.replace(os.environ["HOME"], "~"),
-                        maxlen, apps_check["brew"][d]))
+                    print(
+                        "{0:<{1}s} : {2:d}".format(
+                            d.replace(os.environ["HOME"], "~"),
+                            maxlen,
+                            apps_check["brew"][d],
+                        )
+                    )
                 print("")
             if sum(apps_check["has_cask"].values()) > 0:
                 print("Installed directly, but casks are available:")
                 for d in app_dirs:
                     if apps_check["has_cask"][d] == 0:
                         continue
-                    print("{0:<{1}s} : {2:d}".format(
-                        d.replace(os.environ["HOME"], "~"),
-                        maxlen, apps_check["has_cask"][d]))
+                    print(
+                        "{0:<{1}s} : {2:d}".format(
+                            d.replace(os.environ["HOME"], "~"),
+                            maxlen,
+                            apps_check["has_cask"][d],
+                        )
+                    )
                 print("")
             if sum(apps_check["appstore"].values()) > 0:
                 print("Installed from Appstore")
                 for d in app_dirs:
                     if apps_check["appstore"][d] == 0:
                         continue
-                    print("{0:<{1}s} : {2:d}".format(
-                        d.replace(os.environ["HOME"], "~"),
-                        maxlen, apps_check["appstore"][d]))
+                    print(
+                        "{0:<{1}s} : {2:d}".format(
+                            d.replace(os.environ["HOME"], "~"),
+                            maxlen,
+                            apps_check["appstore"][d],
+                        )
+                    )
                 print("")
             if sum(apps_check["no_cask"].values()) > 0:
                 print("No casks")
                 for d in app_dirs:
                     if apps_check["no_cask"][d] == 0:
                         continue
-                    print("{0:<{1}s} : {2:d}".format(
-                        d.replace(os.environ["HOME"], "~"),
-                        maxlen, apps_check["no_cask"][d]))
+                    print(
+                        "{0:<{1}s} : {2:d}".format(
+                            d.replace(os.environ["HOME"], "~"),
+                            maxlen,
+                            apps_check["no_cask"][d],
+                        )
+                    )
                 print("")
 
     def make_pack_deps(self):
@@ -2560,8 +2906,7 @@ class BrewFile:
         packs = self.get("brew_list")
         self.pack_deps = {}
         for p in packs:
-            deps = self.proc("brew deps --1 " + p, print_cmd=False,
-                             print_out=False)[1]
+            deps = self.proc("brew deps --1 " + p, print_cmd=False, print_out=False)[1]
             self.pack_deps[p] = []
             for d in deps:
                 if d in packs:
@@ -2571,12 +2916,14 @@ class BrewFile:
             dep_packs.extend(v)
         self.top_packs = [x for x in packs if x not in dep_packs]
         if self.opt["verbose"] > 1:
+
             def print_dep(p, depth=0):
                 if depth > 2:
                     print("#" + " " * (depth - 2), end="")
                 print(p)
                 for deps in self.pack_deps[p]:
                     print_dep(deps, depth + 2)
+
             for p in packs:
                 if p not in dep_packs:
                     print_dep(p)
@@ -2708,273 +3055,444 @@ def main():
     b = BrewFile()
 
     # Pre Parser
-    arg_parser_opts = {'add_help': False, 'allow_abbrev': False}
-    pre_parser = argparse.ArgumentParser(usage=__prog__ + "...",
-                                         **arg_parser_opts)
+    arg_parser_opts = {"add_help": False, "allow_abbrev": False}
+    pre_parser = argparse.ArgumentParser(usage=__prog__ + "...", **arg_parser_opts)
     group = pre_parser.add_mutually_exclusive_group()
-    group.add_argument("-i", "--init", action="store_const",
-                       dest="command", const="init")
-    group.add_argument("-s", "--set_repo", action="store_const",
-                       dest="command", const="set_repo")
-    group.add_argument("--set_local", action="store_const",
-                       dest="command", const="set_local")
-    group.add_argument("-c", "--clean", action="store_const",
-                       dest="command", const="clean")
-    group.add_argument("-u", "--update", action="store_const",
-                       dest="command", const="update")
-    group.add_argument("-e", "--edit", action="store_const",
-                       dest="command", const="edit")
-    group.add_argument("--cat", action="store_const",
-                       dest="command", const="cat")
-    group.add_argument("--test", action="store_const",
-                       dest="command", const="test")
-    group.add_argument("--commands", action="store_const",
-                       dest="command", const="commands")
-    group.add_argument("-v", "--version", action="store_const",
-                       dest="command", const="version")
+    group.add_argument(
+        "-i", "--init", action="store_const", dest="command", const="init"
+    )
+    group.add_argument(
+        "-s", "--set_repo", action="store_const", dest="command", const="set_repo"
+    )
+    group.add_argument(
+        "--set_local", action="store_const", dest="command", const="set_local"
+    )
+    group.add_argument(
+        "-c", "--clean", action="store_const", dest="command", const="clean"
+    )
+    group.add_argument(
+        "-u", "--update", action="store_const", dest="command", const="update"
+    )
+    group.add_argument(
+        "-e", "--edit", action="store_const", dest="command", const="edit"
+    )
+    group.add_argument("--cat", action="store_const", dest="command", const="cat")
+    group.add_argument("--test", action="store_const", dest="command", const="test")
+    group.add_argument(
+        "--commands", action="store_const", dest="command", const="commands"
+    )
+    group.add_argument(
+        "-v", "--version", action="store_const", dest="command", const="version"
+    )
 
     # Parent parser
     file_parser = argparse.ArgumentParser(**arg_parser_opts)
     file_parser.add_argument(
-        "-f", "--file", action="store", dest="input",
+        "-f",
+        "--file",
+        action="store",
+        dest="input",
         default=b.opt["input"],
         help="Set input file (default: %(default)s). \n"
-             "You can set input file by environmental variable,\n"
-             "HOMEBREW_BREWFILE, like:\n"
-             "    export HOMEBREW_BREWFILE=~/.brewfile")
+        "You can set input file by environmental variable,\n"
+        "HOMEBREW_BREWFILE, like:\n"
+        "    export HOMEBREW_BREWFILE=~/.brewfile",
+    )
 
     backup_parser = argparse.ArgumentParser(**arg_parser_opts)
     backup_parser.add_argument(
-        "-b", "--backup", action="store", dest="backup",
+        "-b",
+        "--backup",
+        action="store",
+        dest="backup",
         default=b.opt["backup"],
         help="Set backup file (default: %(default)s). \n"
-             "If it is empty, no backup is made.\n"
-             "You can set backup file by environmental variable,\n"
-             " HOMEBREW_BREWFILE_BACKUP, like:\n"
-             "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup")
+        "If it is empty, no backup is made.\n"
+        "You can set backup file by environmental variable,\n"
+        " HOMEBREW_BREWFILE_BACKUP, like:\n"
+        "    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup",
+    )
 
     format_parser = argparse.ArgumentParser(**arg_parser_opts)
     format_parser.add_argument(
-        "-F", "--format", "--form", action="store", dest="form",
+        "-F",
+        "--format",
+        "--form",
+        action="store",
+        dest="form",
         default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
-             "file (or none)    : brew vim --HEAD --with-lua\n"
-             "brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']\n"
-             "  Compatible with "
-             "[homebrew-bundle]"
-             "(https://github.com/Homebrew/homebrew-bundle).\n"
-             "command or cmd    : brew install vim --HEAD --with-lua\n"
-             "  Can be used as a shell script.\n")
+        "file (or none)    : brew vim --HEAD --with-lua\n"
+        "brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']\n"
+        "  Compatible with "
+        "[homebrew-bundle]"
+        "(https://github.com/Homebrew/homebrew-bundle).\n"
+        "command or cmd    : brew install vim --HEAD --with-lua\n"
+        "  Can be used as a shell script.\n",
+    )
 
     leaves_parser = argparse.ArgumentParser(**arg_parser_opts)
     leaves_parser.add_argument(
-        "--leaves", action="store_true", default=b.opt["leaves"],
+        "--leaves",
+        action="store_true",
+        default=b.opt["leaves"],
         dest="leaves",
         help="Make list only for leaves (taken by `brew leaves`).\n"
-             "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_LEAVES, like:\n"
-             "    export HOMEBREW_BREWFILE_LEAVES=1")
+        "You can set this by environmental variable,"
+        " HOMEBREW_BREWFILE_LEAVES, like:\n"
+        "    export HOMEBREW_BREWFILE_LEAVES=1",
+    )
 
     on_request_parser = argparse.ArgumentParser(**arg_parser_opts)
     on_request_parser.add_argument(
-        "--on_request", action="store_true", default=b.opt["on_request"],
+        "--on_request",
+        action="store_true",
+        default=b.opt["on_request"],
         dest="on_request",
         help="Make list only for packages installed on request.\n"
-             "This option is given priority over 'leaves'.\n"
-             "You can set this by environmental variable,"
-             " HOMEBREW_BREWFILE_ON_REQUEST, like:\n"
-             "    export HOMEBREW_BREWFILE_ON_REQUEST=1")
+        "This option is given priority over 'leaves'.\n"
+        "You can set this by environmental variable,"
+        " HOMEBREW_BREWFILE_ON_REQUEST, like:\n"
+        "    export HOMEBREW_BREWFILE_ON_REQUEST=1",
+    )
 
     top_packages_parser = argparse.ArgumentParser(**arg_parser_opts)
     top_packages_parser.add_argument(
-        "--top_packages", action="store", default=b.opt["top_packages"],
+        "--top_packages",
+        action="store",
+        default=b.opt["top_packages"],
         dest="top_packages",
         help="Packages to be listed even if they are under dependencies\n"
-             "and `leaves`/'on_request' option is used.\n"
-             "You can set this by environmental variable,\n"
-             " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
-             "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils")
+        "and `leaves`/'on_request' option is used.\n"
+        "You can set this by environmental variable,\n"
+        " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
+        "    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils",
+    )
 
     noupgradeatupdate_parser = argparse.ArgumentParser(**arg_parser_opts)
     noupgradeatupdate_parser.add_argument(
-        "-U", "--noupgrade", action="store_true",
-        default=b.opt["noupgradeatupdate"], dest="noupgradeatupdate",
-        help="Do not execute `brew update/brew upgrade`"
-             " at `brew file update`.")
+        "-U",
+        "--noupgrade",
+        action="store_true",
+        default=b.opt["noupgradeatupdate"],
+        dest="noupgradeatupdate",
+        help="Do not execute `brew update/brew upgrade`" " at `brew file update`.",
+    )
 
     repo_parser = argparse.ArgumentParser(**arg_parser_opts)
     repo_parser.add_argument(
-        "-r", "--repo", action="store", default=b.opt["repo"], dest="repo",
-        help="Set repository name. Use with set_repo.")
+        "-r",
+        "--repo",
+        action="store",
+        default=b.opt["repo"],
+        dest="repo",
+        help="Set repository name. Use with set_repo.",
+    )
 
     link_parser = argparse.ArgumentParser(**arg_parser_opts)
     link_parser.add_argument(
-        "-n", "--nolink", action="store_false", default=b.opt["link"],
-        dest="link", help="Don't make links for Apps.")
+        "-n",
+        "--nolink",
+        action="store_false",
+        default=b.opt["link"],
+        dest="link",
+        help="Don't make links for Apps.",
+    )
 
     caskonly_parser = argparse.ArgumentParser(**arg_parser_opts)
     caskonly_parser.add_argument(
-        "--caskonly", action="store_true", default=b.opt["caskonly"],
-        dest="caskonly", help="Write out only cask related packages")
+        "--caskonly",
+        action="store_true",
+        default=b.opt["caskonly"],
+        dest="caskonly",
+        help="Write out only cask related packages",
+    )
 
     appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     appstore_parser.add_argument(
-        "--appstore", action="store", default=b.opt["appstore"],
-        dest="appstore", help="Set AppStore application check level.\n"
+        "--appstore",
+        action="store",
+        default=b.opt["appstore"],
+        dest="appstore",
+        help="Set AppStore application check level.\n"
         "0: do not check,\n1: check and manage,\n"
         "2: check for installation,"
         "but do not add to Brewfile when Apps are added.\n"
         "You can set the level by environmental variable:\n"
-        "    export HOMEBREW_BREWFILE_APPSTORE=0")
+        "    export HOMEBREW_BREWFILE_APPSTORE=0",
+    )
 
     no_appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     no_appstore_parser.add_argument(
-        "--no_appstore", action="store_false", default=b.opt["no_appstore"],
-        dest="no_appstore", help="Set AppStore application check level to 0.\n"
-        "(legacy option, works same as '--appstore 0'.)\n")
+        "--no_appstore",
+        action="store_false",
+        default=b.opt["no_appstore"],
+        dest="no_appstore",
+        help="Set AppStore application check level to 0.\n"
+        "(legacy option, works same as '--appstore 0'.)\n",
+    )
 
     all_files_parser = argparse.ArgumentParser(**arg_parser_opts)
     all_files_parser.add_argument(
-        "--all_files", action="store_true", default=b.opt["all_files"],
+        "--all_files",
+        action="store_true",
+        default=b.opt["all_files"],
         dest="all_files",
-        help="Show all files including non-existing files.\n")
+        help="Show all files including non-existing files.\n",
+    )
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
     dryrun_parser.add_argument(
-        "-C", action="store_false", default=b.opt["dryrun"],
-        dest="dryrun", help="Run clean as non dry-run mode.\n"
-        "Use this option to run clean at update command, too.")
+        "-C",
+        action="store_false",
+        default=b.opt["dryrun"],
+        dest="dryrun",
+        help="Run clean as non dry-run mode.\n"
+        "Use this option to run clean at update command, too.",
+    )
 
     yn_parser = argparse.ArgumentParser(**arg_parser_opts)
     yn_parser.add_argument(
-        "-y", "--yes", action="store_true", default=b.opt["yn"],
-        dest="yn", help="Answer yes to all yes/no questions.")
+        "-y",
+        "--yes",
+        action="store_true",
+        default=b.opt["yn"],
+        dest="yn",
+        help="Answer yes to all yes/no questions.",
+    )
 
     verbose_parser = argparse.ArgumentParser(**arg_parser_opts)
-    verbose_parser.add_argument("-V", "--verbose", action="store",
-                                default=b.opt["verbose"],
-                                dest="verbose", help="Verbose level 0/1/2")
+    verbose_parser.add_argument(
+        "-V",
+        "--verbose",
+        action="store",
+        default=b.opt["verbose"],
+        dest="verbose",
+        help="Verbose level 0/1/2",
+    )
 
     help_parser = argparse.ArgumentParser(**arg_parser_opts)
-    help_parser.add_argument("-h", "--help", action="store_true",
-                             default=False, dest="help",
-                             help="Print Help (this message) and exit.")
+    help_parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        default=False,
+        dest="help",
+        help="Print Help (this message) and exit.",
+    )
 
-    min_parsers = [file_parser, backup_parser, format_parser, leaves_parser,
-                   on_request_parser, top_packages_parser, appstore_parser,
-                   no_appstore_parser, caskonly_parser, yn_parser,
-                   verbose_parser]
+    min_parsers = [
+        file_parser,
+        backup_parser,
+        format_parser,
+        leaves_parser,
+        on_request_parser,
+        top_packages_parser,
+        appstore_parser,
+        no_appstore_parser,
+        caskonly_parser,
+        yn_parser,
+        verbose_parser,
+    ]
     formatter = argparse.RawTextHelpFormatter
-    subparser_opts = {'formatter_class': formatter, 'allow_abbrev': False}
+    subparser_opts = {"formatter_class": formatter, "allow_abbrev": False}
 
     # Main parser
     parser = argparse.ArgumentParser(
         prog=__prog__,
-        parents=[file_parser, backup_parser, format_parser, leaves_parser,
-                 on_request_parser, top_packages_parser,
-                 noupgradeatupdate_parser, repo_parser, link_parser,
-                 caskonly_parser, appstore_parser, no_appstore_parser,
-                 dryrun_parser, yn_parser, verbose_parser, help_parser],
+        parents=[
+            file_parser,
+            backup_parser,
+            format_parser,
+            leaves_parser,
+            on_request_parser,
+            top_packages_parser,
+            noupgradeatupdate_parser,
+            repo_parser,
+            link_parser,
+            caskonly_parser,
+            appstore_parser,
+            no_appstore_parser,
+            dryrun_parser,
+            yn_parser,
+            verbose_parser,
+            help_parser,
+        ],
         formatter_class=formatter,
         description=__description__,
         epilog="Check https://homebrew-file.readthedocs.io for more details.",
-        **arg_parser_opts
+        **arg_parser_opts,
     )
 
     subparsers = parser.add_subparsers(
-        title="subcommands", metavar="[command]", help="", dest="command")
+        title="subcommands", metavar="[command]", help="", dest="command"
+    )
 
-    help_doc = "Install packages in BREWFILE if no <package> is given.\n"\
-        "If <package> is given, the package is installed and it is added\n"\
+    help_doc = (
+        "Install packages in BREWFILE if no <package> is given.\n"
+        "If <package> is given, the package is installed and it is added\n"
         "in BREWFILE."
-    subparsers.add_parser("install", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
-    help_doc = "Execute brew command, and update BREWFILE.\n"\
+    )
+    subparsers.add_parser(
+        "install",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
+    help_doc = (
+        "Execute brew command, and update BREWFILE.\n"
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
-    subparsers.add_parser("brew", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
-    help_doc = "or dump/-i/--init\nInitialize/Update BREWFILE "\
-        "with installed packages."
+    )
     subparsers.add_parser(
-        "init", description=help_doc, help=help_doc,
-        parents=min_parsers + [link_parser, repo_parser],
-        **subparser_opts)
+        "brew",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
+    help_doc = (
+        "or dump/-i/--init\nInitialize/Update BREWFILE " "with installed packages."
+    )
     subparsers.add_parser(
-        "dump",
+        "init",
+        description=help_doc,
+        help=help_doc,
         parents=min_parsers + [link_parser, repo_parser],
-        **subparser_opts)
-    help_doc = "or -s/--set_repo\nSet BREWFILE repository "\
+        **subparser_opts,
+    )
+    subparsers.add_parser(
+        "dump", parents=min_parsers + [link_parser, repo_parser], **subparser_opts
+    )
+    help_doc = (
+        "or -s/--set_repo\nSet BREWFILE repository "
         "(e.g. rcmdnk/Brewfile or full path to your repository)."
+    )
     subparsers.add_parser(
-        "set_repo", description=help_doc, help=help_doc,
+        "set_repo",
+        description=help_doc,
+        help=help_doc,
         parents=min_parsers + [repo_parser],
-        **subparser_opts)
+        **subparser_opts,
+    )
     help_doc = "or --set_local\nSet BREWFILE to local file."
-    subparsers.add_parser("set_local", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
+    subparsers.add_parser(
+        "set_local",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
     help_doc = "Update BREWFILE from the repository."
-    subparsers.add_parser("pull", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
+    subparsers.add_parser(
+        "pull",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
     help_doc = "Push your BREWFILE to the repository."
-    subparsers.add_parser("push", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
-    help_doc = "or -c/--clean\nCleanup.\n"\
-        "Uninstall packages not in the list.\n"\
-        "Untap packages not in the list.\n"\
-        "Cleanup cache (brew cleanup)\n"\
-        "By default, cleanup runs as dry-run.\n"\
-        "If you want to enforce cleanup, use '-C' option."
-    subparsers.add_parser("clean", description=help_doc, help=help_doc,
-                          parents=min_parsers + [dryrun_parser],
-                          **subparser_opts)
-    help_doc = "or --clean_non_request.\n"\
-        "Uninstall packages which were installed as dependencies \n"\
-        "but parent packages of which were already uninstalled.\n"\
-        "By default, cleanup runs as dry-run.\n"\
-        "If you want to enforce cleanup, use '-C' option."
     subparsers.add_parser(
-        "clean_non_request", description=help_doc, help=help_doc,
+        "push",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
+    help_doc = (
+        "or -c/--clean\nCleanup.\n"
+        "Uninstall packages not in the list.\n"
+        "Untap packages not in the list.\n"
+        "Cleanup cache (brew cleanup)\n"
+        "By default, cleanup runs as dry-run.\n"
+        "If you want to enforce cleanup, use '-C' option."
+    )
+    subparsers.add_parser(
+        "clean",
+        description=help_doc,
+        help=help_doc,
         parents=min_parsers + [dryrun_parser],
-        **subparser_opts)
-    help_doc = "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"\
-        "install,\n"\
-        "init and push.\n"\
-        "In addition, pull and push\n"\
-        "will be done if the repository is assigned.\n"\
-        "'clean' is also executed after install if you give -C option."
+        **subparser_opts,
+    )
+    help_doc = (
+        "or --clean_non_request.\n"
+        "Uninstall packages which were installed as dependencies \n"
+        "but parent packages of which were already uninstalled.\n"
+        "By default, cleanup runs as dry-run.\n"
+        "If you want to enforce cleanup, use '-C' option."
+    )
     subparsers.add_parser(
-        "update", description=help_doc, help=help_doc,
-        parents=min_parsers + [link_parser, noupgradeatupdate_parser,
-                               dryrun_parser],
-        **subparser_opts)
+        "clean_non_request",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers + [dryrun_parser],
+        **subparser_opts,
+    )
+    help_doc = (
+        "or -u/--update\nDo brew update/upgrade, cask upgrade, pull,"
+        "install,\n"
+        "init and push.\n"
+        "In addition, pull and push\n"
+        "will be done if the repository is assigned.\n"
+        "'clean' is also executed after install if you give -C option."
+    )
+    subparsers.add_parser(
+        "update",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers + [link_parser, noupgradeatupdate_parser, dryrun_parser],
+        **subparser_opts,
+    )
     help_doc = "or -e/--edit\nEdit input files."
-    subparsers.add_parser("edit", description=help_doc, help=help_doc,
-                          parents=[file_parser],
-                          **subparser_opts)
+    subparsers.add_parser(
+        "edit",
+        description=help_doc,
+        help=help_doc,
+        parents=[file_parser],
+        **subparser_opts,
+    )
     help_doc = "or --cat\nShow contents of input files."
-    subparsers.add_parser("cat", description=help_doc, help=help_doc,
-                          parents=[file_parser],
-                          **subparser_opts)
+    subparsers.add_parser(
+        "cat",
+        description=help_doc,
+        help=help_doc,
+        parents=[file_parser],
+        **subparser_opts,
+    )
     help_doc = "Check applications for Cask."
-    subparsers.add_parser("casklist", description=help_doc, help=help_doc,
-                          parents=[verbose_parser],
-                          **subparser_opts)
+    subparsers.add_parser(
+        "casklist",
+        description=help_doc,
+        help=help_doc,
+        parents=[verbose_parser],
+        **subparser_opts,
+    )
     help_doc = "or --test. Used for test."
-    subparsers.add_parser("test", description=help_doc, help=help_doc,
-                          parents=min_parsers, **subparser_opts)
+    subparsers.add_parser(
+        "test",
+        description=help_doc,
+        help=help_doc,
+        parents=min_parsers,
+        **subparser_opts,
+    )
     help_doc = "Get Brewfile's full path, including additional files."
-    subparsers.add_parser("get_files", description=help_doc, help=help_doc,
-                          parents=[file_parser, all_files_parser],
-                          **subparser_opts)
+    subparsers.add_parser(
+        "get_files",
+        description=help_doc,
+        help=help_doc,
+        parents=[file_parser, all_files_parser],
+        **subparser_opts,
+    )
     help_doc = "or --commands\nShow commands."
-    subparsers.add_parser("commands", description=help_doc, help=help_doc,
-                          **subparser_opts)
+    subparsers.add_parser(
+        "commands", description=help_doc, help=help_doc, **subparser_opts
+    )
     help_doc = "or -v/--version\nShow version."
-    subparsers.add_parser("version", description=help_doc, help=help_doc,
-                          **subparser_opts)
+    subparsers.add_parser(
+        "version", description=help_doc, help=help_doc, **subparser_opts
+    )
     help_doc = "or -h/--help\nPrint Help (this message) and exit."
-    subparsers.add_parser("help", description=help_doc, help=help_doc,
-                          **subparser_opts)
+    subparsers.add_parser("help", description=help_doc, help=help_doc, **subparser_opts)
 
     if len(sys.argv) == 1:
         parser.print_usage()
@@ -3001,10 +3519,10 @@ def main():
     (ns, args_tmp) = parser.parse_known_args(args)
     args = vars(ns)
     args.update({"args": args_tmp})
-    if args['command'] in ('install') and args['args']:
-        cmd = args['command']
-        args['command'] = 'brew'
-        args['args'].insert(0, cmd)
+    if args["command"] in ("install") and args["args"]:
+        cmd = args["command"]
+        args["command"] = "brew"
+        args["args"].insert(0, cmd)
 
     b.set_args(**args)
 
@@ -3019,19 +3537,75 @@ def main():
         subparsers.choices[b.opt["command"]].print_help()
         sys.exit(0)
     elif b.opt["command"] == "commands":
-        commands = ["install", "brew", "init", "dump", "set_repo", "set_local",
-                    "pull", "push", "clean", "clean_non_request", "update",
-                    "edit", "cat", "casklist", "test",
-                    "get_files", "commands", "version", "help"]
-        commands_hyphen = ["-i", "--init", "-s", "--set_repo", "--set_local",
-                           "-c", "--clean", "--clean_non_request", "-u",
-                           "--update", "-e", "--edit", "--cat", "--test",
-                           "--commands", "-v", "--version", "-h", "--help"]
-        options = ["-f", "--file", "-b", "--backup",
-                   "-F", "--format", "--form", "--leaves", "--on_request",
-                   "--top_packages", "-U", "--noupgrade", "-r", "--repo", "-n",
-                   "--nolink", "--caskonly", "--appstore", "--no_appstore",
-                   "--all_files", "-C", "-y", "--yes", "-V", "--verbose"]
+        commands = [
+            "install",
+            "brew",
+            "init",
+            "dump",
+            "set_repo",
+            "set_local",
+            "pull",
+            "push",
+            "clean",
+            "clean_non_request",
+            "update",
+            "edit",
+            "cat",
+            "casklist",
+            "test",
+            "get_files",
+            "commands",
+            "version",
+            "help",
+        ]
+        commands_hyphen = [
+            "-i",
+            "--init",
+            "-s",
+            "--set_repo",
+            "--set_local",
+            "-c",
+            "--clean",
+            "--clean_non_request",
+            "-u",
+            "--update",
+            "-e",
+            "--edit",
+            "--cat",
+            "--test",
+            "--commands",
+            "-v",
+            "--version",
+            "-h",
+            "--help",
+        ]
+        options = [
+            "-f",
+            "--file",
+            "-b",
+            "--backup",
+            "-F",
+            "--format",
+            "--form",
+            "--leaves",
+            "--on_request",
+            "--top_packages",
+            "-U",
+            "--noupgrade",
+            "-r",
+            "--repo",
+            "-n",
+            "--nolink",
+            "--caskonly",
+            "--appstore",
+            "--no_appstore",
+            "--all_files",
+            "-C",
+            "-y",
+            "--yes",
+            "-V",
+            "--verbose",
+        ]
         print("commands:", " ".join(commands))
         print("commands_hyphen:", " ".join(commands_hyphen))
         print("options:", " ".join(options))
