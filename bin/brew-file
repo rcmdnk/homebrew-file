@@ -28,8 +28,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.5.11"
-__date__ = "27/Apr/2022"
+__version__ = "v8.5.12"
+__date__ = "02/Aug/2022"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2013,8 +2013,12 @@ class BrewFile:
                             or sorted(self.get("brew_input_opt")[p].split()) \
                             == sorted(self.get("brew_list_opt")[p].split()):
                         continue
-                    else:
-                        cmd = "reinstall"
+                    # Uninstall to install the package with new options
+                    # `reinstall` does not accept options such a --HEAD.
+                    self.proc("brew uninstall " + p)
+                ret, lines = self.proc(
+                    "brew " + cmd + " " + p + self.get("brew_input_opt")[p]
+                )
                 ret, lines = self.proc("brew " + cmd + " " + p
                                        + self.get("brew_input_opt")[p])
                 if ret != 0:
