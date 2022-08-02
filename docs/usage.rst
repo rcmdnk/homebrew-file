@@ -328,4 +328,3 @@ Each developer can update the environment by ``brew file update``.
 
 In addition, each developer can install his/her necessary packages
 and maintain them by ``MyBrewfile``.
-

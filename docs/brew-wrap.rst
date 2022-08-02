@@ -91,5 +91,3 @@ To add actions, define `_post_brewfile_update` function in your **.bashrc** or *
         echo "Brewfile was updated!"
       }
    fi
-
-

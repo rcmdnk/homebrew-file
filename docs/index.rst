@@ -43,4 +43,3 @@ Contents:
    completion
    help
    homebrew-file
-

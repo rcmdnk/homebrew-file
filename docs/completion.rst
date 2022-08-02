@@ -45,4 +45,3 @@ In case you have installed `zsh-completions <https://github.com/zsh-users/zsh-co
 
 If you are using ``brew-wrap``, please write these completion settings
 **BEFORE** ``brew-wrap`` reading.
-
