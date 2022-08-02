@@ -1,0 +1,29 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  install:
+    strategy:
+      matrix:
+        os: [macos-12, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install test
+        run: |
+          curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
+          chmod 755 ./install.sh
+          ./install.sh
+          rm -f install.sh
+  test:
+    strategy:
+      matrix:
+        os: [macos-12, ubuntu-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Homebrew installation
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - name: Homebrew file installation
+        run: brew install rcmdnk/file/brew-file
