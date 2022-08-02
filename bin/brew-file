@@ -289,6 +289,8 @@ class BrewInfo:
         self.after_input = []
         self.cmd_input = []
 
+        self.cask_args_input = []
+
         self.brew_list_opt = {}
 
         self.brew_list = []
@@ -312,6 +314,7 @@ class BrewInfo:
             "before_input": self.before_input,
             "after_input": self.after_input,
             "cmd_input": self.cmd_input,
+            "cask_args_input": self.cask_args_input,
             "brew_list_opt": self.brew_list_opt,
             "brew_list": self.brew_list,
             "brew_full_list": self.brew_full_list,
@@ -355,6 +358,8 @@ class BrewInfo:
         del self.before_input[:]
         del self.after_input[:]
         del self.cmd_input[:]
+
+        del self.cask_args_input[:]
 
     def clear_list(self):
         self.brew_list_opt.clear()
@@ -531,6 +536,8 @@ class BrewInfo:
                 self.before_input.append(excmd)
             elif cmd == "after":
                 self.after_input.append(excmd)
+            elif cmd == "cask_args":
+                self.cask_args_input.append(excmd)
             else:
                 self.cmd_input.append(line.strip())
 
@@ -693,6 +700,7 @@ class BrewInfo:
         # if self.helper.opt["form"] in ["file", "none"]:
         cmd_before = "before "
         cmd_after = "after "
+        cmd_cask_args = "cask_args "
         cmd_other = ""
         cmd_install = "brew "
         cmd_tap = "tap "
@@ -704,10 +712,8 @@ class BrewInfo:
         if self.helper.opt["form"] in ["brewdler", "bundle"]:
             cmd_before = "#before "
             cmd_after = "#after "
+            cmd_cask_args = "#cask_args "
             cmd_other = "#"
-            cmd_install = "brew "
-            cmd_tap = "tap "
-            cmd_cask = "cask "
             cmd_cask_nocask = "#cask "
             cmd_appstore = "mas "
             cmd_main = "#main "
@@ -752,6 +758,25 @@ fi
             output += "# Before commands\n"
             for c in self.before_input:
                 output += cmd_before + c + "\n"
+
+        # Cask args
+        if self.cask_args_input:
+            output += "\n# Cask args\n"
+            for c in self.cask_args_input:
+                output += cmd_cask_args
+                delimiter = " "
+                for k, v in c.items():
+                    if self.helper.opt["form"] in ["brewdler", "bundle"]:
+                        if v == "":
+                            output += f"{delimiter}{k.lstrip('-')}: true"
+                        else:
+                            output += f"{delimiter}{k.lstrip('-')}: {v}"
+                        delimiter = ", "
+                    else:
+                        output += f" {k}"
+                        if v != "":
+                            output += f" {v}"
+                output += "\n"
 
         # Taps
         if self.tap_list:
@@ -2208,10 +2233,22 @@ class BrewFile:
 
         # Cask
         if is_mac():
+            cask_args_opt = {"--cask": "", "--force": ""}
+            for c in self.get("cask_args_input"):
+                cask_args_opt.update(c)
+
             for p in self.get("cask_input"):
                 if p in self.get("cask_list"):
                     continue
-                self.proc("brew install --cask --force " + p)
+                cask_args = {}
+                cask_args.update(cask_args_opt)
+                args = []
+                for k, v in cask_args.items():
+                    args.append(k)
+                    if v != "":
+                        args.append(v)
+                args = shlex.join(args)
+                self.proc(f"brew install {args} {p}")
 
         # brew
         if not self.opt["caskonly"]:
