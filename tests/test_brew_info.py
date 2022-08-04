@@ -79,7 +79,7 @@ def test_get_tap_path(brew_info):
 
 def test_get_tap_packs(brew_info):
     packs = brew_info.get_tap_packs("homebrew/core")
-    assert type(packs) == list
+    assert 'vim' in packs
 
 
 def test_get_leaves(brew_info):

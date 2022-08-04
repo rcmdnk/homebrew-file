@@ -581,7 +581,7 @@ class BrewInfo:
             return packs
         packs = list(
             map(
-                lambda x: str(x).replace(".rb", ""),
+                lambda x: x.stem,
                 filter(lambda y: y.suffix == ".rb", tap_path.iterdir()),
             )
         )
@@ -589,7 +589,7 @@ class BrewInfo:
         if Path(path).is_dir():
             packs += list(
                 map(
-                    lambda x: str(x).replace(".rb", ""),
+                    lambda x: x.stem,
                     filter(lambda y: y.suffix == ".rb", path.iterdir()),
                 )
             )
@@ -605,7 +605,7 @@ class BrewInfo:
         if path.is_dir():
             casks = list(
                 map(
-                    lambda x: str(x).replace(".rb", ""),
+                    lambda x: x.stem,
                     filter(lambda y: y.suffix == ".rb", path.iterdir()),
                 )
             )
