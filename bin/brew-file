@@ -200,12 +200,11 @@ class BrewHelper:
             cmd = shlex.split(cmd)
         cmd_orig = " ".join(["$"] + cmd)
         if cmd[0] == "brew":
-            cmd[0] = self.opt["brew_cmd"]
+            cmd[0] = self.opt.get("brew_cmd", "brew")
         if print_cmd:
             self.info(cmd_orig, verbose)
         all_env = os.environ.copy()
-        for k, v in env.items():
-            all_env[k] = v
+        all_env.update(env)
         lines = []
         try:
             if separate_err:
@@ -232,7 +231,7 @@ class BrewHelper:
             ret = -1
 
         if exit_on_err and ret != 0:
-            if not (print_out and self.opt["verbose"] >= verbose):
+            if not (print_out and self.opt.get("verbose", 1) >= verbose):
                 print("\n".join(lines))
             self.err("Failed at command: " + " ".join(cmd))
             sys.exit(ret)
@@ -240,7 +239,7 @@ class BrewHelper:
         return ret, lines
 
     def out(self, text, verbose=100, color=""):
-        if self.opt["verbose"] < verbose:
+        if self.opt.get("verbose", 1) < verbose:
             return
         pre = post = ""
         if color != "" and sys.stdout.isatty():
@@ -374,7 +373,6 @@ class BrewInfo:
         del self.file_list[:]
 
     def input_to_list(self):
-        self.clear_list()
         self.clear_list()
         self.brew_list.extend(self.brew_input)
         self.brew_list_opt.update(self.brew_input_opt)
