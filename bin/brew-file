@@ -19,7 +19,9 @@ import shlex
 import shutil
 import subprocess
 import sys
-from io import StringIO
+from dataclasses import dataclass, field
+from io import StringIO, TextIOWrapper
+from typing import Union
 from urllib.parse import quote
 
 __prog__ = os.path.basename(__file__)
@@ -35,13 +37,13 @@ __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
 
 
-def is_mac():
+def is_mac() -> bool:
     if platform.system() == "Darwin":
         return True
     return False
 
 
-def to_bool(val):
+def to_bool(val: Union[bool, int, str]) -> bool:
     if isinstance(val, bool):
         return val
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
@@ -52,7 +54,7 @@ def to_bool(val):
     return False
 
 
-def to_num(val):
+def to_num(val: Union[bool, int, str]) -> int:
     if isinstance(val, bool):
         return int(val)
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
@@ -73,7 +75,7 @@ shell_envs = {
 }
 
 
-def expandpath(path):
+def expandpath(path: str) -> str:
     path = os.path.expanduser(path)
     for k in shell_envs:
         for kk in [f"${k}", f"${{{k}}}"]:
@@ -86,12 +88,12 @@ def expandpath(path):
     ).replace("\\$", "$")
 
 
-class OpenWrapper(object):
+@dataclass
+class OpenWrapper:
     """Wrapper function to open a file even if it doesn't exist."""
 
-    def __init__(self, name, mode="w"):
-        self.name = name
-        self.mode = mode
+    name: str
+    mode: str = "w"
 
     def __enter__(self):
         if os.path.dirname(self.name) != "" and not os.path.exists(
@@ -108,26 +110,28 @@ class OpenWrapper(object):
         return True
 
 
+@dataclass
 class Tee:
     """Module to write out in two ways at once."""
 
-    def __init__(self, out1, out2=sys.stdout, use2=True):
-        """__init__"""
+    out1: Union[str, TextIOWrapper]
+    out2: Union[str, TextIOWrapper]
+    use2: bool = True
 
-        if isinstance(out1, str):
-            self.out1name = out1
+    def __post_init__(self):
+        """__post_init__"""
+
+        if isinstance(self.out1, str):
+            self.out1name = self.out1
             self.out1 = StringIO()
         else:
             self.out1name = ""
-            self.out1 = out1
-        self.use2 = use2
         if self.use2:
-            if isinstance(out2, str):
-                self.out2name = out2
+            if isinstance(self.out2, str):
+                self.out2name = self.out2
                 self.out2 = StringIO()
             else:
                 self.out2name = ""
-                self.out2 = out2
 
     def __del__(self):
         """__del__"""
@@ -172,12 +176,13 @@ class Tee:
         self.__del__()
 
 
+@dataclass
 class BrewHelper:
     """Helper functions for BrewFile."""
 
-    def __init__(self, opt):
-        self.opt = opt
-        self.colors = {
+    opt: dict = field(default_factory=dict)
+    colors: dict = field(
+        default_factory=lambda: {
             "black": "30",
             "red": "31",
             "green": "32",
@@ -187,6 +192,7 @@ class BrewHelper:
             "lightblue": 36,
             "white": 37,
         }
+    )
 
     def readstdout(self, proc):
         for line in iter(proc.stdout.readline, ""):
@@ -283,11 +289,14 @@ class BrewHelper:
         return self.opt[name]
 
 
+@dataclass
 class BrewInfo:
     """Homebrew information storage."""
 
-    def __init__(self, helper, filename=""):
+    helper: BrewHelper
+    filename: str = ""
 
+    def __post_init__(self):
         self.brew_input_opt = {}
 
         self.brew_input = []
@@ -337,8 +346,6 @@ class BrewInfo:
             "main_list": self.main_list,
             "file_list": self.file_list,
         }
-        self.filename = filename
-        self.helper = helper
 
     def get_dir(self):
         return os.path.dirname(self.filename)
@@ -915,16 +922,13 @@ fi
             )
 
 
+@dataclass
 class BrewFile:
-
     """Main class of Brew-file."""
 
-    def __init__(self):
-        """initialization."""
+    opt: dict = field(default_factory=dict)
 
-        # Set default values
-        self.opt = {}
-
+    def __post_init__(self):
         # Prepare helper, need verbose first
         self.opt["verbose"] = int(os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
         self.helper = BrewHelper(self.opt)
