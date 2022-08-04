@@ -586,7 +586,7 @@ class BrewInfo:
             )
         )
         path = Path(tap_path, "Formula")
-        if Path(path).is_dir:
+        if Path(path).is_dir():
             packs += list(
                 map(
                     lambda x: str(x).replace(".rb", ""),
@@ -1204,10 +1204,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner("# Initialize " + self.brewinfo_main.filename)
+        self.banner(f"# Initialize {self.brewinfo_main.filename}")
         self.brewinfo_main.write()
         for b in self.brewinfo_ext:
-            self.banner("# Initialize " + b.filename)
+            self.banner(f"# Initialize {b.filename}")
             b.write()
 
     def get(self, name, only_ext=False):
@@ -1273,14 +1273,10 @@ class BrewFile:
 
     def repo_file(self):
         """Helper to build Brewfile path for the repository."""
-        return (
-            self.input_dir()
-            + "/"
-            + self.user_name()
-            + "_"
-            + self.repo_name()
-            + "/"
-            + self.input_file()
+        return Path(
+            self.input_dir(),
+            self.user_name() + "_" + self.repo_name(),
+            self.input_file(),
         )
 
     def init_repo(self):
@@ -1363,7 +1359,7 @@ class BrewFile:
     def check_repo(self):
         """Check input file for Git repository."""
         # Check input file
-        if not Path(self.opt["input"]).exist():
+        if not Path(self.opt["input"]).exists():
             return
 
         self.brewinfo.filename = self.opt["input"]
@@ -1892,7 +1888,7 @@ class BrewFile:
         """Set Brewfile repository"""
 
         # Check input file
-        if Path(self.opt["input"]).exist():
+        if Path(self.opt["input"]).exists():
             prev_repo = ""
             f = open(self.opt["input"], "r")
             lines = f.readlines()
@@ -1978,8 +1974,8 @@ class BrewFile:
     def initialize_write(self):
         self.write()
         self.banner(
-            "# You can edit " + self.brewinfo.filename + " with:\n"
-            "#     $ " + __prog__ + " edit"
+            f"# You can edit {self.brewinfo.filename} with:\n"
+            f"#     $ {__prog__} edit"
         )
         self.opt["initialized"] = True
 
@@ -1987,14 +1983,14 @@ class BrewFile:
         """Check input file"""
 
         if not self.brewinfo.check_file():
-            self.warn("Input file " + self.brewinfo.filename + " is not found.", 0)
+            self.warn(f"Input file {self.brewinfo.filename} is not found.", 0)
             ans = self.ask_yn("Do you want to initialize from installed packages?")
             if ans:
                 self.initialize(check=False)
                 return
 
             self.err("Ok, please prepare brewfile", 0)
-            self.err("or you can initialize " + self.brewinfo.filename + " with:", 0)
+            self.err(f"or you can initialize {self.brewinfo.filename} with:", 0)
             self.err("    $ " + __prog__ + " init", 0)
             sys.exit(1)
 
@@ -2004,7 +2000,7 @@ class BrewFile:
         files = [
             x.filename
             for x in [self.brewinfo_main] + self.brewinfo_ext
-            if all_files or Path(x.filename).exists()
+            if all_files or x.filename.exists()
         ]
         if is_print:
             print("\n".join(files))
@@ -2989,7 +2985,7 @@ class BrewFile:
         print("read input:", len(self.brewinfo.brew_input))
         self.brewinfo.clear()
         print("read input cleared:", len(self.brewinfo.brew_input))
-        self.brewinfo.filename = "/test/not/correct/file/path"
+        self.brewinfo.filename = Path("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
         self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
