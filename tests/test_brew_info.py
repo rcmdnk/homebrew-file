@@ -75,3 +75,40 @@ def test_read(brew_info):
 def test_get_tap_path(brew_info):
     tap_path = brew_info.get_tap_path("homebrew/core")
     assert tap_path.exists()
+
+
+def test_get_tap_packs(brew_info):
+    packs = brew_info.get_tap_packs("homebrew/core")
+    assert type(packs) == list
+
+
+def test_get_leaves(brew_info):
+    pass
+
+
+def test_get_info(brew_info):
+    pass
+
+
+def test_get_installed(brew_info):
+    pass
+
+
+def test_get_option(brew_info):
+    pass
+
+
+def test_convert_option(brew_info):
+    pass
+
+
+def test_packout(brew_info):
+    pass
+
+
+def test_mas_pack(brew_info):
+    pass
+
+
+def write(brew_info):
+    pass
