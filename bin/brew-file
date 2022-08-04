@@ -41,13 +41,6 @@ def is_mac():
     return False
 
 
-def open_output_file(name, mode="w"):
-    """Helper function to open a file even if it doesn't exist."""
-    if os.path.dirname(name) != "" and not os.path.exists(os.path.dirname(name)):
-        os.makedirs(os.path.dirname(name))
-    return open(name, mode)
-
-
 def to_bool(val):
     if isinstance(val, bool):
         return val
@@ -91,6 +84,28 @@ def expandpath(path):
         lambda x: os.environ.get(x.group(2) or x.group(1), ""),
         os.path.expanduser(path),
     ).replace("\\$", "$")
+
+
+class OpenWrapper(object):
+    """Wrapper function to open a file even if it doesn't exist."""
+
+    def __init__(self, name, mode="w"):
+        self.name = name
+        self.mode = mode
+
+    def __enter__(self):
+        if os.path.dirname(self.name) != "" and not os.path.exists(
+            os.path.dirname(self.name)
+        ):
+            os.makedirs(os.path.dirname(self.name))
+        self.file = open(self.name, self.mode)
+        return self.file
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        if exception_type is not None:
+            return False
+        self.file.close()
+        return True
 
 
 class Tee:
@@ -148,14 +163,12 @@ class Tee:
         """Close output files."""
 
         if self.out1name != "":
-            f = open_output_file(self.out1name, "w")
-            f.write(self.out1.getvalue())
-            f.close()
+            with OpenWrapper(self.out1name, "w") as f:
+                f.write(self.out1.getvalue())
         if self.use2:
             if self.out2name != "":
-                f = open(self.out2name, "w")
-                f.write(self.out2.getvalue())
-                f.close()
+                with OpenWrapper(self.out2name, "w") as f:
+                    f.write(self.out2.getvalue())
         self.__del__()
 
 
@@ -1924,9 +1937,8 @@ class BrewFile:
             self.set_brewfile_local()
         else:
             # Write repository to the input file
-            f = open_output_file(self.opt["input"], "w")
-            f.write("git " + self.opt["repo"])
-            f.close()
+            with OpenWrapper(self.opt["input"], "w") as f:
+                f.write("git " + self.opt["repo"])
             self.check_repo()
 
     def set_brewfile_local(self):
