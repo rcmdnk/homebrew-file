@@ -28,7 +28,7 @@ def test_readstdout(helper):
         ("grep a no_such_file", 2, ["grep: no_such_file: No such file or directory"], False, False, None),
         ("grep a no_such_file", 2, [], False, True, None),
         ("_wrong_command_ test", -1, None, False, False, None),
-        ([f"{Path(__file__).parent}/proc_env_test.sh"], 0, ['abc'], False, False, {'TEST_VAL': 'abc'}),
+        ([f"{Path(__file__).parent}/scripts/proc_env_test.sh"], 0, ['abc'], False, False, {'TEST_VAL': 'abc'}),
     ]
 )
 def test_proc(helper, cmd, ret, lines, exit_on_err, separate_err, env):

@@ -23,7 +23,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{matrix.python-version}}
+          architecture: x64
       - name: Homebrew installation
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-      - name: Homebrew file installation
-        run: brew install rcmdnk/file/brew-file
+      - uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            pre-commit
+            pytest
+            pytest-cov
+      - name: Run test
+        run: pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=bin  tests/ | tee pytest-coverage.txt
+      - name: Pytest coverage comment
+        if: ${{ github.ref == 'refs/heads/main' }}
+        id: coverageComment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          hide-comment: true
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
+      - name: Create Variable of Summary Report
+        id: summary_report
+        run: |
+          SUMMARY_REPORT=${{ steps.coverageComment.outputs.summaryReport }}
+          echo "::set-output name=content::$SUMMARY_REPORT"
+      - name: Check the output coverage
+        run: |
+          echo "Coverage Percantage - ${{ steps.coverageComment.outputs.coverage }}"
+          echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
+          echo "Coverage Html - ${{ steps.coverageComment.outputs.coverageHtml }}"
+          echo "Summary Report - ${{ steps.coverageComment.outputs.summaryReport }}"
+          echo "Coverage Warnings - ${{ steps.coverageComment.outputs.warnings }}"
+          echo "Coverage Errors - ${{ steps.coverageComment.outputs.errors }}"
+          echo "Coverage Failures - ${{ steps.coverageComment.outputs.failures }}"
+          echo "Coverage Skipped - ${{ steps.coverageComment.outputs.skipped }}"
+          echo "Coverage Tests - ${{ steps.coverageComment.outputs.tests }}"
+          echo "Coverage Time - ${{ steps.coverageComment.outputs.time }}"
+          echo "Not Success Test Info - ${{ steps.coverageComment.outputs.notSuccessTestInfo }}"
+      - name: pre-commit
+        run: pre-commit run -a
