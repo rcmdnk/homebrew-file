@@ -1193,7 +1193,7 @@ class BrewFile:
         self.brewinfo_main.add("brew_full_list", self.brewinfo.brew_list)
         self.brewinfo_main.add("tap_list", self.brewinfo.tap_list)
         self.brewinfo_main.add("cask_list", self.brewinfo.cask_list)
-        self.brewinfo_main.add("cask_nocask_list", self.brewinfo.cask_list)
+        self.brewinfo_main.add("cask_nocask_list", self.brewinfo.cask_nocask_list)
         self.brewinfo_main.add("appstore_list", self.brewinfo.appstore_list)
         self.brewinfo_main.add("brew_list_opt", self.brewinfo.brew_list_opt)
 
