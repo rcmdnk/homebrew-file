@@ -1,6 +1,6 @@
 import sys
-import tempfile
 from . import brew_file
+from pathlib import Path
 import pytest
 import os
 
@@ -40,4 +40,4 @@ def test_to_num(val, result):
     ]
 )
 def test_expandpath(path, result):
-    assert brew_file.expandpath(path) == result
+    assert brew_file.expandpath(path) == Path(result)
