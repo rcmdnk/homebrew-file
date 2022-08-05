@@ -363,10 +363,6 @@ class BrewInfo:
             return True
         return False
 
-    def clear(self) -> None:
-        self.clear_input()
-        self.clear_list()
-
     def clear_input(self) -> None:
         self.brew_input_opt.clear()
 
@@ -394,6 +390,10 @@ class BrewInfo:
         del self.appstore_list[:]
         del self.main_list[:]
         del self.file_list[:]
+
+    def clear(self) -> None:
+        self.clear_input()
+        self.clear_list()
 
     def input_to_list(self) -> None:
         self.clear_list()

@@ -28,15 +28,15 @@ def test_check_dir(brew_info):
     assert not info.check_dir()
 
 
-def test_clear(brew_info):
-    pass
-
-
 def test_clear_input(brew_info):
     pass
 
 
 def test_clear_list(brew_info):
+    pass
+
+
+def test_clear(brew_info):
     pass
 
 
