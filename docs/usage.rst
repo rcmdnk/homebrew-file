@@ -146,9 +146,7 @@ Some packages such macvim has Application (MacVim.app).
 If you want to install them to Applications area,
 please use ``-l`` (for ``~/Applications/``) or ``-g`` (for ``/Applications/``).
 
-With ``clean`` option, Brew-file runs cleanup.
-By default, it just does dry run (no actual cleanup).
-To run cleanup in non dry-run mode, use ``-C``.
+You can run update/install/clean/clean_non_request/pull/push as dry run mode with option `-d`/`--dry_run`.
 
 If you want edit ``Brewfile``, use ``edit`` option.
 
