@@ -53,7 +53,8 @@ def test_get(brew_info):
 
 
 def test_get_files(brew_info):
-    pass
+    files = brew_info.get_files()
+    assert files == {'main': ['BrewfileMain'], 'ext': ['BrewfileMain', 'BrewfileExt', 'BrewfileExt2', 'BrewfileNotExist', '~/BrewfileHome']}
 
 
 def test_remove(brew_info):

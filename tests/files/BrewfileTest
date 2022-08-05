@@ -14,7 +14,10 @@ tapall rcmdnk/rcmdnkpac
 appstore Keynote
 
 # Additional files
+main BrewfileMain
 file BrewfileExt
+file BrewfileExt2
+file BrewfileNotExist
 brewfile ~/BrewfileHome
 
 # Other commands

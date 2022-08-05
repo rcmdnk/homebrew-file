@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 from . import brew_file
+import tempfile
 
 import pytest
 
@@ -44,7 +45,53 @@ def test_read_all(bf):
 
 
 def test_read(bf):
-    pass
+    helper = brew_file.BrewHelper({})
+
+    bf.brewinfo_ext = []
+    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    ret = bf.read(brewinfo, True)
+    assert ret.filename == filename
+
+    bf.brewinfo_ext = []
+    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    ret = bf.read(brewinfo, False)
+    assert ret is None
+
+    bf.brewinfo_ext = []
+    filename = Path(f"{Path(__file__).parent}/files/BrewfileTest")
+    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    ret = bf.read(brewinfo, True)
+    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    assert ret.filename == filename
+    files = [
+        Path(f"{Path(__file__).parent}/files/BrewfileMain"),
+        Path(f"{Path(__file__).parent}/files/BrewfileExt"),
+        Path(f"{Path(__file__).parent}/files/BrewfileExt2"),
+        Path(f"{Path(__file__).parent}/files/BrewfileExt3"),
+        Path(f"{Path(__file__).parent}/files/BrewfileNotExist"),
+        Path(Path('~/BrewfileHome').expanduser()),
+    ]
+    for i, f in zip(bf.brewinfo_ext, files):
+        assert i.filename == f
+
+    # Absolute path check
+    f1 = tempfile.NamedTemporaryFile()
+    f2 = tempfile.NamedTemporaryFile()
+    f3 = tempfile.NamedTemporaryFile()
+    with open(f1.name, 'w') as f:
+        f.write(f'main {f2.name}')
+    with open(f2.name, 'w') as f:
+        f.write(f'main {f3.name}')
+
+    bf.brewinfo_ext = []
+    brewinfo = brew_file.BrewInfo(helper=helper, filename=f1.name)
+    ret = bf.read(brewinfo, True)
+    assert ret.filename == Path(f3.name)
+    f1.close()
+    f2.close()
+    f3.close()
 
 
 def test_list_to_main(bf):
@@ -68,11 +115,15 @@ def test_remove_pack(bf):
 
 
 def test_repo_name(bf):
-    pass
+    bf.opt['repo'] = "git@github.com:abc/def.git"
+    assert bf.repo_name == 'def'
 
 
 def test_user_name(bf):
-    pass
+    bf.opt['repo'] = "git@github.com:abc/def.git"
+    assert bf.repo_name == 'abc'
+    bf.opt['repo'] = "https://github.com/abc/def.git"
+    assert bf.repo_name == 'abc'
 
 
 def test_input_dir(bf):
