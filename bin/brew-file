@@ -438,6 +438,7 @@ class BrewInfo:
         return copy.deepcopy(self.list_dic[name])
 
     def get_files(self) -> dict:
+        self.read()
         files = {"main": self.get("main_input")}
         files.update({"ext": self.get("file_input")})
         return files
@@ -500,18 +501,18 @@ class BrewInfo:
                     args.pop(0)
                     cmd = args[0]
                     p = args[1]
-                    if self.helper.opt["form"] == "none":
+                    if not self.helper.opt.get("form", ""):
                         self.helper.opt["form"] = "cmd"
                 if len(args) > 2 and cmd in ["brew", "cask"] and p == "install":
                     args.pop(1)
                     p = args[1]
-                    if self.helper.opt["form"] == "none":
+                    if not self.helper.opt.get("form", ""):
                         self.helper.opt["form"] = "cmd"
 
                 if len(args) > 2:
                     if args[2] == "args:":
                         opt = " " + " ".join(["--" + x for x in args[3:]]).strip()
-                        if self.helper.opt["form"] == "none":
+                        if not self.helper.opt.get("form", ""):
                             self.helper.opt["form"] = "bundle"
                     else:
                         opt = " " + " ".join(args[2:]).strip()
@@ -519,7 +520,7 @@ class BrewInfo:
                     opt = ""
                 excmd = " ".join(line.split()[1:]).strip()
 
-                if self.helper.opt["form"] == "none":
+                if not self.helper.opt.get("form", ""):
                     if cmd in ["brew", "tap", "tapall"]:
                         if '"' in line or "'" in line:
                             self.helper.opt["form"] = "bundle"
@@ -539,7 +540,7 @@ class BrewInfo:
                 elif cmd == "cask":
                     self.cask_input.append(p)
                 elif cmd == "mas" and line.find(",") != -1:
-                    if self.helper.opt["form"] == "none":
+                    if not self.helper.opt.get("form", ""):
                         self.helper.opt["form"] = "bundle"
                     p = line.split()[1].strip(",").strip("'").strip('"')
                     pid = line.split()[3]
@@ -945,12 +946,11 @@ class BrewFile:
             os.environ.get("HOMEBREW_BREWFILE_ON_REQUEST", False)
         )
         self.opt["top_packages"] = os.environ.get("HOMEBREW_BREWFILE_TOP_PACKAGES", "")
-        self.opt["form"] = "none"
         self.opt["repo"] = ""
         self.opt["noupgradeatupdate"] = False
         self.opt["link"] = True
         self.opt["caskonly"] = False
-        self.opt["dryrun"] = True
+        self.opt["dryrun"] = False
         self.opt["initialized"] = False
         self.opt["cask_repo"] = "homebrew/cask"
         self.opt["reattach_formula"] = "reattach-to-user-namespace"
@@ -1148,8 +1148,7 @@ class BrewFile:
             return
         self.brewinfo_ext = [self.brewinfo]
         self.brewinfo_main = self.read(self.brewinfo, is_main=True)
-        if self.brewinfo_main in self.brewinfo_ext:
-            self.brewinfo_ext.remove(self.brewinfo_main)
+        self.brewinfo_ext.remove(self.brewinfo_main)
         if self.opt["mas_cmd_installed"]:
             p = Path(self.opt["mas_formula"]).name
             if p not in self.get("brew_input"):
@@ -1167,7 +1166,6 @@ class BrewFile:
             main = brewinfo
         else:
             main = None
-        brewinfo.read()
         files = brewinfo.get_files()
         for f in files["ext"]:
             is_next_main = f in files["main"]
@@ -3282,12 +3280,12 @@ def main():
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
     dryrun_parser.add_argument(
-        "-C",
-        action="store_false",
+        "-d",
+        "--dry_run",
+        action="store_true",
         default=b.opt["dryrun"],
         dest="dryrun",
-        help="Run clean as non dry-run mode.\n"
-        "Use this option to run clean at update command, too.",
+        help="Set dry run mode.",
     )
 
     yn_parser = argparse.ArgumentParser(**arg_parser_opts)
