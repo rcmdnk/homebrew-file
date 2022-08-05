@@ -2033,11 +2033,7 @@ class BrewFile:
                     self.proc(cmd, print_cmd=False, print_out=True)
 
         if self.opt["dryrun"]:
-            self.banner(
-                "# This is dry run.\n"
-                "# If you want to enforce cleanup, use '-C':\n"
-                "#     $ " + __prog__ + " clean_non_request -C"
-            )
+            self.banner("# This is dry run.")
 
     def cleanup(self):
         """Clean up."""
@@ -2204,11 +2200,7 @@ class BrewFile:
 
         if self.opt["dryrun"]:
             # Dry run message
-            self.banner(
-                "# This is dry run.\n"
-                "# If you want to enforce cleanup, use '-C':\n"
-                "#     $ " + __prog__ + " clean -C"
-            )
+            self.banner("# This is dry run.")
 
     def install(self):
         """Install"""
@@ -3440,9 +3432,7 @@ def main():
         "or -c/--clean\nCleanup.\n"
         "Uninstall packages not in the list.\n"
         "Untap packages not in the list.\n"
-        "Cleanup cache (brew cleanup)\n"
-        "By default, cleanup runs as dry-run.\n"
-        "If you want to enforce cleanup, use '-C' option."
+        "Cleanup cache (brew cleanup).\n"
     )
     subparsers.add_parser(
         "clean",
@@ -3455,8 +3445,6 @@ def main():
         "or --clean_non_request.\n"
         "Uninstall packages which were installed as dependencies \n"
         "but parent packages of which were already uninstalled.\n"
-        "By default, cleanup runs as dry-run.\n"
-        "If you want to enforce cleanup, use '-C' option."
     )
     subparsers.add_parser(
         "clean_non_request",
@@ -3471,7 +3459,6 @@ def main():
         "init and push.\n"
         "In addition, pull and push\n"
         "will be done if the repository is assigned.\n"
-        "'clean' is also executed after install if you give -C option."
     )
     subparsers.add_parser(
         "update",
@@ -3637,7 +3624,8 @@ def main():
             "--appstore",
             "--no_appstore",
             "--all_files",
-            "-C",
+            "-d",
+            "--dry_run",
             "-y",
             "--yes",
             "-V",
