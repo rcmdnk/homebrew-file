@@ -1,6 +1,6 @@
 #!/bin/sh
 brew_installed=1
-if ! which brew >& /dev/null;then
+if ! which brew > /dev/null 2>&1;then
   brew_installed=0
   echo Homebrew is not installed!
   echo Install now...
