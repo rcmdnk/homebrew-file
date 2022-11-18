@@ -1,0 +1,74 @@
+[tool.poetry]
+name = "brew-file"
+version = "8.5.12"
+description = "Brewfile manager for Homebrew"
+authors = ["rcmdnk <rcmdnk@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+
+[tool.poetry.dev-dependencies]
+pytest = "7.2.0"
+pre-commit = "2.21.0"
+pytest-cov = "4.0.0"
+pytest-xdist = "3.1.0"
+black = "22.12.0"
+blacken-docs = "1.12.1"
+pyproject-flake8 = "6.0.0.post1"
+flake8-bugbear = "^22.12.6"
+flake8-docstrings = "^1.6.0"
+autoflake = "^2.0.0"
+autopep8 = "^2.0.1"
+isort = "5.11.4"
+mypy = "0.991"
+bandit = {extras = ["toml"], version = "^1.7.4"}
+pre-commit-hooks = "4.4.0"
+
+
+[tool.pytest.ini_options]
+addopts = "-n auto"
+testpaths = ["tests",]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+
+[too.autoflake]
+expand-star-imports = true
+remove-duplicate-keys = true
+remove-unused-variables = true
+
+[tool.autopep8]
+ignore = "E203,E501,E503"
+recursive = true
+aggressive = 3
+
+[tool.flake8]
+# E203 is not PEP8 compliant and black insert space around slice: [Frequently Asked Questions - Black 22.12.0 documentation](https://black.readthedocs.io/en/stable/faq.html#why-are-flake8-s-e203-and-w503-violated)
+# E501: Line too long. Disable it to allow long lines of comments and print lines which black allows.
+# W503 is the counter part of W504, which follows current PEP8: [Line break occurred before a binary operator (W503)](https://www.flake8rules.com/rules/W503.html)
+# D100~D106: Missing docstrings other than class (D101)
+# D401: First line should be in imperative mood
+ignore = "E203,E501,W503,D100,D102,D103,D104,D105,D106,D401"
+#max-complexity = 10
+docstring-convention = "numpy"
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.mypy]
+files = "bin/brew-file"
+ignore_missing_imports = true
+scripts_are_modules = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+install_types = true
+non_interactive = true
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B404", "B603", "B607"]

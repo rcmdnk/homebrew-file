@@ -1,52 +1,140 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 22.3.0
+  - repo: local
     hooks:
-      - id: black
-        files: bin
-
-  - repo: https://github.com/asottile/blacken-docs
-    rev: v1.12.1
-    hooks:
-      - id: blacken-docs
-        files: bin
-
-#  - repo: https://github.com/PyCQA/flake8
-#    rev: 4.0.1
-#    hooks:
-#      - id: flake8
-#        args: ["--ignore", "E203,E501,W503"]
-#        additional_dependencies: [flake8-bugbear]
-#        files: bin
-
-  - repo: https://github.com/csachs/pyproject-flake8
-    rev: v0.0.1a3
-    hooks:
-      - id: pyproject-flake8
-        additional_dependencies: [flake8-bugbear]
-        files: bin
-
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        files: bin/brew-file
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.931
-    hooks:
-      - id: mypy
+      - id: black_diff
+        name: black_diff
+        entry: black
         language: system
+        types_or:
+          - python
+          - pyi
+        require_serial: true
+        args:
+          - "--diff"
+          - "--color"
+        verbose: true
+      - id: black
+        # https://github.com/psf/black
+        name: black
+        entry: black
+        language: system
+        types_or:
+          - python
+          - pyi
+        require_serial: true
+      - id: blacken-docs
+        # https://github.com/asottile/blacken-docs
+        name: blacken-docs
+        entry: blacken-docs
+        language: system
+        files: '\.(rst|md|markdown|py|tex)$'
+      - id: autoflake_diff
+        name: autoflake_diff
+        entry: autoflake
+        language: system
+        types:
+          - python
+        require_serial: true
+        verbose: true
+      - id: autoflake
+        # https://github.com/PyCQA/autoflake
+        name: autoflake
+        entry: autoflake
+        language: system
+        types:
+          - python
+        require_serial: true
+        args:
+          - "--in-place"
+      - id: autopep8_diff
+        name: autopep8_diff
+        entry: autopep8
+        language: system
+        types:
+          - python
+        args:
+          - "--diff"
+        verbose: true
+      - id: autopep8
+        # https://github.com/pre-commit/mirrors-autopep8
+        name: autopep8
+        entry: autopep8
+        language: system
+        types:
+          - python
+        args:
+          - "--in-place"
+      - id: isort_diff
+        name: isort_diff
+        entry: isort
+        language: system
+        require_serial: true
+        types_or:
+          - cython
+          - pyi
+          - python
+        args:
+          - '--diff'
+          - '--filter-files'
+        verbose: true
+      - id: isort
+        # https://github.com/PyCQA/isort
+        name: isort
+        entry: isort
+        language: system
+        require_serial: true
+        types_or:
+          - cython
+          - pyi
+          - python
+        args:
+          - '--filter-files'
+      - id: pflake8
+        # https://github.com/csachs/pyproject-flake8
+        # Use csachs' one instead of PyCQA to use options in pyproject.toml
+        name: pflake8
+        entry: pflake8
+        language: system
+        types:
+          - python
+        require_serial: true
+      - id: mypy
+        # https://github.com/pre-commit/mirrors-mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types_or:
+          - python
+          - pyi
+        require_serial: true
         pass_filenames: false
-        args: ["bin/brew-file"]
+      - id: bandit
+        # https://github.com/PyCQA/bandit
+        name: bandit
+        entry: bandit
+        language: system
+        types:
+          - python
+        args:
+          - "-c"
+          - "pyproject.toml"
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.4.0
     hooks:
       - id: check-yaml
+      - id: check-json
+      - id: check-toml
       - id: check-case-conflict
       - id: check-merge-conflict
+        args:
+          - "--assume-in-merge"
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+      - id: debug-statements
+      - id: detect-private-key
+      - id: detect-aws-credentials
+        args:
+          - "--allow-missing-credentials"

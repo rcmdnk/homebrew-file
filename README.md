@@ -1,9 +1,10 @@
 Brew-file
 =========
 
-[![Build Status](https://travis-ci.com/rcmdnk/homebrew-file.svg?branch=master)](https://travis-ci.com/rcmdnk/homebrew-file)
-[![Coverage Status](https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master)](https://coveralls.io/r/rcmdnk/homebrew-file?branch=master)
+[![Test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml)
 [![Documentation Status](https://readthedocs.org/projects/homebrew-file/badge/?version=latest)](http://homebrew-file.readthedocs.io/en/latest/?badge=latest)
+
+[Test coverage](https://github.com/accelstars/apaf/tree/coverage)
 
 Brewfile manager for [Homebrew](http://brew.sh/) at OS X.
 

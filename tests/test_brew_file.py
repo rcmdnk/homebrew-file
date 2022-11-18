@@ -1,9 +1,9 @@
-import subprocess
-from pathlib import Path
-from . import brew_file
 import tempfile
+from pathlib import Path
 
 import pytest
+
+from . import brew_file
 
 
 @pytest.fixture
@@ -71,7 +71,7 @@ def test_read(bf):
         Path(f"{Path(__file__).parent}/files/BrewfileExt2"),
         Path(f"{Path(__file__).parent}/files/BrewfileExt3"),
         Path(f"{Path(__file__).parent}/files/BrewfileNotExist"),
-        Path(Path('~/BrewfileHome').expanduser()),
+        Path(Path("~/BrewfileHome").expanduser()),
     ]
     for i, f in zip(bf.brewinfo_ext, files):
         assert i.filename == f
@@ -80,10 +80,10 @@ def test_read(bf):
     f1 = tempfile.NamedTemporaryFile()
     f2 = tempfile.NamedTemporaryFile()
     f3 = tempfile.NamedTemporaryFile()
-    with open(f1.name, 'w') as f:
-        f.write(f'main {f2.name}')
-    with open(f2.name, 'w') as f:
-        f.write(f'main {f3.name}')
+    with open(f1.name, "w") as f:
+        f.write(f"main {f2.name}")
+    with open(f2.name, "w") as f:
+        f.write(f"main {f3.name}")
 
     bf.brewinfo_ext = []
     brewinfo = brew_file.BrewInfo(helper=helper, filename=f1.name)
@@ -115,15 +115,17 @@ def test_remove_pack(bf):
 
 
 def test_repo_name(bf):
-    bf.opt['repo'] = "git@github.com:abc/def.git"
-    assert bf.repo_name == 'def'
+    bf.opt["repo"] = "git@github.com:abc/def.git"
+    assert bf.repo_name() == "def"
+    bf.opt["repo"] = "https://github.com/abc/def.git"
+    assert bf.repo_name() == "def"
 
 
 def test_user_name(bf):
-    bf.opt['repo'] = "git@github.com:abc/def.git"
-    assert bf.repo_name == 'abc'
-    bf.opt['repo'] = "https://github.com/abc/def.git"
-    assert bf.repo_name == 'abc'
+    bf.opt["repo"] = "git@github.com:abc/def.git"
+    assert bf.user_name() == "abc"
+    bf.opt["repo"] = "https://github.com/abc/def.git"
+    assert bf.user_name() == "abc"
 
 
 def test_input_dir(bf):
@@ -186,81 +188,81 @@ def test_get_cask_list(bf):
     pass
 
 
-def get_list(bf):
+def test_get_list(bf):
     pass
 
 
-def clean_list(bf):
+def test_clean_list(bf):
     pass
 
 
-def input_backup(bf):
+def test_input_backup(bf):
     pass
 
 
-def set_brewfile_repo(bf):
+def test_set_brewfile_repo(bf):
     pass
 
 
-def set_brewfile_local(bf):
+def test_set_brewfile_local(bf):
     pass
 
 
-def initialize(bf):
+def test_initialize(bf):
     pass
 
 
-def initialize_write(bf):
+def test_initialize_write(bf):
     pass
 
 
-def check_input_file(bf):
+def test_check_input_file(bf):
     pass
 
 
-def get_files(bf):
+def test_get_files(bf):
     pass
 
 
-def edit_brewfile(bf):
+def test_edit_brewfile(bf):
     pass
 
 
-def cat_brewfile(bf):
+def test_cat_brewfile(bf):
     pass
 
 
-def clean_non_request(bf):
+def test_clean_non_request(bf):
     pass
 
 
-def cleanup(bf):
+def test_cleanup(bf):
     pass
 
 
-def install(bf):
+def test_install(bf):
     pass
 
 
-def find_app(bf):
+def test_find_app(bf):
     pass
 
 
-def find_brew_app(bf):
+def test_find_brew_app(bf):
     pass
 
 
-def check_cask(bf):
+def test_check_cask(bf):
     pass
 
 
-def make_pack_deps(bf):
+def test_make_pack_deps(bf):
     pass
 
 
-def my_test(bf):
+def test_my_test(bf):
     bf.my_test()
 
 
-def execute(bf):
+def test_execute(bf):
     pass

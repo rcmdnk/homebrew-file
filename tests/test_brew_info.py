@@ -1,14 +1,16 @@
-import subprocess
 from pathlib import Path
-from . import brew_file
 
 import pytest
+
+from . import brew_file
 
 
 @pytest.fixture
 def brew_info():
     helper = brew_file.BrewHelper({})
-    info = brew_file.BrewInfo(helper=helper, filename=f"{Path(__file__).parent}/files/BrewfileTest")
+    info = brew_file.BrewInfo(
+        helper=helper, filename=f"{Path(__file__).parent}/files/BrewfileTest"
+    )
     return info
 
 
@@ -54,7 +56,16 @@ def test_get(brew_info):
 
 def test_get_files(brew_info):
     files = brew_info.get_files()
-    assert files == {'main': ['BrewfileMain'], 'ext': ['BrewfileMain', 'BrewfileExt', 'BrewfileExt2', 'BrewfileNotExist', '~/BrewfileHome']}
+    assert files == {
+        "main": ["BrewfileMain"],
+        "ext": [
+            "BrewfileMain",
+            "BrewfileExt",
+            "BrewfileExt2",
+            "BrewfileNotExist",
+            "~/BrewfileHome",
+        ],
+    }
 
 
 def test_remove(brew_info):
@@ -80,7 +91,7 @@ def test_get_tap_path(brew_info):
 
 def test_get_tap_packs(brew_info):
     packs = brew_info.get_tap_packs("homebrew/core")
-    assert 'vim' in packs
+    assert "vim" in packs
 
 
 def test_get_leaves(brew_info):

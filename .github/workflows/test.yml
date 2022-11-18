@@ -9,6 +9,10 @@ jobs:
         os: [macos-12, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
       - name: Install test
         run: |
           curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
@@ -19,44 +23,49 @@ jobs:
     strategy:
       matrix:
         os: [macos-12, ubuntu-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Check is main
+        id: isMain
+        continue-on-error: true
+        run: test "${{ github.ref }}" == "refs/heads/master"  && test "${{ matrix.os }}" == "macos-12"  && test "${{ matrix.python-version }}" == "3.10"
+      - name: Homebrew installation
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
       - uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
-          architecture: x64
-      - name: Homebrew installation
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-      - uses: BSFishy/pip-action@v1
-        with:
-          packages: |
-            pre-commit
-            pytest
-            pytest-cov
+      - name: Install poetry
+        run: pip install poetry
+      - name: Poetry setup
+        run: poetry install
       - name: Run test
+        id: pytest
         continue-on-error: true
-        run: pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=bin  tests/ | tee pytest-coverage.txt
+        run: poetry run pytest --durations=0 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=bin  tests/ | tee pytest-coverage.txt
+      - name: pre-commit
+        id: preCommit
+        continue-on-error: true
+        run: poetry run pre-commit run -a
       - name: Pytest coverage comment
-        if: ${{ github.ref == 'refs/heads/main' }}
         id: coverageComment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           hide-comment: true
           pytest-coverage-path: ./pytest-coverage.txt
           junitxml-path: ./pytest.xml
-      - name: Create Variable of Summary Report
-        id: summary_report
-        run: |
-          SUMMARY_REPORT=${{ steps.coverageComment.outputs.summaryReport }}
-          echo "::set-output name=content::$SUMMARY_REPORT"
       - name: Check the output coverage
         run: |
           echo "Coverage Percantage - ${{ steps.coverageComment.outputs.coverage }}"
           echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
-          echo "Coverage Html - ${{ steps.coverageComment.outputs.coverageHtml }}"
-          echo "Summary Report - ${{ steps.coverageComment.outputs.summaryReport }}"
           echo "Coverage Warnings - ${{ steps.coverageComment.outputs.warnings }}"
           echo "Coverage Errors - ${{ steps.coverageComment.outputs.errors }}"
           echo "Coverage Failures - ${{ steps.coverageComment.outputs.failures }}"
@@ -64,6 +73,39 @@ jobs:
           echo "Coverage Tests - ${{ steps.coverageComment.outputs.tests }}"
           echo "Coverage Time - ${{ steps.coverageComment.outputs.time }}"
           echo "Not Success Test Info - ${{ steps.coverageComment.outputs.notSuccessTestInfo }}"
-      - name: pre-commit
+      - name: Check coverage branch
+        id: checkCoverage
         continue-on-error: true
-        run: pre-commit run -a
+        if: ${{ steps.isMain.outcome == 'success' }}
+        run: |
+          git branch --list | grep -q coverage
+      - name: Create coverage branch
+        if: ${{ steps.isMain.outcome == 'success' && steps.checkCoverage.outcome != 'success'}}
+        run: |
+          git checkout --orphan coverage
+          git rm -rf .
+          touch README.md
+          git add README.md
+          git commit -m 'initial commit of coverage'
+      - name: Update Readme in coverage branch with Coverage Html
+        if: ${{ steps.isMain.outcome == 'success' }}
+        run: |
+          git checkout coverage
+          echo "[![test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml)" > ./README.md
+          echo -e ${{ steps.coverageComment.outputs.summaryReport }} >> ./README.md
+      - name: Commit
+        if: ${{ steps.isMain.outcome == 'success' }}
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          PRE_COMMIT_ALLOW_NO_CONFIG=1 git commit -m "Update coverage"
+      - name: Push
+        if: ${{ steps.isMain.outcome == 'success' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: coverage
+      - name: Check tests
+        run: |
+          test ${{ steps.preCommit.outcome }} == "success"  && ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0))

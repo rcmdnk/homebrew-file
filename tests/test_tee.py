@@ -1,4 +1,5 @@
 import tempfile
+
 from . import brew_file
 
 
@@ -9,6 +10,6 @@ def test_tee():
         out.flush()
         out.close()
         with open(f"{tmpdir}/out1") as f:
-            f.read() == "test\n"
+            assert f.read() == "test\n"
         with open(f"{tmpdir}/out2") as f:
-            f.read() == "test\n"
+            assert f.read() == "test\n"
