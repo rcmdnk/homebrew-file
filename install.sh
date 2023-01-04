@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 brew_installed=1
 if ! which brew > /dev/null 2>&1;then
   brew_installed=0
@@ -26,7 +26,8 @@ echo Install Brew-file...
 brew install rcmdnk/file/brew-file
 
 if [ $brew_installed -eq 0 ];then
-  if ! brew doctor;then
+  # Do not check stray files
+  if ! brew doctor $(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask)');then
     echo Check brew environment!
     exit 1
   fi
