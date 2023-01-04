@@ -14,8 +14,8 @@ if ! which brew > /dev/null 2>&1;then
   echo
 
   for path in /home/linuxbrew/.linuxbrew $HOME/.linuxbrew /opt/homebrew /usr/local;do
-    if [ -f "$path/bin" ];then
-      PATH="$path/bin/brew"
+    if [ -f "$path/bin/brew" ];then
+      PATH="$path/bin:$PATH"
     fi
   done
 fi
