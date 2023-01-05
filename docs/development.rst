@@ -4,7 +4,7 @@ Development
 Preparation
 -----------
 
-To develop this package, use poetry.
+To develop this package, use poetry::
 
     $ pip install poetry
     $ poetry install

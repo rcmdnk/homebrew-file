@@ -11,10 +11,12 @@ Welcome to homebrew-file's documentation!
 .. |BuildStatus| image:: https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg
 .. _BuildStatus: https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml
 
+.. |CoverageStatus| image:: https://img.shields.io/badge/Coverage-check%20here-blue.svg
+.. _CoverageStatus: https://github.com/rcmdnk/homebrew-file/tree/coverage
+
 .. |DocumentationStatus| image:: https://readthedocs.org/projects/homebrew-file/badge/?version=latest
 .. _DocumentationStatus: http://homebrew-file.readthedocs.io/en/latest/?badge=latest
 
-.. _CoverageStatus: https://github.com/rcmdnk/homebrew-file/tree/coverage
 
 
 Brewfile manager for `Homebrew <http://brew.sh/>`_ at OS X.
