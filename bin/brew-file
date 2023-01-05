@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-Brew-file: Manager for packages of Homebrew.
-
-https://github.com/rcmdnk/homebrew-file
-
-requirement: Python 3.7 or later
-"""
-
 import argparse
 import copy
 import glob
@@ -27,8 +17,14 @@ from pathlib import Path
 from typing import Any, Optional, Union, cast
 from urllib.parse import quote
 
-__prog__ = Path(__file__).name
-__description__ = __doc__
+__prog__ = "brew-file"
+__description__ = """
+Brew-file: Manager for packages of Homebrew.
+
+https://github.com/rcmdnk/homebrew-file
+
+requirement: Python 3.9 or 3.10
+"""
 __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
