@@ -8,14 +8,14 @@ Welcome to homebrew-file's documentation!
 
 |BuildStatus|_ |CoverageStatus|_ |DocumentationStatus|_
 
-.. |BuildStatus| image:: https://travis-ci.org/rcmdnk/homebrew-file.svg?branch=master
-.. _BuildStatus: https://travis-ci.org/rcmdnk/homebrew-file
-
-.. |CoverageStatus| image:: https://coveralls.io/repos/rcmdnk/homebrew-file/badge.png?branch=master
-.. _CoverageStatus: https://coveralls.io/r/rcmdnk/homebrew-file?branch=master
+.. |BuildStatus| image:: https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg
+.. _BuildStatus: https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml
 
 .. |DocumentationStatus| image:: https://readthedocs.org/projects/homebrew-file/badge/?version=latest
 .. _DocumentationStatus: http://homebrew-file.readthedocs.io/en/latest/?badge=latest
+
+.. _CoverageStatus: https://github.com/rcmdnk/homebrew-file/tree/coverage
+
 
 Brewfile manager for `Homebrew <http://brew.sh/>`_ at OS X.
 
@@ -41,5 +41,6 @@ Contents:
    settings
    brew-wrap
    completion
+   development
    help
    homebrew-file

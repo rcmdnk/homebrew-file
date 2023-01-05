@@ -73,20 +73,6 @@ jobs:
           echo "Coverage Tests - ${{ steps.coverageComment.outputs.tests }}"
           echo "Coverage Time - ${{ steps.coverageComment.outputs.time }}"
           echo "Not Success Test Info - ${{ steps.coverageComment.outputs.notSuccessTestInfo }}"
-      - name: Check coverage branch
-        id: checkCoverage
-        continue-on-error: true
-        if: ${{ steps.isMain.outcome == 'success' }}
-        run: |
-          git branch --list | grep -q coverage
-      - name: Create coverage branch
-        if: ${{ steps.isMain.outcome == 'success' && steps.checkCoverage.outcome != 'success'}}
-        run: |
-          git checkout --orphan coverage
-          git rm -rf .
-          touch README.md
-          git add README.md
-          git commit -m 'initial commit of coverage'
       - name: Update Readme in coverage branch with Coverage Html
         if: ${{ steps.isMain.outcome == 'success' }}
         run: |
