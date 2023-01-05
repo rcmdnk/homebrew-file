@@ -62,6 +62,69 @@ def test_proc_err(helper):
     with pytest.raises(SystemExit) as e:
         ret_proc, lines_proc = helper.proc("_wrong_command_", exit_on_err=True)
     assert e.type == SystemExit
+    with pytest.raises(SystemExit) as e:
+        ret_proc, lines_proc = helper.proc(
+            "_wrong_command_", print_err=False, exit_on_err=True
+        )
+    assert e.type == SystemExit
+
+
+def test_proc_exit_on_err(helper):
+    ret_proc, lines_proc = helper.proc("ech test", separate_err=False, exit_on_err=False)
+    assert ret_proc == -1
+    print(lines_proc)
+    assert lines_proc == ["ech test: [Errno 2] No such file or directory: 'ech'"]
+    ret_proc, lines_proc = helper.proc("ech test", separate_err=True, exit_on_err=False)
+    assert ret_proc == -1
+    print(lines_proc)
+    assert lines_proc == ["ech test: [Errno 2] No such file or directory: 'ech'"]
+
+
+def test_proc_dryrun(helper):
+    ret_proc, lines_proc = helper.proc("echo test", dryrun=True)
+    assert ret_proc == 0
+    assert lines_proc == ["echo test"]
+
+
+def test_out(helper, capfd):
+    helper.opt["verbose"] = 1
+    helper.out("show", verbose=0)
+    helper.out("no show", verbose=100)
+    captured = capfd.readouterr()
+    assert captured.out == "show\n"
+
+
+def test_info(helper, capfd):
+    helper.opt["verbose"] = 2
+    helper.info("show")
+    helper.opt["verbose"] = 1
+    helper.info("no show")
+    captured = capfd.readouterr()
+    assert captured.out == "show\n"
+
+
+def test_warn(helper, capfd):
+    helper.opt["verbose"] = 1
+    helper.warn("show")
+    helper.opt["verbose"] = 0
+    helper.warn("no show")
+    captured = capfd.readouterr()
+    assert captured.out == "[WARNING]: show\n"
+
+
+def test_err(helper, capfd):
+    helper.opt["verbose"] = 0
+    helper.err("show")
+    helper.opt["verbose"] = -1
+    helper.err("no show")
+    captured = capfd.readouterr()
+    assert captured.out == "[ERROR]: show\n"
+
+
+def test_banner(helper, capfd):
+    helper.banner("test banner")
+    captured = capfd.readouterr()
+    assert captured.out == "\n###########\ntest banner\n###########\n\n"
 
 
 def test_brew_val(helper):

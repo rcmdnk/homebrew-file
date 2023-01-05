@@ -13,3 +13,5 @@ cat src/brew_file/main.py|grep -vE "(^from|^import)" >> $output
 
 black $output
 isort $output
+autoflake --in-place $output
+autopep8 --in-place $output

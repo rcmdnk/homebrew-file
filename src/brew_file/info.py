@@ -4,7 +4,7 @@ Brew-file: Manager for packages of Homebrew.
 
 https://github.com/rcmdnk/homebrew-file
 
-requirement: Python 3.9 or 3.10
+requirement: Python 3.10
 """
 __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"

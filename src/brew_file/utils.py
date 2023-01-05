@@ -10,9 +10,7 @@ from typing import Any, Union
 
 
 def is_mac() -> bool:
-    if platform.system() == "Darwin":
-        return True
-    return False
+    return platform.system() == "Darwin"
 
 
 def to_bool(val: Union[bool, int, str]) -> bool:
