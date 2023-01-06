@@ -29,7 +29,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "v8.5.12"
+__version__ = "8.5.12"
 __date__ = "02/Aug/2022"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -299,7 +299,7 @@ class BrewInfo:
     helper: BrewHelper
     filename: Union[str, Path] = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.filename = Path(self.filename)
 
         self.brew_input_opt = {}
@@ -352,18 +352,14 @@ class BrewInfo:
             "file_list": self.file_list,
         }
 
-    def get_dir(self):
+    def get_dir(self) -> Path:
         return cast(Path, self.filename).parent
 
-    def check_file(self):
-        if self.filename.exists():
-            return True
-        return False
+    def check_file(self) -> bool:
+        return self.filename.exists()
 
-    def check_dir(self):
-        if self.get_dir().exists():
-            return True
-        return False
+    def check_dir(self) -> bool:
+        return self.get_dir().exists()
 
     def clear_input(self) -> None:
         self.brew_input_opt.clear()
@@ -423,7 +419,7 @@ class BrewInfo:
                 other_taps.append(t)
         brew_taps.sort()
         other_taps.sort()
-        self.tap_list = core_tap + brew_taps + cask_tap + other_taps
+        self.tap_list = core_tap + cask_tap + brew_taps + other_taps
 
         self.brew_list.sort()
         self.brew_full_list.sort()
@@ -453,7 +449,7 @@ class BrewInfo:
         elif isinstance(self.list_dic[name], dict):
             del self.list_dic[name][package]
 
-    def set_val(self, name: str, val: str) -> None:
+    def set(self, name: str, val: list | dict) -> None:
         if isinstance(self.list_dic[name], list):
             del self.list_dic[name][:]
             self.list_dic[name].extend(val)
@@ -1935,7 +1931,7 @@ class BrewFile:
             env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
         )[1]
 
-        self.brewinfo.set_val("tap_list", lines)
+        self.brewinfo.set("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
@@ -1953,15 +1949,11 @@ class BrewFile:
             if self.opt["appstore"] == 1 or (
                 self.opt["appstore"] == 2 and force_appstore_list
             ):
-                self.brewinfo.set_val(
-                    "appstore_list", self.get_appstore_list()
-                )
+                self.brewinfo.set("appstore_list", self.get_appstore_list())
             elif self.opt["appstore"] == 2:
                 if self.brewinfo.check_file():
                     self.read_all()
-                self.brewinfo.set_val(
-                    "appstore_list", self.get("appstore_input")
-                )
+                self.brewinfo.set("appstore_list", self.get("appstore_input"))
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input."""
@@ -3170,7 +3162,7 @@ class BrewFile:
         self.brewinfo.filename = Path("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
-        self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
+        self.brewinfo.set("brew_input_opt", {"test_pack": "test opt"})
         self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")

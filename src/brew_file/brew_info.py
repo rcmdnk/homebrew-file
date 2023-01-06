@@ -17,7 +17,7 @@ class BrewInfo:
     helper: BrewHelper
     filename: Union[str, Path] = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.filename = Path(self.filename)
 
         self.brew_input_opt = {}
@@ -70,18 +70,14 @@ class BrewInfo:
             "file_list": self.file_list,
         }
 
-    def get_dir(self):
+    def get_dir(self) -> Path:
         return cast(Path, self.filename).parent
 
-    def check_file(self):
-        if self.filename.exists():
-            return True
-        return False
+    def check_file(self) -> bool:
+        return self.filename.exists()
 
-    def check_dir(self):
-        if self.get_dir().exists():
-            return True
-        return False
+    def check_dir(self) -> bool:
+        return self.get_dir().exists()
 
     def clear_input(self) -> None:
         self.brew_input_opt.clear()
@@ -141,7 +137,7 @@ class BrewInfo:
                 other_taps.append(t)
         brew_taps.sort()
         other_taps.sort()
-        self.tap_list = core_tap + brew_taps + cask_tap + other_taps
+        self.tap_list = core_tap + cask_tap + brew_taps + other_taps
 
         self.brew_list.sort()
         self.brew_full_list.sort()
@@ -171,7 +167,7 @@ class BrewInfo:
         elif isinstance(self.list_dic[name], dict):
             del self.list_dic[name][package]
 
-    def set_val(self, name: str, val: str) -> None:
+    def set(self, name: str, val: list | dict) -> None:
         if isinstance(self.list_dic[name], list):
             del self.list_dic[name][:]
             self.list_dic[name].extend(val)

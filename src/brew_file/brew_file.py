@@ -1003,7 +1003,7 @@ class BrewFile:
             env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
         )[1]
 
-        self.brewinfo.set_val("tap_list", lines)
+        self.brewinfo.set("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
@@ -1021,13 +1021,13 @@ class BrewFile:
             if self.opt["appstore"] == 1 or (
                 self.opt["appstore"] == 2 and force_appstore_list
             ):
-                self.brewinfo.set_val(
+                self.brewinfo.set(
                     "appstore_list", self.get_appstore_list()
                 )
             elif self.opt["appstore"] == 2:
                 if self.brewinfo.check_file():
                     self.read_all()
-                self.brewinfo.set_val(
+                self.brewinfo.set(
                     "appstore_list", self.get("appstore_input")
                 )
 
@@ -2238,7 +2238,7 @@ class BrewFile:
         self.brewinfo.filename = Path("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
-        self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
+        self.brewinfo.set("brew_input_opt", {"test_pack": "test opt"})
         self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")
