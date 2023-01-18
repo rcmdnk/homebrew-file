@@ -15,7 +15,7 @@ class BrewInfo:
     """Homebrew information storage."""
 
     helper: BrewHelper
-    filename: Path = field(default_factory=lambda: Path())
+    path: Path = field(default_factory=lambda: Path())
 
     def __post_init__(self) -> None:
         self.brew_input_opt: dict[str, str] = {}
@@ -69,10 +69,10 @@ class BrewInfo:
         }
 
     def get_dir(self) -> Path:
-        return self.filename.parent
+        return self.path.parent
 
     def check_file(self) -> bool:
-        return self.filename.exists()
+        return self.path.exists()
 
     def check_dir(self) -> bool:
         return self.get_dir().exists()
@@ -184,15 +184,15 @@ class BrewInfo:
         elif isinstance(self.list_dic[name], dict):
             self.list_dic[name].update(val)
 
-    def read(self, filename: Union[str, Path] = "") -> None:
+    def read(self, path: Union[str, Path] = "") -> None:
         self.clear_input()
 
-        if filename == "":
-            filename = self.filename
-        filename = Path(filename)
-        if not filename.exists():
+        if path == "":
+            path = self.path
+        path = Path(path)
+        if not path.exists():
             return
-        with open(filename, "r") as f:
+        with open(path, "r") as f:
             lines = f.readlines()
             is_ignore = False
             self.tap_input.append("direct")
@@ -652,23 +652,21 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(
-                self.filename, sys.stdout, self.helper.opt["verbose"] > 1
-            )
+            out = Tee(self.path, sys.stdout, self.helper.opt["verbose"] > 1)
             out.write(output)
             out.close()
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
             self.helper.proc(
-                f"chmod 755 {self.filename}",
+                f"chmod 755 {self.path}",
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=False,
             )
         else:
             self.helper.proc(
-                f"chmod 644 {self.filename}",
+                f"chmod 644 {self.path}",
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=False,

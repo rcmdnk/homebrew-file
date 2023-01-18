@@ -48,23 +48,23 @@ def test_read(bf):
     helper = brew_file.BrewHelper({})
 
     bf.brewinfo_ext = []
-    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
     ret = bf.read(brewinfo, True)
-    assert ret.filename == filename
+    assert ret.path == path
 
     bf.brewinfo_ext = []
-    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
     ret = bf.read(brewinfo, False)
     assert ret is None
 
     bf.brewinfo_ext = []
-    filename = Path(f"{Path(__file__).parent}/files/BrewfileTest")
-    brewinfo = brew_file.BrewInfo(helper=helper, filename=filename)
+    path = Path(f"{Path(__file__).parent}/files/BrewfileTest")
+    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
     ret = bf.read(brewinfo, True)
-    filename = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    assert ret.filename == filename
+    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    assert ret.path == path
     files = [
         Path(f"{Path(__file__).parent}/files/BrewfileMain"),
         Path(f"{Path(__file__).parent}/files/BrewfileExt"),
@@ -74,7 +74,7 @@ def test_read(bf):
         Path(Path("~/BrewfileHome").expanduser()),
     ]
     for i, f in zip(bf.brewinfo_ext, files):
-        assert i.filename == f
+        assert i.path == f
 
     # Absolute path check
     f1 = tempfile.NamedTemporaryFile()
@@ -86,9 +86,9 @@ def test_read(bf):
         f.write(f"main {f3.name}")
 
     bf.brewinfo_ext = []
-    brewinfo = brew_file.BrewInfo(helper=helper, filename=f1.name)
+    brewinfo = brew_file.BrewInfo(helper=helper, path=Path(f1.name))
     ret = bf.read(brewinfo, True)
-    assert ret.filename == Path(f3.name)
+    assert ret.path == Path(f3.name)
     f1.close()
     f2.close()
     f3.close()
