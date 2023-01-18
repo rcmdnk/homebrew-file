@@ -27,7 +27,7 @@ brew install rcmdnk/file/brew-file
 
 if [ $brew_installed -eq 0 ];then
   # Do not check stray files
-  if ! brew doctor $(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask)');then
+  if ! brew doctor $(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask|brew_git_branch)');then
     echo Check brew environment!
     exit 1
   fi
