@@ -3,7 +3,7 @@ import platform
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from typing import Any, Union
@@ -88,7 +88,7 @@ class Tee:
     """Module to write out in two ways at once."""
 
     out1: Any
-    out2: Any = sys.stdout
+    out2: Any = field(default_factory=lambda: sys.stdout)
     use2: bool = True
 
     def __post_init__(self):

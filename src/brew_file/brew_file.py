@@ -124,7 +124,7 @@ class BrewFile:
         self.int_opts = ["verbose"]
         self.float_opts = []
 
-        self.brewinfo = BrewInfo(self.helper, self.opt["input"])
+        self.brewinfo = BrewInfo(self.helper, Path(self.opt["input"]))
         self.brewinfo_ext = []
         self.brewinfo_main = self.brewinfo
         self.opt["read"] = False
@@ -188,7 +188,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.filename = self.opt["input"]
+        self.brewinfo.filename = Path(self.opt["input"])
 
     def ask_yn(self, question):
         """Helper for yes/no."""
@@ -294,7 +294,7 @@ class BrewFile:
             if path.is_absolute():
                 b = BrewInfo(self.helper, path)
             else:
-                b = BrewInfo(self.helper, Path(brewinfo.get_dir(), path))
+                b = BrewInfo(self.helper, brewinfo.get_dir() / path)
             self.brewinfo_ext.append(b)
             if main is not None and is_next_main:
                 main = b
@@ -488,7 +488,7 @@ class BrewFile:
         if not Path(self.opt["input"]).exists():
             return
 
-        self.brewinfo.filename = self.opt["input"]
+        self.brewinfo.filename = Path(self.opt["input"])
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
@@ -1021,15 +1021,11 @@ class BrewFile:
             if self.opt["appstore"] == 1 or (
                 self.opt["appstore"] == 2 and force_appstore_list
             ):
-                self.brewinfo.set(
-                    "appstore_list", self.get_appstore_list()
-                )
+                self.brewinfo.set("appstore_list", self.get_appstore_list())
             elif self.opt["appstore"] == 2:
                 if self.brewinfo.check_file():
                     self.read_all()
-                self.brewinfo.set(
-                    "appstore_list", self.get("appstore_input")
-                )
+                self.brewinfo.set("appstore_list", self.get("appstore_input"))
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input."""

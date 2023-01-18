@@ -14,7 +14,7 @@ import tempfile
 from dataclasses import dataclass, field
 from io import StringIO, TextIOWrapper
 from pathlib import Path
-from typing import Any, Generator, Optional, Union, cast
+from typing import Any, Generator, Optional, Union, no_type_check
 from urllib.parse import quote
 
 __prog__ = "brew-file"
@@ -115,7 +115,7 @@ class Tee:
     """Module to write out in two ways at once."""
 
     out1: Any
-    out2: Any = sys.stdout
+    out2: Any = field(default_factory=lambda: sys.stdout)
     use2: bool = True
 
     def __post_init__(self):
@@ -297,39 +297,37 @@ class BrewInfo:
     """Homebrew information storage."""
 
     helper: BrewHelper
-    filename: Union[str, Path] = ""
+    filename: Path = field(default_factory=lambda: Path())
 
     def __post_init__(self) -> None:
-        self.filename = Path(self.filename)
+        self.brew_input_opt: dict[str, str] = {}
 
-        self.brew_input_opt = {}
+        self.brew_input: list[str] = []
+        self.tap_input: list[str] = []
+        self.cask_input: list[str] = []
+        self.appstore_input: list[str] = []
+        self.main_input: list[str] = []
+        self.file_input: list[str] = []
 
-        self.brew_input = []
-        self.tap_input = []
-        self.cask_input = []
-        self.appstore_input = []
-        self.main_input = []
-        self.file_input = []
+        self.before_input: list[str] = []
+        self.after_input: list[str] = []
+        self.cmd_input: list[str] = []
 
-        self.before_input = []
-        self.after_input = []
-        self.cmd_input = []
+        self.cask_args_input: dict[str, str] = {}
 
-        self.cask_args_input = []
+        self.brew_list_opt: dict[str, str] = {}
 
-        self.brew_list_opt = {}
+        self.brew_list: list[str] = []
+        self.brew_full_list: list[str] = []
+        self.tap_list: list[str] = []
+        self.cask_list: list[str] = []
+        self.appstore_list: list[str] = []
+        self.main_list: list[str] = []
+        self.file_list: list[str] = []
 
-        self.brew_list = []
-        self.brew_full_list = []
-        self.tap_list = []
-        self.cask_list = []
-        self.appstore_list = []
-        self.main_list = []
-        self.file_list = []
+        self.cask_nocask_list: list[str] = []
 
-        self.cask_nocask_list = []
-
-        self.list_dic = {
+        self.list_dic: dict[str, dict | list] = {
             "brew_input_opt": self.brew_input_opt,
             "brew_input": self.brew_input,
             "tap_input": self.tap_input,
@@ -353,7 +351,7 @@ class BrewInfo:
         }
 
     def get_dir(self) -> Path:
-        return cast(Path, self.filename).parent
+        return self.filename.parent
 
     def check_file(self) -> bool:
         return self.filename.exists()
@@ -375,7 +373,7 @@ class BrewInfo:
         del self.after_input[:]
         del self.cmd_input[:]
 
-        del self.cask_args_input[:]
+        self.cask_args_input.clear()
 
     def clear_list(self) -> None:
         self.brew_list_opt.clear()
@@ -443,12 +441,14 @@ class BrewInfo:
         files.update({"ext": self.get("file_input")})
         return files
 
+    @no_type_check
     def remove(self, name: str, package: str) -> None:
         if isinstance(self.list_dic[name], list):
             self.list_dic[name].remove(package)
         elif isinstance(self.list_dic[name], dict):
             del self.list_dic[name][package]
 
+    @no_type_check
     def set(self, name: str, val: list | dict) -> None:
         if isinstance(self.list_dic[name], list):
             del self.list_dic[name][:]
@@ -457,6 +457,7 @@ class BrewInfo:
             self.list_dic[name].clear()
             self.list_dic[name].update(val)
 
+    @no_type_check
     def add(self, name: str, val: str) -> None:
         if isinstance(self.list_dic[name], list):
             self.list_dic[name].extend(
@@ -571,7 +572,21 @@ class BrewInfo:
                 elif cmd == "after":
                     self.after_input.append(excmd)
                 elif cmd == "cask_args":
-                    self.cask_args_input.append(excmd)
+                    if self.helper.opt.get("form") in [
+                        "brewdler",
+                        "bundle",
+                    ]:
+                        for arg in excmd.split(","):
+                            k = f"--{arg.split(':')[0]}"
+                            v = arg.split(":")[1]
+                            if v == "true":
+                                v = ""
+                            self.cask_args_input[k] = v
+                    else:
+                        for arg in excmd.split():
+                            k = arg.split(":")[0]
+                            v = arg.split("=")[1] if "=" in arg else ""
+                            self.cask_args_input[k] = v
                 else:
                     self.cmd_input.append(line.strip())
 
@@ -797,21 +812,18 @@ fi
         # Cask args
         if self.cask_args_input:
             output += "\n# Cask args\n"
-            for c in self.cask_args_input:
+            for k, v in self.cask_args_input.items():
                 output += cmd_cask_args
-                delimiter = " "
-                for k, v in c.items():
-                    if self.helper.opt["form"] in ["brewdler", "bundle"]:
-                        if v == "":
-                            output += f"{delimiter}{k.lstrip('-')}: true"
-                        else:
-                            output += f"{delimiter}{k.lstrip('-')}: {v}"
-                        delimiter = ", "
+                if self.helper.opt["form"] in ["brewdler", "bundle"]:
+                    if v == "":
+                        output += f"{k.removeprefix('--')}: true\n"
                     else:
-                        output += f" {k}"
-                        if v != "":
-                            output += f" {v}"
-                output += "\n"
+                        output += f"{k.removeprefix('--')}: {v}\n"
+                else:
+                    output += k
+                    if v != "":
+                        output += f"={v}"
+                    output += "\n"
 
         # Taps
         if self.tap_list:
@@ -1052,7 +1064,7 @@ class BrewFile:
         self.int_opts = ["verbose"]
         self.float_opts = []
 
-        self.brewinfo = BrewInfo(self.helper, self.opt["input"])
+        self.brewinfo = BrewInfo(self.helper, Path(self.opt["input"]))
         self.brewinfo_ext = []
         self.brewinfo_main = self.brewinfo
         self.opt["read"] = False
@@ -1116,7 +1128,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.filename = self.opt["input"]
+        self.brewinfo.filename = Path(self.opt["input"])
 
     def ask_yn(self, question):
         """Helper for yes/no."""
@@ -1222,7 +1234,7 @@ class BrewFile:
             if path.is_absolute():
                 b = BrewInfo(self.helper, path)
             else:
-                b = BrewInfo(self.helper, Path(brewinfo.get_dir(), path))
+                b = BrewInfo(self.helper, brewinfo.get_dir() / path)
             self.brewinfo_ext.append(b)
             if main is not None and is_next_main:
                 main = b
@@ -1416,7 +1428,7 @@ class BrewFile:
         if not Path(self.opt["input"]).exists():
             return
 
-        self.brewinfo.filename = self.opt["input"]
+        self.brewinfo.filename = Path(self.opt["input"])
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""

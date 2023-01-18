@@ -70,14 +70,22 @@ def test_proc_err(helper):
 
 
 def test_proc_exit_on_err(helper):
-    ret_proc, lines_proc = helper.proc("ech test", separate_err=False, exit_on_err=False)
+    ret_proc, lines_proc = helper.proc(
+        "ech test", separate_err=False, exit_on_err=False
+    )
     assert ret_proc == -1
     print(lines_proc)
-    assert lines_proc == ["ech test: [Errno 2] No such file or directory: 'ech'"]
-    ret_proc, lines_proc = helper.proc("ech test", separate_err=True, exit_on_err=False)
+    assert lines_proc == [
+        "ech test: [Errno 2] No such file or directory: 'ech'"
+    ]
+    ret_proc, lines_proc = helper.proc(
+        "ech test", separate_err=True, exit_on_err=False
+    )
     assert ret_proc == -1
     print(lines_proc)
-    assert lines_proc == ["ech test: [Errno 2] No such file or directory: 'ech'"]
+    assert lines_proc == [
+        "ech test: [Errno 2] No such file or directory: 'ech'"
+    ]
 
 
 def test_proc_dryrun(helper):
