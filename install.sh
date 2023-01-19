@@ -13,7 +13,7 @@ if ! which brew > /dev/null 2>&1;then
   fi
   echo
 
-  if echo $OSTYPE | grep -q darwin;then
+  if echo "$OSTYPE" | grep -q darwin;then
     arc=$(uname -m)
     if [ "$arc" = "x86_64" ];then
       paths=(/usr/local /opt/homebrew)
@@ -39,7 +39,8 @@ brew install rcmdnk/file/brew-file
 
 if [ $brew_installed -eq 0 ];then
   # Do not check stray files
-  if ! brew doctor $(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask|brew_git_branch)');then
+  read -ra checks < <(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask|brew_git_branch)'|tr '\n' ' ')
+  if ! brew doctor "${checks[@]}";then
     echo Check brew environment!
     exit 1
   fi
