@@ -8,21 +8,26 @@ authors = ["rcmdnk <rcmdnk@gmail.com>"]
 python = ">=3.10,<3.11"
 
 [tool.poetry.dev-dependencies]
-pytest = "7.2.0"
+pytest = "7.2.1"
 pre-commit = "2.21.0"
 pytest-cov = "4.0.0"
 pytest-xdist = "3.1.0"
 black = "22.12.0"
-blacken-docs = "1.12.1"
+blacken-docs = "1.13.0"
 pyproject-flake8 = "6.0.0.post1"
-flake8-bugbear = "^22.12.6"
-flake8-docstrings = "^1.6.0"
-autoflake = "^2.0.0"
-autopep8 = "^2.0.1"
+flake8-bugbear = "23.1.14"
+flake8-docstrings = "1.6.0"
+autoflake = "2.0.0"
+autopep8 = "2.0.1"
 isort = "5.11.4"
 mypy = "0.991"
-bandit = {extras = ["toml"], version = "^1.7.4"}
+bandit = {extras = ["toml"], version = "1.7.4"}
 pre-commit-hooks = "4.4.0"
+shellcheck-py = "0.9.0.2"
+mdformat = "0.7.16"
+mdformat-gfm = "0.3.5"
+mdformat-frontmatter = "0.4.1"
+mdformat-footnote = "0.1.1"
 
 
 [tool.poetry.scripts]
@@ -39,13 +44,14 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 79
 
-[too.autoflake]
+[tool.autoflake]
+remove-all-unused-imports = true
 expand-star-imports = true
 remove-duplicate-keys = true
 remove-unused-variables = true
 
 [tool.autopep8]
-ignore = "E203,E501,E503"
+ignore = "E203,E501,W503"
 recursive = true
 aggressive = 3
 

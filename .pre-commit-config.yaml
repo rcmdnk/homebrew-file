@@ -1,8 +1,8 @@
 repos:
   - repo: local
     hooks:
-      - id: black_diff
-        name: black_diff
+      - id: black-diff
+        name: black-diff
         entry: black
         language: system
         types_or:
@@ -28,8 +28,8 @@ repos:
         entry: blacken-docs
         language: system
         files: '\.(rst|md|markdown|py|tex)$'
-      - id: autoflake_diff
-        name: autoflake_diff
+      - id: autoflake-diff
+        name: autoflake-diff
         entry: autoflake
         language: system
         types:
@@ -46,8 +46,8 @@ repos:
         require_serial: true
         args:
           - "--in-place"
-      - id: autopep8_diff
-        name: autopep8_diff
+      - id: autopep8-diff
+        name: autopep8-diff
         entry: autopep8
         language: system
         types:
@@ -64,8 +64,8 @@ repos:
           - python
         args:
           - "--in-place"
-      - id: isort_diff
-        name: isort_diff
+      - id: isort-diff
+        name: isort-diff
         entry: isort
         language: system
         require_serial: true
@@ -118,10 +118,32 @@ repos:
         args:
           - "-c"
           - "pyproject.toml"
+      - id: shellcheck
+        # https://github.com/shellcheck-py/shellcheck-py
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        types: [shell]
+        require_serial: true
+      - id: mdformat-check
+        name: mdformat-check
+        entry: mdformat
+        language: system
+        types: [markdown]
+        args:
+          - "--check"
+      - id: mdformat
+        name: mdformat
+        entry: mdformat
+        language: system
+        types: [markdown]
+
+
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
+      - id: check-byte-order-marker
       - id: check-yaml
       - id: check-json
       - id: check-toml
