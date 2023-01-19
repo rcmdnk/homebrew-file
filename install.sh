@@ -13,9 +13,21 @@ if ! which brew > /dev/null 2>&1;then
   fi
   echo
 
-  for path in /home/linuxbrew/.linuxbrew $HOME/.linuxbrew /opt/homebrew /usr/local;do
+  if echo $OSTYPE | grep -q darwin;then
+    arc=$(uname -m)
+    if [ "$arc" = "x86_64" ];then
+      paths=(/usr/local /opt/homebrew)
+    else
+      paths=(/opt/homebrew /usr/local)
+    fi
+  else
+    paths=(/home/linuxbrew/.linuxbrew "$HOME/.linuxbrew" /opt/homebrew /usr/local)
+  fi
+
+  for path in "${paths[@]}";do
     if [ -f "$path/bin/brew" ];then
-      PATH="$path/sbin:$path/bin:$PATH"
+      export PATH="$path/sbin:$path/bin:$PATH"
+      break
     fi
   done
 fi
