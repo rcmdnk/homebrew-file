@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-echo $TEST_VAL
+echo "$TEST_VAL"

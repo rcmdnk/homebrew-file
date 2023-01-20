@@ -1,6 +1,14 @@
 name: test
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - "coverage"
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   install:
@@ -26,10 +34,6 @@ jobs:
         python-version: ['3.10']
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
       - name: Check is main
         id: isMain
         continue-on-error: true
@@ -38,8 +42,8 @@ jobs:
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       - uses: actions/checkout@v3
         with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+          persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@v4
         with:
           python-version: ${{matrix.python-version}}
@@ -73,15 +77,18 @@ jobs:
           echo "Coverage Tests - ${{ steps.coverageComment.outputs.tests }}"
           echo "Coverage Time - ${{ steps.coverageComment.outputs.time }}"
           echo "Not Success Test Info - ${{ steps.coverageComment.outputs.notSuccessTestInfo }}"
-      - name: Update Readme in coverage branch with Coverage Html
+      - name: Update Readme in coverage branch with Coverage Html and commit to coverage branch
         if: ${{ steps.isMain.outcome == 'success' }}
         run: |
-          git checkout coverage
-          echo "[![test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml)" > ./README.md
+          coverage=$(git branch -a|grep "remotes/origin/coverage$") || :
+          if [ -z "$coverage" ];then
+            git checkout --orphan coverage
+            git rm -rf .
+          else
+            git checkout coverage
+          fi
+          echo "[![test](https://github.com/${GITHUB_REPOSITORY}/actions/workflows/test.yml/badge.svg)](https://github.com/${GITHUB_REPOSITORY}/actions/workflows/test.yml)" > ./README.md
           echo -e ${{ steps.coverageComment.outputs.summaryReport }} >> ./README.md
-      - name: Commit
-        if: ${{ steps.isMain.outcome == 'success' }}
-        run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add README.md
@@ -94,4 +101,6 @@ jobs:
           branch: coverage
       - name: Check tests
         run: |
-          test ${{ steps.preCommit.outcome }} == "success"  && ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0))
+          ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0)) || echo 'Test failed!'
+          test ${{ steps.preCommit.outcome }} == "success" || echo 'Need to fix by following pre-commit!'
+          ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0)) && test ${{ steps.preCommit.outcome }} == "success"

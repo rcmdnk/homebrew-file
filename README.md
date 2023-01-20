@@ -1,5 +1,4 @@
-Brew-file
-=========
+# Brew-file
 
 [![Test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml)
 [![Coverage Status](https://img.shields.io/badge/Coverage-check%20here-blue.svg)](https://github.com/rcmdnk/homebrew-file/tree/coverage)
