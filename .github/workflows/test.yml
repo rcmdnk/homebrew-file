@@ -4,7 +4,15 @@ on:
   push:
     branches-ignore:
       - "coverage"
+      - "renovate/**"
   pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,10 +25,6 @@ jobs:
         os: [macos-12, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
       - name: Install test
         run: |
           curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
@@ -29,78 +33,31 @@ jobs:
           rm -f install.sh
   test:
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-12, ubuntu-latest]
         python-version: ['3.10']
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check is main
-        id: isMain
-        continue-on-error: true
-        run: test "${{ github.ref }}" == "refs/heads/master"  && test "${{ matrix.os }}" == "macos-12"  && test "${{ matrix.python-version }}" == "3.10"
+        id: is_main
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/master" ] && [ "${{ matrix.os }}" = "macos-12" ] && [ "${{ matrix.python-version }}" = "3.10" ];then
+            echo "flag=1" >> $GITHUB_OUTPUT
+          else
+            echo "flag=0" >> $GITHUB_OUTPUT
+          fi
       - name: Homebrew installation
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-      - uses: actions/checkout@v3
+      - uses: rcmdnk/python-action@v1
+        if: ${{ ! inputs.head_python_action }}
         with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{matrix.python-version}}
-      - name: Install poetry
-        run: pip install poetry
-      - name: Poetry setup
-        run: poetry install
-      - name: Run test
-        id: pytest
-        continue-on-error: true
-        run: poetry run pytest --durations=0 --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=bin  tests/ | tee pytest-coverage.txt
-      - name: pre-commit
-        id: preCommit
-        continue-on-error: true
-        run: poetry run pre-commit run -a
-      - name: Pytest coverage comment
-        id: coverageComment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          hide-comment: true
-          pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest.xml
-      - name: Check the output coverage
-        run: |
-          echo "Coverage Percantage - ${{ steps.coverageComment.outputs.coverage }}"
-          echo "Coverage Color - ${{ steps.coverageComment.outputs.color }}"
-          echo "Coverage Warnings - ${{ steps.coverageComment.outputs.warnings }}"
-          echo "Coverage Errors - ${{ steps.coverageComment.outputs.errors }}"
-          echo "Coverage Failures - ${{ steps.coverageComment.outputs.failures }}"
-          echo "Coverage Skipped - ${{ steps.coverageComment.outputs.skipped }}"
-          echo "Coverage Tests - ${{ steps.coverageComment.outputs.tests }}"
-          echo "Coverage Time - ${{ steps.coverageComment.outputs.time }}"
-          echo "Not Success Test Info - ${{ steps.coverageComment.outputs.notSuccessTestInfo }}"
-      - name: Update Readme in coverage branch with Coverage Html and commit to coverage branch
-        if: ${{ steps.isMain.outcome == 'success' }}
-        run: |
-          coverage=$(git branch -a|grep "remotes/origin/coverage$") || :
-          if [ -z "$coverage" ];then
-            git checkout --orphan coverage
-            git rm -rf .
-          else
-            git checkout coverage
-          fi
-          echo "[![test](https://github.com/${GITHUB_REPOSITORY}/actions/workflows/test.yml/badge.svg)](https://github.com/${GITHUB_REPOSITORY}/actions/workflows/test.yml)" > ./README.md
-          echo -e ${{ steps.coverageComment.outputs.summaryReport }} >> ./README.md
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add README.md
-          PRE_COMMIT_ALLOW_NO_CONFIG=1 git commit -m "Update coverage"
-      - name: Push
-        if: ${{ steps.isMain.outcome == 'success' }}
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: coverage
-      - name: Check tests
-        run: |
-          ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0)) || echo 'Test failed!'
-          test ${{ steps.preCommit.outcome }} == "success" || echo 'Need to fix by following pre-commit!'
-          ((${{ steps.coverageComment.outputs.failures }} == 0)) && ((${{ steps.coverageComment.outputs.errors }} == 0)) && test ${{ steps.preCommit.outcome }} == "success"
+          pytest-cov-path: "bin"
+          coverage-push: "${{ steps.is_main.outputs.flag }}"
+          pre-commit: '1'
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        if: ${{ steps.is_main.outputs.flag == '1' && github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        uses: mxschmitt/action-tmate@v3
