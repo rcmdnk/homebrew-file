@@ -52,7 +52,6 @@ jobs:
       - name: Homebrew installation
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       - uses: rcmdnk/python-action@v1
-        if: ${{ ! inputs.head_python_action }}
         with:
           pytest-cov-path: "bin"
           coverage-push: "${{ steps.is_main.outputs.flag }}"
