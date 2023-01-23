@@ -55,7 +55,7 @@ jobs:
         with:
           pytest-cov-path: "bin"
           coverage-push: "${{ steps.is_main.outputs.flag }}"
-          pre-commit: '1'
+          pre-commit: "${{ steps.is_main.outputs.flag }}"
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
         if: ${{ steps.is_main.outputs.flag == '1' && github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
