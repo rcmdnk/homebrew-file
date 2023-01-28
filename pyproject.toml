@@ -19,7 +19,7 @@ flake8-bugbear = "23.1.14"
 flake8-docstrings = "1.6.0"
 autoflake = "2.0.0"
 autopep8 = "2.0.1"
-isort = "5.11.4"
+isort = "5.12.0"
 mypy = "0.991"
 bandit = {extras = ["toml"], version = "1.7.4"}
 pre-commit-hooks = "4.4.0"
