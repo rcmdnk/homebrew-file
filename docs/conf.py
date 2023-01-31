@@ -48,7 +48,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Homebrew-file"
-copyright = "2016, rcmdnk"
+copyright = "2016, rcmdnk"  # noqa: A001
 author = "rcmdnk"
 
 # The version info for the project you're documenting, acts as replacement for

@@ -163,9 +163,7 @@ class BrewFile:
             if user_opts:
                 opts.update(user_opts)
             else:
-                self.warn(
-                    '%s: "%s" is not a proper format.' % (env_var, env_opts), 0
-                )
+                self.warn('{env_var}: "{env_opts}" is not a proper format.', 0)
                 self.warn("Ignoring the value.\n", 0)
 
         return opts
@@ -540,7 +538,7 @@ class BrewFile:
             "repo"
         ].startswith("http"):
             self.info(
-                "You are using repository of %s" % self.opt["repo"]
+                f"You are using repository of {self.opt['repo']}"
                 + "\nUse ssh protocol to push your Brewfile update.",
                 0,
             )
@@ -802,13 +800,11 @@ class BrewFile:
             self.info(self.opt["mas_formula"] + " has not been installed.")
             if not force:
                 ans = self.ask_yn(
-                    "Do you want to install %s?" % self.opt["mas_formula"]
+                    "Do you want to install {self.opt['mas_formula']}?"
                 )
                 if not ans:
                     self.warn("If you need it, please do:")
-                    self.warn(
-                        "    $ brew install %s" % (self.opt["mas_formula"])
-                    )
+                    self.warn("    $ brew install {self.opt['mas_formula']}")
                     self.opt["is_mas_cmd"] = -2
                     return self.opt["is_mas_cmd"]
             ret = self.proc(
@@ -861,14 +857,12 @@ class BrewFile:
             ):
                 if not force:
                     ans = self.ask_yn(
-                        "You need %s in tmux. Do you want to install it?"
-                        % self.opt["reattach_formula"]
+                        f"You need {self.opt['reattach_formula']} in tmux. Do you want to install it?"
                     )
                     if not ans:
                         self.warn("If you need it, please do:")
                         self.warn(
-                            "    $ brew install %s"
-                            % (self.opt["reattach_formula"])
+                            f"    $ brew install {self.opt['reattach_formula']}"
                         )
                         return self.opt["is_mas_cmd"]
                 ret = self.proc(
@@ -923,13 +917,11 @@ class BrewFile:
             #     print_out=False)
             for a in apps_tmp:
                 apps_id = self.proc(
-                    "mdls -name kMDItemAppStoreAdamID -raw '%s.app'" % a,
+                    f"mdls -name kMDItemAppStoreAdamID -raw '{a}.app'",
                     print_cmd=False,
                     print_out=False,
                 )[1][0]
-                apps.append(
-                    "%s %s" % (apps_id, a.split("/")[-1].split(".app")[0])
-                )
+                apps.append(f"{apps_id} {a.split('/')[-1].split('.app')[0]}")
 
         return apps
 
@@ -1003,7 +995,7 @@ class BrewFile:
             env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
         )[1]
 
-        self.brewinfo.set("tap_list", lines)
+        self.brewinfo.set_val("tap_list", lines)
         self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
@@ -1021,11 +1013,15 @@ class BrewFile:
             if self.opt["appstore"] == 1 or (
                 self.opt["appstore"] == 2 and force_appstore_list
             ):
-                self.brewinfo.set("appstore_list", self.get_appstore_list())
+                self.brewinfo.set_val(
+                    "appstore_list", self.get_appstore_list()
+                )
             elif self.opt["appstore"] == 2:
                 if self.brewinfo.check_file():
                     self.read_all()
-                self.brewinfo.set("appstore_list", self.get("appstore_input"))
+                self.brewinfo.set_val(
+                    "appstore_list", self.get("appstore_input")
+                )
 
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input."""
@@ -1297,12 +1293,12 @@ class BrewFile:
                         cmd = "sudo rm -rf"
                     tmpcmd = cmd
                     for d in self.opt["appdirlist"]:
-                        a = "%s/%s.app" % (d, package)
+                        a = f"{d}/{package}.app"
                         if Path(a).is_dir():
                             if uninstall == 0:
                                 cmd += " file:///" + quote(a)
                             else:
-                                cmd += " '%s'" % a
+                                cmd += f" '{a}'"
                             continue
                     if cmd == tmpcmd:
                         self.warn(
@@ -1518,18 +1514,17 @@ class BrewFile:
                         )
                     else:
                         self.info(
-                            "Please install %s from AppStore." % package, 0
+                            f"Please install {package} from AppStore.", 0
                         )
                         self.proc(
-                            "open -W 'macappstore://itunes.apple.com/app/id%s'"
-                            % (identifier),
+                            f"open -W 'macappstore://itunes.apple.com/app/id{identifier}'",
                             dryrun=self.opt["dryrun"],
                         )
                 else:
                     self.warn(
                         "No id or wrong id information was given for "
-                        "AppStore App: %s.\n"
-                        "Please install it manually." % package,
+                        f"AppStore App: {package}.\n"
+                        "Please install it manually.",
                         0,
                     )
 
@@ -1706,13 +1701,8 @@ class BrewFile:
         casks_noinst = {}
         nonapp_casks_noinst = []
         for t in taps:
-            d = self.brewinfo.get_tap_path(t) + "/Casks"
-            for cask in list(
-                map(
-                    lambda x: x.replace(".rb", ""),
-                    filter(lambda y: y.endswith(".rb"), os.listdir(d)),
-                )
-            ):
+            d = Path(self.brewinfo.get_tap_path(t) + "/Casks")
+            for cask in [x.stem for x in d.iterdir() if x.suffix == ".rb"]:
                 cask_apps = []
                 installed = False
                 noinst = True
@@ -2232,7 +2222,7 @@ class BrewFile:
         self.brewinfo.path = Path("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
-        self.brewinfo.set("brew_input_opt", {"test_pack": "test opt"})
+        self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
         self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")

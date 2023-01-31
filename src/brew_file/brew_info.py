@@ -167,7 +167,7 @@ class BrewInfo:
             del self.list_dic[name][package]
 
     @no_type_check
-    def set(self, name: str, val: list | dict) -> None:
+    def set_val(self, name: str, val: list | dict) -> None:
         if isinstance(self.list_dic[name], list):
             del self.list_dic[name][:]
             self.list_dic[name].extend(val)
@@ -328,20 +328,10 @@ class BrewInfo:
         tap_path = self.get_tap_path(tap)
         if not tap_path.is_dir():
             return packs
-        packs = list(
-            map(
-                lambda x: x.stem,
-                filter(lambda y: y.suffix == ".rb", tap_path.iterdir()),
-            )
-        )
+        packs = [x.stem for x in tap_path.iterdir() if x.suffix == ".rb"]
         path = Path(tap_path, "Formula")
         if Path(path).is_dir():
-            packs += list(
-                map(
-                    lambda x: x.stem,
-                    filter(lambda y: y.suffix == ".rb", path.iterdir()),
-                )
-            )
+            packs += [x.stem for x in path.iterdir() if x.suffix == ".rb"]
         return sorted(packs)
 
     def get_tap_casks(self, tap: str) -> list:
@@ -352,12 +342,7 @@ class BrewInfo:
             return casks
         path = Path(tap_path, "Casks")
         if path.is_dir():
-            casks = list(
-                map(
-                    lambda x: x.stem,
-                    filter(lambda y: y.suffix == ".rb", path.iterdir()),
-                )
-            )
+            casks = [x.stem for x in path.iterdir() if x.suffix == ".rb"]
         return sorted(casks)
 
     def get_leaves(self) -> list:
