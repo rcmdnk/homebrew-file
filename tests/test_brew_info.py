@@ -10,7 +10,7 @@ from . import brew_file
 def brew_info():
     helper = brew_file.BrewHelper({})
     info = brew_file.BrewInfo(
-        helper=helper, path=Path(f"{Path(__file__).parent}/files/BrewfileTest")
+        helper=helper, file=Path(__file__).parent / "files" / "BrewfileTest"
     )
     return info
 
@@ -21,13 +21,13 @@ def test_get_dir(brew_info):
 
 def test_check_file(brew_info):
     assert brew_info.check_file()
-    info = brew_file.BrewInfo(helper=brew_info.helper, path=Path("not_exist"))
+    info = brew_file.BrewInfo(helper=brew_info.helper, file=Path("not_exist"))
     assert not info.check_file()
 
 
 def test_check_dir(brew_info):
     assert brew_info.check_dir()
-    info = brew_file.BrewInfo(helper=brew_info.helper, path=Path("/not/exist"))
+    info = brew_file.BrewInfo(helper=brew_info.helper, file=Path("/not/exist"))
     assert not info.check_dir()
 
 
@@ -329,7 +329,7 @@ def test_mas_pack(brew_info):
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_write(brew_info, tmp_path):
     tmp_file = tmp_path / "f"
-    default_file = brew_info.path
+    default_file = brew_info.file
     brew_info.helper.opt["caskonly"] = False
     brew_info.helper.opt["appstore"] = -1
     brew_info.helper.opt["verbose"] = 1
@@ -337,11 +337,8 @@ def test_write(brew_info, tmp_path):
     brew_info.helper.opt["cask_repo"] = "homebrew/cask"
     brew_info.read()
     brew_info.input_to_list()
-    brew_info.path = tmp_file
-    print("here brew_info.file 0", brew_info.path)
+    brew_info.file = tmp_file
     brew_info.write()
-    print("here f.name", tmp_file)
-    print("here brew_info.file 1", brew_info.path)
     with (open(default_file) as f1, open(tmp_file) as f2):
         assert f1.read() == f2.read()
     brew_info.helper.opt["form"] = "bundle"

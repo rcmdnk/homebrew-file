@@ -187,7 +187,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.path = Path(self.opt["input"])
+        self.brewinfo.file = Path(self.opt["input"])
 
     def ask_yn(self, question):
         """Helper for yes/no."""
@@ -324,10 +324,10 @@ class BrewFile:
             b.input_to_list()
 
     def write(self):
-        self.banner(f"# Initialize {self.brewinfo_main.path}")
+        self.banner(f"# Initialize {self.brewinfo_main.file}")
         self.brewinfo_main.write()
         for b in self.brewinfo_ext:
-            self.banner(f"# Initialize {b.path}")
+            self.banner(f"# Initialize {b.file}")
             b.write()
 
     def get(self, name, only_ext=False):
@@ -422,7 +422,7 @@ class BrewFile:
                 "[homebrew-file](https://github.com/rcmdnk/homebrew-file)."
             )
             f.close()
-        open(self.brewinfo.path, "a").close()
+        self.brewinfo.file.touch()
 
         if self.check_gitconfig():
             self.proc("git add -A")
@@ -487,7 +487,7 @@ class BrewFile:
         if not Path(self.opt["input"]).exists():
             return
 
-        self.brewinfo.path = Path(self.opt["input"])
+        self.brewinfo.file = Path(self.opt["input"])
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
@@ -517,7 +517,7 @@ class BrewFile:
             )
 
         # Set Brewfile in the repository
-        self.brewinfo.path = self.repo_file()
+        self.brewinfo.file = self.repo_file()
 
         # If repository does not have a branch, make it
         if self.brewinfo.check_dir():
@@ -1158,7 +1158,7 @@ class BrewFile:
     def initialize_write(self):
         self.write()
         self.banner(
-            f"# You can edit {self.brewinfo.path} with:\n"
+            f"# You can edit {self.brewinfo.file} with:\n"
             f"#     $ {__prog__} edit"
         )
         self.opt["initialized"] = True
@@ -1166,7 +1166,7 @@ class BrewFile:
     def check_input_file(self):
         """Check input file."""
         if not self.brewinfo.check_file():
-            self.warn(f"Input file {self.brewinfo.path} is not found.", 0)
+            self.warn(f"Input file {self.brewinfo.file} is not found.", 0)
             ans = self.ask_yn(
                 "Do you want to initialize from installed packages?"
             )
@@ -1174,18 +1174,19 @@ class BrewFile:
                 self.initialize(check=False)
                 return
 
-            self.err("Ok, please prepare brewfile", 0)
-            self.err(f"or you can initialize {self.brewinfo.path} with:", 0)
-            self.err("    $ " + __prog__ + " init", 0)
-            sys.exit(1)
+            raise RuntimeError(
+                "Ok, please prepare brewfile\n"
+                "or you can initialize {self.brewinfo.file} with:"
+                f"    $ { __prog__} init"
+            )
 
     def get_files(self, is_print=False, all_files=False):
         """Get Brewfiles."""
         self.read_all()
         files = [
-            x.path
+            x.file
             for x in [self.brewinfo_main] + self.brewinfo_ext
-            if all_files or x.path.exists()
+            if all_files or x.file.exists()
         ]
         if is_print:
             print("\n".join(files))
@@ -2222,13 +2223,13 @@ class BrewFile:
         print("read input:", len(self.brewinfo.brew_input))
         self.brewinfo.clear()
         print("read input cleared:", len(self.brewinfo.brew_input))
-        self.brewinfo.path = Path("/test/not/correct/file/path")
+        self.brewinfo.file = Path("/test/not/correct/file/path")
         self.brewinfo.read()
         self.brewinfo.check_dir()
         self.brewinfo.set_val("brew_input_opt", {"test_pack": "test opt"})
         self.brewinfo.add("brew_input_opt", {"test_pack2": "test opt2"})
         print(self.brewinfo.get("brew_input_opt"))
-        self.brewinfo.read("testfile")
+        self.brewinfo.read(Path("testfile"))
 
     def execute(self) -> None:
         """Main execute function."""

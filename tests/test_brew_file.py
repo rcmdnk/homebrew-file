@@ -187,23 +187,23 @@ def test_read(bf, tmp_path):
     helper = brew_file.BrewHelper({})
 
     bf.brewinfo_ext = []
-    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
+    file = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
-    assert ret.path == path
+    assert ret.file == file
 
     bf.brewinfo_ext = []
-    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
+    file = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, False)
     assert ret is None
 
     bf.brewinfo_ext = []
-    path = Path(f"{Path(__file__).parent}/files/BrewfileTest")
-    brewinfo = brew_file.BrewInfo(helper=helper, path=path)
+    file = Path(f"{Path(__file__).parent}/files/BrewfileTest")
+    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
-    path = Path(f"{Path(__file__).parent}/files/BrewfileMain")
-    assert ret.path == path
+    file = Path(f"{Path(__file__).parent}/files/BrewfileMain")
+    assert ret.file == file
     files = [
         Path(f"{Path(__file__).parent}/files/BrewfileMain"),
         Path(f"{Path(__file__).parent}/files/BrewfileExt"),
@@ -213,7 +213,7 @@ def test_read(bf, tmp_path):
         Path(Path("~/BrewfileHomeForTestingNotExists").expanduser()),
     ]
     for i, f in zip(bf.brewinfo_ext, files):
-        assert i.path == f
+        assert i.file == f
 
     # Absolute path check
     f1 = tmp_path / "f1"
@@ -225,9 +225,9 @@ def test_read(bf, tmp_path):
         f.write(f"main {f3}")
 
     bf.brewinfo_ext = []
-    brewinfo = brew_file.BrewInfo(helper=helper, path=f1)
+    brewinfo = brew_file.BrewInfo(helper=helper, file=f1)
     ret = bf.read(brewinfo, True)
-    assert ret.path == Path(f3)
+    assert ret.file == Path(f3)
 
 
 def test_list_to_main(bf):
