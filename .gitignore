@@ -156,17 +156,6 @@ cython_debug/
 #.idea/
 
 # Others
-data/
-mne_data/
-fig/
 .DS_Store
 /*.py
 /*.txt
-outputs
-miniforge3
-tmp_yml/
-test_*/
-tests_*/
-/*.png
-/*.jpg
-work/*
