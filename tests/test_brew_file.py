@@ -1,4 +1,3 @@
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -44,7 +43,7 @@ def test_read_all(bf):
     pass
 
 
-def test_read(bf):
+def test_read(bf, tmp_path):
     helper = brew_file.BrewHelper({})
 
     bf.brewinfo_ext = []
@@ -77,21 +76,18 @@ def test_read(bf):
         assert i.path == f
 
     # Absolute path check
-    f1 = tempfile.NamedTemporaryFile()
-    f2 = tempfile.NamedTemporaryFile()
-    f3 = tempfile.NamedTemporaryFile()
-    with open(f1.name, "w") as f:
-        f.write(f"main {f2.name}")
-    with open(f2.name, "w") as f:
-        f.write(f"main {f3.name}")
+    f1 = tmp_path / "f1"
+    f2 = tmp_path / "f2"
+    f3 = tmp_path / "f3"
+    with open(f1, "w") as f:
+        f.write(f"main {f2}")
+    with open(f2, "w") as f:
+        f.write(f"main {f3}")
 
     bf.brewinfo_ext = []
-    brewinfo = brew_file.BrewInfo(helper=helper, path=Path(f1.name))
+    brewinfo = brew_file.BrewInfo(helper=helper, path=f1)
     ret = bf.read(brewinfo, True)
-    assert ret.path == Path(f3.name)
-    f1.close()
-    f2.close()
-    f3.close()
+    assert ret.path == Path(f3)
 
 
 def test_list_to_main(bf):
