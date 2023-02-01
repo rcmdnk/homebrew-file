@@ -2227,22 +2227,22 @@ class BrewFile:
         print(self.brewinfo.get("brew_input_opt"))
         self.brewinfo.read("testfile")
 
-    def execute(self):
+    def execute(self) -> None:
         """Main execute function."""
         # Cask list check
         if self.opt["command"] == "casklist":
             self.check_cask()
-            sys.exit(0)
+            return
 
         # Set BREWFILE repository
         if self.opt["command"] == "set_repo":
             self.set_brewfile_repo()
-            sys.exit(0)
+            return
 
         # Set BREWFILE to local file
         if self.opt["command"] == "set_local":
             self.set_brewfile_local()
-            sys.exit(0)
+            return
 
         # Change brewfile if it is repository's one or not.
         self.check_repo()
@@ -2252,19 +2252,19 @@ class BrewFile:
             self.debug_banner()
             self.repomgr(self.opt["command"])
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # brew command
         if self.opt["command"] == "brew":
             self.debug_banner()
             self.brew_cmd()
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # Initialize
         if self.opt["command"] in ["init", "dump"]:
             self.initialize()
-            sys.exit(0)
+            return
 
         # Check input file
         # If the file doesn't exist, initialize it.
@@ -2273,38 +2273,38 @@ class BrewFile:
         # Edit
         if self.opt["command"] == "edit":
             self.edit_brewfile()
-            sys.exit(0)
+            return
 
         # Cat
         if self.opt["command"] == "cat":
             self.cat_brewfile()
-            sys.exit(0)
+            return
 
         # Get files
         if self.opt["command"] == "get_files":
             self.get_files(is_print=True, all_files=self.opt["all_files"])
-            sys.exit(0)
+            return
 
         # Cleanup non request
         if self.opt["command"] == "clean_non_request":
             self.debug_banner()
             self.clean_non_request()
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # Cleanup
         if self.opt["command"] == "clean":
             self.debug_banner()
             self.cleanup()
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # Install
         if self.opt["command"] == "install":
             self.debug_banner()
             self.install()
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # Update
         if self.opt["command"] == "update":
@@ -2324,14 +2324,15 @@ class BrewFile:
             if self.opt["repo"] != "":
                 self.repomgr("push")
             self.debug_banner()
-            sys.exit(0)
+            return
 
         # test
         if self.opt["command"] == "test":
             self.my_test()
-            sys.exit(0)
+            return
 
         # No command found
-        self.err("Wrong command: " + self.opt["command"], 0)
-        self.err("Execute `" + __prog__ + " help` for more information.", 0)
-        sys.exit(1)
+        raise RuntimeError(
+            f"Wrong command: {self.opt['command']}\n"
+            f"Execute `{__prog__} help` for more information."
+        )
