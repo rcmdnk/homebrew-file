@@ -356,9 +356,11 @@ class BrewFile:
         return self.opt["repo"].split("/")[-1].split(".git")[0]
 
     def user_name(self):
-        try:
-            user = self.opt["repo"].split("/")[-2].split(":")[-1]
-        except Exception:
+        user = ""
+        repo_split = self.opt["repo"].split("/")
+        if len(repo_split) > 1:
+            user = repo_split[-2].split(":")[-1]
+        if not user:
             user = self.proc(
                 "git config --get github.user",
                 print_cmd=False,
@@ -381,8 +383,7 @@ class BrewFile:
                 else:
                     user = ""
             if user == "":
-                self.err("Can not find git (github) user name")
-                sys.exit(1)
+                raise RuntimeError("Can not find git (github) user name")
         return user
 
     def input_dir(self):
@@ -445,12 +446,13 @@ class BrewFile:
         if ret != 0:
             if exit_on_err:
                 self.err(
-                    "can nott clone " + self.opt["repo"] + ".\n"
-                    "please check the repository, or reset with\n"
-                    "    $ " + __prog__ + " set_repo",
                     0,
                 )
-                sys.exit(ret)
+                raise RuntimeError(
+                    f"Can not clone {self.opt['repo']}.\n"
+                    "please check the repository, or reset with\n"
+                    f"    $ {__prog__} set_repo"
+                )
             else:
                 return False
         self.init_repo()
@@ -470,8 +472,9 @@ class BrewFile:
             + self.repo_name()
             + " doesn't exist."
         )
-        print("Please create the repository first, then try again")
-        sys.exit(1)
+        raise RuntimeError(
+            "Please create the repository first, then try again"
+        )
 
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
@@ -574,9 +577,10 @@ class BrewFile:
         """Helper of repository management."""
         # Check the repository
         if self.opt["repo"] == "":
-            self.err("Please set a repository, or reset with:", 0)
-            self.err("    $ " + __prog__ + " set_repo\n", 0)
-            sys.exit(1)
+            raise RuntimeError(
+                "Please set a repository, or reset with:\n"
+                f"    $ {__prog__} set_repo\n"
+            )
 
         # Clone if it doesn't exist
         if not self.brewinfo.check_dir():
@@ -593,8 +597,7 @@ class BrewFile:
             exit_on_err=True,
         )
         if ret != 0:
-            self.err("\n".join(lines))
-            sys.exit(ret)
+            raise RuntimeError("\n".join(lines))
         if lines:
             if self.check_gitconfig():
                 self.proc("git add -A", dryrun=self.opt["dryrun"])
@@ -691,7 +694,7 @@ class BrewFile:
             # Not install/remove command, no init.
             return
 
-        self.initialize(check=False)
+        _ = self.initialize(check=False)
 
     def add_path(self):
         paths = os.environ["PATH"].split(":")
@@ -777,8 +780,7 @@ class BrewFile:
             return self.opt["is_mas_cmd"]
 
         if not is_mac():
-            print("mas is not available on Linux!")
-            sys.exit(1)
+            raise RuntimeError("mas is not available on Linux!")
 
         if (
             self.proc(
@@ -834,14 +836,13 @@ class BrewFile:
             )[0]
             != 0
         ):
-            sys.exit(1)
+            raise RuntimeError("Failed to prepare mas command.")
 
         # Disable check until this issue is solved:
         # https://github.com/mas-cli/mas#%EF%B8%8F-known-issues
         # if self.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
         #             print_out=False, exit_on_err=False)[0] != 0:
-        #    self.err("\nPlease sign in to the App Store", 0)
-        #    sys.exit(1)
+        #    raise RuntimeError("Please sign in to the App Store.")
 
         self.opt["is_mas_cmd"] = 1
 
@@ -1062,9 +1063,15 @@ class BrewFile:
         else:
             ans = self.ask_yn("Do you want to overwrite it?")
             if not ans:
-                sys.exit(0)
+                return False
+        return True
 
-    def set_brewfile_repo(self):
+    def set_brewfile_local(self):
+        """Set Brewfile to local file."""
+        self.opt["repo"] = ""
+        _ = self.initialize(check=False, check_input=False)
+
+    def set_brewfile_repo(self) -> bool:
         """Set Brewfile repository."""
         # Check input file
         if Path(self.opt["input"]).exists():
@@ -1090,7 +1097,8 @@ class BrewFile:
                         + "."
                     )
 
-            self.input_backup()
+            if not self.input_backup():
+                return False
 
         # Get repository
         if self.opt["repo"] == "":
@@ -1113,16 +1121,12 @@ class BrewFile:
             with OpenWrapper(self.opt["input"], "w") as f:
                 f.write("git " + self.opt["repo"])
             self.check_repo()
+        return True
 
-    def set_brewfile_local(self):
-        """Set Brewfile to local file."""
-        self.opt["repo"] = ""
-        self.initialize(check=False, check_input=False)
-
-    def initialize(self, check=True, check_input=True):
+    def initialize(self, check=True, check_input=True) -> bool:
         """Initialize Brewfile."""
         if self.opt["initialized"]:
-            return
+            return True
 
         if check:
             if not Path(self.opt["input"]).exists():
@@ -1131,7 +1135,8 @@ class BrewFile:
                     "((n) for local Brewfile)."
                 )
                 if ans:
-                    self.set_brewfile_repo()
+                    if not self.set_brewfile_repo():
+                        return False
             else:
                 if self.opt["repo"] != "":
                     print(
@@ -1139,7 +1144,8 @@ class BrewFile:
                     )
                 else:
                     print(self.opt["input"] + " is already there.")
-                    self.input_backup()
+                    if not self.input_backup():
+                        return False
 
         # Get installed package list
         self.get_list()
@@ -1154,6 +1160,8 @@ class BrewFile:
 
         # write out
         self.initialize_write()
+
+        return True
 
     def initialize_write(self):
         self.write()
@@ -1171,8 +1179,7 @@ class BrewFile:
                 "Do you want to initialize from installed packages?"
             )
             if ans:
-                self.initialize(check=False)
-                return
+                _ = self.initialize(check=False)
 
             raise RuntimeError(
                 "Ok, please prepare brewfile\n"
@@ -1648,8 +1655,7 @@ class BrewFile:
     def check_cask(self):
         """Check applications for Cask."""
         if not is_mac():
-            print("Cask is not available on Linux!")
-            sys.exit(1)
+            raise RuntimeError("Cask is not available on Linux!")
 
         self.banner("# Starting to check applications for Cask...")
 
@@ -1703,7 +1709,7 @@ class BrewFile:
         casks_noinst = {}
         nonapp_casks_noinst = []
         for t in taps:
-            d = Path(self.brewinfo.get_tap_path(t) + "/Casks")
+            d = Path(self.brewinfo.get_tap_path(t)) / "Casks"
             for cask in [x.stem for x in d.iterdir() if x.suffix == ".rb"]:
                 cask_apps = []
                 installed = False
@@ -2240,7 +2246,7 @@ class BrewFile:
 
         # Set BREWFILE repository
         if self.opt["command"] == "set_repo":
-            self.set_brewfile_repo()
+            _ = self.set_brewfile_repo()
             return
 
         # Set BREWFILE to local file
@@ -2267,7 +2273,7 @@ class BrewFile:
 
         # Initialize
         if self.opt["command"] in ["init", "dump"]:
-            self.initialize()
+            _ = self.initialize()
             return
 
         # Check input file
@@ -2324,7 +2330,7 @@ class BrewFile:
             self.install()
             self.cleanup()
             if not self.opt["dryrun"]:
-                self.initialize(check=False)
+                _ = self.initialize(check=False)
             if self.opt["repo"] != "":
                 self.repomgr("push")
             self.debug_banner()
