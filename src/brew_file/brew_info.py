@@ -4,7 +4,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Union, no_type_check
+from typing import Optional, Union
 
 from .brew_helper import BrewHelper
 from .utils import Tee, is_mac
@@ -159,30 +159,28 @@ class BrewInfo:
         files.update({"ext": self.get("file_input")})
         return files
 
-    @no_type_check
     def remove(self, name: str, package: str) -> None:
-        if isinstance(self.list_dic[name], list):
-            self.list_dic[name].remove(package)
-        elif isinstance(self.list_dic[name], dict):
-            del self.list_dic[name][package]
+        collection = self.list_dic[name]
+        if isinstance(collection, list):
+            collection.remove(package)
+        elif isinstance(collection, dict):
+            del collection[package]
 
-    @no_type_check
     def set_val(self, name: str, val: list | dict) -> None:
-        if isinstance(self.list_dic[name], list):
-            del self.list_dic[name][:]
-            self.list_dic[name].extend(val)
-        elif isinstance(self.list_dic[name], dict):
-            self.list_dic[name].clear()
-            self.list_dic[name].update(val)
+        collection = self.list_dic[name]
+        if isinstance(collection, list):
+            del collection[:]
+            collection.extend(val)
+        elif isinstance(collection, dict):
+            collection.clear()
+            collection.update(val)
 
-    @no_type_check
-    def add(self, name: str, val: str) -> None:
-        if isinstance(self.list_dic[name], list):
-            self.list_dic[name].extend(
-                [x for x in val if x not in self.list_dic[name]]
-            )
-        elif isinstance(self.list_dic[name], dict):
-            self.list_dic[name].update(val)
+    def add(self, name: str, val: list | dict) -> None:
+        collection = self.list_dic[name]
+        if isinstance(collection, list):
+            collection.extend([x for x in val if x not in collection])
+        elif isinstance(collection, dict):
+            collection.update(val)
 
     def read(self, file: Path | None = None) -> None:
         self.clear_input()
