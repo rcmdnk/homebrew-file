@@ -6,7 +6,7 @@ class BrewFile < Formula
 
   head "https://github.com/rcmdnk/homebrew-file.git"
 
-  depends_on "python"
+  depends_on "python@3.10"
 
   option "without-completions", "Disable bash/zsh completions"
 
