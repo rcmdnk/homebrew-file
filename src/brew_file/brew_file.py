@@ -23,7 +23,7 @@ class BrewFile:
 
     opt: dict = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Prepare helper, need verbose first
         self.opt["verbose"] = int(
             os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1)
@@ -122,24 +122,26 @@ class BrewFile:
 
         self.opt["all_files"] = False
 
-        self.int_opts = ["verbose"]
-        self.float_opts = []
+        self.int_opts: list[str] = ["verbose"]
+        self.float_opts: list[str] = []
 
         self.brewinfo = BrewInfo(self.helper, Path(self.opt["input"]))
-        self.brewinfo_ext = []
+        self.brewinfo_ext: list[BrewInfo] = []
         self.brewinfo_main = self.brewinfo
         self.opt["read"] = False
 
-        self.pack_deps = {}
-        self.top_packs = []
+        self.pack_deps: dict[str, list[str]] = {}
+        self.top_packs: list[str] = []
 
         self.editor = ""
 
-    def debug_banner(self):
+    def debug_banner(self) -> None:
         if self.opt["dryrun"]:
             self.banner("# This is dry run.")
 
-    def parse_env_opts(self, env_var, base_opts=None):
+    def parse_env_opts(
+        self, env_var: str, base_opts: dict | None = None
+    ) -> dict:
         """Returns a dictionary parsed from an environment variable."""
         if base_opts is not None:
             opts = base_opts.copy()
@@ -169,7 +171,7 @@ class BrewFile:
 
         return opts
 
-    def set_args(self, **kw):
+    def set_args(self, **kw) -> None:
         """Set arguments."""
         for k, v in kw.items():
             self.opt[k] = v
@@ -189,7 +191,7 @@ class BrewFile:
 
         self.brewinfo.file = Path(self.opt["input"])
 
-    def ask_yn(self, question):
+    def ask_yn(self, question: str) -> bool:
         """Helper for yes/no."""
         if self.opt["yn"]:
             print(question + " [y/n]: y")
@@ -206,25 +208,21 @@ class BrewFile:
                 return False
             yn = input("Answer with yes (y) or no (n): ").lower()
 
-    def verbose(self):
-        try:
-            v = self.opt["verbose"]
-        except KeyError:
-            v = 10
-        return v
+    def verbose(self) -> int:
+        return self.opt.get("verbose", 10)
 
     def proc(
         self,
-        cmd,
-        print_cmd=True,
-        print_out=True,
-        exit_on_err=True,
-        separate_err=False,
-        print_err=True,
-        verbose=1,
-        env=None,
-        dryrun=False,
-    ):
+        cmd: str | list[str],
+        print_cmd: bool = True,
+        print_out: bool = True,
+        exit_on_err: bool = True,
+        separate_err: bool = False,
+        print_err: bool = True,
+        verbose: int = 1,
+        env: dict | None = None,
+        dryrun: bool = False,
+    ) -> tuple[int, list[str]]:
         if env is None:
             env = {"HOMEBREW_NO_AUTO_UPDATE": "1"}
         return self.helper.proc(
@@ -239,16 +237,16 @@ class BrewFile:
             dryrun=dryrun,
         )
 
-    def info(self, text, verbose=2):
+    def info(self, text: str, verbose: int = 2) -> None:
         self.helper.info(text, verbose)
 
-    def warn(self, text, verbose=1):
+    def warn(self, text: str, verbose: int = 1) -> None:
         self.helper.warn(text, verbose)
 
-    def err(self, text, verbose=1):
+    def err(self, text: str, verbose: int = 1) -> None:
         self.helper.err(text, verbose)
 
-    def banner(self, text, verbose=1):
+    def banner(self, text: str, verbose: int = 1) -> None:
         self.helper.banner(text, verbose)
 
     def remove(self, path: str) -> None:
@@ -281,7 +279,9 @@ class BrewFile:
                 self.brewinfo_main.brew_input_opt[p] = ""
         self.opt["read"] = True
 
-    def read(self, brewinfo, is_main=False):
+    def read(
+        self, brewinfo: BrewInfo, is_main: bool = False
+    ) -> BrewInfo | None:
         if is_main:
             main = brewinfo
         else:
@@ -391,7 +391,7 @@ class BrewFile:
     def input_file(self):
         return self.opt["input"].split("/")[-1]
 
-    def repo_file(self):
+    def repo_file(self) -> Path:
         """Helper to build Brewfile path for the repository."""
         return Path(
             self.input_dir(),
@@ -606,7 +606,7 @@ class BrewFile:
 
         self.proc(f"git {cmd}", dryrun=self.opt["dryrun"])
 
-    def brew_cmd(self):
+    def brew_cmd(self) -> None:
         noinit = False
         if self.opt["args"] and "noinit" in self.opt["args"]:
             noinit = True
@@ -616,7 +616,7 @@ class BrewFile:
         cmd = self.opt["args"][0] if self.opt["args"] else ""
         subcmd = self.opt["args"][1] if len(self.opt["args"]) > 1 else ""
         args = self.opt["args"]
-        env = {}
+        env: dict[str, str] = {}
         if cmd == "mas":
             exe = ["mas"]
             self.opt["args"].pop(0)
@@ -1163,7 +1163,7 @@ class BrewFile:
         )
         self.opt["initialized"] = True
 
-    def check_input_file(self):
+    def check_input_file(self) -> None:
         """Check input file."""
         if not self.brewinfo.check_file():
             self.warn(f"Input file {self.brewinfo.file} is not found.", 0)
@@ -2205,7 +2205,7 @@ class BrewFile:
                 if p not in dep_packs:
                     print_dep(p)
 
-    def my_test(self):
+    def my_test(self) -> None:
         self.make_pack_deps()
 
         out = Tee("test_file")

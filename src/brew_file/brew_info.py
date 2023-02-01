@@ -45,7 +45,7 @@ class BrewInfo:
 
         self.cask_nocask_list: list[str] = []
 
-        self.list_dic: dict[str, dict | list] = {
+        self.list_dic: dict[str, list[str] | dict[str, str]] = {
             "brew_input_opt": self.brew_input_opt,
             "brew_input": self.brew_input,
             "tap_input": self.tap_input,
