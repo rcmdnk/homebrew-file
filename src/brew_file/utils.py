@@ -139,3 +139,13 @@ class Tee:
                 with OpenWrapper(self.out2name, "w") as f:
                     f.write(self.out2.getvalue())
         self.__del__()
+
+
+@dataclass
+class StrRe(str):
+    """Str wrapper to use regex especially for match-case."""
+
+    var: str
+
+    def __eq__(self, pattern) -> bool:
+        return True if re.search(pattern, self.var) is not None else False

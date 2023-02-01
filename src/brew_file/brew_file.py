@@ -14,7 +14,7 @@ from urllib.parse import quote
 from .brew_helper import BrewHelper
 from .brew_info import BrewInfo
 from .info import __prog__
-from .utils import OpenWrapper, Tee, expandpath, is_mac, to_bool, to_num
+from .utils import OpenWrapper, StrRe, Tee, expandpath, is_mac, to_bool, to_num
 
 
 @dataclass
@@ -1712,30 +1712,32 @@ class BrewFile:
                     content = f.read()
                 for line in content.split("\n"):
                     cask_app = ""
-                    if re.search("^ *name ", line):
-                        cask_app = (
-                            re.sub("^ *name ", "", line).strip("\"' ") + ".app"
-                        )
-                    elif re.search("^ *app ", line):
-                        cask_app = (
-                            re.sub("^ *app ", "", line)
-                            .strip("\"' ")
-                            .split("/")[-1]
-                        )
-                    elif re.search("\\.app", line):
-                        cask_app = (
-                            line.split(".app")[0]
-                            .split("/")[-1]
-                            .split("'")[-1]
-                            .split('"')[-1]
-                        )
-                    elif re.search("^ *pkg ", line):
-                        cask_app = (
-                            re.sub("^ *pkg ", "", line)
-                            .strip("\"' ")
-                            .split("/")[-1]
-                            .replace(".pkg", "")
-                        )
+                    match StrRe(line):
+                        case "^ *name ":
+                            cask_app = (
+                                re.sub("^ *name ", "", line).strip("\"' ")
+                                + ".app"
+                            )
+                        case "^ *app ":
+                            cask_app = (
+                                re.sub("^ *app ", "", line)
+                                .strip("\"' ")
+                                .split("/")[-1]
+                            )
+                        case "\\.app":
+                            cask_app = (
+                                line.split(".app")[0]
+                                .split("/")[-1]
+                                .split("'")[-1]
+                                .split('"')[-1]
+                            )
+                        case "^ *pkg ", line:
+                            cask_app = (
+                                re.sub("^ *pkg ", "", line)
+                                .strip("\"' ")
+                                .split("/")[-1]
+                                .replace(".pkg", "")
+                            )
                     if cask_app != "" and cask_app not in cask_apps:
                         cask_apps.append(cask_app)
 

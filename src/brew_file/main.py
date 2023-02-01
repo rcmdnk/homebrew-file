@@ -1,6 +1,5 @@
 import argparse
 import sys
-from typing import Any
 
 from .brew_file import BrewFile
 from .info import __date__, __description__, __prog__, __version__
@@ -11,10 +10,7 @@ def main() -> int:
     b = BrewFile()
 
     # Pre Parser
-    arg_parser_opts: dict[str, bool] = {
-        "add_help": False,
-        "allow_abbrev": False,
-    }
+    arg_parser_opts: dict = {"add_help": False, "allow_abbrev": False}
     pre_parser = argparse.ArgumentParser(
         usage=f"{__prog__}...", **arg_parser_opts
     )
@@ -269,7 +265,7 @@ def main() -> int:
         verbose_parser,
     ]
     formatter = argparse.RawTextHelpFormatter
-    subparser_opts: dict[str, Any] = {
+    subparser_opts: dict = {
         "formatter_class": formatter,
         "allow_abbrev": False,
     }
@@ -504,101 +500,102 @@ def main() -> int:
 
     b.set_args(**args_dict)
 
-    if b.opt["command"] == "help":
-        parser.print_help()
-        return 0
-    elif b.opt["command"] == "brew":
-        if args_tmp and args_tmp[0] in ["-h", "--help"]:
+    match b.opt["command"]:
+        case "help":
+            parser.print_help()
+            return 0
+        case "brew":
+            if args_tmp and args_tmp[0] in ["-h", "--help"]:
+                subparsers.choices[b.opt["command"]].print_help()
+                return 0
+        case _ if "help" in args_tmp:
             subparsers.choices[b.opt["command"]].print_help()
             return 0
-    elif "help" in args_tmp:
-        subparsers.choices[b.opt["command"]].print_help()
-        return 0
-    elif b.opt["command"] == "commands":
-        commands = [
-            "install",
-            "brew",
-            "init",
-            "dump",
-            "set_repo",
-            "set_local",
-            "pull",
-            "push",
-            "clean",
-            "clean_non_request",
-            "update",
-            "edit",
-            "cat",
-            "casklist",
-            "test",
-            "get_files",
-            "commands",
-            "version",
-            "help",
-        ]
-        commands_hyphen = [
-            "-i",
-            "--init",
-            "-s",
-            "--set_repo",
-            "--set_local",
-            "-c",
-            "--clean",
-            "--clean_non_request",
-            "-u",
-            "--update",
-            "-e",
-            "--edit",
-            "--cat",
-            "--test",
-            "--commands",
-            "-v",
-            "--version",
-            "-h",
-            "--help",
-        ]
-        options = [
-            "-f",
-            "--file",
-            "-b",
-            "--backup",
-            "-F",
-            "--format",
-            "--form",
-            "--leaves",
-            "--on_request",
-            "--top_packages",
-            "-U",
-            "--noupgrade",
-            "-r",
-            "--repo",
-            "-n",
-            "--nolink",
-            "--caskonly",
-            "--appstore",
-            "--no_appstore",
-            "--all_files",
-            "-d",
-            "--dry_run",
-            "-y",
-            "--yes",
-            "-V",
-            "--verbose",
-        ]
-        print("commands:", " ".join(commands))
-        print("commands_hyphen:", " ".join(commands_hyphen))
-        print("options:", " ".join(options))
-        return 0
-    elif b.opt["command"] == "version":
-        b.proc("brew -v", print_cmd=False)
-        print(__prog__ + " " + __version__ + " " + __date__)
-        return 0
+        case "commands":
+            commands = [
+                "install",
+                "brew",
+                "init",
+                "dump",
+                "set_repo",
+                "set_local",
+                "pull",
+                "push",
+                "clean",
+                "clean_non_request",
+                "update",
+                "edit",
+                "cat",
+                "casklist",
+                "test",
+                "get_files",
+                "commands",
+                "version",
+                "help",
+            ]
+            commands_hyphen = [
+                "-i",
+                "--init",
+                "-s",
+                "--set_repo",
+                "--set_local",
+                "-c",
+                "--clean",
+                "--clean_non_request",
+                "-u",
+                "--update",
+                "-e",
+                "--edit",
+                "--cat",
+                "--test",
+                "--commands",
+                "-v",
+                "--version",
+                "-h",
+                "--help",
+            ]
+            options = [
+                "-f",
+                "--file",
+                "-b",
+                "--backup",
+                "-F",
+                "--format",
+                "--form",
+                "--leaves",
+                "--on_request",
+                "--top_packages",
+                "-U",
+                "--noupgrade",
+                "-r",
+                "--repo",
+                "-n",
+                "--nolink",
+                "--caskonly",
+                "--appstore",
+                "--no_appstore",
+                "--all_files",
+                "-d",
+                "--dry_run",
+                "-y",
+                "--yes",
+                "-V",
+                "--verbose",
+            ]
+            print("commands:", " ".join(commands))
+            print("commands_hyphen:", " ".join(commands_hyphen))
+            print("options:", " ".join(options))
+            return 0
+        case "version":
+            b.proc("brew -v", print_cmd=False)
+            print(__prog__ + " " + __version__ + " " + __date__)
+            return 0
 
     try:
         b.execute()
     except KeyboardInterrupt:
         return 1
-    except Exception as e:
+    except RuntimeError as e:
         b.err(str(e))
         return 1
     return 0

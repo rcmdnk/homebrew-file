@@ -169,6 +169,16 @@ class Tee:
 
 
 @dataclass
+class StrRe(str):
+    """Str wrapper to use regex especially for match-case."""
+
+    var: str
+
+    def __eq__(self, pattern) -> bool:
+        return True if re.search(pattern, self.var) is not None else False
+
+
+@dataclass
 class BrewHelper:
     """Helper functions for BrewFile."""
 
@@ -2635,30 +2645,32 @@ class BrewFile:
                     content = f.read()
                 for line in content.split("\n"):
                     cask_app = ""
-                    if re.search("^ *name ", line):
-                        cask_app = (
-                            re.sub("^ *name ", "", line).strip("\"' ") + ".app"
-                        )
-                    elif re.search("^ *app ", line):
-                        cask_app = (
-                            re.sub("^ *app ", "", line)
-                            .strip("\"' ")
-                            .split("/")[-1]
-                        )
-                    elif re.search("\\.app", line):
-                        cask_app = (
-                            line.split(".app")[0]
-                            .split("/")[-1]
-                            .split("'")[-1]
-                            .split('"')[-1]
-                        )
-                    elif re.search("^ *pkg ", line):
-                        cask_app = (
-                            re.sub("^ *pkg ", "", line)
-                            .strip("\"' ")
-                            .split("/")[-1]
-                            .replace(".pkg", "")
-                        )
+                    match StrRe(line):
+                        case "^ *name ":
+                            cask_app = (
+                                re.sub("^ *name ", "", line).strip("\"' ")
+                                + ".app"
+                            )
+                        case "^ *app ":
+                            cask_app = (
+                                re.sub("^ *app ", "", line)
+                                .strip("\"' ")
+                                .split("/")[-1]
+                            )
+                        case "\\.app":
+                            cask_app = (
+                                line.split(".app")[0]
+                                .split("/")[-1]
+                                .split("'")[-1]
+                                .split('"')[-1]
+                            )
+                        case "^ *pkg ", line:
+                            cask_app = (
+                                re.sub("^ *pkg ", "", line)
+                                .strip("\"' ")
+                                .split("/")[-1]
+                                .replace(".pkg", "")
+                            )
                     if cask_app != "" and cask_app not in cask_apps:
                         cask_apps.append(cask_app)
 
@@ -3266,9 +3278,9 @@ def main() -> int:
     b = BrewFile()
 
     # Pre Parser
-    arg_parser_opts = {"add_help": False, "allow_abbrev": False}
+    arg_parser_opts: dict = {"add_help": False, "allow_abbrev": False}
     pre_parser = argparse.ArgumentParser(
-        usage=__prog__ + "...", **arg_parser_opts
+        usage=f"{__prog__}...", **arg_parser_opts
     )
     group = pre_parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -3345,6 +3357,7 @@ def main() -> int:
         "--form",
         action="store",
         dest="form",
+        default=b.opt["form"],
         help="Set input file format (default: %(default)s). \n"
         "file (or none)    : brew vim --HEAD --with-lua\n"
         "brewdler or bundle: brew 'vim', args: ['with-lua', 'HEAD']\n"
@@ -3520,7 +3533,10 @@ def main() -> int:
         verbose_parser,
     ]
     formatter = argparse.RawTextHelpFormatter
-    subparser_opts = {"formatter_class": formatter, "allow_abbrev": False}
+    subparser_opts: dict = {
+        "formatter_class": formatter,
+        "allow_abbrev": False,
+    }
 
     # Main parser
     parser = argparse.ArgumentParser(
@@ -3743,110 +3759,111 @@ def main() -> int:
         if args[0] in ["-h", "--help"]:
             args[0] = "help"
     (ns, args_tmp) = parser.parse_known_args(args)
-    args = vars(ns)
-    args.update({"args": args_tmp})
-    if args["command"] in ("install") and args["args"]:
-        cmd = args["command"]
-        args["command"] = "brew"
-        args["args"].insert(0, cmd)
+    args_dict = vars(ns)
+    args_dict.update({"args": args_tmp})
+    if args_dict["command"] in ("install") and args_dict["args"]:
+        cmd = args_dict["command"]
+        args_dict["command"] = "brew"
+        args_dict["args"].insert(0, cmd)
 
-    b.set_args(**args)
+    b.set_args(**args_dict)
 
-    if b.opt["command"] == "help":
-        parser.print_help()
-        return 0
-    elif b.opt["command"] == "brew":
-        if args_tmp and args_tmp[0] in ["-h", "--help"]:
+    match b.opt["command"]:
+        case "help":
+            parser.print_help()
+            return 0
+        case "brew":
+            if args_tmp and args_tmp[0] in ["-h", "--help"]:
+                subparsers.choices[b.opt["command"]].print_help()
+                return 0
+        case _ if "help" in args_tmp:
             subparsers.choices[b.opt["command"]].print_help()
             return 0
-    elif "help" in args_tmp:
-        subparsers.choices[b.opt["command"]].print_help()
-        return 0
-    elif b.opt["command"] == "commands":
-        commands = [
-            "install",
-            "brew",
-            "init",
-            "dump",
-            "set_repo",
-            "set_local",
-            "pull",
-            "push",
-            "clean",
-            "clean_non_request",
-            "update",
-            "edit",
-            "cat",
-            "casklist",
-            "test",
-            "get_files",
-            "commands",
-            "version",
-            "help",
-        ]
-        commands_hyphen = [
-            "-i",
-            "--init",
-            "-s",
-            "--set_repo",
-            "--set_local",
-            "-c",
-            "--clean",
-            "--clean_non_request",
-            "-u",
-            "--update",
-            "-e",
-            "--edit",
-            "--cat",
-            "--test",
-            "--commands",
-            "-v",
-            "--version",
-            "-h",
-            "--help",
-        ]
-        options = [
-            "-f",
-            "--file",
-            "-b",
-            "--backup",
-            "-F",
-            "--format",
-            "--form",
-            "--leaves",
-            "--on_request",
-            "--top_packages",
-            "-U",
-            "--noupgrade",
-            "-r",
-            "--repo",
-            "-n",
-            "--nolink",
-            "--caskonly",
-            "--appstore",
-            "--no_appstore",
-            "--all_files",
-            "-d",
-            "--dry_run",
-            "-y",
-            "--yes",
-            "-V",
-            "--verbose",
-        ]
-        print("commands:", " ".join(commands))
-        print("commands_hyphen:", " ".join(commands_hyphen))
-        print("options:", " ".join(options))
-        return 0
-    elif b.opt["command"] == "version":
-        b.proc("brew -v", print_cmd=False)
-        print(__prog__ + " " + __version__ + " " + __date__)
-        return 0
+        case "commands":
+            commands = [
+                "install",
+                "brew",
+                "init",
+                "dump",
+                "set_repo",
+                "set_local",
+                "pull",
+                "push",
+                "clean",
+                "clean_non_request",
+                "update",
+                "edit",
+                "cat",
+                "casklist",
+                "test",
+                "get_files",
+                "commands",
+                "version",
+                "help",
+            ]
+            commands_hyphen = [
+                "-i",
+                "--init",
+                "-s",
+                "--set_repo",
+                "--set_local",
+                "-c",
+                "--clean",
+                "--clean_non_request",
+                "-u",
+                "--update",
+                "-e",
+                "--edit",
+                "--cat",
+                "--test",
+                "--commands",
+                "-v",
+                "--version",
+                "-h",
+                "--help",
+            ]
+            options = [
+                "-f",
+                "--file",
+                "-b",
+                "--backup",
+                "-F",
+                "--format",
+                "--form",
+                "--leaves",
+                "--on_request",
+                "--top_packages",
+                "-U",
+                "--noupgrade",
+                "-r",
+                "--repo",
+                "-n",
+                "--nolink",
+                "--caskonly",
+                "--appstore",
+                "--no_appstore",
+                "--all_files",
+                "-d",
+                "--dry_run",
+                "-y",
+                "--yes",
+                "-V",
+                "--verbose",
+            ]
+            print("commands:", " ".join(commands))
+            print("commands_hyphen:", " ".join(commands_hyphen))
+            print("options:", " ".join(options))
+            return 0
+        case "version":
+            b.proc("brew -v", print_cmd=False)
+            print(__prog__ + " " + __version__ + " " + __date__)
+            return 0
 
     try:
         b.execute()
     except KeyboardInterrupt:
         return 1
-    except Exception as e:
+    except RuntimeError as e:
         b.err(str(e))
         return 1
     return 0
