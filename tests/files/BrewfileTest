@@ -1,24 +1,29 @@
 # Before commands
 before echo before
 
-# homebrew/cask
-tap homebrew/cask
-cask install iterm2
-tap rcmdnk/rcmdnkcask
-cask install font-migu1m
+# tap repositories and their packages
 
-# rcmdnk/rcmdnkpac
-tapall rcmdnk/rcmdnkpac
+tap homebrew/core
+brew python@3.10
+brew vim --HEAD
+
+tap homebrew/cask
+cask iterm2
+
+tap rcmdnk/rcmdnkcask
+cask font-migu1m
 
 # App Store applications
 appstore Keynote
 
-# Additional files
+# Main file
 main BrewfileMain
+
+# Additional files
 file BrewfileExt
 file BrewfileExt2
 file BrewfileNotExist
-brewfile ~/BrewfileHome
+file ~/BrewfileHomeForTestingNotExists
 
 # Other commands
 echo other commands

@@ -44,6 +44,7 @@ class BrewFile:
             else:
                 self.opt["input"] = brewfile_config
         self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
+        self.opt["form"] = None
         self.opt["leaves"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", False)
         )
@@ -250,14 +251,14 @@ class BrewFile:
     def banner(self, text, verbose=1):
         self.helper.banner(text, verbose)
 
-    def remove(self, path):
+    def remove(self, path: str) -> None:
         """Helper to remove file/directory."""
         if Path(path).is_symlink() or Path(path).is_file():
             os.remove(path)
         elif Path(path).is_dir():
             shutil.rmtree(path)
         else:
-            self.warn("Tried to remove non usual file/directory:" + path, 0)
+            self.warn(f"Tried to remove non usual file/directory: {path}", 0)
 
     def brew_val(self, name):
         return self.helper.brew_val(name)

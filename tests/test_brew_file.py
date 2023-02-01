@@ -1,3 +1,5 @@
+import io
+import os
 from pathlib import Path
 
 import pytest
@@ -11,36 +13,174 @@ def bf():
     return obj
 
 
+def test_debug_banner(bf, capsys):
+    bf.debug_banner()
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    bf.opt["dryrun"] = True
+    bf.debug_banner()
+    captured = capsys.readouterr()
+    assert (
+        captured.out
+        == "\n##################\n# This is dry run.\n##################\n\n"
+    )
+
+
 def test_parse_env_opts(bf):
-    pass
+    os.environ["TEST_OPT"] = "--opt2=3 --opt3 opt4=4"
+    opts = bf.parse_env_opts("test_opt", {"--opt1": "1", "--opt2": "2"})
+    assert opts == {"--opt1": "1", "--opt2": "3", "--opt3": "", "opt4": "4"}
 
 
 def test_set_args(bf):
-    pass
+    bf.opt["appstore"] = 1
+    bf.opt["no_appstore"] = 1
+    bf.set_args(a="1", verbose="1")
+    assert isinstance(bf.opt["a"], str)
+    assert isinstance(bf.opt["verbose"], int)
+    assert bf.opt["appstore"] == 1
+    bf.opt["appstore"] = -1
+    bf.opt["no_appstore"] = False
+    bf.set_args()
+    assert bf.opt["appstore"] == 0
+    bf.opt["appstore"] = 1
+    bf.opt["no_appstore"] = False
+    bf.set_args()
+    assert bf.opt["appstore"] == 1
 
 
-def test_ask_yn(bf):
-    pass
+@pytest.mark.parametrize(
+    "input_value, ret, out",
+    [
+        ("y\n", True, "Question? [y/n]: "),
+        ("Y\n", True, "Question? [y/n]: "),
+        ("yes\n", True, "Question? [y/n]: "),
+        ("YES\n", True, "Question? [y/n]: "),
+        ("Yes\n", True, "Question? [y/n]: "),
+        ("n\n", False, "Question? [y/n]: "),
+        ("N\n", False, "Question? [y/n]: "),
+        ("no\n", False, "Question? [y/n]: "),
+        ("NO\n", False, "Question? [y/n]: "),
+        ("No\n", False, "Question? [y/n]: "),
+        (
+            "a\nb\ny\n",
+            True,
+            "Question? [y/n]: Answer with yes (y) or no (n): Answer with yes (y) or no (n): ",
+        ),
+    ],
+)
+def test_ask_yn(bf, capsys, monkeypatch, input_value, ret, out):
+    monkeypatch.setattr("sys.stdin", io.StringIO(input_value))
+    assert bf.ask_yn("Question?") == ret
+    captured = capsys.readouterr()
+    assert captured.out == out
 
 
 def test_verbose(bf):
-    pass
+    bf.opt["verbose"] = 1
+    assert bf.verbose() == 1
+    del bf.opt["verbose"]
+    assert bf.verbose() == 10
 
 
-def test_proc(bf):
-    pass
+def test_proc(monkeypatch):
+    monkeypatch.setenv("HOMEBREW_NO_AUTO_UPDATE", "0")
+
+    def proc(
+        self,
+        cmd,
+        print_cmd,
+        print_out,
+        exit_on_err,
+        separate_err,
+        print_err,
+        verbose,
+        env,
+        dryrun,
+    ):
+        return env
+
+    monkeypatch.setattr(brew_file.BrewHelper, "proc", proc)
+
+    def post_init(self):
+        self.helper = brew_file.BrewHelper({})
+
+    monkeypatch.setattr(brew_file.BrewFile, "__post_init__", post_init)
+    bf = brew_file.BrewFile()
+    env = bf.proc("echo $HOMEBREW_NO_AUTO_UPDATE")
+    assert env == {"HOMEBREW_NO_AUTO_UPDATE": "1"}
 
 
-def test_remove(bf):
-    pass
+def test_info(bf, capsys):
+    bf.opt["verbose"] = 2
+    bf.info("show")
+    bf.opt["verbose"] = 1
+    bf.info("no show")
+    captured = capsys.readouterr()
+    assert captured.out == "show\n"
+
+
+def test_warn(bf, capsys):
+    bf.opt["verbose"] = 1
+    bf.warn("show")
+    bf.opt["verbose"] = 0
+    bf.warn("no show")
+    captured = capsys.readouterr()
+    assert captured.out == "[WARNING]: show\n"
+
+
+def test_err(bf, capsys):
+    bf.opt["verbose"] = 1
+    bf.err("show")
+    bf.opt["verbose"] = 0
+    bf.err("no show")
+    captured = capsys.readouterr()
+    assert captured.out == "[ERROR]: show\n"
+
+
+def test_banner(bf, capsys):
+    bf.banner("test banner")
+    captured = capsys.readouterr()
+    assert captured.out == "\n###########\ntest banner\n###########\n\n"
+
+
+def test_remove(bf, capsys, tmp_path):
+    file = tmp_path / "testfile"
+    file.touch()
+    bf.remove(str(file))
+    directory = tmp_path / "testdir"
+    directory.mkdir()
+    file = directory / "testfile"
+    file.touch()
+    bf.remove(str(directory))
+    bf.remove(tmp_path / "notexist")
+    captured = capsys.readouterr()
+    assert (
+        captured.out
+        == f"[WARNING]: Tried to remove non usual file/directory: {tmp_path}/notexist\n"
+    )
 
 
 def test_brew_val(bf):
-    pass
+    prefix = "/".join(bf.proc("which brew")[1][0].split("/")[:-2])
+    assert bf.brew_val("prefix") == prefix
 
 
 def test_read_all(bf):
-    pass
+    bf.opt["input"] = f"{Path(__file__).parent}/files/BrewfileTest"
+    bf.read_all()
+    print(bf.brewinfo_main)
+    print(bf.brewinfo_ext)
+    print(bf.get("brew_input"))
+    print(bf.get("brew_input_opt"))
+    print(bf.get("tap_input"))
+    print(bf.get("cask_input"))
+    print(bf.get("appstore_input"))
+    print(bf.get("main_input"))
+    print(bf.get("file_input"))
+    print(bf.get("before_input"))
+    print(bf.get("after_input"))
+    print(bf.get("cmd_input"))
 
 
 def test_read(bf, tmp_path):
@@ -70,7 +210,7 @@ def test_read(bf, tmp_path):
         Path(f"{Path(__file__).parent}/files/BrewfileExt2"),
         Path(f"{Path(__file__).parent}/files/BrewfileExt3"),
         Path(f"{Path(__file__).parent}/files/BrewfileNotExist"),
-        Path(Path("~/BrewfileHome").expanduser()),
+        Path(Path("~/BrewfileHomeForTestingNotExists").expanduser()),
     ]
     for i, f in zip(bf.brewinfo_ext, files):
         assert i.path == f
@@ -168,7 +308,15 @@ def test_brew_cmd(bf):
     pass
 
 
-def test_check_brwe_cmd(bf):
+def test_add_path(bf):
+    pass
+
+
+def test_which_brew(bf):
+    pass
+
+
+def test_check_brew_cmd(bf):
     pass
 
 
@@ -256,9 +404,103 @@ def test_make_pack_deps(bf):
     pass
 
 
-def test_my_test(bf):
+def test_my_test(bf, capsys):
     bf.my_test()
+    captured = capsys.readouterr()
+    assert (
+        captured.out
+        == "test\ntest\n[WARNING]: Tried to remove non usual file/directory: aaa\nread input: 0\nread input cleared: 0\n{'test_pack': 'test opt', 'test_pack2': 'test opt2'}\n"
+    )
 
 
-def test_execute(bf):
-    pass
+@pytest.mark.parametrize(
+    "command, out",
+    [
+        ("casklist", "check_cask () {}\n"),  # noqa: P103
+        ("set_repo", "set_brewfile_repo () {}\n"),  # noqa: P103
+        ("set_local", "set_brewfile_local () {}\n"),  # noqa: P103
+        ("pull", "check_repo () {}\nrepomgr ('pull',) {}\n"),  # noqa: P103
+        ("push", "check_repo () {}\nrepomgr ('push',) {}\n"),  # noqa: P103
+        ("brew", "check_repo () {}\nbrew_cmd () {}\n"),  # noqa: P103
+        ("init", "check_repo () {}\ninitialize () {}\n"),  # noqa: P103
+        ("dump", "check_repo () {}\ninitialize () {}\n"),  # noqa: P103
+        (
+            "edit",
+            "check_repo () {}\ncheck_input_file () {}\nedit_brewfile () {}\n",  # noqa: P103
+        ),
+        (
+            "cat",
+            "check_repo () {}\ncheck_input_file () {}\ncat_brewfile () {}\n",  # noqa: P103
+        ),
+        (
+            "get_files",
+            "check_repo () {}\ncheck_input_file () {}\nget_files () {'is_print': True, 'all_files': False}\n",  # noqa: P103
+        ),
+        (
+            "clean_non_request",
+            "check_repo () {}\ncheck_input_file () {}\nclean_non_request () {}\n",  # noqa: P103
+        ),
+        (
+            "clean",
+            "check_repo () {}\ncheck_input_file () {}\ncleanup () {}\n",  # noqa: P103
+        ),
+        (
+            "update",
+            "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --fetch-HEAD',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {}\ninitialize () {'check': False}\n",  # noqa: P103
+        ),
+        (
+            "test",
+            "check_repo () {}\ncheck_input_file () {}\nmy_test () {}\n",  # noqa: P103
+        ),
+    ],
+)
+def test_execute(monkeypatch, capsys, command, out):
+    for func in [
+        "check_brew_cmd",
+        "check_cask",
+        "set_brewfile_repo",
+        "set_brewfile_local",
+        "check_repo",
+        "repomgr",
+        "brew_cmd",
+        "initialize",
+        "check_input_file",
+        "edit_brewfile",
+        "cat_brewfile",
+        "get_files",
+        "clean_non_request",
+        "cleanup",
+        "install",
+        "proc",
+        "my_test",
+    ]:
+
+        def set_func(func):
+            # make local variable, needed to keep in print view
+            name = func
+            monkeypatch.setattr(
+                brew_file.BrewFile,
+                func,
+                lambda self, *args, **kw: print(name, args, kw),
+            )
+
+        set_func(func)
+    monkeypatch.setattr(
+        brew_file.BrewFile, "check_brew_cmd", lambda self: None
+    )
+    monkeypatch.setattr(brew_file.BrewFile, "brew_val", lambda self, x: x)
+    bf = brew_file.BrewFile({})
+    bf.opt["command"] = command
+    bf.execute()
+    captured = capsys.readouterr()
+    assert captured.out == out
+
+
+def test_execute_err(bf):
+    bf.opt["command"] = "wrong_command"
+    with pytest.raises(RuntimeError) as excinfo:
+        bf.execute()
+    assert (
+        str(excinfo.value)
+        == f"Wrong command: wrong_command\nExecute `{brew_file.__prog__} help` for more information."
+    )
