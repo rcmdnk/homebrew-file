@@ -82,6 +82,9 @@ docstring-convention = "numpy"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
+# B404: import subprocess -> until fixing w/o subprocess
+# B603: subprocess_without_shell_equals_true-> until fixing w/o subprocess, difficult to manage multi arguments especially for arguments including quotes with shell=True
+# B607: start_process_with_partial_path: until fixing w/o subprocess, difficult to run fixed path on multi environments
 skips = ["B404", "B603", "B607"]
 
 [tool.mypy]
