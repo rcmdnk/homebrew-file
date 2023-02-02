@@ -7,6 +7,14 @@ from io import TextIOWrapper
 from typing import Any, Generator
 
 
+class CmdError(Exception):
+    """Exception at command execution."""
+
+    def __init__(self, message, return_code) -> None:
+        super().__init__(message)
+        self.return_code = return_code
+
+
 @dataclass
 class BrewHelper:
     """Helper functions for BrewFile."""
@@ -86,13 +94,13 @@ class BrewHelper:
             if print_out:
                 lines = [" ".join(cmd) + ": " + str(e)]
                 self.info(lines[0].strip(), verbose)
-            ret = -1
+            ret = e.errno
 
         if exit_on_err and ret != 0:
+            msg = "Failed at command: " + " ".join(cmd)
             if not (print_out and self.opt.get("verbose", 1) >= verbose):
-                print("\n".join(lines))
-            self.err("Failed at command: " + " ".join(cmd))
-            sys.exit(ret)
+                msg += "\n".join(lines)
+            raise CmdError(msg, ret)
 
         return ret, lines
 

@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from .brew_file import BrewFile
+from .brew_helper import CmdError
 from .info import __date__, __description__, __prog__, __version__
 
 
@@ -595,6 +596,9 @@ def main() -> int:
         b.execute()
     except KeyboardInterrupt:
         return 1
+    except CmdError as e:
+        b.err(str(e))
+        return e.return_code
     except RuntimeError as e:
         b.err(str(e))
         return 1

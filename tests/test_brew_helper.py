@@ -38,7 +38,7 @@ def test_readstdout(helper):
             None,
         ),
         ("grep a no_such_file", 2, [], False, True, None),
-        ("_wrong_command_ test", -1, None, False, False, None),
+        ("_wrong_command_ test", 2, None, False, False, None),
         (
             [f"{Path(__file__).parent}/scripts/proc_env_test.sh"],
             0,
@@ -59,33 +59,33 @@ def test_proc(helper, cmd, ret, lines, exit_on_err, separate_err, env):
 
 
 def test_proc_err(helper):
-    with pytest.raises(SystemExit) as e:
-        ret_proc, lines_proc = helper.proc("_wrong_command_", exit_on_err=True)
-    assert e.type == SystemExit
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(brew_file.CmdError) as e:
+        ret_proc, lines_proc = helper.proc(
+            "_wrong_command_", print_err=True, exit_on_err=True
+        )
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 2
+    assert str(e.value) == "Failed at command: _wrong_command_"
+    with pytest.raises(brew_file.CmdError) as e:
         ret_proc, lines_proc = helper.proc(
             "_wrong_command_", print_err=False, exit_on_err=True
         )
-    assert e.type == SystemExit
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 2
+    assert str(e.value) == "Failed at command: _wrong_command_"
 
 
 def test_proc_exit_on_err(helper):
     ret_proc, lines_proc = helper.proc(
         "ech test", separate_err=False, exit_on_err=False
     )
-    assert ret_proc == -1
-    print(lines_proc)
-    assert lines_proc == [
-        "ech test: [Errno 2] No such file or directory: 'ech'"
-    ]
+    assert ret_proc == 2
+    assert lines_proc == ["ech test: No such file or directory"]
     ret_proc, lines_proc = helper.proc(
         "ech test", separate_err=True, exit_on_err=False
     )
-    assert ret_proc == -1
-    print(lines_proc)
-    assert lines_proc == [
-        "ech test: [Errno 2] No such file or directory: 'ech'"
-    ]
+    assert ret_proc == 2
+    assert lines_proc == ["ech test: No such file or directory"]
 
 
 def test_proc_dryrun(helper):
