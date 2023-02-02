@@ -604,8 +604,9 @@ class BrewInfo:
         if tap == "direct":
             return Path(self.helper.brew_val("cache"), "Formula")
 
-        tap_user = Path(tap).parent
-        tap_repo = f"homebrew-{Path(tap).name}"
+        tap_path = Path(tap)
+        tap_user = tap_path.parent
+        tap_repo = f"homebrew-{tap_path.name}"
         return Path(
             self.helper.brew_val("repository"),
             "Library/Taps",
@@ -802,18 +803,21 @@ fi
         # Cask args
         if self.cask_args_input:
             output += "\n# Cask args\n"
+            delimiter = ""
             for k, v in self.cask_args_input.items():
                 output += cmd_cask_args
                 if self.helper.opt["form"] in ["brewdler", "bundle"]:
                     if v == "":
-                        output += f"{k.removeprefix('--')}: true\n"
+                        output += f"{delimiter}{k.removeprefix('--')}: true"
                     else:
-                        output += f"{k.removeprefix('--')}: {v}\n"
+                        output += f"{delimiter}{k.removeprefix('--')}: {v}"
+                    delimiter = ", "
                 else:
-                    output += k
+                    output += f"{delimiter}{k}"
                     if v != "":
                         output += f"={v}"
-                    output += "\n"
+                    delimiter = " "
+            output += "\n"
 
         # Taps
         if self.tap_list:
