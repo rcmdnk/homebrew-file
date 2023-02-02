@@ -8,12 +8,13 @@ Brew-file manages packages installed by Homebrew.
 It also supports `brew-cask <https://github.com/phinze/homebrew-cask>`_
 and other Homebrew subcommand installers.
 
-It uses input file. By default, the file is **~/.config/brewfile/Brewfile**.
-You can reuse ``Brewfile`` for Brewdler, too.
+It uses input file. By default, the file is **$XDG_CONFIG_HOME/brewfile/Brewfile**.
+If you don't have ``$XDG_CONFIG_HOME`` environment variable, it is **~/.config/brewfile/Brewfile**.
+You can reuse **Brewfile** for Brewdler, too.
 
 If you want to specify input file, use ``-f`` option.
 
-If you want to change default ``Brewfile``, set environmental variable: ``HOMEBREW_BREWFILE``
+If you want to change default **Brewfile**, set environmental variable: ``HOMEBREW_BREWFILE``
 in your setup file (e.g. **.bashrc**), like:
 
 .. code-block:: sh
@@ -28,14 +29,14 @@ You might want to add the following line to your **.bashrc** or **.zshenv**:
 
     export HOMEBREW_CASK_OPTS="--appdir=$HOME/MyApplications"
 
-If there is no ``Brewfile``, Brew-file will ask you if you want to initialize ``Brewfile``
+If there is no **Brewfile**, Brew-file will ask you if you want to initialize **Brewfile**
 with installed packages or not.
 You can also make it with ``install`` (``-i``) subcommand.
 
-With ``install`` subcommand, Brew-file tries to install packages listed in ``Brewfile``.
+With ``install`` subcommand, Brew-file tries to install packages listed in **Brewfile**.
 
-``Brewfile`` convention is similar as Brewdler.
-Normally, you don't need to modify anything on Brewdler's ``Brewfile`` for Brew-file
+**Brewfile** convention is similar as Brewdler.
+Normally, you don't need to modify anything on Brewdler's **Brewfile** for Brew-file
 
 Example::
 
@@ -83,7 +84,7 @@ If the second column is ``install``, it will be ignored.
 
 i.e. ``brew install package`` is same as ``brew package``.
 
-If you want to build macvim with lua option, you can write as above example ``Brewfile``.
+If you want to build macvim with lua option, you can write as above example **Brewfile**.
 
 If you use ``tap``, Brew-file only does ``tap`` the repository.
 
@@ -91,12 +92,12 @@ If you use ``tapall``, Brew-file does ``brew install`` for all Formulae in the r
 in addition to do ``tap`` the repository.
 
 If you want to divide the list into several files.
-If the top ``Brewfile`` has ``main``, ``file`` or ``brewfile`` commands,
+If the top **Brewfile** has ``main``, ``file`` or ``brewfile`` commands,
 then corresponding argument is used as an external file.
 The path can be an absolute or a relative.
-If you use a relative path, like .``/Brewfile2``,
+If you use a relative path, like **./Brewfile2**,
 then the start directory is the directory
-where the main ``Brewfile`` is.
+where the main **Brewfile** is.
 
 You can use a nest of ``file``, too.
 The relative path starts from the parent file's directory.
@@ -148,7 +149,7 @@ please use ``-l`` (for ``~/Applications/``) or ``-g`` (for ``/Applications/``).
 
 You can run update/install/clean/clean_non_request/pull/push as dry run mode with option `-d`/`--dry_run`.
 
-If you want edit ``Brewfile``, use ``edit`` option.
+If you want edit **Brewfile**, use ``edit`` option.
 
 .. warning::
 
@@ -160,27 +161,27 @@ If you want edit ``Brewfile``, use ``edit`` option.
 Manage Brewfile with Git
 ------------------------
 
-You can maintain your ``Brewfile`` at the git repository.
+You can maintain your **Brewfile** at the git repository.
 First, make new repository at GitHub (or other git server),
-which has a file named ``Brewfile``.
+which has a file named **Brewfile**.
 
 Then, set the repository by::
 
     $ brew file set_repo -r <repository>
 
 It will clone the repository.
-The content of ``Brewfile`` in the repository will be used instead of
-``~/.config/brewfile/Brewfile``.
-(then ``~/.config/brewfile/Brewfile`` will have this repository information.)
+The content of **Brewfile** in the repository will be used instead of
+**$XDG_CONFIG_HOME/brewfile/Brewfile**.
+(then **$XDG_CONFIG_HOME/brewfile/Brewfile** will have this repository information.)
 
 ``repository`` should be like `rcmdnk/Brewfile <https://github.com/rcmdnk/Brewfile>`_ in GitHub,
-which should have ``Brewfile`` (different file name can be used by ``-f``).
+which should have **Brewfile** (different file name can be used by ``-f``).
 
 If you want to use other hosts than github, use full path for the repository, like::
 
     $ brew file set_repo -r git@bitbucket.org:rcmdnk/my_brewfile
 
-If the repository doesn't have ``Brewfile`` (or specified by ``-f``, ``brew file init`` initialize the file.
+If the repository doesn't have **Brewfile** (or specified by ``-f``, ``brew file init`` initialize the file.
 Then, you can push it by ``brew file push``.
 
 With this procedure, you can synchronize all your Mac easily :thumbsup:
@@ -190,13 +191,13 @@ To install new package, use::
     $ brew file brew install <package>
 
 instead of ``brew install <package>``, because above command
-automatically update ``Brewfile``.
+automatically update **Brewfile**.
 
-This is useful especially if you are using the repository for the ``Brewfile``,
+This is useful especially if you are using the repository for the **Brewfile**,
 and want to use ``brew file update``.
 
 Otherwise, please be careful to use ``brew file update``,
-because it deletes what you installed, but you have not registered in ``Brewfile``.
+because it deletes what you installed, but you have not registered in **Brewfile**.
 
 
 Check Apps
@@ -254,7 +255,7 @@ This command makes ``Caskfile.txt``, which is like::
 You can find applications which were installed manually,
 but can be managed by Cask under "Apps not installed by Cask, but installed in...".
 
-If you want to manage them with ``Brewfile``, just copy above lines w/o "#" for these Apps.
+If you want to manage them with **Brewfile**, just copy above lines w/o "#" for these Apps.
 
 Use machine specific Brewfile
 -----------------------------
@@ -282,14 +283,14 @@ Then, install packages at the machine A.
 
 If you set `brew-wrap <https://homebrew-file.readthedocs.io/en/latest/brew-wrap.html>`_
 or run ``brew file init``,
-new packages will be written into ``Brewfile.A``
-in the same directory as ``Brewfile``.
+new packages will be written into **Brewfile.A**
+in the same directory as **Brewfile**.
 
 If you install packages at the machine B,
-then new packages will be written into ``Brewfile.B``.
+then new packages will be written into **Brewfile.B**.
 
-If you have new packages which are common in ``Brewfile.A`` and ``Brewfile.B``,
-edit these files and move the packages into ``Brewfile``.
+If you have new packages which are common in **Brewfile.A** and **Brewfile.B**,
+edit these files and move the packages into **Brewfile**.
 
 If you want to have package lists for each platform,
 it may useful to have ``main`` command like::
@@ -298,10 +299,10 @@ it may useful to have ``main`` command like::
 
 This will make unique names like:
 
-* macOS, M1 (arm environment): ``Brewfile.darwin.arm64``
-* macOS, Intel or x86_64 environment at M1: ``Brewfile.darwin.x86_64``
-* Linux, 64 bit: ``Brewfile.linux.x86_64``
-* Cygwin, 64 bit: ``Brewfile.cygwin.x86_64``
+* macOS, M1 (arm environment): **Brewfile.darwin.arm64**
+* macOS, Intel or x86_64 environment at M1: **Brewfile.darwin.x86_64**
+* Linux, 64 bit: **Brewfile.linux.x86_64**
+* Cygwin, 64 bit: **Brewfile.cygwin.x86_64**
 
 Share Brewfile with your colleagues
 -----------------------------------
@@ -309,7 +310,7 @@ Share Brewfile with your colleagues
 If you are working with in a group, it is good to have a common Brewfile
 to share the development environment.
 
-In this case, make ``Brewfile`` like:
+In this case, make **Brewfile** like:
 
 .. code-block:: sh
 
@@ -320,9 +321,9 @@ In this case, make ``Brewfile`` like:
 
     main ~/.config/MyBrewfile
 
-Then, maintain ``Brewfile`` for the group.
+Then, maintain **Brewfile** for the group.
 It is useful to share it by GitHub.
 Each developer can update the environment by ``brew file update``.
 
 In addition, each developer can install his/her necessary packages
-and maintain them by ``MyBrewfile``.
+and maintain them by *MyBrewfile**.

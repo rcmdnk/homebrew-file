@@ -32,14 +32,18 @@ class BrewFile:
 
         # Other default values
         self.opt["command"] = ""
-        self.opt["input"] = os.environ.get("HOMEBREW_BREWFILE", "")
-        brewfile_config = os.environ["HOME"] + "/.config/brewfile/Brewfile"
-        brewfile_home = os.environ["HOME"] + "/.brewfile/Brewfile"
-        if self.opt["input"] == "":
-            if (
-                not Path(brewfile_config).is_file()
-                and Path(brewfile_home).is_file()
-            ):
+        self.opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
+        if not self.opt["input"].name:
+            brewfile_config = (
+                Path(
+                    os.environ.get(
+                        "XDG_CONFIG_HOME", os.environ["HOME"] + "/.config"
+                    ),
+                )
+                / "brewfile/Brewfile"
+            )
+            brewfile_home = Path(os.environ["HOME"] + "/.brewfile/Brewfile")
+            if not brewfile_config.is_file() and brewfile_home.is_file():
                 self.opt["input"] = brewfile_home
             else:
                 self.opt["input"] = brewfile_config
@@ -125,7 +129,7 @@ class BrewFile:
         self.int_opts: list[str] = ["verbose"]
         self.float_opts: list[str] = []
 
-        self.brewinfo = BrewInfo(self.helper, Path(self.opt["input"]))
+        self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext: list[BrewInfo] = []
         self.brewinfo_main = self.brewinfo
         self.opt["read"] = False
@@ -189,7 +193,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.file = Path(self.opt["input"])
+        self.brewinfo.file = self.opt["input"]
 
     def ask_yn(self, question: str) -> bool:
         """Helper for yes/no."""
@@ -387,10 +391,10 @@ class BrewFile:
         return user
 
     def input_dir(self):
-        return Path(self.opt["input"]).parent
+        return self.opt["input"].parent
 
     def input_file(self):
-        return self.opt["input"].split("/")[-1]
+        return self.opt["input"].name
 
     def repo_file(self) -> Path:
         """Helper to build Brewfile path for the repository."""
@@ -487,16 +491,15 @@ class BrewFile:
     def check_repo(self):
         """Check input file for Git repository."""
         # Check input file
-        if not Path(self.opt["input"]).exists():
+        if not self.opt["input"].exists():
             return
 
-        self.brewinfo.file = Path(self.opt["input"])
+        self.brewinfo.file = self.opt["input"]
 
         # Check input file if it points repository or not
         self.opt["repo"] = ""
-        f = open(self.opt["input"], "r")
-        lines = f.readlines()
-        f.close()
+        with open(self.opt["input"], "r") as f:
+            lines = f.readlines()
         for line in lines:
             if re.match(" *git ", line) is None:
                 continue
@@ -1074,11 +1077,10 @@ class BrewFile:
     def set_brewfile_repo(self) -> bool:
         """Set Brewfile repository."""
         # Check input file
-        if Path(self.opt["input"]).exists():
+        if self.opt["input"].exists():
             prev_repo = ""
-            f = open(self.opt["input"], "r")
-            lines = f.readlines()
-            f.close()
+            with open(self.opt["input"], "r") as f:
+                lines = f.readlines()
             for line in lines:
                 if re.match(" *git ", line) is None:
                     continue
@@ -1087,14 +1089,10 @@ class BrewFile:
                     prev_repo = git_line[1]
                     break
             if self.opt["repo"] == "":
-                print(
-                    "Input file: " + self.opt["input"] + " is already there."
-                )
+                print(f"Input file: {self.opt['input']} is already there.")
                 if prev_repo != "":
                     print(
-                        "git repository for Brewfile is already set as "
-                        + prev_repo
-                        + "."
+                        f"git repository for Brewfile is already set as {prev_repo}."
                     )
 
             if not self.input_backup():
@@ -1105,7 +1103,7 @@ class BrewFile:
             print(
                 "\nSet repository,\n"
                 '"non" (or empty) for local Brewfile '
-                "(" + self.opt["input"] + "),\n"
+                f"({self.opt['input']}),\n"
                 "/path/to/repo for local git repository,\n"
                 "https://your/git/repository "
                 "(or ssh://user@server.project.git) for git repository,\n"
@@ -1129,7 +1127,7 @@ class BrewFile:
             return True
 
         if check:
-            if not Path(self.opt["input"]).exists():
+            if not self.opt["input"].exists():
                 ans = self.ask_yn(
                     "Do you want to set a repository (y)? "
                     "((n) for local Brewfile)."
@@ -1143,7 +1141,7 @@ class BrewFile:
                         "You are using Brewfile of " + self.opt["repo"] + "."
                     )
                 else:
-                    print(self.opt["input"] + " is already there.")
+                    print(f"{self.opt['input']} is already there.")
                     if not self.input_backup():
                         return False
 

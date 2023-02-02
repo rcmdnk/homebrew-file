@@ -36,6 +36,12 @@ such a ``brew install`` or ``brew uninstall``.
 
 .. note::
 
+   2/Feb/2023 update
+
+  The default place of Brewfile uses $XDG_CONFIG_HOME if it is defined.
+
+.. note::
+
   21/Sep/2017 update
 
   The default place of Brewfile has been changed from::

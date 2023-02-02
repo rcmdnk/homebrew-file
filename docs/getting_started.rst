@@ -4,7 +4,11 @@ Getting Started
 Use local Brewfile
 ------------------
 
-By default, **Brewfile** is **~/.config/brewfile/Brewfile**.
+By default, **Brewfile** is **$XDG_CONFIG_HOME/brewfile/Brewfile**.
+
+If **$XDG_CONFIG_HOME** is not set, it is **~/.config/brewfile/Brewfile**.
+
+If you don't have above **Brewfile** and have **~/.brewfile/Brewfile** (old version place), then it is used.
 
 If you don't have **Brewfile**, first, do::
 
@@ -21,7 +25,7 @@ You can check your package list by::
     $ brew file cat
 
 If you already have **Brewfile**, then copy it to
-**~/.config/brewfile/Brewfile**
+**$XDG_CONFIG_HOME/brewfile/Brewfile**
 and install packages listed in **Brewfile** by::
 
     $ brew file install
@@ -31,7 +35,7 @@ After each command, **Brewfile** is updated automatically
 if you set ``brew-wrap`` as in :doc:`installation`.
 
 When you get new Mac, copy
-**~/.config/brewfile** to new Mac
+**$XDG_CONFIG_HOME/brewfile** to new Mac
 and just do::
 
     $ brew file install
