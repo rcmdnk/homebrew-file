@@ -202,7 +202,7 @@ def main() -> int:
     no_appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     no_appstore_parser.add_argument(
         "--no_appstore",
-        action="store_false",
+        action="store_true",
         default=b.opt["no_appstore"],
         dest="no_appstore",
         help="Set AppStore application check level to 0.\n"

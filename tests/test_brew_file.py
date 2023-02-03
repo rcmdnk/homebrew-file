@@ -39,11 +39,15 @@ def test_set_args(bf):
     bf.opt["appstore"] = 1
     bf.opt["no_appstore"] = 1
     bf.set_args(a="1", verbose="1")
-    assert isinstance(bf.opt["a"], str)
-    assert isinstance(bf.opt["verbose"], int)
+    assert bf.opt["a"] == "1"
+    assert bf.opt["verbose"] == "info"
     assert bf.opt["appstore"] == 1
     bf.opt["appstore"] = -1
     bf.opt["no_appstore"] = False
+    bf.set_args()
+    assert bf.opt["appstore"] == 1
+    bf.opt["appstore"] = -1
+    bf.opt["no_appstore"] = True
     bf.set_args()
     assert bf.opt["appstore"] == 0
     bf.opt["appstore"] = 1
@@ -85,13 +89,6 @@ def test_ask_yn_y(bf, caplog):
     assert caplog.record_tuples == [
         ("tests.brew_file", logging.INFO, "Question? [y/n]: y")
     ]
-
-
-def test_verbose(bf):
-    bf.opt["verbose"] = 1
-    assert bf.verbose() == 1
-    del bf.opt["verbose"]
-    assert bf.verbose() == 10
 
 
 def test_proc(monkeypatch):

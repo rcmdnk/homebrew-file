@@ -48,17 +48,12 @@ class BrewFile:
 
         self.editor = ""
 
+        # fix up opt
+        self.set_args()
+
     def default_opt(self) -> dict[str, Any]:
         opt: dict[str, Any] = {}
         opt["verbose"] = os.environ.get("HOMEBREW_BREWFILE_VERBOSE", "info")
-        # Keep compatibility with old verbose
-        match opt["verbose"]:
-            case "0":
-                opt["verbose"] = "debug"
-            case "1":
-                opt["verbose"] = "info"
-            case "2":
-                opt["verbose"] = "error"
         opt["command"] = ""
         opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
         if not opt["input"].name:
@@ -134,10 +129,7 @@ class BrewFile:
         opt["appstore"] = to_num(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1)
         )
-
-        opt["no_appstore"] = to_num(
-            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1)
-        )
+        opt["no_appstore"] = False
 
         opt["all_files"] = False
         opt["read"] = False
@@ -188,9 +180,19 @@ class BrewFile:
 
         return opts
 
-    def set_args(self, **kw) -> None:
-        """Set arguments."""
-        self.opt.update(kw)
+    def set_verbose(self, verbose: str | None = None) -> None:
+        if verbose is None:
+            self.opt["verbose"] = os.environ.get(
+                "HOMEBREW_BREWFILE_VERBOSE", "info"
+            )
+        # Keep compatibility with old verbose
+        match self.opt["verbose"]:
+            case "0":
+                self.opt["verbose"] = "debug"
+            case "1":
+                self.opt["verbose"] = "info"
+            case "2":
+                self.opt["verbose"] = "error"
 
         if self.log.parent:
             self.log.parent.setLevel(
@@ -198,6 +200,12 @@ class BrewFile:
             )
         else:
             self.log.setLevel(getattr(logging, self.opt["verbose"].upper()))
+
+    def set_args(self, **kw) -> None:
+        """Set arguments."""
+        self.opt.update(kw)
+
+        self.set_verbose(self.opt.get("verbose", None))
         for k in self.int_opts:
             self.opt[k] = int(self.opt[k])
         for k in self.float_opts:
@@ -207,7 +215,7 @@ class BrewFile:
         appstore = 1
         if self.opt["appstore"] != -1:
             appstore = self.opt["appstore"]
-        elif not self.opt["no_appstore"]:
+        elif self.opt["no_appstore"]:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
