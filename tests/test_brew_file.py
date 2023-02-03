@@ -129,11 +129,6 @@ def test_banner(bf, caplog):
     ]
 
 
-def test_brew_val(bf):
-    prefix = "/".join(bf.proc("which brew")[1][0].split("/")[:-2])
-    assert bf.brew_val("prefix") == prefix
-
-
 def test_read_all(bf):
     parent = Path(__file__).parent / "files"
     file = parent / "BrewfileTest"
@@ -521,7 +516,7 @@ def test_execute(monkeypatch, capsys, command, out):
     monkeypatch.setattr(
         brew_file.BrewFile, "check_brew_cmd", lambda self: None
     )
-    monkeypatch.setattr(brew_file.BrewFile, "brew_val", lambda self, x: x)
+    monkeypatch.setattr(brew_file.BrewHelper, "brew_val", lambda self, x: x)
     bf = brew_file.BrewFile({})
     bf.opt["command"] = command
     bf.execute()

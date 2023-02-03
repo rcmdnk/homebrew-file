@@ -104,7 +104,7 @@ class BrewFile:
         opt["homebrew_ruby"] = False
 
         # Check Homebrew variables
-        opt["caskroom"] = self.brew_val("prefix") + "/Caskroom"
+        opt["caskroom"] = self.helper.brew_val("prefix") + "/Caskroom"
         cask_opts = self.parse_env_opts(
             "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""}
         )
@@ -264,9 +264,6 @@ class BrewFile:
 
     def banner(self, text: str) -> None:
         self.helper.banner(text)
-
-    def brew_val(self, name):
-        return self.helper.brew_val(name)
 
     def read_all(self, force=False):
         if not force and self.opt["read"]:
@@ -1388,7 +1385,7 @@ class BrewFile:
         # Clean up cashe
         self.banner("# Clean up cache")
         cmd0 = "brew cleanup"
-        cmd1 = "rm -rf " + self.brew_val("cache")
+        cmd1 = "rm -rf " + self.helper.brew_val("cache")
         self.proc(
             cmd0, print_cmd=True, print_out=True, dryrun=self.opt["dryrun"]
         )
@@ -1611,7 +1608,10 @@ class BrewFile:
         tap_brew = tap
         opt = ""
         if Path(
-            self.brew_val("repository") + "/Library/Formula/" + name + ".rb"
+            self.helper.brew_val("repository")
+            + "/Library/Formula/"
+            + name
+            + ".rb"
         ).is_file():
             if isinstance(self.opt["brew_packages"], str):
                 self.opt["brew_packages"] = self.proc(
@@ -1621,13 +1621,13 @@ class BrewFile:
                 check = "brew"
                 opt = self.brewinfo.get_option(name)
                 if Path(
-                    self.brew_val("repository")
+                    self.helper.brew_val("repository")
                     + "/Library/Formula/"
                     + name
                     + ".rb"
                 ).is_symlink():
                     link = os.readlink(
-                        self.brew_val("repository")
+                        self.helper.brew_val("repository")
                         + "/Library/Formula/"
                         + name
                         + ".rb"
