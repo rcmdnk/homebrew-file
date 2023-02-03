@@ -91,15 +91,6 @@ class BrewHelper:
             self.log.error(err)
         return ret, out.splitlines()
 
-    def banner(self, text: str) -> None:
-        width = 0
-        for line in text.split("\n"):
-            if width < len(line):
-                width = len(line)
-        self.log.info(
-            f"\n{'#' * width}\n{text}\n{'#' * width}\n",
-        )
-
     def brew_val(self, name: str) -> Any:
         if name not in self.opt:
             self.opt[name] = self.proc("brew --" + name, False, False)[1][0]

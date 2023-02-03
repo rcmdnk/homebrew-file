@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import argparse
 import copy
 import glob
@@ -264,15 +266,6 @@ class BrewHelper:
         if err and print_err:
             self.log.error(err)
         return ret, out.splitlines()
-
-    def banner(self, text: str) -> None:
-        width = 0
-        for line in text.split("\n"):
-            if width < len(line):
-                width = len(line)
-        self.log.info(
-            f"\n{'#' * width}\n{text}\n{'#' * width}\n",
-        )
 
     def brew_val(self, name: str) -> Any:
         if name not in self.opt:
@@ -1053,9 +1046,28 @@ class BrewFile:
         self.brewinfo_ext: list[BrewInfo] = []
         self.brewinfo_main = self.brewinfo
 
-    def debug_banner(self) -> None:
-        if self.opt["dryrun"]:
-            self.banner("# This is dry run.")
+    def banner(self, text: str) -> None:
+        width = 0
+        for line in text.split("\n"):
+            if width < len(line):
+                width = len(line)
+        self.log.info(
+            f"\n{'#' * width}\n{text}\n{'#' * width}\n",
+        )
+
+    @dataclass
+    class DryrunBanner:
+        """Dryrun banner context manager."""
+
+        brewfile: BrewFile
+
+        def __enter__(self) -> None:
+            if self.brewfile.opt["dryrun"]:
+                self.brewfile.banner("# This is dry run.")
+
+        def __exit__(self, exc_type, exc_value, traceback) -> None:
+            if self.brewfile.opt["dryrun"]:
+                self.brewfile.banner("# This is dry run.")
 
     def parse_env_opts(
         self, env_var: str, base_opts: dict | None = None
@@ -1148,9 +1160,6 @@ class BrewFile:
             if yn in no:
                 return False
             yn = input("Answer with yes (y) or no (n): ").lower()
-
-    def banner(self, text: str) -> None:
-        self.helper.banner(text)
 
     def read_all(self, force=False):
         if not force and self.opt["read"]:
@@ -3086,16 +3095,14 @@ class BrewFile:
 
         # Do pull/push for the repository.
         if self.opt["command"] in ["pull", "push"]:
-            self.debug_banner()
-            self.repomgr(self.opt["command"])
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                self.repomgr(self.opt["command"])
             return
 
         # brew command
         if self.opt["command"] == "brew":
-            self.debug_banner()
-            self.brew_cmd()
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                self.brew_cmd()
             return
 
         # Initialize
@@ -3124,45 +3131,41 @@ class BrewFile:
 
         # Cleanup non request
         if self.opt["command"] == "clean_non_request":
-            self.debug_banner()
-            self.clean_non_request()
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                self.clean_non_request()
             return
 
         # Cleanup
         if self.opt["command"] == "clean":
-            self.debug_banner()
-            self.cleanup()
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                self.cleanup()
             return
 
         # Install
         if self.opt["command"] == "install":
-            self.debug_banner()
-            self.install()
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                self.install()
             return
 
         # Update
         if self.opt["command"] == "update":
-            self.debug_banner()
-            if not self.opt["noupgradeatupdate"]:
-                self.helper.proc("brew update", dryrun=self.opt["dryrun"])
-                self.helper.proc(
-                    "brew upgrade --fetch-HEAD", dryrun=self.opt["dryrun"]
-                )
-                self.helper.proc(
-                    "brew upgrade --cask", dryrun=self.opt["dryrun"]
-                )
-            if self.opt["repo"] != "":
-                self.repomgr("pull")
-            self.install()
-            self.cleanup()
-            if not self.opt["dryrun"]:
-                _ = self.initialize(check=False)
-            if self.opt["repo"] != "":
-                self.repomgr("push")
-            self.debug_banner()
+            with self.DryrunBanner(self):
+                if not self.opt["noupgradeatupdate"]:
+                    self.helper.proc("brew update", dryrun=self.opt["dryrun"])
+                    self.helper.proc(
+                        "brew upgrade --fetch-HEAD", dryrun=self.opt["dryrun"]
+                    )
+                    self.helper.proc(
+                        "brew upgrade --cask", dryrun=self.opt["dryrun"]
+                    )
+                if self.opt["repo"] != "":
+                    self.repomgr("pull")
+                self.install()
+                self.cleanup()
+                if not self.opt["dryrun"]:
+                    _ = self.initialize(check=False)
+                if self.opt["repo"] != "":
+                    self.repomgr("push")
             return
 
         # No command found
