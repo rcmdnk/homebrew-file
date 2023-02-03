@@ -171,23 +171,16 @@ class BrewFile:
         self, env_var: str, base_opts: dict | None = None
     ) -> dict:
         """Returns a dictionary parsed from an environment variable."""
+        opts = {}
         if base_opts is not None:
-            opts = base_opts.copy()
-        else:
-            opts = {}
+            opts.update(base_opts)
 
-        env_var = env_var.upper()
         env_opts = os.environ.get(env_var, None)
         if env_opts:
-
-            # these can be flags ("--flag") or values ("--key=value")
-            # but not weirdness ("--foo=bar=baz")
             user_opts = {
-                key.lower(): value
+                key: value
                 for (key, value) in [
-                    pair.partition("=")[::2]
-                    for pair in env_opts.split()
-                    if pair.count("=") < 2
+                    pair.partition("=")[::2] for pair in env_opts.split()
                 ]
             }
 

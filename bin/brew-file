@@ -1073,23 +1073,16 @@ class BrewFile:
         self, env_var: str, base_opts: dict | None = None
     ) -> dict:
         """Returns a dictionary parsed from an environment variable."""
+        opts = {}
         if base_opts is not None:
-            opts = base_opts.copy()
-        else:
-            opts = {}
+            opts.update(base_opts)
 
-        env_var = env_var.upper()
         env_opts = os.environ.get(env_var, None)
         if env_opts:
-
-            # these can be flags ("--flag") or values ("--key=value")
-            # but not weirdness ("--foo=bar=baz")
             user_opts = {
-                key.lower(): value
+                key: value
                 for (key, value) in [
-                    pair.partition("=")[::2]
-                    for pair in env_opts.split()
-                    if pair.count("=") < 2
+                    pair.partition("=")[::2] for pair in env_opts.split()
                 ]
             }
 
@@ -3641,13 +3634,10 @@ def main() -> int:
         "help", description=help_doc, help=help_doc, **subparser_opts
     )
 
+    info = f"{parser.format_usage()}\n\nExecute `{__prog__} help` to get help.\n\nRefer https://homebrew-file.readthedocs.io for more details."
     if len(sys.argv) == 1:
-        log.info(
-            f"{parser.format_usage()}\n\n"
-            f"Execute `{__prog__} help` to get help.\n\n"
-            "Refer https://homebrew-file.readthedocs.io for more details."
-        )
-        return 1
+        log.info(info)
+        return 0
 
     if sys.argv[1] == "brew":
         args = sys.argv[1:]
@@ -3666,6 +3656,10 @@ def main() -> int:
     (ns, args_tmp) = parser.parse_known_args(args)
     args_dict = vars(ns)
     args_dict.update({"args": args_tmp})
+    if args_dict["command"] is None:
+        log.warning("Need command")
+        log.info(info)
+        return 1
     if args_dict["command"] in ("install") and args_dict["args"]:
         cmd = args_dict["command"]
         args_dict["command"] = "brew"
