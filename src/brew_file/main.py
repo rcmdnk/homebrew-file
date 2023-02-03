@@ -243,9 +243,16 @@ def main() -> int:
         "-V",
         "--verbose",
         action="store",
+        choices=[
+            "debug",
+            "info",
+            "warning",
+            "error",
+            "critical",
+        ],
         default=b.opt["verbose"],
         dest="verbose",
-        help="Verbose level 0/1/2",
+        help="Verbose level",
     )
 
     help_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -498,6 +505,7 @@ def main() -> int:
         args_dict["args"].insert(0, cmd)
 
     b.set_args(**args_dict)
+    log.setLevel(getattr(logging, b.opt["verbose"].upper()))
 
     match b.opt["command"]:
         case "help":

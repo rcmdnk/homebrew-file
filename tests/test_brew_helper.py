@@ -59,38 +59,110 @@ def test_proc(helper, cmd, ret, lines, exit_on_err, separate_err, env):
         assert lines_proc == lines
 
 
-def test_proc_err(helper):
-    with pytest.raises(brew_file.CmdError) as e:
-        ret_proc, lines_proc = helper.proc(
-            "_wrong_command_", print_err=True, exit_on_err=True
-        )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 2
-    assert str(e.value) == "Failed at command: _wrong_command_"
-    with pytest.raises(brew_file.CmdError) as e:
-        ret_proc, lines_proc = helper.proc(
-            "_wrong_command_", print_err=False, exit_on_err=True
-        )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 2
-    assert str(e.value) == "Failed at command: _wrong_command_"
+def test_proc_err(helper, caplog):
+    caplog.set_level(logging.DEBUG)
 
-
-def test_proc_exit_on_err(helper):
+    caplog.clear()
     ret_proc, lines_proc = helper.proc(
         "ech test", separate_err=False, exit_on_err=False
     )
     assert ret_proc == 2
-    assert lines_proc == [
-        "ech test: [Errno 2] No such file or directory: 'ech'"
-    ]
+    assert lines_proc == ["[Errno 2] No such file or directory: 'ech'"]
+
+    caplog.clear()
+    ret_proc, lines_proc = helper.proc(
+        "ls /path/to/not/exist", separate_err=False, exit_on_err=False
+    )
+    assert ret_proc == 1
+    assert lines_proc == ["ls: /path/to/not/exist: No such file or directory"]
+
+    caplog.clear()
     ret_proc, lines_proc = helper.proc(
         "ech test", separate_err=True, exit_on_err=False
     )
     assert ret_proc == 2
-    assert lines_proc == [
-        "ech test: [Errno 2] No such file or directory: 'ech'"
+    assert lines_proc == []
+    assert caplog.record_tuples == [
+        ("tests.brew_file", logging.INFO, "$ ech test"),
+        ("tests.brew_file", logging.INFO, ""),
+        (
+            "tests.brew_file",
+            logging.ERROR,
+            "[Errno 2] No such file or directory: 'ech'\n",
+        ),
     ]
+
+    caplog.clear()
+    ret_proc, lines_proc = helper.proc(
+        "ls /path/to/not/exist", separate_err=True, exit_on_err=False
+    )
+    assert ret_proc == 1
+    assert lines_proc == []
+    assert caplog.record_tuples == [
+        ("tests.brew_file", logging.INFO, "$ ls /path/to/not/exist"),
+        ("tests.brew_file", logging.INFO, ""),
+        (
+            "tests.brew_file",
+            logging.ERROR,
+            "ls: /path/to/not/exist: No such file or directory\n",
+        ),
+    ]
+
+
+def test_proc_err_exit_on_err(helper, capsys):
+    with pytest.raises(brew_file.CmdError) as e:
+        ret_proc, lines_proc = helper.proc(
+            "_wrong_command_",
+            separate_err=False,
+            print_err=True,
+            exit_on_err=True,
+        )
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 2
+    assert (
+        str(e.value)
+        == "[Errno 2] No such file or directory: '_wrong_command_'\n"
+    )
+
+    with pytest.raises(brew_file.CmdError) as e:
+        ret_proc, lines_proc = helper.proc(
+            "ls /path/to/not/exist",
+            separate_err=False,
+            print_err=True,
+            exit_on_err=True,
+        )
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 1
+    assert (
+        str(e.value) == "ls: /path/to/not/exist: No such file or directory\n"
+    )
+
+    with pytest.raises(brew_file.CmdError) as e:
+        ret_proc, lines_proc = helper.proc(
+            "_wrong_command_",
+            separate_err=True,
+            print_err=True,
+            exit_on_err=True,
+        )
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 2
+    assert (
+        str(e.value)
+        == "[Errno 2] No such file or directory: '_wrong_command_'\n"
+    )
+
+    with pytest.raises(brew_file.CmdError) as e:
+        ret_proc, lines_proc = helper.proc(
+            "ls /path/to/not/exist",
+            separate_err=True,
+            print_err=True,
+            exit_on_err=True,
+        )
+    assert e.type == brew_file.CmdError
+    assert e.value.return_code == 1
+    assert (
+        str(e.value) == "ls: /path/to/not/exist: No such file or directory\n"
+    )
 
 
 def test_proc_dryrun(helper):

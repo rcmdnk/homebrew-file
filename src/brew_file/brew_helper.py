@@ -3,7 +3,6 @@ import os
 import shlex
 import subprocess
 from dataclasses import dataclass, field
-from io import TextIOWrapper
 from typing import Any, Generator
 
 
@@ -39,7 +38,6 @@ class BrewHelper:
         exit_on_err: bool = True,
         separate_err: bool = False,
         print_err: bool = True,
-        verbose: int = 1,
         env: dict | None = None,
         dryrun: bool = False,
     ) -> tuple[int, list[str]]:
@@ -57,14 +55,12 @@ class BrewHelper:
             return 0, [" ".join(cmd)]
         all_env = os.environ.copy()
         all_env.update(env)
-        lines = []
-        stderr: TextIOWrapper | int | None = None
         try:
             if separate_err:
                 if print_err:
-                    stderr = None
+                    stderr = subprocess.PIPE
                 else:
-                    stderr = open(os.devnull, "w")
+                    stderr = subprocess.DEVNULL
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(
@@ -74,26 +70,26 @@ class BrewHelper:
                 text=True,
                 env=all_env,
             )
-            if hasattr(stderr, "close"):
-                stderr.close()  # type: ignore
-            for line in self.readstdout(p):
-                lines.append(line)
-                if print_out:
-                    self.log.info(line)
-            ret = p.wait()
+            out, err = p.communicate()
+            ret = p.returncode
         except OSError as e:
-            if print_out:
-                lines = [" ".join(cmd) + ": " + str(e)]
-                self.log.info(lines[0].strip())
+            if not separate_err:
+                out = str(e) + "\n"
+                err = None
+            elif print_err:
+                out = ""
+                err = str(e) + "\n"
             ret = e.errno
 
         if exit_on_err and ret != 0:
-            msg = "Failed at command: " + " ".join(cmd)
-            if not (print_out and self.opt.get("verbose", 1) >= verbose):
-                msg += "\n".join(lines)
-            raise CmdError(msg, ret)
-
-        return ret, lines
+            if err is not None:
+                out += err
+            raise CmdError(out, ret)
+        if print_out:
+            self.log.info(out)
+        if err and print_err:
+            self.log.error(err)
+        return ret, out.splitlines()
 
     def banner(self, text: str) -> None:
         width = 0

@@ -105,7 +105,6 @@ def test_proc(monkeypatch):
         exit_on_err,
         separate_err,
         print_err,
-        verbose,
         env,
         dryrun,
     ):

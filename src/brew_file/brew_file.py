@@ -27,9 +27,6 @@ class BrewFile:
         self.log = logging.getLogger(__name__)
 
         # Make helper
-        self.opt["verbose"] = int(
-            os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1)
-        )
         self.helper = BrewHelper(self.opt)
 
         # Check Homebrew
@@ -41,7 +38,7 @@ class BrewFile:
                 self.opt[k] = v
 
         # Set other initial variables
-        self.int_opts: list[str] = ["verbose"]
+        self.int_opts: list[str] = []
         self.float_opts: list[str] = []
 
         self.set_input(self.opt["input"])
@@ -53,7 +50,15 @@ class BrewFile:
 
     def default_opt(self) -> dict[str, Any]:
         opt: dict[str, Any] = {}
-        opt["verbose"] = int(os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
+        opt["verbose"] = os.environ.get("HOMEBREW_BREWFILE_VERBOSE", "info")
+        # Keep compatibility with old verbose
+        match opt["verbose"]:
+            case "0":
+                opt["verbose"] = "debug"
+            case "1":
+                opt["verbose"] = "info"
+            case "2":
+                opt["verbose"] = "error"
         opt["command"] = ""
         opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
         if not opt["input"].name:
@@ -220,9 +225,6 @@ class BrewFile:
                 return False
             yn = input("Answer with yes (y) or no (n): ").lower()
 
-    def verbose(self) -> int:
-        return self.opt.get("verbose", 10)
-
     def proc(
         self,
         cmd: str | list[str],
@@ -231,7 +233,6 @@ class BrewFile:
         exit_on_err: bool = True,
         separate_err: bool = False,
         print_err: bool = True,
-        verbose: int = 1,
         env: dict | None = None,
         dryrun: bool = False,
     ) -> tuple[int, list[str]]:
@@ -244,7 +245,6 @@ class BrewFile:
             exit_on_err=exit_on_err,
             separate_err=separate_err,
             print_err=print_err,
-            verbose=verbose,
             env=env,
             dryrun=dryrun,
         )
@@ -699,7 +699,6 @@ class BrewFile:
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
-            verbose=1,
         )
         if ret == 0:
             self.opt["brew_cmd"] = cmd[0]
@@ -730,7 +729,6 @@ class BrewFile:
                 print_cmd=True,
                 print_out=True,
                 exit_on_err=False,
-                verbose=0,
             )
             cmd = f"bash {f.name}"
             self.proc(
@@ -738,7 +736,6 @@ class BrewFile:
                 print_cmd=True,
                 print_out=True,
                 exit_on_err=False,
-                verbose=0,
             )
         if not self.which_brew():
             return False
@@ -747,7 +744,6 @@ class BrewFile:
             print_cmd=True,
             print_out=True,
             exit_on_err=False,
-            verbose=0,
         )
         if ret != 0:
             for line in lines:
@@ -2089,59 +2085,56 @@ class BrewFile:
 
         # Summary
         self.banner("# Summary")
-        if self.verbose() > 0:
-            self.log.info(
-                f"Total:{napps} apps have been checked.\n"
-                f"Apps in {[d.replace(os.environ['HOME'], '~') for d in app_dirs]}\n"
-            )
-            maxlen = max(
-                len(x.replace(os.environ["HOME"], "~")) for x in app_dirs
-            )
-            if sum(apps_check["cask"].values()) > 0:
-                self.log.info("Installed by Cask:")
-                for d in app_dirs:
-                    if apps_check["cask"][d] == 0:
-                        continue
-                    self.log.info(
-                        f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['cask'][d]}"
-                    )
-                self.log.info("")
-            if sum(apps_check["brew"].values()) > 0:
-                self.log.info("Installed by brew install command")
-                for d in app_dirs:
-                    if apps_check["brew"][d] == 0:
-                        continue
-                    self.log.info(
-                        f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['brew'][d]}"
-                    )
-                self.log.info("")
-            if sum(apps_check["has_cask"].values()) > 0:
-                self.log.info("Installed directly, but casks are available:")
-                for d in app_dirs:
-                    if apps_check["has_cask"][d] == 0:
-                        continue
-                    self.log.info(
-                        f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['has_cask'][d]}"
-                    )
-                self.log.info("")
-            if sum(apps_check["appstore"].values()) > 0:
-                self.log.info("Installed from Appstore")
-                for d in app_dirs:
-                    if apps_check["appstore"][d] == 0:
-                        continue
-                    self.log.info(
-                        f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['appstore'][d]}"
-                    )
-                self.log.info("")
-            if sum(apps_check["no_cask"].values()) > 0:
-                self.log.info("No casks")
-                for d in app_dirs:
-                    if apps_check["no_cask"][d] == 0:
-                        continue
-                    self.log.info(
-                        f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['no_cask'][d]}"
-                    )
-                self.log.info("")
+        self.log.info(
+            f"Total:{napps} apps have been checked.\n"
+            f"Apps in {[d.replace(os.environ['HOME'], '~') for d in app_dirs]}\n"
+        )
+        maxlen = max(len(x.replace(os.environ["HOME"], "~")) for x in app_dirs)
+        if sum(apps_check["cask"].values()) > 0:
+            self.log.info("Installed by Cask:")
+            for d in app_dirs:
+                if apps_check["cask"][d] == 0:
+                    continue
+                self.log.info(
+                    f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['cask'][d]}"
+                )
+            self.log.info("")
+        if sum(apps_check["brew"].values()) > 0:
+            self.log.info("Installed by brew install command")
+            for d in app_dirs:
+                if apps_check["brew"][d] == 0:
+                    continue
+                self.log.info(
+                    f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['brew'][d]}"
+                )
+            self.log.info("")
+        if sum(apps_check["has_cask"].values()) > 0:
+            self.log.info("Installed directly, but casks are available:")
+            for d in app_dirs:
+                if apps_check["has_cask"][d] == 0:
+                    continue
+                self.log.info(
+                    f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['has_cask'][d]}"
+                )
+            self.log.info("")
+        if sum(apps_check["appstore"].values()) > 0:
+            self.log.info("Installed from Appstore")
+            for d in app_dirs:
+                if apps_check["appstore"][d] == 0:
+                    continue
+                self.log.info(
+                    f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['appstore'][d]}"
+                )
+            self.log.info("")
+        if sum(apps_check["no_cask"].values()) > 0:
+            self.log.info("No casks")
+            for d in app_dirs:
+                if apps_check["no_cask"][d] == 0:
+                    continue
+                self.log.info(
+                    f"{d.replace(os.environ['HOME'], '~'):{maxlen}s} : {apps_check['no_cask'][d]}"
+                )
+            self.log.info("")
 
     def make_pack_deps(self):
         """Make package dependencies."""
@@ -2159,18 +2152,17 @@ class BrewFile:
         for v in self.pack_deps.values():
             dep_packs.extend(v)
         self.top_packs = [x for x in packs if x not in dep_packs]
-        if self.opt["verbose"] > 1:
 
-            def print_dep(p, depth=0):
-                if depth > 2:
-                    self.log.info(f"#{' ' * (depth - 2)}", end="")
-                self.log.info(p)
-                for deps in self.pack_deps[p]:
-                    print_dep(deps, depth + 2)
+        def print_dep(p, depth=0):
+            if depth > 2:
+                self.log.info(f"#{' ' * (depth - 2)}", end="")
+            self.log.info(p)
+            for deps in self.pack_deps[p]:
+                print_dep(deps, depth + 2)
 
-            for p in packs:
-                if p not in dep_packs:
-                    print_dep(p)
+        for p in packs:
+            if p not in dep_packs:
+                print_dep(p)
 
     def execute(self) -> None:
         """Main execute function."""
