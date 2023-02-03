@@ -474,13 +474,10 @@ def main() -> int:
         "help", description=help_doc, help=help_doc, **subparser_opts
     )
 
+    info = f"{parser.format_usage()}\n\nExecute `{__prog__} help` to get help.\n\nRefer https://homebrew-file.readthedocs.io for more details."
     if len(sys.argv) == 1:
-        log.info(
-            f"{parser.format_usage()}\n\n"
-            f"Execute `{__prog__} help` to get help.\n\n"
-            "Refer https://homebrew-file.readthedocs.io for more details."
-        )
-        return 1
+        log.info(info)
+        return 0
 
     if sys.argv[1] == "brew":
         args = sys.argv[1:]
@@ -499,6 +496,10 @@ def main() -> int:
     (ns, args_tmp) = parser.parse_known_args(args)
     args_dict = vars(ns)
     args_dict.update({"args": args_tmp})
+    if args_dict["command"] is None:
+        log.warning("Need command")
+        log.info(info)
+        return 1
     if args_dict["command"] in ("install") and args_dict["args"]:
         cmd = args_dict["command"]
         args_dict["command"] = "brew"
