@@ -593,7 +593,7 @@ def main() -> int:
             )
             return 0
         case "version":
-            b.proc("brew -v", print_cmd=False)
+            b.helper.proc("brew -v", print_cmd=False)
             log.info(f"{__prog__} {__version__} {__date__}")
             return 0
 

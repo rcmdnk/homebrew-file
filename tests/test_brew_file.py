@@ -91,33 +91,6 @@ def test_ask_yn_y(bf, caplog):
     ]
 
 
-def test_proc(monkeypatch):
-    monkeypatch.setenv("HOMEBREW_NO_AUTO_UPDATE", "0")
-
-    def proc(
-        self,
-        cmd,
-        print_cmd,
-        print_out,
-        exit_on_err,
-        separate_err,
-        print_err,
-        env,
-        dryrun,
-    ):
-        return env
-
-    monkeypatch.setattr(brew_file.BrewHelper, "proc", proc)
-
-    def post_init(self):
-        self.helper = brew_file.BrewHelper({})
-
-    monkeypatch.setattr(brew_file.BrewFile, "__post_init__", post_init)
-    bf = brew_file.BrewFile()
-    env = bf.proc("echo $HOMEBREW_NO_AUTO_UPDATE")
-    assert env == {"HOMEBREW_NO_AUTO_UPDATE": "1"}
-
-
 def test_banner(bf, caplog):
     bf.banner("test banner")
     assert caplog.record_tuples == [
@@ -500,7 +473,6 @@ def test_execute(monkeypatch, capsys, command, out):
         "clean_non_request",
         "cleanup",
         "install",
-        "proc",
     ]:
 
         def set_func(func):
@@ -517,6 +489,11 @@ def test_execute(monkeypatch, capsys, command, out):
         brew_file.BrewFile, "check_brew_cmd", lambda self: None
     )
     monkeypatch.setattr(brew_file.BrewHelper, "brew_val", lambda self, x: x)
+    monkeypatch.setattr(
+        brew_file.BrewHelper,
+        "proc",
+        lambda self, *args, **kw: print("proc", args, kw),  # noqa: T201
+    )
     bf = brew_file.BrewFile({})
     bf.opt["command"] = command
     bf.execute()
