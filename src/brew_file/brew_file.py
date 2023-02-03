@@ -190,9 +190,14 @@ class BrewFile:
 
     def set_args(self, **kw) -> None:
         """Set arguments."""
-        for k, v in kw.items():
-            self.opt[k] = v
+        self.opt.update(kw)
 
+        if self.log.parent:
+            self.log.parent.setLevel(
+                getattr(logging, self.opt["verbose"].upper())
+            )
+        else:
+            self.log.setLevel(getattr(logging, self.opt["verbose"].upper()))
         for k in self.int_opts:
             self.opt[k] = int(self.opt[k])
         for k in self.float_opts:

@@ -505,7 +505,6 @@ def main() -> int:
         args_dict["args"].insert(0, cmd)
 
     b.set_args(**args_dict)
-    log.setLevel(getattr(logging, b.opt["verbose"].upper()))
 
     match b.opt["command"]:
         case "help":
