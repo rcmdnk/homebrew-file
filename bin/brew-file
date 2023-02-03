@@ -456,14 +456,12 @@ class BrewInfo:
         elif isinstance(collection, dict):
             collection.update(val)
 
-    def read(self, file: Path | None = None) -> None:
+    def read(self) -> None:
         self.clear_input()
 
-        if file is None:
-            file = self.file
-        if not file.exists():
+        if not self.file.exists():
             return
-        with open(file, "r") as f:
+        with open(self.file, "r") as f:
             lines = f.readlines()
             is_ignore = False
             self.tap_input.append("direct")
