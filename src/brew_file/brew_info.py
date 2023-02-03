@@ -1,7 +1,7 @@
 import copy
 import json
+import logging
 import re
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Union
@@ -16,6 +16,9 @@ class BrewInfo:
 
     helper: BrewHelper
     file: Path = field(default_factory=lambda: Path())
+    log: logging.Logger = field(
+        default_factory=lambda: logging.getLogger(__name__)
+    )
 
     def __post_init__(self) -> None:
         self.brew_input_opt: dict[str, str] = {}
@@ -636,7 +639,7 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(self.file, sys.stdout, self.helper.opt["verbose"] > 1)
+            out = Tee(self.file, self.log)
             out.write(output)
             out.close()
 

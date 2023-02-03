@@ -1,7 +1,7 @@
+import logging
 import os
 import shlex
 import subprocess
-import sys
 from dataclasses import dataclass, field
 from io import TextIOWrapper
 from typing import Any, Generator
@@ -20,17 +20,8 @@ class BrewHelper:
     """Helper functions for BrewFile."""
 
     opt: dict = field(default_factory=dict)
-    colors: dict[str, int] = field(
-        default_factory=lambda: {
-            "black": 30,
-            "red": 31,
-            "green": 32,
-            "yellow": 33,
-            "blue": 34,
-            "magenta": 35,
-            "lightblue": 36,
-            "white": 37,
-        }
+    log: logging.Logger = field(
+        default_factory=lambda: logging.getLogger(__name__)
     )
 
     def readstdout(self, proc: subprocess.Popen) -> Generator[str, None, None]:
@@ -61,7 +52,7 @@ class BrewHelper:
         if cmd[0] == "brew":
             cmd[0] = self.opt.get("brew_cmd", "brew")
         if print_cmd or dryrun:
-            self.info(cmd_orig, verbose)
+            self.log.info(cmd_orig)
         if dryrun:
             return 0, [" ".join(cmd)]
         all_env = os.environ.copy()
@@ -88,12 +79,12 @@ class BrewHelper:
             for line in self.readstdout(p):
                 lines.append(line)
                 if print_out:
-                    self.info(line, verbose)
+                    self.log.info(line)
             ret = p.wait()
         except OSError as e:
             if print_out:
                 lines = [" ".join(cmd) + ": " + str(e)]
-                self.info(lines[0].strip(), verbose)
+                self.log.info(lines[0].strip())
             ret = e.errno
 
         if exit_on_err and ret != 0:
@@ -104,33 +95,13 @@ class BrewHelper:
 
         return ret, lines
 
-    def out(self, text: str, verbose: int = 100, color: str = "") -> None:
-        if self.opt.get("verbose", 1) < verbose:
-            return
-        pre = post = ""
-        if color != "" and sys.stdout.isatty():
-            if color in self.colors:
-                pre = f"\033[{self.colors[color]};1m"
-                post = "\033[m"
-        print(pre + text + post)
-
-    def info(self, text: str, verbose: int = 2) -> None:
-        self.out(text, verbose)
-
-    def warn(self, text: str, verbose: int = 1) -> None:
-        self.out("[WARNING]: " + text, verbose, "yellow")
-
-    def err(self, text, verbose=0) -> None:
-        self.out("[ERROR]: " + text, verbose, "red")
-
-    def banner(self, text: str, verbose: int = 1) -> None:
+    def banner(self, text: str) -> None:
         width = 0
         for line in text.split("\n"):
             if width < len(line):
                 width = len(line)
-        self.out(
-            "\n" + "#" * width + "\n" + text + "\n" + "#" * width + "\n",
-            verbose,
+        self.log.info(
+            f"\n{'#' * width}\n{text}\n{'#' * width}\n",
         )
 
     def brew_val(self, name: str) -> Any:

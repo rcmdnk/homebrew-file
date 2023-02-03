@@ -1,12 +1,42 @@
+import logging
 import os
 import platform
 import re
 import subprocess
 import sys
-from dataclasses import dataclass, field
-from io import StringIO
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Union
+from typing import Union
+
+
+class LogFormatter(logging.Formatter):
+    """Formatter to add color to log messages."""
+
+    def __init__(self) -> None:
+
+        self.default_format = "%(message)s"
+        self.formats = {
+            logging.DEBUG: f"[DEBUG] {self.default_format}",
+            logging.INFO: f"{self.default_format}",
+            logging.WARNING: f"[WARNING] {self.default_format}",
+            logging.ERROR: f"[ERROR] {self.default_format}",
+            logging.CRITICAL: f"[CRITICAL] {self.default_format}",
+        }
+        if sys.stdout.isatty():
+            colors = {
+                logging.WARNING: "33",
+                logging.ERROR: "31",
+                logging.CRITICAL: "31",
+            }
+            for level in colors:
+                self.formats[
+                    level
+                ] = f"\033[{colors[level]};1m{self.formats[level]}\033[m"
+
+    def format(self, record) -> str:  # noqa: A003
+        fmt = self.formats.get(record.levelno, self.default_format)
+        formatter = logging.Formatter(fmt)
+        return formatter.format(record)
 
 
 def is_mac() -> bool:
@@ -85,59 +115,32 @@ class OpenWrapper:
 
 @dataclass
 class Tee:
-    """Module to write out in two ways at once."""
+    """Module to write out to a file and loggers at the same time."""
 
-    out1: Any
-    out2: Any = field(default_factory=lambda: sys.stdout)
-    use2: bool = True
+    file: Path
+    logger: logging.Logger | None = None
 
-    def __post_init__(self):
-        if isinstance(self.out1, str) or isinstance(self.out1, Path):
-            self.out1name = str(self.out1)
-            self.out1 = StringIO()
-        else:
-            self.out1name = ""
-        if self.use2:
-            if isinstance(self.out2, str) or isinstance(self.out2, Path):
-                self.out2name = str(self.out2)
-                self.out2 = StringIO()
-            else:
-                self.out2name = ""
+    def __post_init__(self) -> None:
+        self.file.parent.mkdir(parents=True, exist_ok=True)
+        self.out = open(self.file, "w")
 
-    def __del__(self):
-        if self.out1name != "":
-            self.out1.close()
-        if self.use2:
-            if self.out2name != "":
-                self.out2.close()
+    def __del__(self) -> None:
+        self.out.close()
 
-    def write(self, text):
+    def write(self, text) -> None:
         """Write w/o line break."""
-        self.out1.write(text)
-        if self.use2:
-            self.out2.write(text)
+        self.out.write(text)
+        if self.logger:
+            self.logger.info(text)
 
-    def writeln(self, text):
+    def writeln(self, text) -> None:
         """Write w/ line break."""
-        self.out1.write(text + "\n")
-        if self.use2:
-            self.out2.write(text + "\n")
-
-    def flush(self):
-        """Flush the output."""
-        self.out1.flush()
-        if self.use2:
-            self.out2.flush()
+        self.out.write(text + "\n")
+        if self.logger:
+            self.logger.info(text + "\n")
 
     def close(self):
         """Close output files."""
-        if self.out1name != "":
-            with OpenWrapper(self.out1name, "w") as f:
-                f.write(self.out1.getvalue())
-        if self.use2:
-            if self.out2name != "":
-                with OpenWrapper(self.out2name, "w") as f:
-                    f.write(self.out2.getvalue())
         self.__del__()
 
 

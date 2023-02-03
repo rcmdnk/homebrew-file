@@ -1,45 +1,29 @@
-import sys
+import logging
 
 from . import brew_file
 
 
-def test_tee(capsys, tmp_path):
+def test_tee(caplog, tmp_path):
+    caplog.set_level(logging.DEBUG)
     out = brew_file.Tee(tmp_path / "out1")
     out.write("test\n")
     out.writeln("test_ln")
-    out.flush()
     out.close()
     with open(tmp_path / "out1") as f:
         assert f.read() == "test\ntest_ln\n"
-    sys.stdout.flush()
-    captured = capsys.readouterr()
-    assert captured.out == "test\ntest_ln\n"
-    assert captured.err == ""
+    assert not caplog.record_tuples
 
 
-def test_tee_out2_file(capsys, tmp_path):
-    out = brew_file.Tee(tmp_path / "out1", tmp_path / "out2")
+def test_tee_logger(caplog, tmp_path):
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test")
+    out = brew_file.Tee(tmp_path / "out1", logger)
     out.write("test\n")
     out.writeln("test_ln")
-    out.flush()
     out.close()
     with open(tmp_path / "out1") as f:
         assert f.read() == "test\ntest_ln\n"
-    with open(tmp_path / "out2") as f:
-        assert f.read() == "test\ntest_ln\n"
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert captured.err == ""
-
-
-def test_tee_no_out2(capsys, tmp_path):
-    out = brew_file.Tee(tmp_path / "out1", use2=False)
-    out.write("test\n")
-    out.writeln("test_ln")
-    out.flush()
-    out.close()
-    with open(tmp_path / "out1") as f:
-        assert f.read() == "test\ntest_ln\n"
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert captured.err == ""
+    assert caplog.record_tuples == [
+        ("test", logging.INFO, "test\n"),
+        ("test", logging.INFO, "test_ln\n"),
+    ]

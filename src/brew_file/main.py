@@ -1,12 +1,21 @@
 import argparse
+import logging
 import sys
 
 from .brew_file import BrewFile
 from .brew_helper import CmdError
 from .info import __date__, __description__, __prog__, __version__
+from .utils import LogFormatter
 
 
 def main() -> int:
+    log = logging.getLogger(__name__.split(".")[0])
+    log.setLevel(logging.INFO)
+    ch = logging.StreamHandler(stream=sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(LogFormatter())
+    log.addHandler(ch)
+
     # Prepare BrewFile
     b = BrewFile()
 
@@ -40,9 +49,6 @@ def main() -> int:
     )
     group.add_argument(
         "--cat", action="store_const", dest="command", const="cat"
-    )
-    group.add_argument(
-        "--test", action="store_const", dest="command", const="test"
     )
     group.add_argument(
         "--commands", action="store_const", dest="command", const="commands"
@@ -440,14 +446,6 @@ def main() -> int:
         parents=[verbose_parser],
         **subparser_opts,
     )
-    help_doc = "or --test. Used for test."
-    subparsers.add_parser(
-        "test",
-        description=help_doc,
-        help=help_doc,
-        parents=min_parsers,
-        **subparser_opts,
-    )
     help_doc = "Get Brewfile's full path, including additional files."
     subparsers.add_parser(
         "get_files",
@@ -470,11 +468,11 @@ def main() -> int:
     )
 
     if len(sys.argv) == 1:
-        parser.print_usage()
-        print("")
-        print("Execute `" + __prog__ + " help` to get help.")
-        print("")
-        print("Refer https://homebrew-file.readthedocs.io for more details.")
+        log.info(
+            f"{parser.format_usage()}\n\n"
+            f"Execute `{__prog__} help` to get help.\n\n"
+            "Refer https://homebrew-file.readthedocs.io for more details."
+        )
         return 1
 
     if sys.argv[1] == "brew":
@@ -503,14 +501,14 @@ def main() -> int:
 
     match b.opt["command"]:
         case "help":
-            parser.print_help()
+            log.info(parser.format_help())
             return 0
         case "brew":
             if args_tmp and args_tmp[0] in ["-h", "--help"]:
-                subparsers.choices[b.opt["command"]].print_help()
+                log.info(subparsers.choices[b.opt["command"]].format_help())
                 return 0
         case _ if "help" in args_tmp:
-            subparsers.choices[b.opt["command"]].print_help()
+            log.info(subparsers.choices[b.opt["command"]].format_help())
             return 0
         case "commands":
             commands = [
@@ -528,7 +526,6 @@ def main() -> int:
                 "edit",
                 "cat",
                 "casklist",
-                "test",
                 "get_files",
                 "commands",
                 "version",
@@ -548,7 +545,6 @@ def main() -> int:
                 "-e",
                 "--edit",
                 "--cat",
-                "--test",
                 "--commands",
                 "-v",
                 "--version",
@@ -583,13 +579,15 @@ def main() -> int:
                 "-V",
                 "--verbose",
             ]
-            print("commands:", " ".join(commands))
-            print("commands_hyphen:", " ".join(commands_hyphen))
-            print("options:", " ".join(options))
+            log.info(
+                f"commands: {' '.join(commands)}\n"
+                f"commands_hyphen: {''.join(commands_hyphen)}\n"
+                f"options: {' '.join(options)}"
+            )
             return 0
         case "version":
             b.proc("brew -v", print_cmd=False)
-            print(__prog__ + " " + __version__ + " " + __date__)
+            log.info(f"{__prog__} {__version__} {__date__}")
             return 0
 
     try:
@@ -597,10 +595,10 @@ def main() -> int:
     except KeyboardInterrupt:
         return 1
     except CmdError as e:
-        b.err(str(e))
+        b.log.error(str(e))
         return e.return_code
     except RuntimeError as e:
-        b.err(str(e))
+        b.log.error(str(e))
         return 1
     return 0
 

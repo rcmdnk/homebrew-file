@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 from pathlib import Path
 
@@ -8,22 +9,24 @@ from . import brew_file
 
 
 @pytest.fixture
-def bf():
+def bf(caplog):
+    caplog.set_level(logging.DEBUG)
     obj = brew_file.BrewFile({})
     return obj
 
 
-def test_debug_banner(bf, capsys):
+def test_debug_banner(bf, caplog):
     bf.debug_banner()
-    captured = capsys.readouterr()
-    assert captured.out == ""
+    assert not caplog.text
     bf.opt["dryrun"] = True
     bf.debug_banner()
-    captured = capsys.readouterr()
-    assert (
-        captured.out
-        == "\n##################\n# This is dry run.\n##################\n\n"
-    )
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n##################\n# This is dry run.\n##################\n",
+        )
+    ]
 
 
 def test_parse_env_opts(bf):
@@ -76,6 +79,14 @@ def test_ask_yn(bf, capsys, monkeypatch, input_value, ret, out):
     assert captured.out == out
 
 
+def test_ask_yn_y(bf, caplog):
+    bf.opt["yn"] = True
+    assert bf.ask_yn("Question?")
+    assert caplog.record_tuples == [
+        ("tests.brew_file", logging.INFO, "Question? [y/n]: y")
+    ]
+
+
 def test_verbose(bf):
     bf.opt["verbose"] = 1
     assert bf.verbose() == 1
@@ -111,54 +122,15 @@ def test_proc(monkeypatch):
     assert env == {"HOMEBREW_NO_AUTO_UPDATE": "1"}
 
 
-def test_info(bf, capsys):
-    bf.opt["verbose"] = 2
-    bf.info("show")
-    bf.opt["verbose"] = 1
-    bf.info("no show")
-    captured = capsys.readouterr()
-    assert captured.out == "show\n"
-
-
-def test_warn(bf, capsys):
-    bf.opt["verbose"] = 1
-    bf.warn("show")
-    bf.opt["verbose"] = 0
-    bf.warn("no show")
-    captured = capsys.readouterr()
-    assert captured.out == "[WARNING]: show\n"
-
-
-def test_err(bf, capsys):
-    bf.opt["verbose"] = 1
-    bf.err("show")
-    bf.opt["verbose"] = 0
-    bf.err("no show")
-    captured = capsys.readouterr()
-    assert captured.out == "[ERROR]: show\n"
-
-
-def test_banner(bf, capsys):
+def test_banner(bf, caplog):
     bf.banner("test banner")
-    captured = capsys.readouterr()
-    assert captured.out == "\n###########\ntest banner\n###########\n\n"
-
-
-def test_remove(bf, capsys, tmp_path):
-    file = tmp_path / "testfile"
-    file.touch()
-    bf.remove(str(file))
-    directory = tmp_path / "testdir"
-    directory.mkdir()
-    file = directory / "testfile"
-    file.touch()
-    bf.remove(str(directory))
-    bf.remove(tmp_path / "notexist")
-    captured = capsys.readouterr()
-    assert (
-        captured.out
-        == f"[WARNING]: Tried to remove non usual file/directory: {tmp_path}/notexist\n"
-    )
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n###########\ntest banner\n###########\n",
+        )
+    ]
 
 
 def test_brew_val(bf):
@@ -396,21 +368,19 @@ def test_find_brew_app(bf):
     pass
 
 
-def test_check_cask(bf):
-    pass
+def test_check_cask(bf, caplog):
+    if not brew_file.is_mac():
+        with pytest.raises(RuntimeError) as excinfo:
+            bf.check_cask()
+            assert str(excinfo.value) == "Cask is not available on Linux!"
+        return
+    bf.check_cask()
+    assert "# Starting to check applications for Cask..." in caplog.messages[0]
+    assert "# Summary" in "".join(caplog.messages)
 
 
 def test_make_pack_deps(bf):
     pass
-
-
-def test_my_test(bf, capsys):
-    bf.my_test()
-    captured = capsys.readouterr()
-    assert (
-        captured.out
-        == "test\ntest\n[WARNING]: Tried to remove non usual file/directory: aaa\nread input: 0\nread input cleared: 0\n{'test_pack': 'test opt', 'test_pack2': 'test opt2'}\n"
-    )
 
 
 @pytest.mark.parametrize(
@@ -448,10 +418,6 @@ def test_my_test(bf, capsys):
             "update",
             "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --fetch-HEAD',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {}\ninitialize () {'check': False}\n",  # noqa: P103
         ),
-        (
-            "test",
-            "check_repo () {}\ncheck_input_file () {}\nmy_test () {}\n",  # noqa: P103
-        ),
     ],
 )
 def test_execute(monkeypatch, capsys, command, out):
@@ -472,7 +438,6 @@ def test_execute(monkeypatch, capsys, command, out):
         "cleanup",
         "install",
         "proc",
-        "my_test",
     ]:
 
         def set_func(func):
