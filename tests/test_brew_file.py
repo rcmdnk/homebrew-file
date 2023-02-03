@@ -139,20 +139,92 @@ def test_brew_val(bf):
 
 
 def test_read_all(bf):
-    bf.opt["input"] = f"{Path(__file__).parent}/files/BrewfileTest"
+    parent = Path(__file__).parent / "files"
+    file = parent / "BrewfileTest"
+    bf.set_input(file)
     bf.read_all()
-    print(bf.brewinfo_main)
-    print(bf.brewinfo_ext)
-    print(bf.get("brew_input"))
-    print(bf.get("brew_input_opt"))
-    print(bf.get("tap_input"))
-    print(bf.get("cask_input"))
-    print(bf.get("appstore_input"))
-    print(bf.get("main_input"))
-    print(bf.get("file_input"))
-    print(bf.get("before_input"))
-    print(bf.get("after_input"))
-    print(bf.get("cmd_input"))
+    assert bf.brewinfo_main.file == parent / "BrewfileMain"
+    assert [x.file for x in bf.brewinfo_ext] == [
+        parent / x
+        for x in [
+            "BrewfileTest",
+            "BrewfileExt",
+            "BrewfileExt2",
+            "BrewfileExt3",
+            "BrewfileNotExist",
+        ]
+    ] + [Path(os.environ["HOME"]) / "BrewfileHomeForTestingNotExists"]
+    assert bf.get("brew_input") == {
+        "cmake",
+        "ec2",
+        "escape_sequence",
+        "evernote_mail",
+        "gcp-tools",
+        "gmail_filter_manager",
+        "gtask",
+        "inputsource",
+        "multi_clipboard",
+        "open_newtab",
+        "parse-plist",
+        "po",
+        "python@3.10",
+        "rcmdnk-sshrc",
+        "rcmdnk-trash",
+        "screenutf8",
+        "sd_cl",
+        "sentaku",
+        "shell-explorer",
+        "shell-logger",
+        "smenu",
+        "stow_reset",
+        "vim",
+    }
+    assert bf.get("brew_input_opt") == {
+        "cmake": "",
+        "ec2": "",
+        "escape_sequence": "",
+        "evernote_mail": "",
+        "gcp-tools": "",
+        "gmail_filter_manager": "",
+        "gtask": "",
+        "inputsource": "",
+        "multi_clipboard": "",
+        "open_newtab": "",
+        "parse-plist": "",
+        "po": "",
+        "python@3.10": "",
+        "rcmdnk-sshrc": "",
+        "rcmdnk-trash": "",
+        "screenutf8": "",
+        "sd_cl": "",
+        "sentaku": "",
+        "shell-explorer": "",
+        "shell-logger": "",
+        "smenu": "",
+        "stow_reset": "",
+        "vim": " --HEAD",
+    }
+    assert bf.get("tap_input") == {
+        "direct",
+        "homebrew/cask",
+        "homebrew/core",
+        "rcmdnk/rcmdnkcask",
+        "rcmdnk/rcmdnkpac",
+    }
+    assert bf.get("cask_input") == {"iterm2", "font-migu1m"}
+    assert bf.get("appstore_input") == {"Keynote"}
+    assert bf.get("main_input") == {"BrewfileMain"}
+    assert bf.get("file_input") == {
+        "BrewfileMain",
+        "BrewfileExt",
+        "BrewfileExt2",
+        "BrewfileNotExist",
+        "~/BrewfileHomeForTestingNotExists",
+        "BrewfileExt3",
+    }
+    assert bf.get("before_input") == {"echo before", "echo EXT before"}
+    assert bf.get("after_input") == {"echo after", "echo EXT after"}
+    assert bf.get("cmd_input") == {"echo BrewfileMain", "echo other commands"}
 
 
 def test_read(bf, tmp_path):
@@ -446,7 +518,7 @@ def test_execute(monkeypatch, capsys, command, out):
             monkeypatch.setattr(
                 brew_file.BrewFile,
                 func,
-                lambda self, *args, **kw: print(name, args, kw),
+                lambda self, *args, **kw: print(name, args, kw),  # noqa: T201
             )
 
         set_func(func)

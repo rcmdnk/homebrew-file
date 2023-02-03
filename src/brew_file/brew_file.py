@@ -5,10 +5,10 @@ import os
 import re
 import shlex
 import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 from urllib.parse import quote
 
 from .brew_helper import BrewHelper
@@ -25,16 +25,38 @@ class BrewFile:
 
     def __post_init__(self) -> None:
         self.log = logging.getLogger(__name__)
-        # Prepare helper, need verbose first
+
+        # Make helper
         self.opt["verbose"] = int(
             os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1)
         )
         self.helper = BrewHelper(self.opt)
 
-        # Other default values
-        self.opt["command"] = ""
-        self.opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
-        if not self.opt["input"].name:
+        # Check Homebrew
+        self.check_brew_cmd()
+
+        # Set full opt
+        for k, v in self.default_opt().items():
+            if k not in self.opt:
+                self.opt[k] = v
+
+        # Set other initial variables
+        self.int_opts: list[str] = ["verbose"]
+        self.float_opts: list[str] = []
+
+        self.set_input(self.opt["input"])
+
+        self.pack_deps: dict[str, list[str]] = {}
+        self.top_packs: list[str] = []
+
+        self.editor = ""
+
+    def default_opt(self) -> dict[str, Any]:
+        opt: dict[str, Any] = {}
+        opt["verbose"] = int(os.environ.get("HOMEBREW_BREWFILE_VERBOSE", 1))
+        opt["command"] = ""
+        opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
+        if not opt["input"].name:
             brewfile_config = (
                 Path(
                     os.environ.get(
@@ -45,100 +67,83 @@ class BrewFile:
             )
             brewfile_home = Path(os.environ["HOME"] + "/.brewfile/Brewfile")
             if not brewfile_config.is_file() and brewfile_home.is_file():
-                self.opt["input"] = brewfile_home
+                opt["input"] = brewfile_home
             else:
-                self.opt["input"] = brewfile_config
-        self.opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
-        self.opt["form"] = None
-        self.opt["leaves"] = to_bool(
+                opt["input"] = brewfile_config
+        opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
+        opt["form"] = None
+        opt["leaves"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_LEAVES", False)
         )
-        self.opt["on_request"] = to_bool(
+        opt["on_request"] = to_bool(
             os.environ.get("HOMEBREW_BREWFILE_ON_REQUEST", False)
         )
-        self.opt["top_packages"] = os.environ.get(
+        opt["top_packages"] = os.environ.get(
             "HOMEBREW_BREWFILE_TOP_PACKAGES", ""
         )
-        self.opt["repo"] = ""
-        self.opt["noupgradeatupdate"] = False
-        self.opt["link"] = True
-        self.opt["caskonly"] = False
-        self.opt["dryrun"] = False
-        self.opt["initialized"] = False
-        self.opt["cask_repo"] = "homebrew/cask"
-        self.opt["reattach_formula"] = "reattach-to-user-namespace"
-        self.opt["mas_formula"] = "mas"
-        self.opt["my_editor"] = os.environ.get(
+        opt["repo"] = ""
+        opt["noupgradeatupdate"] = False
+        opt["link"] = True
+        opt["caskonly"] = False
+        opt["dryrun"] = False
+        opt["initialized"] = False
+        opt["cask_repo"] = "homebrew/cask"
+        opt["reattach_formula"] = "reattach-to-user-namespace"
+        opt["mas_formula"] = "mas"
+        opt["my_editor"] = os.environ.get(
             "HOMEBREW_BREWFILE_EDITOR", os.environ.get("EDITOR", "vim")
         )
-        self.opt["is_brew_cmd"] = False
-        self.opt["brew_cmd"] = ""
-        self.opt["mas_cmd"] = "mas"
-        self.opt["is_mas_cmd"] = 0
-        self.opt["mas_cmd_installed"] = False
-        self.opt["reattach_cmd_installed"] = False
-        self.opt["args"] = []
-        self.opt["yn"] = False
-        self.opt["brew_packages"] = ""
-        self.opt["homebrew_ruby"] = False
-
-        # Check Homebrew
-        self.check_brew_cmd()
+        opt["brew_cmd"] = ""
+        opt["mas_cmd"] = "mas"
+        opt["is_mas_cmd"] = 0
+        opt["mas_cmd_installed"] = False
+        opt["reattach_cmd_installed"] = False
+        opt["args"] = []
+        opt["yn"] = False
+        opt["brew_packages"] = ""
+        opt["homebrew_ruby"] = False
 
         # Check Homebrew variables
+        opt["caskroom"] = self.brew_val("prefix") + "/Caskroom"
         cask_opts = self.parse_env_opts(
             "HOMEBREW_CASK_OPTS", {"--appdir": "", "--fontdir": ""}
         )
-
-        if (
-            not Path(self.brew_val("prefix") + "/Caskroom").is_dir()
-            and Path("/opt/homebrew-cask/Caskroom").is_dir()
-        ):
-            self.opt["caskroom"] = "/opt/homebrew-cask/Caskroom"
-        else:
-            self.opt["caskroom"] = self.brew_val("prefix") + "/Caskroom"
-        self.opt["appdir"] = (
+        opt["appdir"] = (
             cask_opts["--appdir"].rstrip("/")
             if cask_opts["--appdir"] != ""
             else os.environ["HOME"] + "/Applications"
         )
-        self.opt["appdirlist"] = [
+        opt["appdirlist"] = [
             "/Applications",
             os.environ["HOME"] + "/Applications",
         ]
-        if self.opt["appdir"].rstrip("/") not in self.opt["appdirlist"]:
-            self.opt["appdirlist"].append(self.opt["appdir"])
-        self.opt["appdirlist"] += [
-            x.rstrip("/") + "/Utilities" for x in self.opt["appdirlist"]
+        if opt["appdir"].rstrip("/") not in opt["appdirlist"]:
+            opt["appdirlist"].append(opt["appdir"])
+        opt["appdirlist"] += [
+            x.rstrip("/") + "/Utilities" for x in opt["appdirlist"]
         ]
-        self.opt["appdirlist"] = [
-            x for x in self.opt["appdirlist"] if Path(x).is_dir()
-        ]
+        opt["appdirlist"] = [x for x in opt["appdirlist"] if Path(x).is_dir()]
         # fontdir may be used for application search, too
-        self.opt["fontdir"] = cask_opts["--fontdir"]
+        opt["fontdir"] = cask_opts["--fontdir"]
 
-        self.opt["appstore"] = to_num(
+        opt["appstore"] = to_num(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1)
         )
 
-        self.opt["no_appstore"] = to_num(
+        opt["no_appstore"] = to_num(
             os.environ.get("HOMEBREW_BREWFILE_APPSTORE", 1)
         )
 
-        self.opt["all_files"] = False
+        opt["all_files"] = False
+        opt["read"] = False
 
-        self.int_opts: list[str] = ["verbose"]
-        self.float_opts: list[str] = []
+        return opt
 
+    def set_input(self, file: str | Path) -> None:
+        self.opt["input"] = Path(file)
         self.brewinfo = BrewInfo(self.helper, self.opt["input"])
         self.brewinfo_ext: list[BrewInfo] = []
         self.brewinfo_main = self.brewinfo
-        self.opt["read"] = False
-
-        self.pack_deps: dict[str, list[str]] = {}
-        self.top_packs: list[str] = []
-
-        self.editor = ""
 
     def debug_banner(self) -> None:
         if self.opt["dryrun"]:
@@ -319,19 +324,20 @@ class BrewFile:
             self.banner(f"# Initialize {b.file}")
             b.write()
 
-    def get(self, name, only_ext=False):
+    def get(self, name, only_ext=False) -> set | dict:
         list_copy = self.brewinfo_main.get(name)
         if isinstance(list_copy, list):
             if only_ext:
                 del list_copy[:]
             for b in self.brewinfo_ext:
                 list_copy += b.get(name)
+            return set(list_copy)
         elif isinstance(list_copy, dict):
             if only_ext:
                 list_copy.clear()
             for b in self.brewinfo_ext:
                 list_copy.update(b.get(name))
-        return list_copy
+            return list_copy
 
     def remove_pack(self, name, package):
         if package in self.brewinfo_main.get(name):
@@ -703,7 +709,7 @@ class BrewFile:
 
     def check_brew_cmd(self):
         """Check Homebrew."""
-        if self.opt["is_brew_cmd"]:
+        if self.opt.get("is_brew_cmd", False):
             return True
 
         if self.which_brew():
@@ -745,7 +751,7 @@ class BrewFile:
         )
         if ret != 0:
             for line in lines:
-                sys.stdout.write(line)
+                self.log.info(line)
             self.log.warning(
                 "\n\nCheck brew environment and fix problems if necessary.\n"
                 "# You can check by:\n"
