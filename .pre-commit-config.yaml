@@ -1,39 +1,39 @@
 repos:
-- repo: https://github.com/rcmdnk/pyproject-pre-commit
-  rev: v0.0.1
-  hooks:
-  - id: black-diff
-  - id: black
-  - id: blacken-docs
-  - id: autoflake-diff
-  - id: autoflake
-  - id: autopep8-diff
-  - id: autopep8
-  - id: isort-diff
-  - id: isort
-  - id: flake8
-  - id: bandit
-  - id: mypy
-  - id: shellcheck
-  - id: mdformat-check
-  - id: mdformat
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
-  hooks:
-    - id: check-byte-order-marker
-    - id: check-yaml
-    - id: check-json
-    - id: check-toml
-    - id: check-case-conflict
-    - id: check-merge-conflict
-      args:
-        - "--assume-in-merge"
-    - id: end-of-file-fixer
-    - id: fix-byte-order-marker
-    - id: mixed-line-ending
-    - id: trailing-whitespace
-    - id: debug-statements
-    - id: detect-private-key
-    - id: detect-aws-credentials
-      args:
-        - "--allow-missing-credentials"
+  - repo: https://github.com/rcmdnk/pyproject-pre-commit
+    rev: v0.0.1
+    hooks:
+      - id: black-diff
+      - id: black
+      - id: blacken-docs
+      - id: autoflake-diff
+      - id: autoflake
+      - id: autopep8-diff
+      - id: autopep8
+      - id: isort-diff
+      - id: isort
+      - id: flake8
+      - id: bandit
+      - id: mypy
+      - id: shellcheck
+      - id: mdformat-check
+      - id: mdformat
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-byte-order-marker
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-case-conflict
+      - id: check-merge-conflict
+        args:
+          - "--assume-in-merge"
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: debug-statements
+      - id: detect-private-key
+      - id: detect-aws-credentials
+        args:
+          - "--allow-missing-credentials"
