@@ -259,6 +259,7 @@ class BrewInfo:
                     case "tap":
                         self.tap_input.append(p)
                     case "tapall":
+                        self.helper.proc(f"brew tap {p}")
                         self.tap_input.append(p)
                         for tp in self.get_tap_packs(p):
                             self.brew_input.append(tp)

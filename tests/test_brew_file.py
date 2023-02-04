@@ -15,23 +15,9 @@ def bf(caplog):
     return obj
 
 
-def test_debug_banner(bf, caplog):
-    bf.debug_banner()
-    assert not caplog.text
-    bf.opt["dryrun"] = True
-    bf.debug_banner()
-    assert caplog.record_tuples == [
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "\n##################\n# This is dry run.\n##################\n",
-        )
-    ]
-
-
 def test_parse_env_opts(bf):
     os.environ["TEST_OPT"] = "--opt2=3 --opt3 opt4=4"
-    opts = bf.parse_env_opts("test_opt", {"--opt1": "1", "--opt2": "2"})
+    opts = bf.parse_env_opts("TEST_OPT", {"--opt1": "1", "--opt2": "2"})
     assert opts == {"--opt1": "1", "--opt2": "3", "--opt3": "", "opt4": "4"}
 
 
@@ -99,6 +85,40 @@ def test_banner(bf, caplog):
             logging.INFO,
             "\n###########\ntest banner\n###########\n",
         )
+    ]
+
+
+def test_dryrun_banner(bf, caplog):
+    bf.opt["dryrun"] = False
+    with bf.DryrunBanner(bf):
+        bf.log.info("test")
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "test",
+        ),
+    ]
+    caplog.clear()
+    bf.opt["dryrun"] = True
+    with bf.DryrunBanner(bf):
+        bf.log.info("test")
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n##################\n# This is dry run.\n##################\n",
+        ),
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "test",
+        ),
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n##################\n# This is dry run.\n##################\n",
+        ),
     ]
 
 
@@ -404,7 +424,8 @@ def test_find_brew_app(bf):
     pass
 
 
-def test_check_cask(bf, caplog):
+def test_check_cask(bf, caplog, tmp_path):
+    os.chdir(tmp_path)
     if not brew_file.is_mac():
         with pytest.raises(RuntimeError) as excinfo:
             bf.check_cask()
@@ -413,10 +434,61 @@ def test_check_cask(bf, caplog):
     bf.check_cask()
     assert "# Starting to check applications for Cask..." in caplog.messages[0]
     assert "# Summary" in "".join(caplog.messages)
+    assert Path("Caskfile").exists()
+    with open("Caskfile", "r") as f:
+        lines = f.readlines()
+    assert lines[0] == "# Cask applications\n"
+    assert (
+        lines[1]
+        == "# Please copy these lines to your Brewfile and use with `brew-file install`.\n"
+    )
 
 
 def test_make_pack_deps(bf):
     pass
+
+
+@pytest.fixture
+def execute_fixture(monkeypatch) -> None:
+    for func in [
+        "check_brew_cmd",
+        "check_cask",
+        "set_brewfile_repo",
+        "set_brewfile_local",
+        "check_repo",
+        "repomgr",
+        "brew_cmd",
+        "initialize",
+        "check_input_file",
+        "edit_brewfile",
+        "cat_brewfile",
+        "get_files",
+        "clean_non_request",
+        "cleanup",
+        "install",
+    ]:
+
+        def set_func(func):
+            # make local variable, needed to keep in print view
+            name = func
+            monkeypatch.setattr(
+                brew_file.BrewFile,
+                func,
+                lambda self, *args, **kw: print(name, args, kw),  # noqa: T201
+            )
+
+        set_func(func)
+    monkeypatch.setattr(
+        brew_file.BrewFile, "check_brew_cmd", lambda self: None
+    )
+    monkeypatch.setattr(brew_file.BrewHelper, "brew_val", lambda self, x: x)
+    monkeypatch.setattr(
+        brew_file.BrewHelper,
+        "proc",
+        lambda self, *args, **kw: print("proc", args, kw),  # noqa: T201
+    )
+    bf = brew_file.BrewFile({})
+    return bf
 
 
 @pytest.mark.parametrize(
@@ -456,52 +528,16 @@ def test_make_pack_deps(bf):
         ),
     ],
 )
-def test_execute(monkeypatch, capsys, command, out):
-    for func in [
-        "check_brew_cmd",
-        "check_cask",
-        "set_brewfile_repo",
-        "set_brewfile_local",
-        "check_repo",
-        "repomgr",
-        "brew_cmd",
-        "initialize",
-        "check_input_file",
-        "edit_brewfile",
-        "cat_brewfile",
-        "get_files",
-        "clean_non_request",
-        "cleanup",
-        "install",
-    ]:
-
-        def set_func(func):
-            # make local variable, needed to keep in print view
-            name = func
-            monkeypatch.setattr(
-                brew_file.BrewFile,
-                func,
-                lambda self, *args, **kw: print(name, args, kw),  # noqa: T201
-            )
-
-        set_func(func)
-    monkeypatch.setattr(
-        brew_file.BrewFile, "check_brew_cmd", lambda self: None
-    )
-    monkeypatch.setattr(brew_file.BrewHelper, "brew_val", lambda self, x: x)
-    monkeypatch.setattr(
-        brew_file.BrewHelper,
-        "proc",
-        lambda self, *args, **kw: print("proc", args, kw),  # noqa: T201
-    )
-    bf = brew_file.BrewFile({})
+def test_execute(execute_fixture, capsys, command, out):
+    bf = execute_fixture
     bf.opt["command"] = command
     bf.execute()
     captured = capsys.readouterr()
     assert captured.out == out
 
 
-def test_execute_err(bf):
+def test_execute_err(execute_fixture):
+    bf = execute_fixture
     bf.opt["command"] = "wrong_command"
     with pytest.raises(RuntimeError) as excinfo:
         bf.execute()

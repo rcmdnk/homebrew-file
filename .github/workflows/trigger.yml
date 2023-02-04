@@ -1,0 +1,28 @@
+---
+name: trigger
+
+on:
+  push:
+    branches-ignore:
+      - "coverage"
+      - "renovate/**"
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: convictional/trigger-workflow-and-wait@v1.6.5
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          ref: ${{ github.ref }}
+          github_token: ${{ github.token }}
+          workflow_file_name: dispatch.yml
+          propagate_failure: true

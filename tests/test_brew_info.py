@@ -272,26 +272,33 @@ def test_get_tap_packs(brew_info):
     assert "python@3.10" in packs
 
 
-def test_get_tap_casks(brew_info):
+def test_get_tap_casks(brew_info, monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        brew_file.BrewInfo, "get_tap_path", lambda self, x: tmp_path / x
+    )
+    cask_dir = tmp_path / "homebrew/cask/Casks"
+    cask_dir.mkdir(parents=True, exist_ok=True)
+    (cask_dir / "a.rb").touch()
+    (cask_dir / "b.rb").touch()
     casks = brew_info.get_tap_casks("homebrew/cask")
-    assert "iterm2" in casks
+    assert casks == ["a", "b"]
 
 
 def test_get_leaves(brew_info):
     pass
 
 
-def test_get_info(brew_info):
+def test_get_info(brew_info, python):
     info = brew_info.get_info("python@3.10")
     assert info["python@3.10"]["installed"][0]["used_options"] == []
 
 
-def test_get_installed(brew_info):
+def test_get_installed(brew_info, python):
     installed = brew_info.get_installed("python@3.10")
     assert installed["version"] == platform.python_version()
 
 
-def test_get_option(brew_info):
+def test_get_option(brew_info, python):
     opt = brew_info.get_option("python@3.10")
     assert opt == ""
 
@@ -327,7 +334,7 @@ def test_mas_pack(brew_info):
 
 # Ignore DeprecationWarning to allow \$
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-def test_write(brew_info, tmp_path):
+def test_write(brew_info, tmp_path, tap):
     tmp_file = tmp_path / "f"
     default_file = brew_info.file
     brew_info.helper.opt["caskonly"] = False
@@ -340,13 +347,32 @@ def test_write(brew_info, tmp_path):
     brew_info.file = tmp_file
     brew_info.write()
     with (open(default_file) as f1, open(tmp_file) as f2):
-        assert f1.read() == f2.read()
+        default_txt = f1.readlines()
+        if not brew_file.is_mac():
+            default_txt = [
+                x
+                for x in default_txt
+                if not x.startswith("cask ") and not x.startswith("appstore ")
+            ]
+        default_txt = "".join(default_txt)
+        if not brew_file.is_mac():
+            default_txt = default_txt.replace(
+                "# App Store applications\n\n", ""
+            )
+        assert f2.read() == default_txt
     brew_info.helper.opt["form"] = "bundle"
     brew_info.write()
+    if brew_file.is_mac():
+        appstore1 = "\n# App Store applications\nmas '', id: Keynote\n"
+        appstore2 = "\n# App Store applications\nmas install Keynote\n"
+    else:
+        appstore1 = ""
+        appstore2 = ""
+
     with open(tmp_file) as f2:
         assert (
             f2.read()
-            == """# Before commands
+            == f"""# Before commands
 #before echo before
 
 # tap repositories and their packages
@@ -356,10 +382,7 @@ tap 'homebrew/core'
 tap 'homebrew/cask'
 
 tap 'rcmdnk/rcmdnkcask'
-
-# App Store applications
-mas '', id: Keynote
-
+{appstore1}
 # Main file
 #main 'BrewfileMain'
 
@@ -382,7 +405,7 @@ mas '', id: Keynote
         with open(tmp_file) as f2:
             assert (
                 f2.read()
-                == """#!/usr/bin/env bash
+                == f"""#!/usr/bin/env bash
 
 #BREWFILE_IGNORE
 if ! which brew >& /dev/null;then
@@ -405,10 +428,7 @@ brew tap homebrew/core
 brew tap homebrew/cask
 
 brew tap rcmdnk/rcmdnkcask
-
-# App Store applications
-mas install Keynote
-
+{appstore2}
 # Main file
 #main BrewfileMain
 

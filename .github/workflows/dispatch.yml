@@ -1,0 +1,93 @@
+name: test
+
+on:
+  workflow_dispatch:
+    inputs:
+      main_branch:
+        description: "Main branch for coverage/tmate."
+        type: string
+        required: false
+        default: "master"
+      main_os:
+        description: "Main os for coverage/tmate."
+        type: choice
+        default: "macos-12"
+        options:
+          - "macos-12"
+          - "ubuntu-latest"
+      main_py_ver:
+        description: "Main python version for coverage/tmate."
+        type: choice
+        default: "3.10"
+        options:
+          - "3.10"
+      tmate:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate). This is only for main strategy and others will be stopped.'
+        required: false
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    strategy:
+      matrix:
+        os: [macos-12, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install test
+        run: |
+          curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
+          chmod 755 ./install.sh
+          ./install.sh
+          rm -f install.sh
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-12, ubuntu-latest]
+        python-version: ['3.10']
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check is main
+        id: is_main
+        run: |
+          main_branch="${{ inputs.main_branch }}"
+          main_branch=${main_branch:-master}
+          main_os="${{ inputs.main_os }}"
+          main_os=${main_os:-macos-12}
+          main_py_ver="${{ inputs.main_py_ver }}"
+          main_py_ver=${main_py_ver:-3.10}
+          echo "MAIN_BRANCH=$main_branch" >> $GITHUB_ENV
+          echo "MAIN_OS=$main_os" >> $GITHUB_ENV
+          echo "MAIN_PY_VER=$main_py_ver" >> $GITHUB_ENV
+          if [ "${{ github.ref }}" = "refs/heads/$main_branch" ] && [ "${{ matrix.os }}" = "$main_os" ] && [ "${{ matrix.python-version }}" = "$main_py_ver" ];then
+            echo "IS_MAIN=1" >> $GITHUB_ENV
+            is_main=1
+          else
+            echo "IS_MAIN=0" >> $GITHUB_ENV
+            is_main=0
+          fi
+          if [ "${{ inputs.tmate }}" = "true" ];then
+            if [ "$is_main" = 0 ];then
+              echo "Tmate is enabled and this is not main, skip tests"
+              exit 1
+            fi
+            echo "DEBUG=1" >> $GITHUB_ENV
+          else
+            echo "DEBUG=0" >> $GITHUB_ENV
+          fi
+      - name: Homebrew installation
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - uses: rcmdnk/python-action@v1
+        with:
+          pytest-cov-path: "bin"
+          coverage-push: "${{ env.IS_MAIN }}"
+          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
+          pre-commit: "${{ env.IS_MAIN }}"
+          tmate: "${{ env.DEBUG }}"

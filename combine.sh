@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 
+pre-commit run -a
 
 dest="./bin/brew-file"
 tmp_backup=$(mktemp -t brew-file)
 mv "$dest" "$tmp_backup"
 echo "Old brew-file was moved to $tmp_backup"
-
-black src/brew_file/
-isort src/brew_file
-autoflake --in-place src/brew_file
-autopep8 --in-place src/brew_file
 
 {
   echo "#!/usr/bin/env python3"

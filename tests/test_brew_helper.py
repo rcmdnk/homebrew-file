@@ -59,110 +59,76 @@ def test_proc(helper, cmd, ret, lines, exit_on_err, separate_err, env):
         assert lines_proc == lines
 
 
-def test_proc_err(helper, caplog):
+@pytest.fixture
+def err_cmd():
+    cmd = {
+        "ech test": {
+            "ret": 2,
+            "out": "[Errno 2] No such file or directory: 'ech'",
+        },
+        "ls /path/to/not/exist": {
+            "ret": 1 if brew_file.is_mac() else 2,
+            "out": "ls: /path/to/not/exist: No such file or directory"
+            if brew_file.is_mac()
+            else "ls: cannot access '/path/to/not/exist': No such file or directory",
+        },
+    }
+    return cmd
+
+
+def test_proc_err(helper, caplog, err_cmd):
     caplog.set_level(logging.DEBUG)
 
-    caplog.clear()
-    ret_proc, lines_proc = helper.proc(
-        "ech test", separate_err=False, exit_on_err=False
-    )
-    assert ret_proc == 2
-    assert lines_proc == ["[Errno 2] No such file or directory: 'ech'"]
-
-    caplog.clear()
-    ret_proc, lines_proc = helper.proc(
-        "ls /path/to/not/exist", separate_err=False, exit_on_err=False
-    )
-    assert ret_proc == 1
-    assert lines_proc == ["ls: /path/to/not/exist: No such file or directory"]
-
-    caplog.clear()
-    ret_proc, lines_proc = helper.proc(
-        "ech test", separate_err=True, exit_on_err=False
-    )
-    assert ret_proc == 2
-    assert lines_proc == []
-    assert caplog.record_tuples == [
-        ("tests.brew_file", logging.INFO, "$ ech test"),
-        ("tests.brew_file", logging.INFO, ""),
-        (
-            "tests.brew_file",
-            logging.ERROR,
-            "[Errno 2] No such file or directory: 'ech'\n",
-        ),
-    ]
-
-    caplog.clear()
-    ret_proc, lines_proc = helper.proc(
-        "ls /path/to/not/exist", separate_err=True, exit_on_err=False
-    )
-    assert ret_proc == 1
-    assert lines_proc == []
-    assert caplog.record_tuples == [
-        ("tests.brew_file", logging.INFO, "$ ls /path/to/not/exist"),
-        ("tests.brew_file", logging.INFO, ""),
-        (
-            "tests.brew_file",
-            logging.ERROR,
-            "ls: /path/to/not/exist: No such file or directory\n",
-        ),
-    ]
-
-
-def test_proc_err_exit_on_err(helper, capsys):
-    with pytest.raises(brew_file.CmdError) as e:
+    for cmd in err_cmd:
+        caplog.clear()
         ret_proc, lines_proc = helper.proc(
-            "_wrong_command_",
-            separate_err=False,
-            print_err=True,
-            exit_on_err=True,
+            cmd, separate_err=False, exit_on_err=False
         )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 2
-    assert (
-        str(e.value)
-        == "[Errno 2] No such file or directory: '_wrong_command_'\n"
-    )
+        assert ret_proc == err_cmd[cmd]["ret"]
+        assert lines_proc == [err_cmd[cmd]["out"]]
 
-    with pytest.raises(brew_file.CmdError) as e:
+    for cmd in err_cmd:
+        caplog.clear()
         ret_proc, lines_proc = helper.proc(
-            "ls /path/to/not/exist",
-            separate_err=False,
-            print_err=True,
-            exit_on_err=True,
+            cmd, separate_err=True, exit_on_err=False
         )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 1
-    assert (
-        str(e.value) == "ls: /path/to/not/exist: No such file or directory\n"
-    )
+        assert ret_proc == err_cmd[cmd]["ret"]
+        assert lines_proc == []
+        assert caplog.record_tuples == [
+            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+            ("tests.brew_file", logging.INFO, ""),
+            (
+                "tests.brew_file",
+                logging.ERROR,
+                f"{err_cmd[cmd]['out']}\n",
+            ),
+        ]
 
-    with pytest.raises(brew_file.CmdError) as e:
-        ret_proc, lines_proc = helper.proc(
-            "_wrong_command_",
-            separate_err=True,
-            print_err=True,
-            exit_on_err=True,
-        )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 2
-    assert (
-        str(e.value)
-        == "[Errno 2] No such file or directory: '_wrong_command_'\n"
-    )
 
-    with pytest.raises(brew_file.CmdError) as e:
-        ret_proc, lines_proc = helper.proc(
-            "ls /path/to/not/exist",
-            separate_err=True,
-            print_err=True,
-            exit_on_err=True,
-        )
-    assert e.type == brew_file.CmdError
-    assert e.value.return_code == 1
-    assert (
-        str(e.value) == "ls: /path/to/not/exist: No such file or directory\n"
-    )
+def test_proc_err_exit_on_err(helper, capsys, err_cmd):
+    for cmd in err_cmd:
+        with pytest.raises(brew_file.CmdError) as e:
+            ret_proc, lines_proc = helper.proc(
+                cmd,
+                separate_err=False,
+                print_err=True,
+                exit_on_err=True,
+            )
+        assert e.type == brew_file.CmdError
+        assert e.value.return_code == err_cmd[cmd]["ret"]
+        assert str(e.value) == f"{err_cmd[cmd]['out']}\n"
+
+    for cmd in err_cmd:
+        with pytest.raises(brew_file.CmdError) as e:
+            ret_proc, lines_proc = helper.proc(
+                cmd,
+                separate_err=True,
+                print_err=True,
+                exit_on_err=True,
+            )
+        assert e.type == brew_file.CmdError
+        assert e.value.return_code == err_cmd[cmd]["ret"]
+        assert str(e.value) == f"{err_cmd[cmd]['out']}\n"
 
 
 def test_proc_dryrun(helper):
@@ -171,18 +137,6 @@ def test_proc_dryrun(helper):
     assert lines_proc == ["echo test"]
 
 
-def test_banner(helper, caplog):
-    caplog.set_level(logging.DEBUG)
-    helper.banner("test banner")
-    assert caplog.record_tuples == [
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "\n###########\ntest banner\n###########\n",
-        )
-    ]
-
-
 def test_brew_val(helper):
-    prefix = "/".join(helper.proc("which brew")[1][0].split("/")[:-2])
-    assert helper.brew_val("prefix") == prefix
+    prefix = Path(helper.proc("which brew")[1][0]).parents[1]
+    assert helper.brew_val("prefix") == str(prefix)
