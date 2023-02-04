@@ -68,3 +68,5 @@ ignore_missing_imports = true
 scripts_are_modules = true
 warn_unused_ignores = true
 warn_redundant_casts = true
+install_types = true
+non_interactive = true
