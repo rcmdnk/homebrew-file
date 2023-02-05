@@ -3,5 +3,5 @@
 
 | Tests | Skipped | Failures | Errors | Time |
 | ----- | ------- | -------- | -------- | ------------------ |
-| 137 | 0 :zzz: | 2 :x: | 0 :fire: | 19.729s :stopwatch: |
+| 137 | 0 :zzz: | 2 :x: | 0 :fire: | 18.056s :stopwatch: |
 
