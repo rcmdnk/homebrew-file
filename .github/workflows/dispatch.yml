@@ -1,3 +1,4 @@
+---
 name: dispatch
 
 on:
@@ -38,6 +39,9 @@ jobs:
         os: [macos-12, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Exit workflow
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.tmate }}
+        run: exit 1
       - name: Install test
         run: |
           curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
@@ -57,16 +61,7 @@ jobs:
       - name: Check is main
         id: is_main
         run: |
-          main_branch="${{ inputs.main_branch }}"
-          main_branch=${main_branch:-master}
-          main_os="${{ inputs.main_os }}"
-          main_os=${main_os:-macos-12}
-          main_py_ver="${{ inputs.main_py_ver }}"
-          main_py_ver=${main_py_ver:-3.10}
-          echo "MAIN_BRANCH=$main_branch" >> $GITHUB_ENV
-          echo "MAIN_OS=$main_os" >> $GITHUB_ENV
-          echo "MAIN_PY_VER=$main_py_ver" >> $GITHUB_ENV
-          if [ "${{ github.ref }}" = "refs/heads/$main_branch" ] && [ "${{ matrix.os }}" = "$main_os" ] && [ "${{ matrix.python-version }}" = "$main_py_ver" ];then
+          if [ "${{ github.ref }}" = "refs/heads/${{ inputs.main_branch }}" ] && [ "${{ matrix.os }}" = "${{ inputs.main_os }}" ] && [ "${{ matrix.python-version }}" = "${{ inputs.main_py_ver }}" ];then
             echo "IS_MAIN=1" >> $GITHUB_ENV
             is_main=1
           else
@@ -88,6 +83,6 @@ jobs:
         with:
           pytest-cov-path: "bin"
           coverage-push: "${{ env.IS_MAIN }}"
-          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
+          coverage-push-condition: "branch=${{ inputs.main_branch }}, os=${{ inputs.main_os }}, python_version=${{ inputs.main_py_ver }}"
           pre-commit: "${{ env.IS_MAIN }}"
           tmate: "${{ env.DEBUG }}"
