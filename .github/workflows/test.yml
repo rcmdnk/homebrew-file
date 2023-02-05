@@ -1,5 +1,5 @@
 ---
-name: trigger
+name: test
 
 on:
   push:
@@ -13,16 +13,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  trigger:
+  test:
     runs-on: ubuntu-latest
     permissions:
       actions: write
     steps:
       - uses: convictional/trigger-workflow-and-wait@v1.6.5
+        continue-on-error: true
+        id: dispatch
         with:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
           ref: ${{ github.ref }}
           github_token: ${{ github.token }}
           workflow_file_name: dispatch.yml
-          propagate_failure: true
+      - name: Write workflow url
+        run: |
+          echo Main job URL: ${{ steps.dispatch.outputs.workflow_url }} >> $GITHUB_STEP_SUMMARY
+      - name: Check status
+        run: |
+          if [ "${{ steps.dispatch.outputs.conclusion }}" != "success" ];then
+            exit 1
+          fi
