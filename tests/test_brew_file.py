@@ -122,7 +122,7 @@ def test_dryrun_banner(bf, caplog):
     ]
 
 
-def test_read_all(bf):
+def test_read_all(bf, tap):
     parent = Path(__file__).parent / "files"
     file = parent / "BrewfileTest"
     bf.set_input(file)
