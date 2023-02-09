@@ -19,7 +19,7 @@ Welcome to homebrew-file's documentation!
 
 
 
-Brewfile manager for `Homebrew <http://brew.sh/>`_ at OS X.
+Brewfile manager for `Homebrew <http://brew.sh/>`_ at macOS and Linux.
 
 It is similar to
 `homebrew-bundle <https://github.com/Homebrew/homebrew-bundle>`_
