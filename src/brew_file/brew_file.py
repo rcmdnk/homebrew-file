@@ -2246,9 +2246,10 @@ class BrewFile:
                     self.helper.proc(
                         "brew upgrade --fetch-HEAD", dryrun=self.opt["dryrun"]
                     )
-                    self.helper.proc(
-                        "brew upgrade --cask", dryrun=self.opt["dryrun"]
-                    )
+                    if is_mac():
+                        self.helper.proc(
+                            "brew upgrade --cask", dryrun=self.opt["dryrun"]
+                        )
                 if self.opt["repo"] != "":
                     self.repomgr("pull")
                 self.install()
