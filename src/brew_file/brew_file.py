@@ -972,7 +972,6 @@ class BrewFile:
             "brew tap",
             print_cmd=False,
             print_out=False,
-            env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
         )[1]
 
         self.brewinfo.set_val("tap_list", lines)
@@ -1660,7 +1659,6 @@ class BrewFile:
                     "brew tap",
                     print_cmd=False,
                     print_out=False,
-                    env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
                 )[1],
             )
         )
