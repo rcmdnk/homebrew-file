@@ -40,7 +40,6 @@ class LogFormatter(logging.Formatter):
     """Formatter to add color to log messages."""
 
     def __init__(self) -> None:
-
         self.default_format = "%(message)s"
         self.formats = {
             logging.DEBUG: f"[DEBUG] {self.default_format}",
@@ -765,8 +764,8 @@ if ! which brew >& /dev/null;then
   brew_installed=0
   echo Homebrew is not installed!
   echo Install now...
-  echo /bin/bash -c \\\"\\$\\(curl -fsSL https://raw.githubusercontent.com/Homebrew/ install/master/install.sh\\)\\\"
-  /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/ install/master/install.sh)\"
+  echo /bin/bash -c \\\"\\$\\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh\\)\\\"
+  /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\"
   echo
 fi
 #BREWFILE_ENDIGNORE
@@ -1347,7 +1346,12 @@ class BrewFile:
                 ["git", "commit", "-m", '"Prepared by ' + __prog__ + '"'],
                 cwd=dirname,
             )
-            self.helper.proc("git push -u origin master", cwd=dirname)
+            default_branch = self.helper.proc("git config init.defaultBranch")[
+                1
+            ][0]
+            self.helper.proc(
+                f"git push -u origin {default_branch}", cwd=dirname
+            )
 
     def clone_repo(self, exit_on_err=True):
         ret = self.helper.proc(

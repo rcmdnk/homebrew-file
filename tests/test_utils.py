@@ -64,3 +64,10 @@ def test_to_num(val, result):
 )
 def test_expandpath(path, result):
     assert brew_file.expandpath(path) == Path(result)
+
+
+def test_home_tilde():
+    assert (
+        brew_file.home_tilde(Path(os.environ["HOME"]) / "test" / "path")
+        == "~/test/path"
+    )

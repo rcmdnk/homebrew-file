@@ -422,7 +422,12 @@ class BrewFile:
                 ["git", "commit", "-m", '"Prepared by ' + __prog__ + '"'],
                 cwd=dirname,
             )
-            self.helper.proc("git push -u origin master", cwd=dirname)
+            default_branch = self.helper.proc("git config init.defaultBranch")[
+                1
+            ][0]
+            self.helper.proc(
+                f"git push -u origin {default_branch}", cwd=dirname
+            )
 
     def clone_repo(self, exit_on_err=True):
         ret = self.helper.proc(

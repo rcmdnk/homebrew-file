@@ -13,7 +13,6 @@ class LogFormatter(logging.Formatter):
     """Formatter to add color to log messages."""
 
     def __init__(self) -> None:
-
         self.default_format = "%(message)s"
         self.formats = {
             logging.DEBUG: f"[DEBUG] {self.default_format}",

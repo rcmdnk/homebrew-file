@@ -143,6 +143,14 @@ def test_brew_val(helper):
     assert helper.brew_val("prefix") == str(prefix)
 
 
+def test_formula_list(helper):
+    pass
+
+
+def test_cask_list(helper):
+    pass
+
+
 def test_get_info(helper, python):
     info = helper.get_info("python@3.10")
     assert info["python@3.10"]["installed"][0]["used_options"] == []
@@ -159,9 +167,19 @@ def test_get_option(helper, python):
     assert opt == ""
 
 
+def test_get_formula_info(helper):
+    info = helper.get_formula_info()
+    assert info[0]["tap"] == "homebrew/core"
+
+
 def test_get_tap_packs(helper, tap):
     packs = helper.get_tap_packs("rcmdnk/rcmdnkpac")
     assert "sentaku" in packs
+
+
+def test_get_cask_info(helper):
+    info = helper.get_cask_info()
+    assert info[0]["tap"] == "homebrew/cask"
 
 
 def test_get_tap_casks(helper, tap):

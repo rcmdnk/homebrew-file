@@ -15,10 +15,67 @@ def bf(caplog):
     return obj
 
 
+def test_default_opt(bf):
+    pass
+
+
+def test_set_input(bf):
+    pass
+
+
+def test_banner(bf, caplog):
+    bf.banner("test banner")
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n###########\ntest banner\n###########\n",
+        )
+    ]
+
+
+def test_dryrun_banner(bf, caplog):
+    bf.opt["dryrun"] = False
+    with bf.DryrunBanner(bf):
+        bf.log.info("test")
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "test",
+        ),
+    ]
+    caplog.clear()
+    bf.opt["dryrun"] = True
+    with bf.DryrunBanner(bf):
+        bf.log.info("test")
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n##################\n# This is dry run.\n##################\n",
+        ),
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "test",
+        ),
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n##################\n# This is dry run.\n##################\n",
+        ),
+    ]
+
+
 def test_parse_env_opts(bf):
     os.environ["TEST_OPT"] = "--opt2=3 --opt3 opt4=4"
     opts = bf.parse_env_opts("TEST_OPT", {"--opt1": "1", "--opt2": "2"})
     assert opts == {"--opt1": "1", "--opt2": "3", "--opt3": "", "opt4": "4"}
+
+
+def test_set_verbose(bf):
+    pass
 
 
 def test_set_args(bf):
@@ -74,51 +131,6 @@ def test_ask_yn_y(bf, caplog):
     assert bf.ask_yn("Question?")
     assert caplog.record_tuples == [
         ("tests.brew_file", logging.INFO, "Question? [y/n]: y")
-    ]
-
-
-def test_banner(bf, caplog):
-    bf.banner("test banner")
-    assert caplog.record_tuples == [
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "\n###########\ntest banner\n###########\n",
-        )
-    ]
-
-
-def test_dryrun_banner(bf, caplog):
-    bf.opt["dryrun"] = False
-    with bf.DryrunBanner(bf):
-        bf.log.info("test")
-    assert caplog.record_tuples == [
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "test",
-        ),
-    ]
-    caplog.clear()
-    bf.opt["dryrun"] = True
-    with bf.DryrunBanner(bf):
-        bf.log.info("test")
-    assert caplog.record_tuples == [
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "\n##################\n# This is dry run.\n##################\n",
-        ),
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "test",
-        ),
-        (
-            "tests.brew_file",
-            logging.INFO,
-            "\n##################\n# This is dry run.\n##################\n",
-        ),
     ]
 
 
@@ -304,8 +316,22 @@ def test_repo_file(bf):
     pass
 
 
-def test_init_repo(bf):
-    pass
+def test_init_repo(bf, caplog, tmp_path):
+    bf.check_gitconfig = lambda: False
+    file = tmp_path / "Brewfile"
+    bf.helper.proc("git init", cwd=tmp_path)
+    bf.set_input(file)
+    caplog.clear()
+    bf.init_repo()
+    assert caplog.record_tuples == [
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "Initialize the repository with README.md/Brewfile.",
+        )
+    ]
+    assert (tmp_path / "README.md").exists()
+    assert file.exists()
 
 
 def test_clone_repo(bf):
@@ -349,6 +375,10 @@ def test_check_brew_cmd(bf):
 
 
 def test_check_mas_cmd(bf):
+    pass
+
+
+def test_get_appstore_dict(bf):
     pass
 
 
@@ -416,12 +446,37 @@ def test_install(bf):
     pass
 
 
+def test_generate_cask_token(bf):
+    pass
+
+
 def test_find_app(bf):
     pass
 
 
 def test_find_brew_app(bf):
     pass
+
+
+def test_make_brew_app_cmd(bf):
+    assert (
+        bf.make_brew_app_cmd("abc", "/path/to/app")
+        == "brew abc # /path/to/app"
+    )
+
+
+def test_make_cask_app_cmd(bf):
+    assert (
+        bf.make_cask_app_cmd("abc", "/path/to/app")
+        == "cask abc # /path/to/app"
+    )
+
+
+def test_make_appstore_app_cmd(bf):
+    assert (
+        bf.make_appstore_app_cmd("abc", "/path/to/app")
+        == "appstore abc # /path/to/app"
+    )
 
 
 def test_check_cask(bf, caplog, tmp_path):
