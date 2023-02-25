@@ -118,37 +118,6 @@ class OpenWrapper:
 
 
 @dataclass
-class Tee:
-    """Module to write out to a file and loggers at the same time."""
-
-    file: Path
-    logger: logging.Logger | None = None
-
-    def __post_init__(self) -> None:
-        self.file.parent.mkdir(parents=True, exist_ok=True)
-        self.out = open(self.file, "w")
-
-    def __del__(self) -> None:
-        self.out.close()
-
-    def write(self, text) -> None:
-        """Write w/o line break."""
-        self.out.write(text)
-        if self.logger:
-            self.logger.info(text)
-
-    def writeln(self, text) -> None:
-        """Write w/ line break."""
-        self.out.write(text + "\n")
-        if self.logger:
-            self.logger.info(text + "\n")
-
-    def close(self):
-        """Close output files."""
-        self.__del__()
-
-
-@dataclass
 class StrRe(str):
     """Str wrapper to use regex especially for match-case."""
 

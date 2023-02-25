@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Union
 
 from .brew_helper import BrewHelper
-from .utils import Tee, is_mac
+from .utils import is_mac
 
 
 @dataclass
@@ -523,9 +523,10 @@ fi
         # Write to Brewfile
         if output:
             output = output_prefix + output
-            out = Tee(self.file, self.log)
-            out.write(output)
-            out.close()
+            self.get_dir().mkdir(parents=True, exist_ok=True)
+            self.log.info(output)
+            with open(self.file, "w") as f:
+                f.write(output)
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:

@@ -15,15 +15,7 @@ from urllib.parse import quote
 from .brew_helper import BrewHelper
 from .brew_info import BrewInfo
 from .info import __prog__
-from .utils import (
-    OpenWrapper,
-    Tee,
-    expandpath,
-    home_tilde,
-    is_mac,
-    to_bool,
-    to_num,
-)
+from .utils import OpenWrapper, expandpath, home_tilde, is_mac, to_bool, to_num
 
 
 @dataclass
@@ -468,7 +460,7 @@ class BrewFile:
 
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
-        Path(dirname).mkdir(parent=True, exist_ok=True)
+        Path(dirname).mkdir(parents=True, exist_ok=True)
         self.helper.proc("git init --bare", cwd=dirname)
         self.clone_repo()
 
@@ -1706,93 +1698,97 @@ class BrewFile:
 
         # Make list
         casks_in_others = []
-        out = Tee(Path("Caskfile"), self.log)
+        output = ""
 
-        out.writeln("# Cask applications\n")
+        output += "# Cask applications\n\n"
 
         for tap in set(cask_apps.keys()) or set(has_cask_apps.keys()):
-            out.writeln(f"# Apps installed by cask in {tap}")
+            output += f"# Apps installed by cask in {tap}\n"
             if tap != self.opt["cask_repo"] or not self.opt["api"]:
-                out.writeln(f"tap {tap}")
+                output += f"tap {tap}\n"
             for app_path, token in sorted(cask_apps[tap], key=lambda x: x[1]):
                 if token not in casks_in_others:
-                    out.writeln(self.make_cask_app_cmd(token, app_path))
+                    output += self.make_cask_app_cmd(token, app_path) + "\n"
                     casks_in_others.append(token)
                 else:
-                    out.writeln(f"#{self.make_cask_app_cmd(token, app_path)}")
-            out.writeln("")
+                    output += f"#{self.make_cask_app_cmd(token, app_path)}\n"
+            output += "\n"
 
             if tap in non_latest_cask_apps and non_latest_cask_apps[tap]:
-                out.writeln("# New version are available for following apps")
+                output += "# New version are available for following apps\n"
                 for app_path, token in sorted(non_latest_cask_apps[tap]):
                     if token not in casks_in_others:
-                        out.writeln(self.make_cask_app_cmd(token, app_path))
+                        output += (
+                            self.make_cask_app_cmd(token, app_path) + "\n"
+                        )
                         casks_in_others.append(token)
                     else:
-                        out.writeln(
-                            f"#{self.make_cask_app_cmd(token, app_path)}"
+                        output += (
+                            f"#{self.make_cask_app_cmd(token, app_path)}\n"
                         )
-                out.writeln("")
+                output += "\n"
 
             if tap in installed_casks and installed_casks[tap]:
-                out.writeln(
+                output += (
                     "# Cask is found, but no applications are found "
                     + "(could be fonts, system settings, "
-                    + "or installed in other directory.)"
+                    + "or installed in other directory.)\n"
                 )
                 for token in sorted(installed_casks[tap]):
                     if token not in casks_in_others:
-                        out.writeln(f"cask {token}")
+                        output += f"cask {token}\n"
                         casks_in_others.append(token)
                     else:
-                        out.writeln(f"#cask {token}")
-                out.writeln("")
+                        output += f"#cask {token}\n"
+                output += "\n"
 
             if tap in has_cask_apps and has_cask_apps[tap]:
-                out.writeln("# Apps installed directly instead of by cask")
+                output += "# Apps installed directly instead of by cask\n"
                 for app_path, token in sorted(has_cask_apps[tap]):
-                    out.writeln(f"#{self.make_cask_app_cmd(token, app_path)}")
-                out.writeln("")
+                    output += f"#{self.make_cask_app_cmd(token, app_path)}\n"
+                output += "\n"
 
         for tap in set(brew_apps.keys()) or set(has_brew_apps.keys()):
-            out.writeln(f"# Apps installed by brew in {tap}")
+            output += f"# Apps installed by brew in {tap}\n"
             if tap != self.opt["core_repo"] or not self.opt["api"]:
-                out.writeln(f"tap {tap}")
+                output += f"tap {tap}\n"
             for app_path, token in sorted(brew_apps[tap], key=lambda x: x[1]):
                 if token not in casks_in_others:
-                    out.writeln(self.make_brew_app_cmd(token, app_path))
+                    output += self.make_brew_app_cmd(token, app_path) + "\n"
                     casks_in_others.append(token)
                 else:
-                    out.writeln(f"#{self.make_brew_app_cmd(token, app_path)}")
-            out.writeln("")
+                    output += f"#{self.make_brew_app_cmd(token, app_path)}\n"
+            output += "\n"
 
             if tap in has_brew_apps and has_brew_apps[tap]:
-                out.writeln("# Apps installed directly instead of by brew")
+                output += "# Apps installed directly instead of by brew\n"
                 for app_path, token in sorted(has_brew_apps[tap]):
-                    out.writeln(f"#{self.make_brew_app_cmd(token, app_path)}")
-                out.writeln("")
+                    output += f"#{self.make_brew_app_cmd(token, app_path)}\n"
+                output += "\n"
 
         if appstore_apps:
-            out.writeln("# Apps installed from AppStore")
+            output += "# Apps installed from AppStore\n"
             for name, app_path in appstore_apps.items():
-                out.writeln(self.make_appstore_app_cmd(name, app_path))
-            out.writeln("")
+                output += self.make_appstore_app_cmd(name, app_path) + "\n"
+            output += "\n"
 
         if appstore_has_cask_apps:
-            out.writeln(
-                "# Apps installed from AppStore, but casks are available."
+            output += (
+                "# Apps installed from AppStore, but casks are available.\n"
             )
             for name, app_path in appstore_has_cask_apps.items():
-                out.writeln(self.make_appstore_app_cmd(name, app_path))
-            out.writeln("")
+                output += self.make_appstore_app_cmd(name, app_path) + "\n"
+            output += "\n"
 
         if no_cask:
-            out.writeln("# Apps installed but no casks are available")
-            out.writeln("# (System applications or directory installed.)")
+            output += "# Apps installed but no casks are available\n"
+            output += "# (System applications or directory installed.)\n"
             for app_path in no_cask:
-                out.writeln(f"# {app_path}")
+                output += f"# {app_path}\n"
 
-        out.close()
+        with open("Caskfile", "w") as f:
+            f.write(output)
+        self.log.info(output)
 
         # Summary
         self.banner("# Summary")
