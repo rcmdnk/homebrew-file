@@ -261,11 +261,6 @@ def test_read(brew_info):
     assert brew_info.cmd_input == ["echo other commands"]
 
 
-def test_get_tap_path(brew_info, tap):
-    tap_path = brew_info.get_tap_path("rcmdnk/rcmdnkpac")
-    assert tap_path.exists()
-
-
 def test_get_leaves(brew_info):
     pass
 

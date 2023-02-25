@@ -83,7 +83,7 @@ def expandpath(path: Union[str, Path]) -> Path:
                 path = path.replace(kk, shell_envs[k])
     path = re.sub(
         r"(?<!\\)\$(\w+|\{([^}]*)\})",
-        lambda x: os.environ.get(x.group(2) or x.group(1), ""),
+        lambda x: os.getenv(x.group(2) or x.group(1), ""),
         path,
     )
     path = path.replace("\\$", "$")
@@ -91,7 +91,7 @@ def expandpath(path: Union[str, Path]) -> Path:
 
 
 def home_tilde(path: Union[str, Path]) -> str:
-    return str(path).replace(os.environ["HOME"], "~")
+    return str(path).replace(os.getenv("HOME"), "~")
 
 
 @dataclass

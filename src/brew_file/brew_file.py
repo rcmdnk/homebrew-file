@@ -62,34 +62,30 @@ class BrewFile:
 
     def default_opt(self) -> dict[str, Any]:
         opt: dict[str, Any] = {}
-        opt["verbose"] = os.environ.get("HOMEBREW_BREWFILE_VERBOSE", "info")
+        opt["verbose"] = os.getenv("HOMEBREW_BREWFILE_VERBOSE", "info")
         opt["command"] = ""
-        opt["input"] = Path(os.environ.get("HOMEBREW_BREWFILE", ""))
+        opt["input"] = Path(os.getenv("HOMEBREW_BREWFILE", ""))
         if not opt["input"].name:
             brewfile_config = (
                 Path(
-                    os.environ.get(
-                        "XDG_CONFIG_HOME", os.environ["HOME"] + "/.config"
+                    os.getenv(
+                        "XDG_CONFIG_HOME", os.getenv("HOME") + "/.config"
                     ),
                 )
                 / "brewfile/Brewfile"
             )
-            brewfile_home = Path(os.environ["HOME"] + "/.brewfile/Brewfile")
+            brewfile_home = Path(os.getenv("HOME") + "/.brewfile/Brewfile")
             if not brewfile_config.is_file() and brewfile_home.is_file():
                 opt["input"] = brewfile_home
             else:
                 opt["input"] = brewfile_config
-        opt["backup"] = os.environ.get("HOMEBREW_BREWFILE_BACKUP", "")
+        opt["backup"] = os.getenv("HOMEBREW_BREWFILE_BACKUP", "")
         opt["form"] = None
-        opt["leaves"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_LEAVES", False)
-        )
+        opt["leaves"] = to_bool(os.getenv("HOMEBREW_BREWFILE_LEAVES", False))
         opt["on_request"] = to_bool(
-            os.environ.get("HOMEBREW_BREWFILE_ON_REQUEST", False)
+            os.getenv("HOMEBREW_BREWFILE_ON_REQUEST", False)
         )
-        opt["top_packages"] = os.environ.get(
-            "HOMEBREW_BREWFILE_TOP_PACKAGES", ""
-        )
+        opt["top_packages"] = os.getenv("HOMEBREW_BREWFILE_TOP_PACKAGES", "")
         opt["repo"] = ""
         opt["noupgradeatupdate"] = False
         opt["link"] = True
@@ -101,8 +97,8 @@ class BrewFile:
         opt["cask_repo"] = f"{opt['homebrew_tap_prefix']}cask"
         opt["reattach_formula"] = "reattach-to-user-namespace"
         opt["mas_formula"] = "mas"
-        opt["my_editor"] = os.environ.get(
-            "HOMEBREW_BREWFILE_EDITOR", os.environ.get("EDITOR", "vim")
+        opt["my_editor"] = os.getenv(
+            "HOMEBREW_BREWFILE_EDITOR", os.getenv("EDITOR", "vim")
         )
         opt["brew_cmd"] = ""
         opt["mas_cmd"] = "mas"
@@ -116,7 +112,7 @@ class BrewFile:
 
         # Check Homebrew variables
         # Boolean HOMEBREW variable should be True if other than empty is set, including '0'
-        opt["api"] = not os.environ.get("HOMEBREW_NO_INSTALL_FROM_API", False)
+        opt["api"] = not os.getenv("HOMEBREW_NO_INSTALL_FROM_API", False)
         opt["cache"] = self.helper.brew_val("cache")
         opt["caskroom"] = self.helper.brew_val("prefix") + "/Caskroom"
         cask_opts = self.parse_env_opts(
@@ -125,11 +121,11 @@ class BrewFile:
         opt["appdir"] = (
             cask_opts["--appdir"].rstrip("/")
             if cask_opts["--appdir"] != ""
-            else os.environ["HOME"] + "/Applications"
+            else os.getenv("HOME") + "/Applications"
         )
         opt["appdirlist"] = [
             "/Applications",
-            os.environ["HOME"] + "/Applications",
+            os.getenv("HOME") + "/Applications",
         ]
         if opt["appdir"].rstrip("/") not in opt["appdirlist"]:
             opt["appdirlist"].append(opt["appdir"])
@@ -140,9 +136,7 @@ class BrewFile:
         # fontdir may be used for application search, too
         opt["fontdir"] = cask_opts["--fontdir"]
 
-        opt["appstore"] = to_num(
-            os.environ.get("HOMEBREW_BREWFILE_APPSTORE", -1)
-        )
+        opt["appstore"] = to_num(os.getenv("HOMEBREW_BREWFILE_APPSTORE", -1))
         opt["no_appstore"] = False
 
         opt["all_files"] = False
@@ -187,7 +181,7 @@ class BrewFile:
         if base_opts is not None:
             opts.update(base_opts)
 
-        env_opts = os.environ.get(env_var, None)
+        env_opts = os.getenv(env_var, None)
         if env_opts:
             user_opts = {
                 key: value
@@ -208,7 +202,7 @@ class BrewFile:
 
     def set_verbose(self, verbose: str | None = None) -> None:
         if verbose is None:
-            self.opt["verbose"] = os.environ.get(
+            self.opt["verbose"] = os.getenv(
                 "HOMEBREW_BREWFILE_VERBOSE", "info"
             )
         # Keep compatibility with old verbose
@@ -690,15 +684,15 @@ class BrewFile:
         _ = self.initialize(check=False)
 
     def add_path(self):
-        paths = os.environ["PATH"].split(":")
+        paths = os.getenv("PATH").split(":")
         for path in [
             "/home/linuxbrew/.linuxbrew/bin",
-            os.environ["HOME"] + "/.linuxbrew/bin",
+            os.getenv("HOME") + "/.linuxbrew/bin",
             "/opt/homebrew/bin",
             "/usr/local/bin",
         ]:
             if path not in paths:
-                os.environ["PATH"] = path + ":" + os.environ["PATH"]
+                os.environ["PATH"] = path + ":" + os.getenv("PATH")
 
     def which_brew(self):
         ret, cmd = self.helper.proc(
@@ -836,7 +830,7 @@ class BrewFile:
 
         self.opt["is_mas_cmd"] = 1
 
-        is_tmux = os.environ.get("TMUX", "")
+        is_tmux = os.getenv("TMUX", "")
         if is_tmux != "":
             if (
                 self.helper.proc(
