@@ -20,7 +20,9 @@ def test_default_opt(bf):
 
 
 def test_set_input(bf):
-    pass
+    bf.set_input("/path/to/file")
+    assert bf.opt["input"] == Path("/path/to/file")
+    assert bf.brewinfo.file == Path("/path/to/file")
 
 
 def test_banner(bf, caplog):
@@ -75,7 +77,18 @@ def test_parse_env_opts(bf):
 
 
 def test_set_verbose(bf):
-    pass
+    if "HOMEBREW_BREWFILE_VERBOSE" in os.environ:
+        del os.environ["HOMEBREW_BREWFILE_VERBOSE"]
+    bf.set_verbose()
+    assert bf.opt["verbose"] == "info"
+    assert bf.log.getEffectiveLevel() == logging.INFO
+    os.environ["HOMEBREW_BREWFILE_VERBOSE"] = "error"
+    bf.set_verbose()
+    assert bf.opt["verbose"] == "error"
+    assert bf.log.getEffectiveLevel() == logging.ERROR
+    bf.set_verbose("0")
+    assert bf.opt["verbose"] == "debug"
+    assert bf.log.getEffectiveLevel() == logging.DEBUG
 
 
 def test_set_args(bf):
@@ -313,7 +326,10 @@ def test_input_file(bf):
 
 
 def test_repo_file(bf):
-    pass
+    bf.set_input("/path/to/input")
+    bf.user_name = lambda: "user"
+    bf.opt["repo"] = "repo.git"
+    assert bf.repo_file() == Path("/path/to/user_repo/input")
 
 
 def test_init_repo(bf, caplog, tmp_path):
@@ -342,8 +358,12 @@ def test_check_github_repo(bf):
     pass
 
 
-def test_check_local_repo(bf):
-    pass
+def test_check_local_repo(bf, tmp_path):
+    bf.opt["repo"] = f"file:///{tmp_path}/repo"
+    bf.clone_repo = lambda: None
+    bf.check_local_repo()
+    assert (tmp_path / "repo").exists()
+    assert (tmp_path / "repo" / ".git").exists()
 
 
 def test_check_repo(bf):

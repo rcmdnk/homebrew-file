@@ -197,6 +197,8 @@ class BrewFile:
             self.opt["verbose"] = os.getenv(
                 "HOMEBREW_BREWFILE_VERBOSE", "info"
             )
+        else:
+            self.opt["verbose"] = verbose
         # Keep compatibility with old verbose
         match self.opt["verbose"]:
             case "0":
@@ -466,7 +468,7 @@ class BrewFile:
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
         Path(dirname).mkdir(parents=True, exist_ok=True)
-        self.helper.proc("git init --bare", cwd=dirname)
+        self.helper.proc("git init", cwd=dirname)
         self.clone_repo()
 
     def check_repo(self):

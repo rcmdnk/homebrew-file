@@ -260,10 +260,6 @@ def test_read(brew_info):
     assert brew_info.cmd_input == ["echo other commands"]
 
 
-def test_get_leaves(brew_info):
-    pass
-
-
 def test_convert_option(brew_info):
     brew_info.helper.opt["form"] = "file"
     opt = brew_info.convert_option("--HEAD --test")

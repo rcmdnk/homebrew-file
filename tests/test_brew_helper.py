@@ -143,12 +143,13 @@ def test_brew_val(helper):
     assert helper.brew_val("prefix") == str(prefix)
 
 
-def test_formula_list(helper):
-    pass
+def test_get_formula_list(helper, python):
+    formula_list = helper.get_formula_list()
+    assert "python@3.10" in formula_list
 
 
-def test_cask_list(helper):
-    pass
+def test_get_cask_list(helper):
+    assert isinstance(helper.get_cask_list(), list)
 
 
 def test_get_info(helper, python):
@@ -185,3 +186,7 @@ def test_get_cask_info(helper):
 def test_get_tap_casks(helper, tap):
     casks = helper.get_tap_casks("rcmdnk/rcmdnkcask")
     assert "vem" in casks
+
+
+def test_get_leaves(helper):
+    pass
