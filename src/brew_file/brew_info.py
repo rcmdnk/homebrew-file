@@ -3,7 +3,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 from .brew_helper import BrewHelper
 from .utils import Tee, is_mac
@@ -307,43 +307,6 @@ class BrewInfo:
                                 self.cask_args_input[k] = v
                     case _:
                         self.cmd_input.append(line.strip())
-
-    def get_installed(
-        self, package: str, package_info: Optional[dict] = None
-    ) -> dict:
-        """Get installed version of brew package."""
-        if package_info is None:
-            package_info = self.helper.get_info(package)[package]
-
-        if (version := package_info["linked_keg"]) is None:
-            version = package_info["installed"][-1]["version"]
-
-        if version != "":
-            for i in package_info["installed"]:
-                if i["version"].replace(".reinstall", "") == version:
-                    installed = i
-                    break
-        return installed
-
-    def get_option(
-        self, package: str, package_info: Optional[dict] = None
-    ) -> str:
-        """Get install options from brew info."""
-        # Get options for build
-        if package_info is None:
-            package_info = self.helper.get_info(package)[package]
-
-        opt = ""
-        installed = self.get_installed(package, package_info)
-        if installed["used_options"]:
-            opt = " " + " ".join(installed["used_options"])
-        for k, v in package_info["versions"].items():
-            if installed["version"] == v and k != "stable":
-                if k == "head":
-                    opt += " --HEAD"
-                else:
-                    opt += " --" + k
-        return opt
 
     def convert_option(self, opt: str) -> str:
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:

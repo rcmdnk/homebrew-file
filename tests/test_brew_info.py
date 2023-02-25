@@ -1,4 +1,3 @@
-import platform
 from pathlib import Path
 
 import pytest
@@ -263,17 +262,6 @@ def test_read(brew_info):
 
 def test_get_leaves(brew_info):
     pass
-
-
-def test_get_installed(brew_info, python):
-    installed = brew_info.get_installed("python@3.10")
-    # brew version can contained additional number with '_'
-    assert installed["version"].split("_")[0] == platform.python_version()
-
-
-def test_get_option(brew_info, python):
-    opt = brew_info.get_option("python@3.10")
-    assert opt == ""
 
 
 def test_convert_option(brew_info):

@@ -1,4 +1,5 @@
 import logging
+import platform
 import subprocess
 from pathlib import Path
 
@@ -145,6 +146,17 @@ def test_brew_val(helper):
 def test_get_info(helper, python):
     info = helper.get_info("python@3.10")
     assert info["python@3.10"]["installed"][0]["used_options"] == []
+
+
+def test_get_installed(helper, python):
+    installed = helper.get_installed("python@3.10")
+    # brew version can contained additional number with '_'
+    assert installed["version"].split("_")[0] == platform.python_version()
+
+
+def test_get_option(helper, python):
+    opt = helper.get_option("python@3.10")
+    assert opt == ""
 
 
 def test_get_tap_packs(helper, tap):

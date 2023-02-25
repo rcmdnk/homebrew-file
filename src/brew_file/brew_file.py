@@ -909,12 +909,11 @@ class BrewFile:
         if not self.opt["caskonly"]:
             info = self.helper.get_info()
             full_list = self.helper.get_formula_list()
-            del self.brewinfo.brew_full_list[:]
             self.brewinfo.brew_full_list.extend(full_list)
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
-                    installed = self.brewinfo.get_installed(p, info[p])
+                    installed = self.helper.get_installed(p, info[p])
                     if (
                         installed["installed_on_request"] is True
                         or installed["installed_on_request"] is None
@@ -936,7 +935,7 @@ class BrewFile:
                 if p not in leaves:
                     continue
                 self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = self.brewinfo.get_option(
+                self.brewinfo.brew_list_opt[p] = self.helper.get_option(
                     p, info[p]
                 )
 
@@ -1445,7 +1444,7 @@ class BrewFile:
                     != self.get("brew_list_opt")[p]
                 ):
                     self.brewinfo.add(
-                        "brew_input_opt", {p: self.brewinfo.get_option(p)}
+                        "brew_input_opt", {p: self.helper.get_option(p)}
                     )
                     reinit = 1
 

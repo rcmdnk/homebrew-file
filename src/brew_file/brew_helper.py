@@ -155,6 +155,43 @@ class BrewHelper:
             info[i["name"]] = i
         return info
 
+    def get_installed(
+        self, package: str, package_info: dict | None = None
+    ) -> dict:
+        """Get installed version of brew package."""
+        if package_info is None:
+            package_info = self.get_info(package)[package]
+
+        if (version := package_info["linked_keg"]) is None:
+            version = package_info["installed"][-1]["version"]
+
+        if version != "":
+            for i in package_info["installed"]:
+                if i["version"].replace(".reinstall", "") == version:
+                    installed = i
+                    break
+        return installed
+
+    def get_option(
+        self, package: str, package_info: dict | None = None
+    ) -> str:
+        """Get install options from brew info."""
+        # Get options for build
+        if package_info is None:
+            package_info = self.get_info(package)[package]
+
+        opt = ""
+        installed = self.get_installed(package, package_info)
+        if installed["used_options"]:
+            opt = " " + " ".join(installed["used_options"])
+        for k, v in package_info["versions"].items():
+            if installed["version"] == v and k != "stable":
+                if k == "head":
+                    opt += " --HEAD"
+                else:
+                    opt += " --" + k
+        return opt
+
     def get_formula_info(self):
         if "formula_info" in self.opt:
             return self.opt["formula_info"]

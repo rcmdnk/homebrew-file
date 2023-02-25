@@ -14,7 +14,7 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Generator, Optional, Union
+from typing import Any, Generator, Union
 from urllib.parse import quote
 
 __prog__ = "brew-file"
@@ -331,6 +331,43 @@ class BrewHelper:
         for i in infotmp:
             info[i["name"]] = i
         return info
+
+    def get_installed(
+        self, package: str, package_info: dict | None = None
+    ) -> dict:
+        """Get installed version of brew package."""
+        if package_info is None:
+            package_info = self.get_info(package)[package]
+
+        if (version := package_info["linked_keg"]) is None:
+            version = package_info["installed"][-1]["version"]
+
+        if version != "":
+            for i in package_info["installed"]:
+                if i["version"].replace(".reinstall", "") == version:
+                    installed = i
+                    break
+        return installed
+
+    def get_option(
+        self, package: str, package_info: dict | None = None
+    ) -> str:
+        """Get install options from brew info."""
+        # Get options for build
+        if package_info is None:
+            package_info = self.get_info(package)[package]
+
+        opt = ""
+        installed = self.get_installed(package, package_info)
+        if installed["used_options"]:
+            opt = " " + " ".join(installed["used_options"])
+        for k, v in package_info["versions"].items():
+            if installed["version"] == v and k != "stable":
+                if k == "head":
+                    opt += " --HEAD"
+                else:
+                    opt += " --" + k
+        return opt
 
     def get_formula_info(self):
         if "formula_info" in self.opt:
@@ -695,43 +732,6 @@ class BrewInfo:
                                 self.cask_args_input[k] = v
                     case _:
                         self.cmd_input.append(line.strip())
-
-    def get_installed(
-        self, package: str, package_info: Optional[dict] = None
-    ) -> dict:
-        """Get installed version of brew package."""
-        if package_info is None:
-            package_info = self.helper.get_info(package)[package]
-
-        if (version := package_info["linked_keg"]) is None:
-            version = package_info["installed"][-1]["version"]
-
-        if version != "":
-            for i in package_info["installed"]:
-                if i["version"].replace(".reinstall", "") == version:
-                    installed = i
-                    break
-        return installed
-
-    def get_option(
-        self, package: str, package_info: Optional[dict] = None
-    ) -> str:
-        """Get install options from brew info."""
-        # Get options for build
-        if package_info is None:
-            package_info = self.helper.get_info(package)[package]
-
-        opt = ""
-        installed = self.get_installed(package, package_info)
-        if installed["used_options"]:
-            opt = " " + " ".join(installed["used_options"])
-        for k, v in package_info["versions"].items():
-            if installed["version"] == v and k != "stable":
-                if k == "head":
-                    opt += " --HEAD"
-                else:
-                    opt += " --" + k
-        return opt
 
     def convert_option(self, opt: str) -> str:
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:
@@ -1852,12 +1852,11 @@ class BrewFile:
         if not self.opt["caskonly"]:
             info = self.helper.get_info()
             full_list = self.helper.get_formula_list()
-            del self.brewinfo.brew_full_list[:]
             self.brewinfo.brew_full_list.extend(full_list)
             if self.opt["on_request"]:
                 leaves = []
                 for p in info:
-                    installed = self.brewinfo.get_installed(p, info[p])
+                    installed = self.helper.get_installed(p, info[p])
                     if (
                         installed["installed_on_request"] is True
                         or installed["installed_on_request"] is None
@@ -1879,7 +1878,7 @@ class BrewFile:
                 if p not in leaves:
                     continue
                 self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = self.brewinfo.get_option(
+                self.brewinfo.brew_list_opt[p] = self.helper.get_option(
                     p, info[p]
                 )
 
@@ -2388,7 +2387,7 @@ class BrewFile:
                     != self.get("brew_list_opt")[p]
                 ):
                     self.brewinfo.add(
-                        "brew_input_opt", {p: self.brewinfo.get_option(p)}
+                        "brew_input_opt", {p: self.helper.get_option(p)}
                     )
                     reinit = 1
 
