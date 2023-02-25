@@ -315,21 +315,8 @@ class BrewInfo:
         if package_info is None:
             package_info = self.helper.get_info(package)[package]
 
-        installed = package_info["installed"][0]
-        version = ""
-        if package_info["linked_keg"] is None:
-            version = self.helper.proc(
-                "ls -l " + self.helper.brew_val("prefix") + "/opt/" + package,
-                print_cmd=False,
-                print_out=False,
-                exit_on_err=False,
-                separate_err=False,
-            )[1][0]
-            version = version.split("/")[-1]
-            if "No such file or directory" in version:
-                version = ""
-        else:
-            version = package_info["linked_keg"]
+        if (version := package_info["linked_keg"]) is None:
+            version = package_info["installed"][-1]["version"]
 
         if version != "":
             for i in package_info["installed"]:
