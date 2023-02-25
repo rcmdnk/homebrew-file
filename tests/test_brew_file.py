@@ -466,8 +466,15 @@ def test_install(bf):
     pass
 
 
-def test_generate_cask_token(bf):
-    pass
+@pytest.mark.parametrize(
+    "app, token",
+    [
+        ("/App/ABC.app", "abc"),
+        ("/App/--A B  C--D+E@f-9.app", "a-b-c-dpluseatf9"),
+    ],
+)
+def test_generate_cask_token(bf, app, token):
+    assert bf.generate_cask_token(app) == token
 
 
 def test_find_app(bf):
@@ -513,10 +520,6 @@ def test_check_cask(bf, caplog, tmp_path):
     with open("Caskfile", "r") as f:
         lines = f.readlines()
     assert lines[0] == "# Cask applications\n"
-
-
-def test_make_pack_deps(bf):
-    pass
 
 
 @pytest.fixture
