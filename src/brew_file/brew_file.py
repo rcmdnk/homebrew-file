@@ -903,7 +903,8 @@ class BrewFile:
     def get_list(self, force_appstore_list=False):
         """Get Installed Package List."""
         # Clear lists
-        self.brewinfo.clear_list()
+        for bi in self.brew_info_ext + [self.brewinfo_main]:
+            bi.clear_list()
 
         # Brew packages
         if not self.opt["caskonly"]:
