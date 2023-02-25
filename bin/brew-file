@@ -1008,9 +1008,6 @@ class BrewFile:
 
         self.set_input(self.opt["input"])
 
-        self.pack_deps: dict[str, list[str]] = {}
-        self.top_packs: list[str] = []
-
         self.editor = ""
 
         # fix up opt
@@ -2805,34 +2802,6 @@ class BrewFile:
                     f"{home_tilde(d):{maxlen}s} : {apps_check['no_cask'][d]}"
                 )
             self.log.info("")
-
-    def make_pack_deps(self):
-        """Make package dependencies."""
-        packs = self.get("brew_list")
-        self.pack_deps = {}
-        for p in packs:
-            deps = self.helper.proc(
-                "brew deps --1 " + p, print_cmd=False, print_out=False
-            )[1]
-            self.pack_deps[p] = []
-            for d in deps:
-                if d in packs:
-                    self.pack_deps[p].append(d)
-        dep_packs = []
-        for v in self.pack_deps.values():
-            dep_packs.extend(v)
-        self.top_packs = [x for x in packs if x not in dep_packs]
-
-        def print_dep(p, depth=0):
-            if depth > 2:
-                self.log.info(f"#{' ' * (depth - 2)}", end="")
-            self.log.info(p)
-            for deps in self.pack_deps[p]:
-                print_dep(deps, depth + 2)
-
-        for p in packs:
-            if p not in dep_packs:
-                print_dep(p)
 
     def execute(self) -> None:
         """Main execute function."""
