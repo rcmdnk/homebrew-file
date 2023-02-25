@@ -69,12 +69,12 @@ class BrewFile:
             brewfile_config = (
                 Path(
                     os.getenv(
-                        "XDG_CONFIG_HOME", os.getenv("HOME") + "/.config"
+                        "XDG_CONFIG_HOME", os.environ["HOME"] + "/.config"
                     ),
                 )
                 / "brewfile/Brewfile"
             )
-            brewfile_home = Path(os.getenv("HOME") + "/.brewfile/Brewfile")
+            brewfile_home = Path(os.environ["HOME"] + "/.brewfile/Brewfile")
             if not brewfile_config.is_file() and brewfile_home.is_file():
                 opt["input"] = brewfile_home
             else:
@@ -121,11 +121,11 @@ class BrewFile:
         opt["appdir"] = (
             cask_opts["--appdir"].rstrip("/")
             if cask_opts["--appdir"] != ""
-            else os.getenv("HOME") + "/Applications"
+            else os.environ["HOME"] + "/Applications"
         )
         opt["appdirlist"] = [
             "/Applications",
-            os.getenv("HOME") + "/Applications",
+            os.environ["HOME"] + "/Applications",
         ]
         if opt["appdir"].rstrip("/") not in opt["appdirlist"]:
             opt["appdirlist"].append(opt["appdir"])

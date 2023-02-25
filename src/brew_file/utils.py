@@ -91,7 +91,7 @@ def expandpath(path: Union[str, Path]) -> Path:
 
 
 def home_tilde(path: Union[str, Path]) -> str:
-    return str(path).replace(os.getenv("HOME"), "~")
+    return str(path).replace(os.environ["HOME"], "~")
 
 
 @dataclass
