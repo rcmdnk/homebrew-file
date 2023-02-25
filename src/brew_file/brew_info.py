@@ -524,9 +524,9 @@ fi
         if output:
             output = output_prefix + output
             self.get_dir().mkdir(parents=True, exist_ok=True)
+            with open(self.file, "w") as fout:
+                fout.write(output)
             self.log.info(output)
-            with open(self.file, "w") as f:
-                f.write(output)
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
