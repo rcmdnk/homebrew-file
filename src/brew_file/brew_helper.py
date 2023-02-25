@@ -41,6 +41,7 @@ class BrewHelper:
         separate_err: bool = False,
         print_err: bool = True,
         env: dict | None = None,
+        cwd: str | Path | None = None,
         dryrun: bool = False,
     ) -> tuple[int, list[str]]:
         """Get process output."""
@@ -71,6 +72,7 @@ class BrewHelper:
                 stderr=stderr,
                 text=True,
                 env=all_env,
+                cwd=cwd,
             )
             out, err = p.communicate()
             ret = p.returncode

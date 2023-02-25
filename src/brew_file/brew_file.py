@@ -396,21 +396,22 @@ class BrewFile:
         )
 
     def init_repo(self):
-        dirname = self.brewinfo.get_dir()
-        os.chdir(dirname)
+        dirname = Path(self.brewinfo.get_dir())
         branches = self.helper.proc(
             "git branch",
             print_cmd=False,
             print_out=False,
             exit_on_err=True,
             separate_err=True,
+            cwd=dirname,
         )[1]
         if branches:
             return
 
         self.log.info("Initialize the repository with README.md/Brewfile.")
-        if not Path("README.md").exists():
-            f = open("README.md", "w")
+        readme = dirname / "README.md"
+        if not readme.exists():
+            f = open(readme, "w")
             f.write(
                 "# " + self.repo_name() + "\n\n"
                 "Package list for [homebrew](http://brew.sh/).\n\n"
@@ -421,19 +422,16 @@ class BrewFile:
         self.brewinfo.file.touch()
 
         if self.check_gitconfig():
-            self.helper.proc("git add -A")
+            self.helper.proc("git add -A", cwd=dirname)
             self.helper.proc(
-                ["git", "commit", "-m", '"Prepared by ' + __prog__ + '"']
+                ["git", "commit", "-m", '"Prepared by ' + __prog__ + '"'],
+                cwd=dirname,
             )
-            self.helper.proc("git push -u origin master")
+            self.helper.proc("git push -u origin master", cwd=dirname)
 
     def clone_repo(self, exit_on_err=True):
         ret = self.helper.proc(
-            "git clone "
-            + self.opt["repo"]
-            + ' "'
-            + self.brewinfo.get_dir()
-            + '"',
+            f"git clone {self.opt['repo']} '{self.brewinfo.get_dir()}'",
             print_cmd=True,
             print_out=True,
             exit_on_err=False,
@@ -469,8 +467,7 @@ class BrewFile:
         dirname = self.opt["repo"].replace("file:///", "")
         if not Path(dirname).is_dir():
             os.makedirs(dirname)
-        os.chdir(dirname)
-        self.helper.proc("git init --bare")
+        self.helper.proc("git init --bare", cwd=dirname)
         self.clone_repo()
 
     def check_repo(self):
@@ -573,14 +570,14 @@ class BrewFile:
             self.clone_repo()
 
         # pull/push
-        self.log.info(f"$ cd {self.brewinfo.get_dir()}")
-        os.chdir(self.brewinfo.get_dir())
+        dirname = self.brewinfo.get_dir()
 
         ret, lines = self.helper.proc(
             "git status -s -uno",
             print_cmd=False,
             print_out=False,
             exit_on_err=True,
+            cwd=dirname,
         )
         if ret != 0:
             raise RuntimeError("\n".join(lines))
@@ -591,9 +588,10 @@ class BrewFile:
                     ["git", "commit", "-m", '"Update the package list"'],
                     exit_on_err=False,
                     dryrun=self.opt["dryrun"],
+                    cwd=dirname,
                 )
 
-        self.helper.proc(f"git {cmd}", dryrun=self.opt["dryrun"])
+        self.helper.proc(f"git {cmd}", dryrun=self.opt["dryrun"], cwd=dirname)
 
     def brew_cmd(self) -> None:
         noinit = False
@@ -903,7 +901,7 @@ class BrewFile:
     def get_list(self, force_appstore_list=False):
         """Get Installed Package List."""
         # Clear lists
-        for bi in self.brew_info_ext + [self.brewinfo_main]:
+        for bi in self.brewinfo_ext + [self.brewinfo_main]:
             bi.clear_list()
 
         # Brew packages
