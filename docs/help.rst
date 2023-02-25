@@ -5,8 +5,10 @@ Help message of brew-file:
 
 .. code-block:: none
 
-    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves] [--on_request] [--top_packages TOP_PACKAGES] [-U] [-r REPO] [-n]
-                     [--caskonly] [--appstore APPSTORE] [--no_appstore] [-d] [-y] [-V {debug,info,warning,error,critical}] [-h]
+    usage: brew-file [-f INPUT] [-b BACKUP] [-F FORM] [--leaves] [--on_request]
+                     [--top_packages TOP_PACKAGES] [-U] [-r REPO] [--fetch-HEAD]
+                     [-n] [--caskonly] [--appstore APPSTORE] [--no_appstore] [-d]
+                     [-y] [-V {debug,info,warning,error,critical}] [-h]
                      [command] ...
 
     Brew-file: Manager for packages of Homebrew.
@@ -49,6 +51,7 @@ Help message of brew-file:
                                 export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils
       -U, --noupgrade       Do not execute `brew update/brew upgrade` at `brew file update`.
       -r REPO, --repo REPO  Set repository name. Use with set_repo.
+      --fetch-HEAD          Fetch HEAD at update.
       -n, --nolink          Don't make links for Apps.
       --caskonly            Write out only cask related packages
       --appstore APPSTORE   Set AppStore application check level.

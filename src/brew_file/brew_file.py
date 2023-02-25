@@ -83,6 +83,9 @@ class BrewFile:
             os.getenv("HOMEBREW_BREWFILE_ON_REQUEST", False)
         )
         opt["top_packages"] = os.getenv("HOMEBREW_BREWFILE_TOP_PACKAGES", "")
+        opt["fetch_head"] = to_bool(
+            os.getenv("HOMEBREW_BREWFILE_FETCH_HEAD", False)
+        )
         opt["repo"] = ""
         opt["noupgradeatupdate"] = False
         opt["link"] = True
@@ -1924,8 +1927,12 @@ class BrewFile:
             with self.DryrunBanner(self):
                 if not self.opt["noupgradeatupdate"]:
                     self.helper.proc("brew update", dryrun=self.opt["dryrun"])
+                    fetch_head = (
+                        "--fetch-HEAD" if self.opt["fetch_head"] else ""
+                    )
                     self.helper.proc(
-                        "brew upgrade --fetch-HEAD", dryrun=self.opt["dryrun"]
+                        f"brew upgrade --formula {fetch_head}",
+                        dryrun=self.opt["dryrun"],
                     )
                     if is_mac():
                         self.helper.proc(

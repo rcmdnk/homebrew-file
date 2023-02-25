@@ -166,6 +166,15 @@ def main() -> int:
         help="Set repository name. Use with set_repo.",
     )
 
+    fetch_parser = argparse.ArgumentParser(**arg_parser_opts)
+    fetch_parser.add_argument(
+        "--fetch-HEAD",
+        action="store_true",
+        default=b.opt["fetch_head"],
+        dest="fetch_head",
+        help="Fetch HEAD at update.",
+    )
+
     link_parser = argparse.ArgumentParser(**arg_parser_opts)
     link_parser.add_argument(
         "-n",
@@ -296,6 +305,7 @@ def main() -> int:
             top_packages_parser,
             noupgradeatupdate_parser,
             repo_parser,
+            fetch_parser,
             link_parser,
             caskonly_parser,
             appstore_parser,
@@ -426,7 +436,7 @@ def main() -> int:
         description=help_doc,
         help=help_doc,
         parents=min_parsers
-        + [link_parser, noupgradeatupdate_parser, dryrun_parser],
+        + [fetch_parser, link_parser, noupgradeatupdate_parser, dryrun_parser],
         **subparser_opts,
     )
     help_doc = "or -e/--edit\nEdit input files."
@@ -574,6 +584,7 @@ def main() -> int:
                 "--noupgrade",
                 "-r",
                 "--repo",
+                "--fetch-HEAD",
                 "-n",
                 "--nolink",
                 "--caskonly",
