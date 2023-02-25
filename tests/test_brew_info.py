@@ -7,12 +7,12 @@ from . import brew_file
 
 
 @pytest.fixture
-def brew_info():
-    helper = brew_file.BrewHelper({})
-    info = brew_file.BrewInfo(
-        helper=helper, file=Path(__file__).parent / "files" / "BrewfileTest"
+def brew_info(check_brew):
+    bf = brew_file.BrewFile(
+        {"input": Path(__file__).parent / "files" / "BrewfileTest"}
     )
-    return info
+    bf.opt["api"] = True
+    return bf.brewinfo
 
 
 def test_get_dir(brew_info):
@@ -167,7 +167,6 @@ def test_input_to_list(brew_info):
 
 
 def test_sort(brew_info):
-    brew_info.helper.opt["cask_repo"] = "homebrew/cask"
     brew_info.tap_list.extend(
         ["rcmdnk/file", "homebrew/cask", "homebrew/bundle", "homebrew/core"]
     )
@@ -262,40 +261,19 @@ def test_read(brew_info):
     assert brew_info.cmd_input == ["echo other commands"]
 
 
-def test_get_tap_path(brew_info):
-    tap_path = brew_info.get_tap_path("homebrew/core")
+def test_get_tap_path(brew_info, tap):
+    tap_path = brew_info.get_tap_path("rcmdnk/rcmdnkpac")
     assert tap_path.exists()
-
-
-def test_get_tap_packs(brew_info):
-    packs = brew_info.get_tap_packs("homebrew/core")
-    assert "python@3.10" in packs
-
-
-def test_get_tap_casks(brew_info, monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        brew_file.BrewInfo, "get_tap_path", lambda self, x: tmp_path / x
-    )
-    cask_dir = tmp_path / "homebrew/cask/Casks"
-    cask_dir.mkdir(parents=True, exist_ok=True)
-    (cask_dir / "a.rb").touch()
-    (cask_dir / "b.rb").touch()
-    casks = brew_info.get_tap_casks("homebrew/cask")
-    assert casks == ["a", "b"]
 
 
 def test_get_leaves(brew_info):
     pass
 
 
-def test_get_info(brew_info, python):
-    info = brew_info.get_info("python@3.10")
-    assert info["python@3.10"]["installed"][0]["used_options"] == []
-
-
 def test_get_installed(brew_info, python):
     installed = brew_info.get_installed("python@3.10")
-    assert installed["version"] == platform.python_version()
+    # brew version can contained additional number with '_'
+    assert installed["version"].split("_")[0] == platform.python_version()
 
 
 def test_get_option(brew_info, python):
@@ -341,7 +319,6 @@ def test_write(brew_info, tmp_path, tap):
     brew_info.helper.opt["appstore"] = -1
     brew_info.helper.opt["verbose"] = 1
     brew_info.helper.opt["form"] = None
-    brew_info.helper.opt["cask_repo"] = "homebrew/cask"
     brew_info.read()
     brew_info.input_to_list()
     brew_info.file = tmp_file

@@ -90,6 +90,10 @@ def expandpath(path: Union[str, Path]) -> Path:
     return Path(path).expanduser()
 
 
+def home_tilde(path: Union[str, Path]) -> str:
+    return str(path).replace(os.environ["HOME"], "~")
+
+
 @dataclass
 class OpenWrapper:
     """Wrapper function to open a file even if it doesn't exist."""

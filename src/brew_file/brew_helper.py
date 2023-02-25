@@ -1,8 +1,10 @@
+import json
 import logging
 import os
 import shlex
 import subprocess
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Generator
 
 
@@ -95,3 +97,124 @@ class BrewHelper:
         if name not in self.opt:
             self.opt[name] = self.proc("brew --" + name, False, False)[1][0]
         return self.opt[name]
+
+    def get_formula_list(self):
+        lines = self.proc(
+            "brew list --formula",
+            print_cmd=False,
+            print_out=False,
+            separate_err=True,
+            print_err=False,
+        )[1]
+        packages = []
+        for line in lines:
+            if (
+                "Warning: nothing to list" in line
+                or "=>" in line
+                or "->" in line
+            ):
+                continue
+            packages.append(line)
+        return packages
+
+    def get_cask_list(self):
+        lines = self.proc(
+            "brew list --cask",
+            print_cmd=False,
+            print_out=False,
+            separate_err=True,
+            print_err=False,
+        )[1]
+        packages = []
+        for line in lines:
+            if (
+                "Warning: nothing to list" in line
+                or "=>" in line
+                or "->" in line
+            ):
+                continue
+            packages.append(line)
+        return packages
+
+    def get_info(self, package: str = "") -> dict:
+        if package == "":
+            package = "--installed"
+        infotmp = json.loads(
+            "".join(
+                self.proc(
+                    "brew info --json=v1 " + package,
+                    print_cmd=False,
+                    print_out=False,
+                    exit_on_err=True,
+                    separate_err=True,
+                )[1]
+            )
+        )
+        info = {}
+        for i in infotmp:
+            info[i["name"]] = i
+        return info
+
+    def get_formula_info(self):
+        if "formula_info" in self.opt:
+            return self.opt["formula_info"]
+
+        _, lines = self.proc(
+            "brew info --eval-all --json=v1",
+            print_cmd=False,
+            print_out=False,
+        )
+        info = list(json.loads("".join(lines)))
+        if self.opt["api"]:
+            info_taps = [x for x in info if x["tap"] != self.opt["core_repo"]]
+            formula_json = Path(self.opt["cache"]) / "api" / "formula.json"
+            if formula_json.exists():
+                with open(formula_json, "r") as f:
+                    info_api = json.load(f)
+                info = info_api + info_taps
+        self.opt["formula_info"] = info
+        return info
+
+    def get_tap_packs(self, tap: str) -> list:
+        return sorted(
+            [x["name"] for x in self.get_formula_info() if x["tap"] == tap]
+        )
+
+    def get_cask_info(self):
+        if "cask_info" in self.opt:
+            return self.opt["cask_info"]
+
+        _, lines = self.proc(
+            "brew info --eval-all --json=v2",
+            print_cmd=False,
+            print_out=False,
+        )
+        info = list(json.loads("".join(lines))["casks"])
+        if self.opt["api"]:
+            info_taps = [x for x in info if x["tap"] != self.opt["cask_repo"]]
+            cask_json = Path(self.opt["cache"]) / "api" / "cask.json"
+            if cask_json.exists():
+                with open(cask_json, "r") as f:
+                    info_api = json.load(f)
+                info = info_api + info_taps
+        self.opt["cask_info"] = info
+        return info
+
+    def get_tap_casks(self, tap: str) -> list:
+        return sorted(
+            [x["token"] for x in self.get_cask_info() if x["tap"] == tap]
+        )
+
+    def get_leaves(self) -> list[str]:
+        if "leaves" in self.opt:
+            return self.opt["leaves"]
+        leaves = self.proc(
+            "brew leaves",
+            print_cmd=False,
+            print_out=False,
+            separate_err=True,
+            print_err=False,
+        )[1]
+        leaves = [x.split("/")[-1] for x in leaves]
+        self.opt["leaves"] = leaves
+        return leaves

@@ -1,5 +1,4 @@
 import copy
-import json
 import logging
 import re
 from dataclasses import dataclass, field
@@ -129,11 +128,11 @@ class BrewInfo:
         other_taps = []
         for t in self.tap_list:
             match t:
-                case "homebrew/core":
+                case s if s == self.helper.opt["core_repo"]:
                     core_tap.append(t)
                 case s if s == self.helper.opt["cask_repo"]:
                     cask_tap.append(t)
-                case s if s.startswith("homebrew/"):
+                case s if s.startswith(self.helper.opt["homebrew_tap_prefix"]):
                     brew_taps.append(t)
                 case _:
                     other_taps.append(t)
@@ -261,10 +260,10 @@ class BrewInfo:
                     case "tapall":
                         self.helper.proc(f"brew tap {p}")
                         self.tap_input.append(p)
-                        for tp in self.get_tap_packs(p):
+                        for tp in self.helper.get_tap_packs(p):
                             self.brew_input.append(tp)
                             self.brew_input_opt[tp] = ""
-                        for tp in self.get_tap_casks(p):
+                        for tp in self.helper.get_tap_casks(p):
                             self.cask_input.append(tp)
                     case "cask":
                         self.cask_input.append(p)
@@ -309,76 +308,12 @@ class BrewInfo:
                     case _:
                         self.cmd_input.append(line.strip())
 
-    def get_tap_path(self, tap: str) -> Path:
-        """Get tap path."""
-        if tap == "direct":
-            return Path(self.helper.brew_val("cache"), "Formula")
-
-        tap_path = Path(tap)
-        tap_user = tap_path.parent
-        tap_repo = f"homebrew-{tap_path.name}"
-        return Path(
-            self.helper.brew_val("repository"),
-            "Library/Taps",
-            tap_user,
-            tap_repo,
-        )
-
-    def get_tap_packs(self, tap: str) -> list:
-        """Helper for tap configuration file."""
-        packs: list = []
-        tap_path = self.get_tap_path(tap)
-        if not tap_path.is_dir():
-            return packs
-        packs = [x.stem for x in tap_path.iterdir() if x.suffix == ".rb"]
-        path = Path(tap_path, "Formula")
-        if Path(path).is_dir():
-            packs += [x.stem for x in path.iterdir() if x.suffix == ".rb"]
-        return sorted(packs)
-
-    def get_tap_casks(self, tap: str) -> list:
-        """Helper for tap configuration file."""
-        tap_path = self.get_tap_path(tap)
-        casks: list = []
-        if not tap_path.is_dir():
-            return casks
-        path = Path(tap_path, "Casks")
-        if path.is_dir():
-            casks = [x.stem for x in path.iterdir() if x.suffix == ".rb"]
-        return sorted(casks)
-
-    def get_leaves(self) -> list:
-        leavestmp = self.helper.proc("brew leaves", False, False)[1]
-        leaves = []
-        for line in leavestmp:
-            leaves.append(line.split("/")[-1])
-        return leaves
-
-    def get_info(self, package: str = "") -> dict:
-        if package == "":
-            package = "--installed"
-        infotmp = json.loads(
-            "".join(
-                self.helper.proc(
-                    "brew info --json=v1 " + package,
-                    print_cmd=False,
-                    print_out=False,
-                    exit_on_err=True,
-                    separate_err=True,
-                )[1]
-            )
-        )
-        info = {}
-        for i in infotmp:
-            info[i["name"]] = i
-        return info
-
     def get_installed(
         self, package: str, package_info: Optional[dict] = None
     ) -> dict:
         """Get installed version of brew package."""
         if package_info is None:
-            package_info = self.get_info(package)[package]
+            package_info = self.helper.get_info(package)[package]
 
         installed = package_info["installed"][0]
         version = ""
@@ -409,7 +344,7 @@ class BrewInfo:
         """Get install options from brew info."""
         # Get options for build
         if package_info is None:
-            package_info = self.get_info(package)[package]
+            package_info = self.helper.get_info(package)[package]
 
         opt = ""
         installed = self.get_installed(package, package_info)
@@ -546,7 +481,7 @@ fi
             for t in self.tap_list:
                 isfirst_pack = True
                 direct_first = False
-                tap_packs = self.get_tap_packs(t)
+                tap_packs = self.helper.get_tap_packs(t)
 
                 if t == "direct":
                     if not tap_packs:
@@ -572,7 +507,7 @@ fi
                             del self.brew_list_opt[p]
                 if not is_mac():
                     continue
-                tap_casks = self.get_tap_casks(t)
+                tap_casks = self.helper.get_tap_casks(t)
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(

@@ -438,10 +438,6 @@ def test_check_cask(bf, caplog, tmp_path):
     with open("Caskfile", "r") as f:
         lines = f.readlines()
     assert lines[0] == "# Cask applications\n"
-    assert (
-        lines[1]
-        == "# Please copy these lines to your Brewfile and use with `brew-file install`.\n"
-    )
 
 
 def test_make_pack_deps(bf):

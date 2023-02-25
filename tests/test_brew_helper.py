@@ -9,8 +9,8 @@ from . import brew_file
 
 @pytest.fixture
 def helper():
-    obj = brew_file.BrewHelper({})
-    return obj
+    bf = brew_file.BrewFile()
+    return bf.helper
 
 
 def test_readstdout(helper):
@@ -140,3 +140,18 @@ def test_proc_dryrun(helper):
 def test_brew_val(helper):
     prefix = Path(helper.proc("which brew")[1][0]).parents[1]
     assert helper.brew_val("prefix") == str(prefix)
+
+
+def test_get_info(helper, python):
+    info = helper.get_info("python@3.10")
+    assert info["python@3.10"]["installed"][0]["used_options"] == []
+
+
+def test_get_tap_packs(helper, tap):
+    packs = helper.get_tap_packs("rcmdnk/rcmdnkpac")
+    assert "sentaku" in packs
+
+
+def test_get_tap_casks(helper, tap):
+    casks = helper.get_tap_casks("rcmdnk/rcmdnkcask")
+    assert "vem" in casks
