@@ -1413,8 +1413,7 @@ class BrewFile:
 
     def check_local_repo(self):
         dirname = self.opt["repo"].replace("file:///", "")
-        if not Path(dirname).is_dir():
-            os.makedirs(dirname)
+        Path(dirname).mkdir(parent=True, exist_ok=True)
         self.helper.proc("git init --bare", cwd=dirname)
         self.clone_repo()
 
