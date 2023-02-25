@@ -1907,13 +1907,13 @@ class BrewFile:
         if self.opt["api"] and self.opt["core_repo"] not in self.brewinfo.get(
             "tap_list"
         ):
-            self.brewnfo.add("tap_list", [self.opt["core_repo"]])
+            self.brewinfo.add("tap_list", [self.opt["core_repo"]])
         if (
             is_mac()
             and self.opt["api"]
             and self.opt["cask_repo"] not in self.brewinfo.get("tap_list")
         ):
-            self.brewnfo.add("tap_list", [self.opt["cask_repo"]])
+            self.brewinfo.add("tap_list", [self.opt["cask_repo"]])
         self.brewinfo.add("tap_list", ["direct"])
 
         # Casks
