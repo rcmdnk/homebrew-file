@@ -2536,7 +2536,7 @@ class BrewFile:
         }
 
         appstore_apps: dict[str, str] = {}
-        appstore_has_cask_apps: dict[str, str] = {}
+        appstore_has_cask_apps: dict[str, tuple[str, str]] = {}
         cask_apps: dict[str, list[tuple]] = {self.opt["cask_repo"]: []}
         non_latest_cask_apps: dict[str, list[tuple]] = {
             self.opt["cask_repo"]: []
@@ -2562,6 +2562,12 @@ class BrewFile:
                 tap = ""
                 app_path = home_tilde(f"{d}/{app}")
                 aname = app.removesuffix(".app")
+                if app in apps:
+                    token = apps[app]
+                elif app_path in apps:
+                    token = apps[app_path]
+                else:
+                    token = self.generate_cask_token(app)
 
                 if aname in appstore_list:
                     check = "appstore"
@@ -2572,17 +2578,11 @@ class BrewFile:
                         + " "
                         + appstore_list[aname][1]
                     )
-                    if app in apps:
-                        appstore_has_cask_apps[name] = app_path
+                    if token in casks:
+                        appstore_has_cask_apps[name] = (token, app_path)
                     else:
                         appstore_apps[name] = app_path
                 else:
-                    if app in apps:
-                        token = apps[app]
-                    elif app_path in apps:
-                        token = apps[app_path]
-                    else:
-                        token = self.generate_cask_token(app)
                     if token in casks:
                         if casks[token]["installed"]:
                             check = "cask"
@@ -2707,8 +2707,11 @@ class BrewFile:
             output += (
                 "# Apps installed from AppStore, but casks are available.\n"
             )
-            for name, app_path in appstore_has_cask_apps.items():
-                output += self.make_appstore_app_cmd(name, app_path) + "\n"
+            for name, (token, app_path) in appstore_has_cask_apps.items():
+                output += (
+                    self.make_appstore_app_cmd(name, f"{token}, {app_path}")
+                    + "\n"
+                )
             output += "\n"
 
         if no_cask:
