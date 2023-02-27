@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 import re
@@ -127,15 +129,14 @@ class BrewInfo:
         brew_taps = []
         other_taps = []
         for t in self.tap_list:
-            match t:
-                case s if s == self.helper.opt["core_repo"]:
-                    core_tap.append(t)
-                case s if s == self.helper.opt["cask_repo"]:
-                    cask_tap.append(t)
-                case s if s.startswith(self.helper.opt["homebrew_tap_prefix"]):
-                    brew_taps.append(t)
-                case _:
-                    other_taps.append(t)
+            if t == self.helper.opt["core_repo"]:
+                core_tap.append(t)
+            elif t == self.helper.opt["cask_repo"]:
+                cask_tap.append(t)
+            elif t.startswith(self.helper.opt["homebrew_tap_prefix"]):
+                brew_taps.append(t)
+            else:
+                other_taps.append(t)
         brew_taps.sort()
         other_taps.sort()
         self.tap_list = core_tap + cask_tap + brew_taps + other_taps
@@ -251,62 +252,62 @@ class BrewInfo:
                         if '"' in line or "'" in line:
                             self.helper.opt["form"] = "bundle"
 
-                match cmd.lower():
-                    case "brew" | "install":
-                        self.brew_input.append(p)
-                        self.brew_input_opt[p] = opt
-                    case "tap":
-                        self.tap_input.append(p)
-                    case "tapall":
-                        self.helper.proc(f"brew tap {p}")
-                        self.tap_input.append(p)
-                        for tp in self.helper.get_tap_packs(p):
-                            self.brew_input.append(tp)
-                            self.brew_input_opt[tp] = ""
-                        for tp in self.helper.get_tap_casks(p):
-                            self.cask_input.append(tp)
-                    case "cask":
-                        self.cask_input.append(p)
-                    case s if s == "mas" and line.find(",") != -1:
-                        if not self.helper.opt.get("form"):
-                            self.helper.opt["form"] = "bundle"
-                        p = line.split()[1].strip(",").strip("'").strip('"')
-                        pid = line.split()[3]
-                        self.appstore_input.append(pid + " " + p)
-                    case "appstore" | "mas":
-                        self.appstore_input.append(
-                            re.sub("^ *appstore *", "", line)
-                            .strip()
-                            .strip("'")
-                            .strip('"')
-                        )
-                    case "main":
-                        self.main_input.append(p)
-                        self.file_input.append(p)
-                    case "file" | "brewfile":
-                        self.file_input.append(p)
-                    case "before":
-                        self.before_input.append(excmd)
-                    case "after":
-                        self.after_input.append(excmd)
-                    case "cask_args":
-                        if self.helper.opt.get("form") in [
-                            "brewdler",
-                            "bundle",
-                        ]:
-                            for arg in excmd.split(","):
-                                k = f"--{arg.split(':')[0]}"
-                                v = arg.split(":")[1]
-                                if v == "true":
-                                    v = ""
-                                self.cask_args_input[k] = v
-                        else:
-                            for arg in excmd.split():
-                                k = arg.split(":")[0]
-                                v = arg.split("=")[1] if "=" in arg else ""
-                                self.cask_args_input[k] = v
-                    case _:
-                        self.cmd_input.append(line.strip())
+                cmd = cmd.lower()
+                if cmd in ["brew", "install"]:
+                    self.brew_input.append(p)
+                    self.brew_input_opt[p] = opt
+                elif cmd == "tap":
+                    self.tap_input.append(p)
+                elif cmd == "tapall":
+                    self.helper.proc(f"brew tap {p}")
+                    self.tap_input.append(p)
+                    for tp in self.helper.get_tap_packs(p):
+                        self.brew_input.append(tp)
+                        self.brew_input_opt[tp] = ""
+                    for tp in self.helper.get_tap_casks(p):
+                        self.cask_input.append(tp)
+                elif cmd == "cask":
+                    self.cask_input.append(p)
+                elif cmd == "mas" and line.find(",") != -1:
+                    if not self.helper.opt.get("form"):
+                        self.helper.opt["form"] = "bundle"
+                    p = line.split()[1].strip(",").strip("'").strip('"')
+                    pid = line.split()[3]
+                    self.appstore_input.append(pid + " " + p)
+                elif cmd in ["appstore", "mas"]:
+                    self.appstore_input.append(
+                        re.sub("^ *appstore *", "", line)
+                        .strip()
+                        .strip("'")
+                        .strip('"')
+                    )
+                elif cmd == "main":
+                    self.main_input.append(p)
+                    self.file_input.append(p)
+                elif cmd in ["file", "brewfile"]:
+                    self.file_input.append(p)
+                elif cmd == "before":
+                    self.before_input.append(excmd)
+                elif cmd == "after":
+                    self.after_input.append(excmd)
+                elif cmd == "cask_args":
+                    if self.helper.opt.get("form") in [
+                        "brewdler",
+                        "bundle",
+                    ]:
+                        for arg in excmd.split(","):
+                            k = f"--{arg.split(':')[0]}"
+                            v = arg.split(":")[1]
+                            if v == "true":
+                                v = ""
+                            self.cask_args_input[k] = v
+                    else:
+                        for arg in excmd.split():
+                            k = arg.split(":")[0]
+                            v = arg.split("=")[1] if "=" in arg else ""
+                            self.cask_args_input[k] = v
+                else:
+                    self.cmd_input.append(line.strip())
 
     def convert_option(self, opt: str) -> str:
         if opt != "" and self.helper.opt["form"] in ["brewdler", "bundle"]:

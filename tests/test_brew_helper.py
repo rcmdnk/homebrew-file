@@ -1,5 +1,4 @@
 import logging
-import platform
 import subprocess
 from pathlib import Path
 
@@ -160,7 +159,7 @@ def test_get_info(helper, python):
 def test_get_installed(helper, python):
     installed = helper.get_installed("python@3.10")
     # brew version can contained additional number with '_'
-    assert installed["version"].split("_")[0] == platform.python_version()
+    assert installed["version"].split("_")[0].startswith("3.10")
 
 
 def test_get_option(helper, python):

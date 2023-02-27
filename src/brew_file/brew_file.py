@@ -200,13 +200,12 @@ class BrewFile:
         else:
             self.opt["verbose"] = verbose
         # Keep compatibility with old verbose
-        match self.opt["verbose"]:
-            case "0":
-                self.opt["verbose"] = "debug"
-            case "1":
-                self.opt["verbose"] = "info"
-            case "2":
-                self.opt["verbose"] = "error"
+        if self.opt["verbose"] == "0":
+            self.opt["verbose"] = "debug"
+        elif self.opt["verbose"] == "1":
+            self.opt["verbose"] = "info"
+        elif self.opt["verbose"] == "2":
+            self.opt["verbose"] = "error"
 
         if self.log.parent:
             self.log.parent.setLevel(

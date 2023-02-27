@@ -24,9 +24,12 @@ on:
       main_py_ver:
         description: "Main python version for coverage/tmate."
         type: choice
-        default: "3.10"
+        default: "3.9"
         options:
+          - "3.11"
           - "3.10"
+          - "3.9"
+          - "3.8"
       tmate:
         type: boolean
         description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate). This is only for main strategy and others will be stopped.'
@@ -65,7 +68,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-12, ubuntu-latest]
-        python-version: ['3.10']
+        python-version: ['3.11', '3.10', '3.9', '3.8']
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
