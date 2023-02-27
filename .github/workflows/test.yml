@@ -7,31 +7,94 @@ on:
       - "coverage"
       - "renovate/**"
   pull_request:
+  workflow_dispatch:
+    inputs:
+      main_branch:
+        description: "Main branch for coverage/tmate."
+        type: string
+        required: false
+        default: "master"
+      main_os:
+        description: "Main os for coverage/tmate."
+        type: choice
+        default: "macos-12"
+        options:
+          - "macos-12"
+          - "ubuntu-latest"
+      main_py_ver:
+        description: "Main python version for coverage/tmate."
+        type: choice
+        default: "3.10"
+        options:
+          - "3.10"
+      tmate:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate). This is only for main strategy and others will be stopped.'
+        required: false
+        default: false
+
+env:
+  MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
+  MAIN_OS: ${{ inputs.main_os || 'macos-12' }}
+  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.10' }}
+  TMATE: ${{ inputs.tmate || 'false' }}
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
+  install:
+    strategy:
+      matrix:
+        os: [macos-12, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: convictional/trigger-workflow-and-wait@v1.6.5
-        continue-on-error: true
-        id: dispatch
-        with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
-          ref: ${{ github.ref }}
-          github_token: ${{ github.token }}
-          workflow_file_name: dispatch.yml
-      - name: Write workflow url
+      - name: Exit workflow
+        if: ${{ github.event_name == 'workflow_dispatch' && env.TMATE == 'true' }}
+        run: exit 1
+      - name: Install test
         run: |
-          echo Main job URL: ${{ steps.dispatch.outputs.workflow_url }} >> $GITHUB_STEP_SUMMARY
-      - name: Check status
+          curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
+          chmod 755 ./install.sh
+          ./install.sh
+          rm -f install.sh
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-12, ubuntu-latest]
+        python-version: ['3.10']
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check is main
+        id: is_main
         run: |
-          if [ "${{ steps.dispatch.outputs.conclusion }}" != "success" ];then
-            exit 1
+          if [ "${{ github.ref }}" = "refs/heads/${{ env.MAIN_BRANCH }}" ] && [ "${{ matrix.os }}" = "${{ env.MAIN_OS }}" ] && [ "${{ matrix.python-version }}" = "${{ env.MAIN_PY_VER }}" ];then
+            echo "IS_MAIN=1" >> $GITHUB_ENV
+            is_main=1
+          else
+            echo "IS_MAIN=0" >> $GITHUB_ENV
+            is_main=0
           fi
+          if [ "${{ env.TMATE }}" = "true" ];then
+            if [ "$is_main" = 0 ];then
+              echo "Tmate is enabled and this is not main, skip tests"
+              exit 1
+            fi
+            echo "DEBUG=1" >> $GITHUB_ENV
+          else
+            echo "DEBUG=0" >> $GITHUB_ENV
+          fi
+      - name: Homebrew installation
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - uses: rcmdnk/python-action@v1
+        with:
+          pytest-cov-path: "bin"
+          coverage-push: "${{ env.IS_MAIN }}"
+          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
+          pre-commit: "${{ env.IS_MAIN }}"
+          tmate: "${{ env.DEBUG }}"
