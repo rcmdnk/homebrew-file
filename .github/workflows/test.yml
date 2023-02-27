@@ -92,8 +92,9 @@ jobs:
           else
             echo "DEBUG=0" >> $GITHUB_ENV
           fi
-      - name: Homebrew installation
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
       - uses: rcmdnk/python-action@v1
         with:
           pytest-cov-path: "bin"
