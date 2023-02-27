@@ -13,7 +13,7 @@ on:
         description: "Main branch for coverage/tmate."
         type: string
         required: false
-        default: "master"
+        default: "main"
       main_os:
         description: "Main os for coverage/tmate."
         type: choice
