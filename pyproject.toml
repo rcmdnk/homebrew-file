@@ -12,7 +12,7 @@ pytest = "7.2.1"
 pytest-cov = "4.0.0"
 pytest-xdist = "3.1.0"
 pytest-benchmark = "4.0.0"
-pyproject-pre-commit = "0.0.4"
+pyproject-pre-commit = "0.0.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
