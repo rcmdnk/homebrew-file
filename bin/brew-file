@@ -2437,7 +2437,9 @@ class BrewFile:
 
     def generate_cask_token(self, app):
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
-        token = app.split("/")[-1].removesuffix(".app")
+        token = app.split("/")[-1]
+        if token.endswith(".app"):
+            token = token[:-4]
         token = token.replace("+", "plus")
         token = token.replace("@", "at")
         token = token.replace(" ", "-").lower()
@@ -2559,7 +2561,9 @@ class BrewFile:
                 check = "no_cask"
                 tap = ""
                 app_path = home_tilde(f"{d}/{app}")
-                aname = app.removesuffix(".app")
+                aname = app
+                if aname.endswith(".app"):
+                    aname = aname[:-4]
                 if app in apps:
                     token = apps[app]
                 elif app_path in apps:
