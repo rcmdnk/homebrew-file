@@ -301,7 +301,7 @@ def test_write(brew_info, tmp_path, tap):
     brew_info.input_to_list()
     brew_info.file = tmp_file
     brew_info.write()
-    with (open(default_file) as f1, open(tmp_file) as f2):
+    with open(default_file) as f1:
         default_txt = f1.readlines()
         if not brew_file.is_mac():
             default_txt = [
@@ -314,7 +314,9 @@ def test_write(brew_info, tmp_path, tap):
             default_txt = default_txt.replace(
                 "# App Store applications\n\n", ""
             )
-        assert f2.read() == default_txt
+    with open(tmp_file) as f2:
+        tmp_txt = f2.read()
+    assert tmp_txt == default_txt
     brew_info.helper.opt["form"] = "bundle"
     brew_info.write()
     if brew_file.is_mac():

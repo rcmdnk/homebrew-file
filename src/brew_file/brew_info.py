@@ -405,9 +405,9 @@ fi
                 output += cmd_cask_args
                 if self.helper.opt["form"] in ["brewdler", "bundle"]:
                     if v == "":
-                        output += f"{delimiter}{k.removeprefix('--')}: true"
+                        output += f"{delimiter}{k[2:]}: true"
                     else:
-                        output += f"{delimiter}{k.removeprefix('--')}: {v}"
+                        output += f"{delimiter}{k[2:]}: {v}"
                     delimiter = ", "
                 else:
                     output += f"{delimiter}{k}"
