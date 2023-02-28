@@ -76,11 +76,9 @@ def err_cmd():
     return cmd
 
 
-def test_proc_err(helper, caplog, err_cmd):
-    caplog.set_level(logging.DEBUG)
-
+def test_proc_err(helper, caplog_locked, err_cmd):
     for cmd in err_cmd:
-        caplog.clear()
+        caplog_locked.clear()
         ret_proc, lines_proc = helper.proc(
             cmd, separate_err=False, exit_on_err=False
         )
@@ -88,13 +86,13 @@ def test_proc_err(helper, caplog, err_cmd):
         assert lines_proc == [err_cmd[cmd]["out"]]
 
     for cmd in err_cmd:
-        caplog.clear()
+        caplog_locked.clear()
         ret_proc, lines_proc = helper.proc(
             cmd, separate_err=True, exit_on_err=False
         )
         assert ret_proc == err_cmd[cmd]["ret"]
         assert lines_proc == []
-        assert caplog.record_tuples == [
+        assert caplog_locked.record_tuples == [
             ("tests.brew_file", logging.INFO, f"$ {cmd}"),
             ("tests.brew_file", logging.INFO, ""),
             (

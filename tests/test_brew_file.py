@@ -9,8 +9,7 @@ from . import brew_file
 
 
 @pytest.fixture
-def bf(caplog):
-    caplog.set_level(logging.DEBUG)
+def bf():
     obj = brew_file.BrewFile({})
     return obj
 
@@ -25,9 +24,9 @@ def test_set_input(bf):
     assert bf.brewinfo.file == Path("/path/to/file")
 
 
-def test_banner(bf, caplog):
+def test_banner(bf, caplog_locked):
     bf.banner("test banner")
-    assert caplog.record_tuples == [
+    assert caplog_locked.record_tuples == [
         (
             "tests.brew_file",
             logging.INFO,
@@ -36,22 +35,22 @@ def test_banner(bf, caplog):
     ]
 
 
-def test_dryrun_banner(bf, caplog):
+def test_dryrun_banner(bf, caplog_locked):
     bf.opt["dryrun"] = False
     with bf.DryrunBanner(bf):
         bf.log.info("test")
-    assert caplog.record_tuples == [
+    assert caplog_locked.record_tuples == [
         (
             "tests.brew_file",
             logging.INFO,
             "test",
         ),
     ]
-    caplog.clear()
+    caplog_locked.clear()
     bf.opt["dryrun"] = True
     with bf.DryrunBanner(bf):
         bf.log.info("test")
-    assert caplog.record_tuples == [
+    assert caplog_locked.record_tuples == [
         (
             "tests.brew_file",
             logging.INFO,
@@ -139,10 +138,10 @@ def test_ask_yn(bf, capsys, monkeypatch, input_value, ret, out):
     assert captured.out == out
 
 
-def test_ask_yn_y(bf, caplog):
+def test_ask_yn_y(bf, caplog_locked):
     bf.opt["yn"] = True
     assert bf.ask_yn("Question?")
-    assert caplog.record_tuples == [
+    assert caplog_locked.record_tuples == [
         ("tests.brew_file", logging.INFO, "Question? [y/n]: y")
     ]
 
@@ -332,14 +331,14 @@ def test_repo_file(bf):
     assert bf.repo_file() == Path("/path/to/user_repo/input")
 
 
-def test_init_repo(bf, caplog, tmp_path):
+def test_init_repo(bf, caplog_locked, tmp_path):
     bf.check_gitconfig = lambda: False
     file = tmp_path / "Brewfile"
     bf.helper.proc("git init", cwd=tmp_path)
     bf.set_input(file)
-    caplog.clear()
+    caplog_locked.clear()
     bf.init_repo()
-    assert caplog.record_tuples == [
+    assert caplog_locked.record_tuples == [
         (
             "tests.brew_file",
             logging.INFO,
@@ -506,7 +505,7 @@ def test_make_appstore_app_cmd(bf):
     )
 
 
-def test_check_cask(bf, caplog, tmp_path):
+def test_check_cask(bf, caplog_locked, tmp_path):
     os.chdir(tmp_path)
     if not brew_file.is_mac():
         with pytest.raises(RuntimeError) as excinfo:
@@ -514,8 +513,11 @@ def test_check_cask(bf, caplog, tmp_path):
             assert str(excinfo.value) == "Cask is not available on Linux!"
         return
     bf.check_cask()
-    assert "# Starting to check applications for Cask..." in caplog.messages[0]
-    assert "# Summary" in "".join(caplog.messages)
+    assert (
+        "# Starting to check applications for Cask..."
+        in caplog_locked.messages[0]
+    )
+    assert "# Summary" in "".join(caplog_locked.messages)
     assert Path("Caskfile").exists()
     with open("Caskfile", "r") as f:
         lines = f.readlines()
