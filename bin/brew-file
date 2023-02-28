@@ -351,11 +351,11 @@ class BrewHelper:
         info = list(json.loads("".join(lines)))
         if self.opt["api"]:
             info_taps = [x for x in info if x["tap"] != self.opt["core_repo"]]
-            formula_json = Path(self.opt["cache"]) / "api" / "formula.json"
+            formula_json = Path(self.opt["cache"]) / "api" / "formula.jws.json"
             if not formula_json.exists():
                 self.proc("brew update")
             with open(formula_json, "r") as f:
-                info_api = json.load(f)
+                info_api = json.loads(json.load(f)["payload"])
             info = info_api + info_taps
         self.opt["formula_info"] = info
         return info
@@ -377,11 +377,11 @@ class BrewHelper:
         info = list(json.loads("".join(lines))["casks"])
         if self.opt["api"]:
             info_taps = [x for x in info if x["tap"] != self.opt["cask_repo"]]
-            cask_json = Path(self.opt["cache"]) / "api" / "cask.json"
+            cask_json = Path(self.opt["cache"]) / "api" / "cask.jws.json"
             if not cask_json.exists():
                 self.proc("brew update")
             with open(cask_json, "r") as f:
-                info_api = json.load(f)
+                info_api = json.loads(json.load(f)["payload"])
             info = info_api + info_taps
         self.opt["cask_info"] = info
         return info

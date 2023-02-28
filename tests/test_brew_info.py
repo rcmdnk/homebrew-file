@@ -10,7 +10,6 @@ def brew_info(check_brew):
     bf = brew_file.BrewFile(
         {"input": Path(__file__).parent / "files" / "BrewfileTest"}
     )
-    bf.opt["api"] = True
     return bf.brewinfo
 
 
