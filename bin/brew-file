@@ -659,8 +659,9 @@ class BrewInfo:
                     for tp in self.helper.get_tap_packs(p):
                         self.brew_input.append(tp)
                         self.brew_input_opt[tp] = ""
-                    for tp in self.helper.get_tap_casks(p):
-                        self.cask_input.append(tp)
+                    if is_mac():
+                        for tp in self.helper.get_tap_casks(p):
+                            self.cask_input.append(tp)
                 elif cmd == "cask":
                     self.cask_input.append(p)
                 elif cmd == "mas" and line.find(",") != -1:

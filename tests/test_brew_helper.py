@@ -148,6 +148,8 @@ def test_get_formula_list(helper, python):
 
 
 def test_get_cask_list(helper):
+    if not brew_file.is_mac():
+        pytest.skip("only for mac")
     assert isinstance(helper.get_cask_list(), list)
 
 
@@ -178,11 +180,15 @@ def test_get_tap_packs(helper, tap):
 
 
 def test_get_cask_info(helper):
+    if not brew_file.is_mac():
+        pytest.skip("only for mac")
     info = helper.get_cask_info()
     assert info[0]["tap"] == "homebrew/cask"
 
 
 def test_get_tap_casks(helper, tap):
+    if not brew_file.is_mac():
+        pytest.skip("only for mac")
     casks = helper.get_tap_casks("rcmdnk/rcmdnkcask")
     assert "vem" in casks
 
