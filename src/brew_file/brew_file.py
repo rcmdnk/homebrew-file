@@ -988,9 +988,24 @@ class BrewFile:
     def clean_list(self):
         """Remove duplications between brewinfo.list to extra files' input."""
         # Cleanup extra files
+        aliases = self.helper.get_formula_aliases()
         for b in self.brewinfo_ext + [self.brewinfo_main]:
             for line in ["brew", "tap", "cask", "appstore"]:
                 for p in b.get(line + "_input"):
+                    # Keep aliases
+                    if line == "brew" and p in aliases:
+                        if aliases[p] in self.brewinfo.get("brew_list"):
+                            self.brewinfo.add("brew_list", [p])
+                            self.brewinfo.add(
+                                "brew_list_opt",
+                                {
+                                    p: self.brewinfo.get("brew_list_opt")[
+                                        aliases[p]
+                                    ]
+                                },
+                            )
+                            self.brewinfo.remove("brew_list", aliases[p])
+                            self.brewinfo.remove("brew_list_opt", aliases[p])
                     if p not in self.brewinfo.get(line + "_list"):
                         b.remove(line + "_input", p)
 
@@ -1402,9 +1417,11 @@ class BrewFile:
         # brew
         if not self.opt["caskonly"]:
             # Brew
+            aliases = self.helper.get_formula_aliases()
             for p in self.get("brew_input"):
                 cmd = "install"
-                if p in self.get("brew_full_list"):
+                pack = aliases[p] if p in aliases else p
+                if pack in self.get("brew_full_list"):
                     if p not in self.get("brew_list_opt") or sorted(
                         self.get("brew_input_opt")[p].split()
                     ) == sorted(self.get("brew_list_opt")[p].split()):

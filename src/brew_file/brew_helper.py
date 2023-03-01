@@ -217,10 +217,23 @@ class BrewHelper:
         self.opt["formula_info"] = info
         return info
 
+    def get_formula_aliases(self) -> dict[str, str]:
+        if "formula_aliases" in self.opt:
+            return self.opt["formula_aliases"]
+        info = self.get_formula_info()
+        self.opt["formula_aliases"] = {}
+        for i in info:
+            if "aliases" in i:
+                for a in i["aliases"]:
+                    self.opt["formula_aliases"][a] = i["name"]
+        return self.opt["formula_aliases"]
+
     def get_tap_packs(self, tap: str) -> list:
-        return sorted(
-            [x["name"] for x in self.get_formula_info() if x["tap"] == tap]
-        )
+        packs = [x["name"] for x in self.get_formula_info() if x["tap"] == tap]
+        packs_aliases = [
+            k for k, v in self.get_formula_aliases().items() if v in packs
+        ]
+        return packs + packs_aliases
 
     def get_cask_info(self):
         if "cask_info" in self.opt:

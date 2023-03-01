@@ -172,6 +172,11 @@ def test_get_formula_info(helper):
     assert info[0]["tap"] == "homebrew/core"
 
 
+def test_get_formula_aliases(helper):
+    aliases = helper.get_formula_aliases()
+    assert aliases["python"].startswith("python@")
+
+
 def test_get_tap_packs(helper, tap):
     packs = helper.get_tap_packs("rcmdnk/rcmdnkpac")
     assert "sentaku" in packs
