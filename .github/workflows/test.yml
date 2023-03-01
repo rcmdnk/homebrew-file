@@ -37,10 +37,10 @@ on:
         default: false
 
 env:
-  MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
-  MAIN_OS: ${{ inputs.main_os || 'macos-12' }}
-  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.9' }}
-  TMATE: ${{ inputs.tmate || 'false' }}
+  main_branch: ${{ inputs.main_branch || 'main' }}
+  main_os: ${{ inputs.main_os || 'macos-12' }}
+  main_py_ver: ${{ inputs.main_py_ver || '3.9' }}
+  tmate: ${{ inputs.tmate || 'false' }}
 
 
 concurrency:
@@ -55,7 +55,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.TMATE == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
         run: exit 1
       - name: Install test
         run: |
@@ -76,21 +76,21 @@ jobs:
       - name: Check is main
         id: is_main
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/${{ env.MAIN_BRANCH }}" ] && [ "${{ matrix.os }}" = "${{ env.MAIN_OS }}" ] && [ "${{ matrix.python-version }}" = "${{ env.MAIN_PY_VER }}" ];then
-            echo "IS_MAIN=1" >> $GITHUB_ENV
+          if [ "${{ github.ref }}" = "refs/heads/${{ env.main_branch }}" ] && [ "${{ matrix.os }}" = "${{ env.main_os }}" ] && [ "${{ matrix.python-version }}" = "${{ env.main_py_ver }}" ];then
+            echo "is_main=1" >> $GITHUB_ENV
             is_main=1
           else
-            echo "IS_MAIN=0" >> $GITHUB_ENV
+            echo "is_main=0" >> $GITHUB_ENV
             is_main=0
           fi
-          if [ "${{ env.TMATE }}" = "true" ];then
+          if [ "${{ env.tmate }}" = "true" ];then
             if [ "$is_main" = 0 ];then
               echo "Tmate is enabled and this is not main, skip tests"
               exit 1
             fi
-            echo "DEBUG=1" >> $GITHUB_ENV
+            echo "debug=1" >> $GITHUB_ENV
           else
-            echo "DEBUG=0" >> $GITHUB_ENV
+            echo "debug=0" >> $GITHUB_ENV
           fi
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -101,7 +101,7 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
           pytest-cov-path: "bin"
-          coverage-push: "${{ env.IS_MAIN }}"
-          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
-          pre-commit: "${{ env.IS_MAIN }}"
-          tmate: "${{ env.DEBUG }}"
+          coverage-push: "${{ env.is_main }}"
+          coverage-push-condition: "branch=${{ env.main_branch }}, os=${{ env.main_os }}, python_version=${{ env.main_py_ver }}"
+          pre-commit: "1"
+          tmate: "${{ env.debug }}"
