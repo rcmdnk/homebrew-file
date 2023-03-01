@@ -1,12 +1,10 @@
 class BrewFile < Formula
   desc "Brewfile manager for Homebrew."
   homepage "https://github.com/rcmdnk/homebrew-file/"
-  url "https://github.com/rcmdnk/homebrew-file/archive/v8.5.12.tar.gz"
-  sha256 "839d92a863def1ed393b60fc2947cec3839e17a8655219a53efa49f731e0b9dd"
+  url "https://github.com/rcmdnk/homebrew-file/archive/v9.0.0.tar.gz"
+  sha256 "10e28ee92ee0c442b300c40e90cbf52bae831a97425fa68ff7a1a0b9e867cb16"
 
   head "https://github.com/rcmdnk/homebrew-file.git"
-
-  depends_on "python@3.10"
 
   option "without-completions", "Disable bash/zsh completions"
 
