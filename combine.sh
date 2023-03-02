@@ -9,8 +9,10 @@ autopep8 --in-place "$src/"*.py
 isort "$src"
 
 tmp_backup=$(mktemp -t brew-file)
-mv "$dest" "$tmp_backup"
-echo "Old brew-file was moved to $tmp_backup"
+if [ -f "$dest" ];then
+  mv "$dest" "$tmp_backup"
+  echo "Old brew-file was moved to $tmp_backup"
+fi
 
 imports=""
 contents=""
@@ -53,5 +55,7 @@ autoflake --in-place "$dest"
 autopep8 --in-place "$dest"
 isort "$dest"
 
-diff -u "$tmp_backup" "$dest"
+if [ -f "$tmp_backup" ];then
+  diff -u "$tmp_backup" "$dest"
+fi
 chmod 755 "$dest"

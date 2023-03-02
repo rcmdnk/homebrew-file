@@ -1146,7 +1146,7 @@ class BrewFile:
         elif self.opt["verbose"] == "2":
             self.opt["verbose"] = "error"
 
-        if self.log.parent:
+        if self.log.parent and self.log.parent.name != "root":
             self.log.parent.setLevel(
                 getattr(logging, self.opt["verbose"].upper())
             )
