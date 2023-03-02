@@ -65,18 +65,20 @@ def err_cmd():
         "ech test": {
             "ret": 2,
             "out": "[Errno 2] No such file or directory: 'ech'",
+            "oserr": True,
         },
         "ls /path/to/not/exist": {
             "ret": 1 if brew_file.is_mac() else 2,
             "out": "ls: /path/to/not/exist: No such file or directory"
             if brew_file.is_mac()
             else "ls: cannot access '/path/to/not/exist': No such file or directory",
+            "oserr": False,
         },
     }
     return cmd
 
 
-def test_proc_err(helper, caplog_locked, err_cmd):
+def test_proc_err(helper, caplog_locked, capfd, err_cmd):
     for cmd in err_cmd:
         caplog_locked.clear()
         ret_proc, lines_proc = helper.proc(
@@ -84,6 +86,17 @@ def test_proc_err(helper, caplog_locked, err_cmd):
         )
         assert ret_proc == err_cmd[cmd]["ret"]
         assert lines_proc == [err_cmd[cmd]["out"]]
+        assert caplog_locked.record_tuples == [
+            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+            (
+                "tests.brew_file",
+                logging.INFO,
+                f"{err_cmd[cmd]['out']}",
+            ),
+        ]
+        out, err = capfd.readouterr()
+        assert out == ""
+        assert err == ""
 
     for cmd in err_cmd:
         caplog_locked.clear()
@@ -92,19 +105,24 @@ def test_proc_err(helper, caplog_locked, err_cmd):
         )
         assert ret_proc == err_cmd[cmd]["ret"]
         assert lines_proc == []
-        assert caplog_locked.record_tuples == [
-            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
-            ("tests.brew_file", logging.INFO, ""),
-            (
-                "tests.brew_file",
-                logging.ERROR,
-                f"{err_cmd[cmd]['out']}\n",
-            ),
-        ]
+        if err_cmd[cmd]["oserr"]:
+            record = [
+                ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+                ("tests.brew_file", logging.ERROR, err_cmd[cmd]["out"]),
+            ]
+            syserr = ""
+        else:
+            record = [("tests.brew_file", logging.INFO, f"$ {cmd}")]
+            syserr = err_cmd[cmd]["out"] + "\n"
+        assert caplog_locked.record_tuples == record
+        out, err = capfd.readouterr()
+        assert out == ""
+        assert err == syserr
 
 
-def test_proc_err_exit_on_err(helper, capsys, err_cmd):
+def test_proc_err_exit_on_err(helper, caplog_locked, capsys, err_cmd):
     for cmd in err_cmd:
+        caplog_locked.clear()
         with pytest.raises(brew_file.CmdError) as e:
             ret_proc, lines_proc = helper.proc(
                 cmd,
@@ -114,9 +132,19 @@ def test_proc_err_exit_on_err(helper, capsys, err_cmd):
             )
         assert e.type == brew_file.CmdError
         assert e.value.return_code == err_cmd[cmd]["ret"]
-        assert str(e.value) == f"{err_cmd[cmd]['out']}\n"
+        assert (
+            str(e.value) == f"Failed at command: {cmd}\n{err_cmd[cmd]['out']}"
+        )
+        assert caplog_locked.record_tuples == [
+            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+            ("tests.brew_file", logging.INFO, err_cmd[cmd]["out"]),
+        ]
+        out, err = capsys.readouterr()
+        assert out == ""
+        assert err == ""
 
     for cmd in err_cmd:
+        caplog_locked.clear()
         with pytest.raises(brew_file.CmdError) as e:
             ret_proc, lines_proc = helper.proc(
                 cmd,
@@ -124,9 +152,21 @@ def test_proc_err_exit_on_err(helper, capsys, err_cmd):
                 print_err=True,
                 exit_on_err=True,
             )
+
+        if err_cmd[cmd]["oserr"]:
+            record = [
+                ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+                ("tests.brew_file", logging.ERROR, err_cmd[cmd]["out"]),
+            ]
+        else:
+            record = [("tests.brew_file", logging.INFO, f"$ {cmd}")]
         assert e.type == brew_file.CmdError
         assert e.value.return_code == err_cmd[cmd]["ret"]
-        assert str(e.value) == f"{err_cmd[cmd]['out']}\n"
+        assert str(e.value) == f"Failed at command: {cmd}\n"
+        assert caplog_locked.record_tuples == record
+        out, err = capsys.readouterr()
+        assert out == ""
+        assert err == ""
 
 
 def test_proc_dryrun(helper):
