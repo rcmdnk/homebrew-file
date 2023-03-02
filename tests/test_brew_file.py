@@ -616,12 +616,12 @@ def test_execute_update(execute_fixture, capsys):
     if brew_file.is_mac():
         assert (
             captured.out
-            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {}\ninitialize () {'check': False}\n"  # noqa: P103
+            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False}\n"  # noqa: P103
         )
     else:
         assert (
             captured.out
-            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\ninstall () {}\ncleanup () {}\ninitialize () {'check': False}\n"  # noqa: P103
+            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False}\n"  # noqa: P103
         )
 
 
