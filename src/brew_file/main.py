@@ -403,7 +403,7 @@ def main() -> int:
         "or -c/--clean\nCleanup.\n"
         "Uninstall packages not in the list.\n"
         "Untap packages not in the list.\n"
-        "Cleanup cache (brew cleanup).\n"
+        "Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).\n"
     )
     subparsers.add_parser(
         "clean",

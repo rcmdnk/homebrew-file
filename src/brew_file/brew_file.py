@@ -1198,7 +1198,7 @@ class BrewFile:
                     dryrun=self.opt["dryrun"],
                 )
 
-    def cleanup(self):
+    def cleanup(self, delete_cache=True):
         """Clean up."""
         # Get installed package list
         self.get_list()
@@ -1365,13 +1365,14 @@ class BrewFile:
         # Clean up cashe
         self.banner("# Clean up cache")
         cmd0 = "brew cleanup"
-        cmd1 = "rm -rf " + self.helper.brew_val("cache")
         self.helper.proc(
             cmd0, print_cmd=True, print_out=True, dryrun=self.opt["dryrun"]
         )
-        self.helper.proc(
-            cmd1, print_cmd=True, print_out=True, dryrun=self.opt["dryrun"]
-        )
+        if delete_cache:
+            cmd1 = "rm -rf " + self.helper.brew_val("cache")
+            self.helper.proc(
+                cmd1, print_cmd=True, print_out=True, dryrun=self.opt["dryrun"]
+            )
 
     def install(self):
         # Reinit flag
@@ -1966,7 +1967,7 @@ class BrewFile:
                 if self.opt["repo"] != "":
                     self.repomgr("pull")
                 self.install()
-                self.cleanup()
+                self.cleanup(delete_cache=False)
                 if not self.opt["dryrun"]:
                     _ = self.initialize(check=False)
                 if self.opt["repo"] != "":
