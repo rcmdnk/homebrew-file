@@ -60,10 +60,11 @@ class BrewHelper:
             return 0, [" ".join(cmd)]
         all_env = os.environ.copy()
         all_env.update(env)
+        lines = []
         try:
             if separate_err:
                 if print_err:
-                    stderr = subprocess.PIPE
+                    stderr = None
                 else:
                     stderr = subprocess.DEVNULL
             else:
@@ -76,26 +77,27 @@ class BrewHelper:
                 env=all_env,
                 cwd=cwd,
             )
-            out, err = p.communicate()
-            ret = p.returncode
+            for line in self.readstdout(p):
+                lines.append(line)
+                if print_out:
+                    self.log.info(line)
+            ret = p.wait()
         except OSError as e:
-            if not separate_err:
-                out = str(e) + "\n"
-                err = None
-            elif print_err:
-                out = ""
-                err = str(e) + "\n"
+            if separate_err:
+                if print_err:
+                    self.log.error(str(e))
+            else:
+                lines += str(e).splitlines()
+                if print_out:
+                    self.log.info(str(e))
             ret = e.errno
 
         if exit_on_err and ret != 0:
-            if err is not None:
-                out += err
-            raise CmdError(out, ret)
-        if print_out:
-            self.log.info(out)
-        if err and print_err:
-            self.log.error(err)
-        return ret, out.splitlines()
+            output = "\n".join(lines)
+            raise CmdError(
+                f"Failed at command: {' '.join(cmd)}\n{output}", ret
+            )
+        return ret, lines
 
     def brew_val(self, name: str) -> Any:
         if name not in self.opt:
