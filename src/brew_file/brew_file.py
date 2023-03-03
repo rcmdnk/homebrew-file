@@ -63,7 +63,7 @@ class BrewFile:
             input_path = home_config
 
         home_brewfile = Path(os.environ["HOME"]) / "/.brewfile/Brewfile"
-        if home_brewfile.if_file():
+        if home_brewfile.is_file():
             return home_brewfile
         return input_path
 
