@@ -6,7 +6,7 @@ from . import brew_file
 
 
 @pytest.fixture
-def brew_info(check_brew):
+def brew_info():
     bf = brew_file.BrewFile(
         {"input": Path(__file__).parent / "files" / "BrewfileTest"}
     )
