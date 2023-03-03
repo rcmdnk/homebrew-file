@@ -142,14 +142,16 @@ class BrewFile:
         self.brewinfo_ext: list[BrewInfo] = []
         self.brewinfo_main = self.brewinfo
 
-    def banner(self, text: str) -> None:
+    def banner(self, text: str, debug_out=False) -> None:
         width = 0
         for line in text.split("\n"):
             if width < len(line):
                 width = len(line)
-        self.log.info(
-            f"\n{'#' * width}\n{text}\n{'#' * width}\n",
-        )
+        output = f"\n{'#' * width}\n{text}\n{'#' * width}\n"
+        if debug_out:
+            self.log.debug(output)
+        else:
+            self.log.info(output)
 
     @dataclass
     class DryrunBanner:
@@ -313,11 +315,13 @@ class BrewFile:
         for b in self.brewinfo_ext:
             b.input_to_list()
 
-    def write(self):
-        self.banner(f"# Initialize {self.brewinfo_main.file}")
+    def write(self, debug_out=False):
+        self.banner(
+            f"# Initialize {self.brewinfo_main.file}", debug_out=debug_out
+        )
         self.brewinfo_main.write()
         for b in self.brewinfo_ext:
-            self.banner(f"# Initialize {b.file}")
+            self.banner(f"# Initialize {b.file}", debug_out=debug_out)
             b.write()
 
     def get(self, name, only_ext=False) -> set | dict:
@@ -676,7 +680,7 @@ class BrewFile:
             # Not install/remove command, no init.
             return
 
-        _ = self.initialize(check=False)
+        _ = self.initialize(check=False, debug_out=True)
 
     def add_path(self):
         paths = os.getenv("PATH").split(":")
@@ -1095,7 +1099,9 @@ class BrewFile:
             self.check_repo()
         return True
 
-    def initialize(self, check=True, check_input=True) -> bool:
+    def initialize(
+        self, check=True, check_input=True, debug_out=False
+    ) -> bool:
         """Initialize Brewfile."""
         if self.opt["initialized"]:
             return True
@@ -1131,15 +1137,16 @@ class BrewFile:
             self.clean_list()
 
         # write out
-        self.initialize_write()
+        self.initialize_write(debug_out=debug_out)
 
         return True
 
-    def initialize_write(self):
-        self.write()
+    def initialize_write(self, debug_out=False):
+        self.write(debug_out=debug_out)
         self.banner(
             f"# You can edit {self.brewinfo.file} with:\n"
-            f"#     $ {__prog__} edit"
+            f"#     $ {__prog__} edit",
+            debug_out=debug_out,
         )
         self.opt["initialized"] = True
 
@@ -1528,7 +1535,7 @@ class BrewFile:
         ):
             self.opt["mas_cmd_installed"] = self.opt["reattach_cmd_installed"]
             self.input_to_list()
-            self.initialize_write()
+            self.initialize_write(debug_out=True)
 
     def generate_cask_token(self, app):
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
@@ -1819,7 +1826,7 @@ class BrewFile:
 
         with open("Caskfile", "w") as f:
             f.write(output)
-        self.log.info(output)
+        self.log.debug(output)
 
         # Summary
         self.banner("# Summary")
@@ -1969,7 +1976,7 @@ class BrewFile:
                 self.install()
                 self.cleanup(delete_cache=False)
                 if not self.opt["dryrun"]:
-                    _ = self.initialize(check=False)
+                    _ = self.initialize(check=False, debug_out=True)
                 if self.opt["repo"] != "":
                     self.repomgr("push")
             return
