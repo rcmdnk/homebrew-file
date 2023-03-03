@@ -1,5 +1,45 @@
 # Changelog
 
+## [v9.0.3](https://github.com/rcmdnk/homebrew-file/tree/v9.0.3) (2023-03-03)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v9.0.2...v9.0.3)
+
+**Closed issues:**
+
+- brew-file consumes the output of `brew upgrade` [#151](https://github.com/rcmdnk/homebrew-file/issues/151)
+
+## [v9.0.2](https://github.com/rcmdnk/homebrew-file/tree/v9.0.2) (2023-03-02)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v9.0.1...v9.0.2)
+
+## [v9.0.1](https://github.com/rcmdnk/homebrew-file/tree/v9.0.1) (2023-03-02)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v9.0.0...v9.0.1)
+
+## [v9.0.0](https://github.com/rcmdnk/homebrew-file/tree/v9.0.0) (2023-03-01)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v8.5.12...v9.0.0)
+
+**Closed issues:**
+
+- Use FileHandler in Tee [#147](https://github.com/rcmdnk/homebrew-file/issues/147)
+- generate_cask_token with ruby 2.X [#146](https://github.com/rcmdnk/homebrew-file/issues/146)
+- mas does not show all apps [#145](https://github.com/rcmdnk/homebrew-file/issues/145)
+- For HOMEBREW_INSTALL_FROM_API [#142](https://github.com/rcmdnk/homebrew-file/issues/142)
+- Add support for Linux [#128](https://github.com/rcmdnk/homebrew-file/issues/128)
+- Reinstall no longer supports --HEAD [#127](https://github.com/rcmdnk/homebrew-file/issues/127)
+- Feature request: provide hook into "Initialize Brewfile" process [#121](https://github.com/rcmdnk/homebrew-file/issues/121)
+- mas-cli on Monterey no longer supports "mas account" sub-command [#111](https://github.com/rcmdnk/homebrew-file/issues/111)
+
+**Merged pull requests:**
+
+- chore(deps): update dependency pytest-xdist to v3.2.0 [#149](https://github.com/rcmdnk/homebrew-file/pull/149) ([renovate\[bot\]](https://github.com/apps/renovate))
+- chore(deps): update pre-commit hook rcmdnk/pyproject-pre-commit to v0.0.5 [#144](https://github.com/rcmdnk/homebrew-file/pull/144) ([renovate\[bot\]](https://github.com/apps/renovate))
+- chore(deps): update dependency pyproject-pre-commit to v0.0.5 [#143](https://github.com/rcmdnk/homebrew-file/pull/143) ([renovate\[bot\]](https://github.com/apps/renovate))
+- Update actions/setup-dotnet action to v3 [#132](https://github.com/rcmdnk/homebrew-file/pull/132) ([renovate\[bot\]](https://github.com/apps/renovate))
+- Update actions/setup-python action to v4 [#131](https://github.com/rcmdnk/homebrew-file/pull/131) ([renovate\[bot\]](https://github.com/apps/renovate))
+- Update dependency docutils to v0.19 [#130](https://github.com/rcmdnk/homebrew-file/pull/130) ([renovate\[bot\]](https://github.com/apps/renovate))
+
 ## [v8.5.12](https://github.com/rcmdnk/homebrew-file/tree/v8.5.12) (2022-08-02)
 
 [Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v8.5.11...v8.5.12)
@@ -70,7 +110,7 @@
 
 **Merged pull requests:**
 
-- Updated with Fish support for brew-wrap [#107](https://github.com/rcmdnk/homebrew-file/pull/107) ([pard68](https://github.com/pard68))
+- Updated with Fish support for brew-wrap [#107](https://github.com/rcmdnk/homebrew-file/pull/107) ([ispringle](https://github.com/ispringle))
 
 ## [v8.5.2](https://github.com/rcmdnk/homebrew-file/tree/v8.5.2) (2021-08-04)
 
@@ -181,15 +221,15 @@
 
 ## [v8.0.3](https://github.com/rcmdnk/homebrew-file/tree/v8.0.3) (2020-09-13)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v8.0.2...v8.0.3)
-
-## [v8.0.2](https://github.com/rcmdnk/homebrew-file/tree/v8.0.2) (2020-08-14)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.8...v8.0.2)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.8...v8.0.3)
 
 ## [v3.16.8](https://github.com/rcmdnk/homebrew-file/tree/v3.16.8) (2020-08-14)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.7...v3.16.8)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v8.0.2...v3.16.8)
+
+## [v8.0.2](https://github.com/rcmdnk/homebrew-file/tree/v8.0.2) (2020-08-14)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.7...v8.0.2)
 
 ## [v3.16.7](https://github.com/rcmdnk/homebrew-file/tree/v3.16.7) (2020-05-15)
 
@@ -206,15 +246,15 @@
 
 ## [v8.0.0](https://github.com/rcmdnk/homebrew-file/tree/v8.0.0) (2020-04-29)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.1.2...v8.0.0)
-
-## [v7.1.2](https://github.com/rcmdnk/homebrew-file/tree/v7.1.2) (2020-03-09)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.6...v7.1.2)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.6...v8.0.0)
 
 ## [v3.16.6](https://github.com/rcmdnk/homebrew-file/tree/v3.16.6) (2020-03-09)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.1.1...v3.16.6)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.1.2...v3.16.6)
+
+## [v7.1.2](https://github.com/rcmdnk/homebrew-file/tree/v7.1.2) (2020-03-09)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.1.1...v7.1.2)
 
 ## [v7.1.1](https://github.com/rcmdnk/homebrew-file/tree/v7.1.1) (2020-02-06)
 
@@ -230,15 +270,15 @@
 
 ## [v3.16.4](https://github.com/rcmdnk/homebrew-file/tree/v3.16.4) (2020-01-11)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.0.3...v3.16.4)
-
-## [v7.0.3](https://github.com/rcmdnk/homebrew-file/tree/v7.0.3) (2020-01-11)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.5...v7.0.3)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.16.5...v3.16.4)
 
 ## [v3.16.5](https://github.com/rcmdnk/homebrew-file/tree/v3.16.5) (2020-01-11)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.0.2...v3.16.5)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.0.3...v3.16.5)
+
+## [v7.0.3](https://github.com/rcmdnk/homebrew-file/tree/v7.0.3) (2020-01-11)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v7.0.2...v7.0.3)
 
 **Closed issues:**
 
@@ -537,15 +577,15 @@
 
 ## [v3.15.2](https://github.com/rcmdnk/homebrew-file/tree/v3.15.2) (2016-08-22)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.1...v3.15.2)
-
-## [v3.15.1](https://github.com/rcmdnk/homebrew-file/tree/v3.15.1) (2016-08-18)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.5...v3.15.1)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.5...v3.15.2)
 
 ## [v3.14.5](https://github.com/rcmdnk/homebrew-file/tree/v3.14.5) (2016-08-18)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.4...v3.14.5)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.15.1...v3.14.5)
+
+## [v3.15.1](https://github.com/rcmdnk/homebrew-file/tree/v3.15.1) (2016-08-18)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.14.4...v3.15.1)
 
 ## [v3.14.4](https://github.com/rcmdnk/homebrew-file/tree/v3.14.4) (2016-08-18)
 
@@ -812,15 +852,15 @@
 
 ## [v3.6.10](https://github.com/rcmdnk/homebrew-file/tree/v3.6.10) (2015-11-01)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.9...v3.6.10)
-
-## [v3.6.9](https://github.com/rcmdnk/homebrew-file/tree/v3.6.9) (2015-11-01)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.8...v3.6.9)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.8...v3.6.10)
 
 ## [v3.6.8](https://github.com/rcmdnk/homebrew-file/tree/v3.6.8) (2015-11-01)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.7...v3.6.8)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.9...v3.6.8)
+
+## [v3.6.9](https://github.com/rcmdnk/homebrew-file/tree/v3.6.9) (2015-11-01)
+
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v3.6.7...v3.6.9)
 
 **Closed issues:**
 
@@ -1238,15 +1278,11 @@
 
 ## [v0.0.4](https://github.com/rcmdnk/homebrew-file/tree/v0.0.4) (2013-10-21)
 
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/test...v0.0.4)
+[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.2...v0.0.4)
 
 **Merged pull requests:**
 
 - Add a Bitdeli Badge to README [#1](https://github.com/rcmdnk/homebrew-file/pull/1) ([bitdeli-chef](https://github.com/bitdeli-chef))
-
-## [test](https://github.com/rcmdnk/homebrew-file/tree/test) (2013-09-16)
-
-[Full Changelog](https://github.com/rcmdnk/homebrew-file/compare/v0.0.2...test)
 
 ## [v0.0.2](https://github.com/rcmdnk/homebrew-file/tree/v0.0.2) (2013-09-15)
 
