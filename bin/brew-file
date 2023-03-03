@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.2"
-__date__ = "02/Mar/2023"
+__version__ = "9.0.3"
+__date__ = "03/Mar/2023"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -988,25 +988,57 @@ class BrewFile:
         # fix up opt
         self.set_args()
 
+    def get_input_path(self) -> Path:
+        input_path = None
+        xdg_config_home = os.getenv("XGD_CONFIG_HOME")
+        if xdg_config_home is not None:
+            input_path = Path(xdg_config_home) / "brewfile/Brewfile"
+            if input_path.is_file():
+                return input_path
+        home_config = Path(os.environ["HOME"]) / ".config/brewfile/Brewfile"
+        if home_config.is_file():
+            return home_config
+        if input_path is None:
+            input_path = home_config
+
+        home_brewfile = Path(os.environ["HOME"]) / "/.brewfile/Brewfile"
+        if home_brewfile.if_file():
+            return home_brewfile
+        return input_path
+
+    def parse_env_opts(
+        self, env_var: str, base_opts: dict | None = None
+    ) -> dict:
+        """Returns a dictionary parsed from an environment variable."""
+        opts = {}
+        if base_opts is not None:
+            opts.update(base_opts)
+
+        env_opts = os.getenv(env_var, None)
+        if env_opts:
+            user_opts = {
+                key: value
+                for (key, value) in [
+                    pair.partition("=")[::2] for pair in env_opts.split()
+                ]
+            }
+
+            if user_opts:
+                opts.update(user_opts)
+            else:
+                self.log.warning(
+                    '{env_var}: "{env_opts}" is not a proper format.'
+                )
+                self.log.warning("Ignoring the value.\n")
+        return opts
+
     def default_opt(self) -> dict[str, Any]:
         opt: dict[str, Any] = {}
         opt["verbose"] = os.getenv("HOMEBREW_BREWFILE_VERBOSE", "info")
         opt["command"] = ""
         opt["input"] = Path(os.getenv("HOMEBREW_BREWFILE", ""))
         if not opt["input"].name:
-            brewfile_config = (
-                Path(
-                    os.getenv(
-                        "XDG_CONFIG_HOME", os.environ["HOME"] + "/.config"
-                    ),
-                )
-                / "brewfile/Brewfile"
-            )
-            brewfile_home = Path(os.environ["HOME"] + "/.brewfile/Brewfile")
-            if not brewfile_config.is_file() and brewfile_home.is_file():
-                opt["input"] = brewfile_home
-            else:
-                opt["input"] = brewfile_config
+            opt["input"] = self.get_input_path()
         opt["backup"] = os.getenv("HOMEBREW_BREWFILE_BACKUP", "")
         opt["form"] = None
         opt["leaves"] = to_bool(os.getenv("HOMEBREW_BREWFILE_LEAVES", False))
@@ -1105,33 +1137,6 @@ class BrewFile:
         def __exit__(self, exc_type, exc_value, traceback) -> None:
             if self.brewfile.opt["dryrun"]:
                 self.brewfile.banner("# This is dry run.")
-
-    def parse_env_opts(
-        self, env_var: str, base_opts: dict | None = None
-    ) -> dict:
-        """Returns a dictionary parsed from an environment variable."""
-        opts = {}
-        if base_opts is not None:
-            opts.update(base_opts)
-
-        env_opts = os.getenv(env_var, None)
-        if env_opts:
-            user_opts = {
-                key: value
-                for (key, value) in [
-                    pair.partition("=")[::2] for pair in env_opts.split()
-                ]
-            }
-
-            if user_opts:
-                opts.update(user_opts)
-            else:
-                self.log.warning(
-                    '{env_var}: "{env_opts}" is not a proper format.'
-                )
-                self.log.warning("Ignoring the value.\n")
-
-        return opts
 
     def set_verbose(self, verbose: str | None = None) -> None:
         if verbose is None:
