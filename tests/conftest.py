@@ -1,5 +1,6 @@
 import logging
-import sys
+import os
+from pathlib import Path
 
 import pytest
 from filelock import FileLock
@@ -8,8 +9,14 @@ from . import brew_file
 
 
 @pytest.fixture(scope="session", autouse=True)
-def check_brew():
-    brew_file.BrewFile({})
+def check_brew(tmp_path_factory):
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    with FileLock(root_tmp_dir / "brew.lock"):
+        bf = brew_file.BrewFile({})
+        if not (Path(bf.opt["cache"]) / "api/formula.jws.json").exists():
+            # pseudo code to download api json
+            bf.helper.proc("brew search python")
+    os.environ["HOMEBREW_API_AUTO_UPDATE_SECS"] = "100000"
 
 
 @pytest.fixture(scope="session", autouse=False)
@@ -27,14 +34,6 @@ def python(tmp_path_factory):
     with FileLock(root_tmp_dir / "python.lock"):
         bf = brew_file.BrewFile({})
         bf.helper.proc("brew install python@3.10")
-
-
-@pytest.fixture
-def ch() -> logging.StreamHandler:
-    ch = logging.StreamHandler(stream=sys.stdout)
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(brew_file.LogFormatter())
-    return ch
 
 
 @pytest.fixture(scope="function", autouse=False)
