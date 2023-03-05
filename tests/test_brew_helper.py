@@ -158,15 +158,17 @@ def test_proc_err_exit_on_err(helper, caplog_locked, err_cmd, capfd):
                 ("tests.brew_file", logging.INFO, f"$ {cmd}"),
                 ("tests.brew_file", logging.ERROR, err_cmd[cmd]["out"]),
             ]
+            syserr = ""
         else:
             record = [("tests.brew_file", logging.INFO, f"$ {cmd}")]
+            syserr = err_cmd[cmd]["out"] + "\n"
         assert e.type == brew_file.CmdError
         assert e.value.return_code == err_cmd[cmd]["ret"]
         assert str(e.value) == f"Failed at command: {cmd}\n"
         assert caplog_locked.record_tuples == record
         out, err = capfd.readouterr()
         assert out == ""
-        assert err == ""
+        assert err == syserr
 
 
 def test_proc_dryrun(helper):
