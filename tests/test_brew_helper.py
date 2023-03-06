@@ -120,7 +120,7 @@ def test_proc_err(helper, caplog_locked, err_cmd, capfd):
         assert err == syserr
 
 
-def test_proc_err_exit_on_err(helper, caplog_locked, err_cmd, capsys):
+def test_proc_err_exit_on_err(helper, caplog_locked, err_cmd, capfd):
     for cmd in err_cmd:
         caplog_locked.clear()
         with pytest.raises(brew_file.CmdError) as e:
@@ -139,7 +139,7 @@ def test_proc_err_exit_on_err(helper, caplog_locked, err_cmd, capsys):
             ("tests.brew_file", logging.INFO, f"$ {cmd}"),
             ("tests.brew_file", logging.INFO, err_cmd[cmd]["out"]),
         ]
-        out, err = capsys.readouterr()
+        out, err = capfd.readouterr()
         assert out == ""
         assert err == ""
 
@@ -166,7 +166,7 @@ def test_proc_err_exit_on_err(helper, caplog_locked, err_cmd, capsys):
         assert e.value.return_code == err_cmd[cmd]["ret"]
         assert str(e.value) == f"Failed at command: {cmd}\n"
         assert caplog_locked.record_tuples == record
-        out, err = capsys.readouterr()
+        out, err = capfd.readouterr()
         assert out == ""
         assert err == syserr
 
