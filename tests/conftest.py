@@ -1,4 +1,3 @@
-import logging
 import os
 from pathlib import Path
 
@@ -17,6 +16,8 @@ def check_brew(tmp_path_factory):
             # pseudo code to download api json
             bf.helper.proc("brew search python")
     os.environ["HOMEBREW_API_AUTO_UPDATE_SECS"] = "100000"
+    if "HOMEBREW_BREWFILE_VERBOSE" in os.environ:
+        del os.environ["HOMEBREW_BREWFILE_VERBOSE"]
 
 
 @pytest.fixture(scope="session", autouse=False)
@@ -34,11 +35,3 @@ def python(tmp_path_factory):
     with FileLock(root_tmp_dir / "python.lock"):
         bf = brew_file.BrewFile({})
         bf.helper.proc("brew install python@3.10")
-
-
-@pytest.fixture(scope="function", autouse=False)
-def caplog_locked(tmp_path_factory, caplog):
-    root_tmp_dir = tmp_path_factory.getbasetemp().parent
-    with FileLock(root_tmp_dir / "caplog.lock"):
-        caplog.set_level(logging.DEBUG)
-        yield caplog
