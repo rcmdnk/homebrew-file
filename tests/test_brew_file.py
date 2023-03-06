@@ -73,9 +73,10 @@ def test_parse_env_opts(bf):
     os.environ["TEST_OPT"] = "--opt2=3 --opt3 opt4=4"
     opts = bf.parse_env_opts("TEST_OPT", {"--opt1": "1", "--opt2": "2"})
     assert opts == {"--opt1": "1", "--opt2": "3", "--opt3": "", "opt4": "4"}
+    del os.environ["TEST_OPT"]
 
 
-def test_set_verbose(bf):
+def test_set_verbose(bf, caplog_locked):
     if "HOMEBREW_BREWFILE_VERBOSE" in os.environ:
         del os.environ["HOMEBREW_BREWFILE_VERBOSE"]
     bf.set_verbose()
@@ -85,6 +86,7 @@ def test_set_verbose(bf):
     bf.set_verbose()
     assert bf.opt["verbose"] == "error"
     assert bf.log.getEffectiveLevel() == logging.ERROR
+    del os.environ["HOMEBREW_BREWFILE_VERBOSE"]
     bf.set_verbose("0")
     assert bf.opt["verbose"] == "debug"
     assert bf.log.getEffectiveLevel() == logging.DEBUG
