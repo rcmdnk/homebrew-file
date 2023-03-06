@@ -7,5 +7,5 @@ condition: branch=main, os=macos-12, python_version=3.9
 
 | Tests | Skipped | Failures | Errors | Time |
 | ----- | ------- | -------- | -------- | ------------------ |
-| 148 | 0 :zzz: | 2 :x: | 0 :fire: | 4m 42s :stopwatch: |
+| 148 | 0 :zzz: | 2 :x: | 0 :fire: | 7m 5s :stopwatch: |
 
