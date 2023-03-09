@@ -259,7 +259,7 @@ class BrewInfo:
                 elif cmd == "tap":
                     self.tap_input.append(p)
                 elif cmd == "tapall":
-                    self.helper.proc(f"brew tap {p}")
+                    _ = self.helper.proc(f"brew tap {p}")
                     self.tap_input.append(p)
                     for tp in self.helper.get_tap_packs(p):
                         self.brew_input.append(tp)
@@ -532,14 +532,14 @@ fi
 
         # Change permission for exe/normal file
         if self.helper.opt["form"] in ["command", "cmd"]:
-            self.helper.proc(
+            _ = self.helper.proc(
                 f"chmod 755 {self.file}",
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=False,
             )
         else:
-            self.helper.proc(
+            _ = self.helper.proc(
                 f"chmod 644 {self.file}",
                 print_cmd=False,
                 print_out=False,
