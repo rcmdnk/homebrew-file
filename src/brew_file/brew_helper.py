@@ -101,17 +101,18 @@ class BrewHelper:
 
     def brew_val(self, name: str) -> Any:
         if name not in self.opt:
-            self.opt[name] = self.proc("brew --" + name, False, False)[1][0]
+            _, lines = self.proc("brew --" + name, False, False)
+            self.opt[name] = lines[0]
         return self.opt[name]
 
     def get_formula_list(self):
-        lines = self.proc(
+        _, lines = self.proc(
             "brew list --formula",
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
-        )[1]
+        )
         packages = []
         for line in lines:
             if (
@@ -124,13 +125,13 @@ class BrewHelper:
         return packages
 
     def get_cask_list(self):
-        lines = self.proc(
+        _, lines = self.proc(
             "brew list --cask",
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
-        )[1]
+        )
         packages = []
         for line in lines:
             if (
@@ -142,19 +143,24 @@ class BrewHelper:
             packages.append(line)
         return packages
 
+    def brew_info(self, info_opt: str, **kw) -> list | dict:
+        ret, lines = self.proc("brew info " + info_opt, **kw)
+        info = (
+            lines[lines.index("{") :]
+            if "{" in lines
+            else lines[lines.index("[") :]
+        )
+        return json.loads("".join(info))
+
     def get_info(self, package: str = "") -> dict:
         if package == "":
             package = "--installed"
-        infotmp = json.loads(
-            "".join(
-                self.proc(
-                    "brew info --json=v1 " + package,
-                    print_cmd=False,
-                    print_out=False,
-                    exit_on_err=True,
-                    separate_err=True,
-                )[1]
-            )
+        infotmp = self.brew_info(
+            info_opt="--json=v1 " + package,
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=True,
+            separate_err=True,
         )
         info = {}
         for i in infotmp:
@@ -202,20 +208,19 @@ class BrewHelper:
         if "formula_info" in self.opt:
             return self.opt["formula_info"]
 
-        _, lines = self.proc(
-            "brew info --eval-all --json=v1",
-            print_cmd=False,
-            print_out=False,
+        info = self.brew_info(
+            info_opt="--eval-all --json=v1", print_cmd=False, print_out=False
         )
-        info = list(json.loads("".join(lines)))
-        if self.opt["api"]:
-            info_taps = [x for x in info if x["tap"] != self.opt["core_repo"]]
+        if (
+            not [x for x in info if x["tap"] == self.opt["core_repo"]]
+            and self.opt["api"]
+        ):
             formula_json = Path(self.opt["cache"]) / "api" / "formula.jws.json"
             if not formula_json.exists():
-                self.proc("brew update")
+                _ = self.proc("brew update")
             with open(formula_json, "r") as f:
                 info_api = json.loads(json.load(f)["payload"])
-            info = info_api + info_taps
+            info = info_api + info
         self.opt["formula_info"] = info
         return info
 
@@ -246,15 +251,19 @@ class BrewHelper:
             print_cmd=False,
             print_out=False,
         )
-        info = list(json.loads("".join(lines))["casks"])
-        if self.opt["api"]:
-            info_taps = [x for x in info if x["tap"] != self.opt["cask_repo"]]
+        info = self.brew_info(
+            info_opt="--eval-all --json=v2", print_cmd=False, print_out=False
+        )["casks"]
+        if (
+            not [x for x in info if x["tap"] == self.opt["cask_repo"]]
+            and self.opt["api"]
+        ):
             cask_json = Path(self.opt["cache"]) / "api" / "cask.jws.json"
             if not cask_json.exists():
-                self.proc("brew update")
+                _ = self.proc("brew update")
             with open(cask_json, "r") as f:
                 info_api = json.loads(json.load(f)["payload"])
-            info = info_api + info_taps
+            info = info_api + info
         self.opt["cask_info"] = info
         return info
 
@@ -266,13 +275,13 @@ class BrewHelper:
     def get_leaves(self) -> list[str]:
         if "leaves" in self.opt:
             return self.opt["leaves"]
-        leaves = self.proc(
+        _, leaves = self.proc(
             "brew leaves",
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
-        )[1]
+        )
         leaves = [x.split("/")[-1] for x in leaves]
         self.opt["leaves"] = leaves
         return leaves
