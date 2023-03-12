@@ -445,7 +445,7 @@ def test_check_input_file(bf):
     pass
 
 
-def test_get_files(bf, caplog):
+def test_get_files(bf, tap, caplog):
     parent = Path(__file__).parent / "files"
     file = parent / "BrewfileTest"
     bf.set_input(file)
