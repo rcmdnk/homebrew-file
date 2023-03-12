@@ -1176,7 +1176,7 @@ class BrewFile:
             if all_files or x.file.exists()
         ]
         if is_print:
-            self.log.info("\n".join(files))
+            self.log.info("\n".join([str(x) for x in files]))
         return files
 
     def edit_brewfile(self):

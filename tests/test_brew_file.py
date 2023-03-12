@@ -445,8 +445,49 @@ def test_check_input_file(bf):
     pass
 
 
-def test_get_files(bf):
-    pass
+def test_get_files(bf, caplog):
+    parent = Path(__file__).parent / "files"
+    file = parent / "BrewfileTest"
+    bf.set_input(file)
+    files = [
+        parent / x
+        for x in [
+            "BrewfileMain",
+            "BrewfileTest",
+            "BrewfileExt",
+            "BrewfileExt2",
+        ]
+    ]
+    caplog.clear()
+    assert bf.get_files() == files
+    assert caplog.record_tuples == [
+        ("tests.brew_file", 20, "$ brew tap rcmdnk/rcmdnkpac"),
+    ]
+
+    bf.set_input(file)
+    bf.opt["read"] = False
+    files = [
+        parent / x
+        for x in [
+            "BrewfileMain",
+            "BrewfileTest",
+            "BrewfileExt",
+            "BrewfileExt2",
+            "BrewfileExt3",
+            "BrewfileNotExist",
+        ]
+        + [Path(os.environ["HOME"]) / "BrewfileHomeForTestingNotExists"]
+    ]
+    caplog.clear()
+    assert bf.get_files(is_print=True, all_files=True) == files
+    assert caplog.record_tuples == [
+        ("tests.brew_file", 20, "$ brew tap rcmdnk/rcmdnkpac"),
+        (
+            "tests.brew_file",
+            logging.INFO,
+            "\n".join([str(x) for x in files]),
+        ),
+    ]
 
 
 def test_edit_brewfile(bf):
