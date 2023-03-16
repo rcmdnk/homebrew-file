@@ -179,14 +179,24 @@ def test_sort(brew_info):
     assert brew_info.appstore_list == ["222 aaa (1)", "bbb", "111 ccc (2)"]
 
 
-def test_get(brew_info):
+def test_get_list(brew_info):
     brew_info.brew_input.extend(["brew"])
-    brew_input = brew_info.get("brew_input")
+    brew_input = brew_info.get_list("brew_input")
     assert brew_input == ["brew"]
     brew_input.append("brew2")
     assert brew_info.brew_input == ["brew"]
-    brew_input = brew_info.get("brew_input")
+    brew_input = brew_info.get_list("brew_input")
     assert brew_input == ["brew"]
+
+
+def test_get_dict(brew_info):
+    brew_info.brew_input_opt["brew"] = "opt"
+    brew_input_opt = brew_info.get_dict("brew_input_opt")
+    assert brew_input_opt["brew"] == "opt"
+    brew_input_opt["brew2"] = "opt2"
+    assert list(brew_input_opt.keys()) == ["brew", "brew2"]
+    brew_input_opt = brew_info.get_dict("brew_input_opt")
+    assert list(brew_input_opt.keys()) == ["brew"]
 
 
 def test_get_files(brew_info):
@@ -212,21 +222,27 @@ def test_remove(brew_info):
     assert brew_info.brew_input_opt == {"aaa": "aaa", "ccc": "ccc"}
 
 
-def test_set_val(brew_info):
+def test_set_list_val(brew_info):
     brew_info.brew_input.extend(["aaa", "bbb"])
-    brew_info.set_val("brew_input", ["ccc"])
+    brew_info.set_list_val("brew_input", ["ccc"])
     assert brew_info.brew_input == ["ccc"]
+
+
+def test_set_dict_val(brew_info):
     brew_info.brew_input_opt.update({"aaa": "aaa", "bbb": "bbb"})
-    brew_info.set_val("brew_input_opt", {"ccc": "ccc"})
+    brew_info.set_dict_val("brew_input_opt", {"ccc": "ccc"})
     assert brew_info.brew_input_opt == {"ccc": "ccc"}
 
 
-def test_add(brew_info):
+def test_add_to_list(brew_info):
     brew_info.brew_input.extend(["aaa", "bbb"])
-    brew_info.add("brew_input", ["aaa", "ccc"])
+    brew_info.add_to_list("brew_input", ["aaa", "ccc"])
     assert brew_info.brew_input == ["aaa", "bbb", "ccc"]
+
+
+def test_add_to_dict(brew_info):
     brew_info.brew_input_opt.update({"aaa": "aaa", "bbb": "bbb"})
-    brew_info.add("brew_input_opt", {"aaa": "ddd", "ccc": "ccc"})
+    brew_info.add_to_dict("brew_input_opt", {"aaa": "ddd", "ccc": "ccc"})
     assert brew_info.brew_input_opt == {
         "aaa": "ddd",
         "bbb": "bbb",

@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from typing import Any
 
 from .brew_file import BrewFile
 from .brew_helper import CmdError
@@ -20,7 +21,10 @@ def main() -> int:
     b = BrewFile()
 
     # Pre Parser
-    arg_parser_opts: dict = {"add_help": False, "allow_abbrev": False}
+    arg_parser_opts: dict[str, Any] = {
+        "add_help": False,
+        "allow_abbrev": False,
+    }
     pre_parser = argparse.ArgumentParser(
         usage=f"{__prog__}...", **arg_parser_opts
     )
@@ -288,7 +292,7 @@ def main() -> int:
         verbose_parser,
     ]
     formatter = argparse.RawTextHelpFormatter
-    subparser_opts: dict = {
+    subparser_opts: dict[str, Any] = {
         "formatter_class": formatter,
         "allow_abbrev": False,
     }
