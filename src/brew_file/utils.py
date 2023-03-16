@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import platform
@@ -6,7 +8,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Any, Type
 
 
 class LogFormatter(logging.Formatter):
@@ -32,7 +34,7 @@ class LogFormatter(logging.Formatter):
                     level
                 ] = f"\033[{colors[level]};1m{self.formats[level]}\033[m"
 
-    def format(self, record) -> str:  # noqa: A003
+    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         fmt = self.formats.get(record.levelno, self.default_format)
         formatter = logging.Formatter(fmt)
         return formatter.format(record)
@@ -42,7 +44,7 @@ def is_mac() -> bool:
     return platform.system() == "Darwin"
 
 
-def to_bool(val: Union[bool, int, str]) -> bool:
+def to_bool(val: bool | int | str) -> bool:
     if isinstance(val, bool):
         return val
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
@@ -53,7 +55,7 @@ def to_bool(val: Union[bool, int, str]) -> bool:
     return False
 
 
-def to_num(val: Union[bool, int, str]) -> int:
+def to_num(val: bool | int | str) -> int:
     if isinstance(val, bool):
         return int(val)
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
@@ -64,7 +66,7 @@ def to_num(val: Union[bool, int, str]) -> int:
     return 0
 
 
-shell_envs = {
+shell_envs: dict[str, str] = {
     "HOSTNAME": os.uname().nodename,
     "HOSTTYPE": os.uname().machine,
     "OSTYPE": subprocess.run(
@@ -74,7 +76,7 @@ shell_envs = {
 }
 
 
-def expandpath(path: Union[str, Path]) -> Path:
+def expandpath(path: str | Path) -> Path:
     path = str(path)
     for k in shell_envs:
         for kk in [f"${k}", f"${{{k}}}"]:
@@ -89,7 +91,7 @@ def expandpath(path: Union[str, Path]) -> Path:
     return Path(path).expanduser()
 
 
-def home_tilde(path: Union[str, Path]) -> str:
+def home_tilde(path: str | Path) -> str:
     return str(path).replace(os.environ["HOME"], "~")
 
 
@@ -100,7 +102,7 @@ class OpenWrapper:
     name: str
     mode: str = "w"
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         if (
             Path(self.name).parent != ""
             and not Path(self.name).parent.exists()
@@ -109,7 +111,12 @@ class OpenWrapper:
         self.file = open(self.name, self.mode)
         return self.file
 
-    def __exit__(self, exception_type, exception_value, traceback):
+    def __exit__(
+        self,
+        exception_type: Type[BaseException],
+        exception_value: BaseException,
+        traceback: Any,
+    ) -> bool:
         if exception_type is not None:
             return False
         self.file.close()
@@ -122,5 +129,5 @@ class StrRe(str):
 
     var: str
 
-    def __eq__(self, pattern) -> bool:
+    def __eq__(self, pattern: Any) -> bool:
         return True if re.search(pattern, self.var) is not None else False

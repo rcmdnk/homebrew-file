@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "brew-file"
-version = "9.0.7"
+version = "9.0.8"
 description = "Brewfile manager for Homebrew"
 authors = ["rcmdnk <rcmdnk@gmail.com>"]
 
@@ -61,8 +61,9 @@ skips = ["B404", "B603", "B607"]
 
 [tool.mypy]
 files = ["bin/brew-file", "src/**/*.py"]
-#strict = true
-#warn_return_any = false
+strict = true
+
+warn_return_any = false
 ignore_missing_imports = true
 scripts_are_modules = true
 warn_unused_ignores = true

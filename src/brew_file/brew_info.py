@@ -5,7 +5,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import Any
 
 from .brew_helper import BrewHelper
 from .utils import is_mac
@@ -49,8 +49,7 @@ class BrewInfo:
 
         self.cask_nocask_list: list[str] = []
 
-        self.list_dic: dict[str, list[str] | dict[str, str]] = {
-            "brew_input_opt": self.brew_input_opt,
+        self.lists: dict[str, list[str]] = {
             "brew_input": self.brew_input,
             "tap_input": self.tap_input,
             "cask_input": self.cask_input,
@@ -60,8 +59,6 @@ class BrewInfo:
             "before_input": self.before_input,
             "after_input": self.after_input,
             "cmd_input": self.cmd_input,
-            "cask_args_input": self.cask_args_input,
-            "brew_list_opt": self.brew_list_opt,
             "brew_list": self.brew_list,
             "brew_full_list": self.brew_full_list,
             "tap_list": self.tap_list,
@@ -70,6 +67,11 @@ class BrewInfo:
             "appstore_list": self.appstore_list,
             "main_list": self.main_list,
             "file_list": self.file_list,
+        }
+        self.dicts: dict[str, dict[str, str]] = {
+            "brew_input_opt": self.brew_input_opt,
+            "cask_args_input": self.cask_args_input,
+            "brew_list_opt": self.brew_list_opt,
         }
 
     def get_dir(self) -> Path:
@@ -154,37 +156,41 @@ class BrewInfo:
             else x.split()[0]
         )
 
-    def get(self, name: str) -> Union[list, dict]:
-        return copy.deepcopy(self.list_dic[name])
+    def get_list(self, name: str) -> list[str]:
+        return copy.deepcopy(self.lists[name])
 
-    def get_files(self) -> dict:
+    def get_dict(self, name: str) -> dict[str, str]:
+        return copy.deepcopy(self.dicts[name])
+
+    def get_files(self) -> dict[str, list[str]]:
         self.read()
-        files = {"main": self.get("main_input")}
-        files.update({"ext": self.get("file_input")})
+        files = {"main": self.get_list("main_input")}
+        files.update({"ext": self.get_list("file_input")})
         return files
 
     def remove(self, name: str, package: str) -> None:
-        collection = self.list_dic[name]
-        if isinstance(collection, list):
-            collection.remove(package)
-        elif isinstance(collection, dict):
-            del collection[package]
+        if name in self.lists:
+            self.lists[name].remove(package)
+        else:
+            del self.dicts[name][package]
 
-    def set_val(self, name: str, val: list | dict) -> None:
-        collection = self.list_dic[name]
-        if isinstance(collection, list):
-            del collection[:]
-            collection.extend(val)
-        elif isinstance(collection, dict):
-            collection.clear()
-            collection.update(val)
+    def set_list_val(self, name: str, val: list[str]) -> None:
+        collection = self.lists[name]
+        del collection[:]
+        collection.extend(val)
 
-    def add(self, name: str, val: list | dict) -> None:
-        collection = self.list_dic[name]
-        if isinstance(collection, list):
-            collection.extend([x for x in val if x not in collection])
-        elif isinstance(collection, dict):
-            collection.update(val)
+    def set_dict_val(self, name: str, val: dict[str, str]) -> None:
+        collection = self.dicts[name]
+        collection.clear()
+        collection.update(val)
+
+    def add_to_list(self, name: str, val: list[str]) -> None:
+        collection = self.lists[name]
+        collection.extend([x for x in val if x not in collection])
+
+    def add_to_dict(self, name: str, val: dict[str, Any]) -> None:
+        collection = self.dicts[name]
+        collection.update(val)
 
     def read(self) -> None:
         self.clear_input()
@@ -421,8 +427,12 @@ fi
             isfirst = True
 
             def first_tap_pack_write(
-                isfirst, direct_first, isfirst_pack, tap, cmd_tap
-            ):
+                isfirst: bool,
+                direct_first: bool,
+                isfirst_pack: bool,
+                tap: str,
+                cmd_tap: str,
+            ) -> str:
                 output = ""
                 if isfirst:
                     output += "\n# tap repositories and their packages\n"

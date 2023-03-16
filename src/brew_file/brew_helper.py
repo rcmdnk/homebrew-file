@@ -13,7 +13,7 @@ from typing import Any, Generator
 class CmdError(Exception):
     """Exception at command execution."""
 
-    def __init__(self, message, return_code) -> None:
+    def __init__(self, message: str, return_code: int) -> None:
         super().__init__(message)
         self.return_code = return_code
 
@@ -22,12 +22,14 @@ class CmdError(Exception):
 class BrewHelper:
     """Helper functions for BrewFile."""
 
-    opt: dict = field(default_factory=dict)
+    opt: dict[str, Any] = field(default_factory=dict)
     log: logging.Logger = field(
         default_factory=lambda: logging.getLogger(__name__)
     )
 
-    def readstdout(self, proc: subprocess.Popen) -> Generator[str, None, None]:
+    def readstdout(
+        self, proc: subprocess.Popen[str]
+    ) -> Generator[str, None, None]:
         for line in iter(proc.stdout.readline, ""):  # type: ignore
             line = line.rstrip()
             if line == "":
@@ -42,7 +44,7 @@ class BrewHelper:
         exit_on_err: bool = True,
         separate_err: bool = False,
         print_err: bool = True,
-        env: dict | None = None,
+        env: dict[str, str] | None = None,
         cwd: str | Path | None = None,
         dryrun: bool = False,
     ) -> tuple[int, list[str]]:
@@ -105,7 +107,7 @@ class BrewHelper:
             self.opt[name] = lines[0]
         return self.opt[name]
 
-    def get_formula_list(self):
+    def get_formula_list(self) -> list[str]:
         _, lines = self.proc(
             "brew list --formula",
             print_cmd=False,
@@ -124,7 +126,7 @@ class BrewHelper:
             packages.append(line)
         return packages
 
-    def get_cask_list(self):
+    def get_cask_list(self) -> list[str]:
         _, lines = self.proc(
             "brew list --cask",
             print_cmd=False,
@@ -143,33 +145,42 @@ class BrewHelper:
             packages.append(line)
         return packages
 
-    def brew_info(self, info_opt: str, **kw) -> list | dict:
-        ret, lines = self.proc("brew info " + info_opt, **kw)
-        info = (
-            lines[lines.index("{") :]
-            if "{" in lines
-            else lines[lines.index("[") :]
-        )
+    def brew_info_v1(
+        self,
+        info_opt: str,
+        **kw: str | list[str] | bool | dict[str, str] | Path | None,
+    ) -> list[dict[str, Any]]:
+        ret, lines = self.proc("brew info --json=v1 " + info_opt, **kw)  # type: ignore
+        info = lines[lines.index("[") :]
         return json.loads("".join(info))
 
-    def get_info(self, package: str = "") -> dict:
+    def brew_info_v2(
+        self,
+        info_opt: str,
+        **kw: str | list[str] | bool | dict[str, str] | Path | None,
+    ) -> dict[str, Any]:
+        ret, lines = self.proc("brew info --json=v2 " + info_opt, **kw)  # type: ignore
+        info = lines[lines.index("{") :]
+        return json.loads("".join(info))
+
+    def get_info(self, package: str = "") -> dict[str, Any]:
         if package == "":
             package = "--installed"
-        infotmp = self.brew_info(
-            info_opt="--json=v1 " + package,
+        infotmp = self.brew_info_v1(
+            info_opt=package,
             print_cmd=False,
             print_out=False,
             exit_on_err=True,
             separate_err=True,
         )
-        info = {}
+        info: dict[str, Any] = {}
         for i in infotmp:
             info[i["name"]] = i
         return info
 
     def get_installed(
-        self, package: str, package_info: dict | None = None
-    ) -> dict:
+        self, package: str, package_info: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Get installed version of brew package."""
         if package_info is None:
             package_info = self.get_info(package)[package]
@@ -185,7 +196,7 @@ class BrewHelper:
         return installed
 
     def get_option(
-        self, package: str, package_info: dict | None = None
+        self, package: str, package_info: dict[str, Any] | None = None
     ) -> str:
         """Get install options from brew info."""
         # Get options for build
@@ -204,12 +215,12 @@ class BrewHelper:
                     opt += " --" + k
         return opt
 
-    def get_formula_info(self):
+    def get_formula_info(self) -> list[dict[str, Any]]:
         if "formula_info" in self.opt:
             return self.opt["formula_info"]
 
-        info = self.brew_info(
-            info_opt="--eval-all --json=v1", print_cmd=False, print_out=False
+        info = self.brew_info_v1(
+            info_opt="--eval-all", print_cmd=False, print_out=False
         )
         if (
             not [x for x in info if x["tap"] == self.opt["core_repo"]]
@@ -235,14 +246,14 @@ class BrewHelper:
                     self.opt["formula_aliases"][a] = i["name"]
         return self.opt["formula_aliases"]
 
-    def get_tap_packs(self, tap: str) -> list:
+    def get_tap_packs(self, tap: str) -> list[str]:
         packs = [x["name"] for x in self.get_formula_info() if x["tap"] == tap]
         packs_aliases = [
             k for k, v in self.get_formula_aliases().items() if v in packs
         ]
         return packs + packs_aliases
 
-    def get_cask_info(self):
+    def get_cask_info(self) -> Any:
         if "cask_info" in self.opt:
             return self.opt["cask_info"]
 
@@ -251,8 +262,8 @@ class BrewHelper:
             print_cmd=False,
             print_out=False,
         )
-        info = self.brew_info(
-            info_opt="--eval-all --json=v2", print_cmd=False, print_out=False
+        info = self.brew_info_v2(
+            info_opt="--eval-all", print_cmd=False, print_out=False
         )["casks"]
         if (
             not [x for x in info if x["tap"] == self.opt["cask_repo"]]
@@ -267,21 +278,21 @@ class BrewHelper:
         self.opt["cask_info"] = info
         return info
 
-    def get_tap_casks(self, tap: str) -> list:
+    def get_tap_casks(self, tap: str) -> list[str]:
         return sorted(
             [x["token"] for x in self.get_cask_info() if x["tap"] == tap]
         )
 
     def get_leaves(self) -> list[str]:
-        if "leaves" in self.opt:
-            return self.opt["leaves"]
-        _, leaves = self.proc(
+        if "leaves_list" in self.opt:
+            return self.opt["leaves_list"]
+        _, leaves_list = self.proc(
             "brew leaves",
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
         )
-        leaves = [x.split("/")[-1] for x in leaves]
-        self.opt["leaves"] = leaves
-        return leaves
+        leaves_list = [x.split("/")[-1] for x in leaves_list]
+        self.opt["leaves_list"] = leaves_list
+        return leaves_list

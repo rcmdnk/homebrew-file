@@ -166,7 +166,7 @@ def test_read_all(bf, tap):
             "BrewfileNotExist",
         ]
     ] + [Path(os.environ["HOME"]) / "BrewfileHomeForTestingNotExists"]
-    assert bf.get("brew_input") == {
+    assert bf.get_list("brew_input") == {
         "cmake",
         "ec2",
         "escape_sequence",
@@ -191,7 +191,7 @@ def test_read_all(bf, tap):
         "stow_reset",
         "vim",
     }
-    assert bf.get("brew_input_opt") == {
+    assert bf.get_dict("brew_input_opt") == {
         "cmake": "",
         "ec2": "",
         "escape_sequence": "",
@@ -216,17 +216,17 @@ def test_read_all(bf, tap):
         "stow_reset": "",
         "vim": " --HEAD",
     }
-    assert bf.get("tap_input") == {
+    assert bf.get_list("tap_input") == {
         "direct",
         "homebrew/cask",
         "homebrew/core",
         "rcmdnk/rcmdnkcask",
         "rcmdnk/rcmdnkpac",
     }
-    assert bf.get("cask_input") == {"iterm2", "font-migu1m"}
-    assert bf.get("appstore_input") == {"Keynote"}
-    assert bf.get("main_input") == {"BrewfileMain"}
-    assert bf.get("file_input") == {
+    assert bf.get_list("cask_input") == {"iterm2", "font-migu1m"}
+    assert bf.get_list("appstore_input") == {"Keynote"}
+    assert bf.get_list("main_input") == {"BrewfileMain"}
+    assert bf.get_list("file_input") == {
         "BrewfileMain",
         "BrewfileExt",
         "BrewfileExt2",
@@ -234,9 +234,12 @@ def test_read_all(bf, tap):
         "~/BrewfileHomeForTestingNotExists",
         "BrewfileExt3",
     }
-    assert bf.get("before_input") == {"echo before", "echo EXT before"}
-    assert bf.get("after_input") == {"echo after", "echo EXT after"}
-    assert bf.get("cmd_input") == {"echo BrewfileMain", "echo other commands"}
+    assert bf.get_list("before_input") == {"echo before", "echo EXT before"}
+    assert bf.get_list("after_input") == {"echo after", "echo EXT after"}
+    assert bf.get_list("cmd_input") == {
+        "echo BrewfileMain",
+        "echo other commands",
+    }
 
 
 def test_read(bf, tmp_path):
@@ -498,8 +501,9 @@ def test_cat_brewfile(bf):
     pass
 
 
-def test_clean_non_request(bf):
-    pass
+def test_clean_non_request(bf, caplog):
+    bf.opt["dryrun"] = True
+    bf.clean_non_request()
 
 
 def test_cleanup(bf):
