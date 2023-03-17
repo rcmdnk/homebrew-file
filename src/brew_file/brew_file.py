@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Dict, List, Literal, Tuple, cast
 from urllib.parse import quote
 
 from .brew_helper import BrewHelper
@@ -17,8 +17,8 @@ from .brew_info import BrewInfo
 from .info import __prog__
 from .utils import OpenWrapper, expandpath, home_tilde, is_mac, to_bool, to_num
 
-CaskInfo = dict[str, tuple[str, str]]
-CaskListInfo = dict[str, list[tuple[str, str]]]
+CaskInfo = Dict[str, Tuple[str, str]]
+CaskListInfo = Dict[str, List[Tuple[str, str]]]
 
 
 @dataclass

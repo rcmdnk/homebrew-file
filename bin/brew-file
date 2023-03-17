@@ -14,7 +14,7 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Generator, Literal, Type, cast
+from typing import Any, Dict, Generator, List, Literal, Tuple, Type, cast
 from urllib.parse import quote
 
 __prog__ = "brew-file"
@@ -29,7 +29,7 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.8"
+__version__ = "9.0.9"
 __date__ = "16/Mar/2023"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
@@ -992,8 +992,8 @@ fi
             )
 
 
-CaskInfo = dict[str, tuple[str, str]]
-CaskListInfo = dict[str, list[tuple[str, str]]]
+CaskInfo = Dict[str, Tuple[str, str]]
+CaskListInfo = Dict[str, List[Tuple[str, str]]]
 
 
 @dataclass
