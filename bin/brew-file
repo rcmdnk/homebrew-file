@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.9"
-__date__ = "16/Mar/2023"
+__version__ = "9.0.10"
+__date__ = "28/Mar/2023"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1576,7 +1576,9 @@ class BrewFile:
             raise RuntimeError("\n".join(lines))
         if lines:
             if self.check_gitconfig():
-                _ = self.helper.proc("git add -A", dryrun=self.opt["dryrun"])
+                _ = self.helper.proc(
+                    "git add -A", dryrun=self.opt["dryrun"], cwd=dirname
+                )
                 _ = self.helper.proc(
                     ["git", "commit", "-m", '"Update the package list"'],
                     exit_on_err=False,

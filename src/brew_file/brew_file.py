@@ -601,7 +601,9 @@ class BrewFile:
             raise RuntimeError("\n".join(lines))
         if lines:
             if self.check_gitconfig():
-                _ = self.helper.proc("git add -A", dryrun=self.opt["dryrun"])
+                _ = self.helper.proc(
+                    "git add -A", dryrun=self.opt["dryrun"], cwd=dirname
+                )
                 _ = self.helper.proc(
                     ["git", "commit", "-m", '"Update the package list"'],
                     exit_on_err=False,
