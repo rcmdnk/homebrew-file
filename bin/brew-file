@@ -29,8 +29,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.10"
-__date__ = "28/Mar/2023"
+__version__ = "9.0.11"
+__date__ = "07/Apr/2023"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1027,7 +1027,7 @@ class BrewFile:
 
     def get_input_path(self) -> Path:
         input_path = None
-        xdg_config_home = os.getenv("XGD_CONFIG_HOME")
+        xdg_config_home = os.getenv("XDG_CONFIG_HOME")
         if xdg_config_home is not None:
             input_path = Path(xdg_config_home) / "brewfile/Brewfile"
             if input_path.is_file():

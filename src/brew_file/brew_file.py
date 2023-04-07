@@ -52,7 +52,7 @@ class BrewFile:
 
     def get_input_path(self) -> Path:
         input_path = None
-        xdg_config_home = os.getenv("XGD_CONFIG_HOME")
+        xdg_config_home = os.getenv("XDG_CONFIG_HOME")
         if xdg_config_home is not None:
             input_path = Path(xdg_config_home) / "brewfile/Brewfile"
             if input_path.is_file():
