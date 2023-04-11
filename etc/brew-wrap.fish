@@ -37,7 +37,7 @@ function brew
           set exe "brew-file brew"
         end
       end
-    case *
+    case '*'
       if echo " brew init dump set_repo set_local pull push clean clean_non_request casklist get_files version "|grep -q -- " $argv[1] "
         set exe "brew-file"
       end
