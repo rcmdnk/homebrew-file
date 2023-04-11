@@ -3,6 +3,7 @@ class BrewFile < Formula
   homepage "https://github.com/rcmdnk/homebrew-file/"
   url "https://github.com/rcmdnk/homebrew-file/archive/v9.0.12.tar.gz"
   sha256 "d2c32a4f862c7126bcd7f5fb12d5ea625b0bc88a7f11eadfca96b7b57c491cd1"
+  license "MIT"
 
   head "https://github.com/rcmdnk/homebrew-file.git"
 
