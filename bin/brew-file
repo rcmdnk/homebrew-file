@@ -1053,12 +1053,9 @@ class BrewFile:
 
         env_opts = os.getenv(env_var, None)
         if env_opts:
-            user_opts = {
-                key: value
-                for (key, value) in [
-                    pair.partition("=")[::2] for pair in env_opts.split()
-                ]
-            }
+            user_opts = dict(
+                pair.partition("=")[::2] for pair in env_opts.split()
+            )
 
             if user_opts:
                 opts.update(user_opts)
