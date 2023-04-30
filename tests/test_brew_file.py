@@ -167,12 +167,15 @@ def test_read_all(bf, tap):
         ]
     ] + [Path(os.environ["HOME"]) / "BrewfileHomeForTestingNotExists"]
     assert bf.get_list("brew_input") == {
+        "chatgpt-prompt-wrapper",
         "cmake",
+        "cocoro",
         "ec2",
         "escape_sequence",
         "evernote_mail",
         "gcp-tools",
         "gmail_filter_manager",
+        "git-gpt-commit",
         "gtask",
         "inputsource",
         "multi_clipboard",
@@ -192,12 +195,15 @@ def test_read_all(bf, tap):
         "vim",
     }
     assert bf.get_dict("brew_input_opt") == {
+        "chatgpt-prompt-wrapper": "",
         "cmake": "",
+        "cocoro": "",
         "ec2": "",
         "escape_sequence": "",
         "evernote_mail": "",
         "gcp-tools": "",
         "gmail_filter_manager": "",
+        "git-gpt-commit": "",
         "gtask": "",
         "inputsource": "",
         "multi_clipboard": "",

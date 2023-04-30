@@ -16,6 +16,7 @@ def check_brew(tmp_path_factory):
             # pseudo code to download api json
             bf.helper.proc("brew search python")
     os.environ["HOMEBREW_API_AUTO_UPDATE_SECS"] = "100000"
+    os.environ["HOMEBREW_AUTO_UPDATE_SECS"] = "100000"
     if "HOMEBREW_BREWFILE_VERBOSE" in os.environ:
         del os.environ["HOMEBREW_BREWFILE_VERBOSE"]
 
