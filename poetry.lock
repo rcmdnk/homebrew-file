@@ -974,14 +974,14 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "3.2.2"
+version = "3.3.1"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pre_commit-3.2.2-py2.py3-none-any.whl", hash = "sha256:0b4210aea813fe81144e87c5a291f09ea66f199f367fa1df41b55e1d26e1e2b4"},
-    {file = "pre_commit-3.2.2.tar.gz", hash = "sha256:5b808fcbda4afbccf6d6633a56663fed35b6c2bc08096fd3d47ce197ac351d9d"},
+    {file = "pre_commit-3.3.1-py2.py3-none-any.whl", hash = "sha256:218e9e3f7f7f3271ebc355a15598a4d3893ad9fc7b57fe446db75644543323b9"},
+    {file = "pre_commit-3.3.1.tar.gz", hash = "sha256:733f78c9a056cdd169baa6cd4272d51ecfda95346ef8a89bf93712706021b907"},
 ]
 
 [package.dependencies]
@@ -1050,14 +1050,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.8"
+version = "0.0.9"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.8-py3-none-any.whl", hash = "sha256:dd016f885893274daed6c33e4cb02f4486b1b3d8e5f163e3ae4cda120f77a901"},
-    {file = "pyproject_pre_commit-0.0.8.tar.gz", hash = "sha256:7e88efbfdcd3ff1ae33ea5b509a39fb60644784ceaaa58d0c630ae9597b17385"},
+    {file = "pyproject_pre_commit-0.0.9-py3-none-any.whl", hash = "sha256:48f9b1208e73e8352536638ab9007fb4e35c420c8a237b4bc0e2491b2c9a4664"},
+    {file = "pyproject_pre_commit-0.0.9.tar.gz", hash = "sha256:4c587847737465c15e132a5380c606a4a35ef84f8a6bffdc2f822a4d834ce64b"},
 ]
 
 [package.dependencies]
@@ -1085,7 +1085,7 @@ mdformat-frontmatter = "2.0.1"
 mdformat-gfm = "0.3.5"
 mypy = "1.2.0"
 pep8-naming = "0.13.3"
-pre-commit = "3.2.2"
+pre-commit = "3.3.1"
 pycodestyle = "2.10.0"
 shellcheck-py = "0.9.0.2"
 
@@ -1450,4 +1450,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "e4ac87dbf9ac0bf036360c3e21f21b282b48b2e5178278cdc56edb5a80746586"
+content-hash = "920888c2b0d229684378517ecddaa980123899ada1a9d46b8a363f1af79909d6"
