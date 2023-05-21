@@ -351,14 +351,14 @@ flake8 = "*"
 
 [[package]]
 name = "flake8-bugbear"
-version = "23.3.23"
+version = "23.5.9"
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1"
 files = [
-    {file = "flake8-bugbear-23.3.23.tar.gz", hash = "sha256:ea565bdb87b96b56dc499edd6cc3ba7f695373d902a5f56c989b74fad7c7719d"},
-    {file = "flake8_bugbear-23.3.23-py3-none-any.whl", hash = "sha256:8a218d13abd6904800970381057ce8e72cde8eea743240c4ef3ede4dd0bc9cfb"},
+    {file = "flake8-bugbear-23.5.9.tar.gz", hash = "sha256:695c84a5d7da54eb35d79a7354dbaf3aaba80de32250608868aa1c85534b2a86"},
+    {file = "flake8_bugbear-23.5.9-py3-none-any.whl", hash = "sha256:631fa927fbc799e8ca636b849dd7dfc304812287137b6ecb3277821f028bee40"},
 ]
 
 [package.dependencies]
@@ -1050,14 +1050,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.9"
+version = "0.0.10"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.9-py3-none-any.whl", hash = "sha256:48f9b1208e73e8352536638ab9007fb4e35c420c8a237b4bc0e2491b2c9a4664"},
-    {file = "pyproject_pre_commit-0.0.9.tar.gz", hash = "sha256:4c587847737465c15e132a5380c606a4a35ef84f8a6bffdc2f822a4d834ce64b"},
+    {file = "pyproject_pre_commit-0.0.10-py3-none-any.whl", hash = "sha256:7d6a019778952fafb723ddf6cb787ab6b226fa39d0db863a05af3db73169adb5"},
+    {file = "pyproject_pre_commit-0.0.10.tar.gz", hash = "sha256:f97545e556465749777d687288bef3ebee41a921d8677583660a06571a93796b"},
 ]
 
 [package.dependencies]
@@ -1067,7 +1067,7 @@ bandit = {version = "1.7.5", extras = ["toml"]}
 black = "23.3.0"
 blacken-docs = "1.13.0"
 flake8-annotations-complexity = "0.0.7"
-flake8-bugbear = "23.3.23"
+flake8-bugbear = "23.5.9"
 flake8-builtins = "2.1.0"
 flake8-comprehensions = "3.12.0"
 flake8-debugger = "4.1.2"
@@ -1450,4 +1450,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "920888c2b0d229684378517ecddaa980123899ada1a9d46b8a363f1af79909d6"
+content-hash = "ba18e39e164074545801ab88c69ed30e5c63d6c13b6995ba21e2907c7c283783"
