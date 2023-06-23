@@ -128,14 +128,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "blacken-docs"
-version = "1.13.0"
+version = "1.14.0"
 description = "Run Black on Python code blocks in documentation files."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "blacken_docs-1.13.0-py3-none-any.whl", hash = "sha256:455388df506fca04742f36a4a3475630eb7f141cb98acc6070d3c24bcf69cdda"},
-    {file = "blacken_docs-1.13.0.tar.gz", hash = "sha256:2babba84a42fb31a1d393dcf5a9a66d9b0657bdc320aec69d9f96301501dba35"},
+    {file = "blacken_docs-1.14.0-py3-none-any.whl", hash = "sha256:fd579c07522d46dc323e4826dfaf8885637d2654936f56e71144682933598812"},
+    {file = "blacken_docs-1.14.0.tar.gz", hash = "sha256:1ddda708c9a346ebd70c758d2847b5fd35b3801780261aa23787f19eb5d4d50d"},
 ]
 
 [package.dependencies]
@@ -360,14 +360,14 @@ flake8 = "*"
 
 [[package]]
 name = "flake8-bugbear"
-version = "23.5.9"
+version = "23.6.5"
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1"
 files = [
-    {file = "flake8-bugbear-23.5.9.tar.gz", hash = "sha256:695c84a5d7da54eb35d79a7354dbaf3aaba80de32250608868aa1c85534b2a86"},
-    {file = "flake8_bugbear-23.5.9-py3-none-any.whl", hash = "sha256:631fa927fbc799e8ca636b849dd7dfc304812287137b6ecb3277821f028bee40"},
+    {file = "flake8-bugbear-23.6.5.tar.gz", hash = "sha256:8631e1071c9d85d24a615f235565c16c9a2ac57add4a14636d331bf9f4ef14fa"},
+    {file = "flake8_bugbear-23.6.5-py3-none-any.whl", hash = "sha256:1d9eae6d262a3823765f4579cdab169963d1d2288b02f0f5c6e829b03dded509"},
 ]
 
 [package.dependencies]
@@ -983,14 +983,14 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "3.3.2"
+version = "3.3.3"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pre_commit-3.3.2-py2.py3-none-any.whl", hash = "sha256:8056bc52181efadf4aac792b1f4f255dfd2fb5a350ded7335d251a68561e8cb6"},
-    {file = "pre_commit-3.3.2.tar.gz", hash = "sha256:66e37bec2d882de1f17f88075047ef8962581f83c234ac08da21a0c58953d1f0"},
+    {file = "pre_commit-3.3.3-py2.py3-none-any.whl", hash = "sha256:10badb65d6a38caff29703362271d7dca483d01da88f9d7e05d0b97171c136cb"},
+    {file = "pre_commit-3.3.3.tar.gz", hash = "sha256:a2256f489cd913d575c145132ae196fe335da32d91a8294b7afe6622335dd023"},
 ]
 
 [package.dependencies]
@@ -1059,14 +1059,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.12"
+version = "0.0.15"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.12-py3-none-any.whl", hash = "sha256:2d9776140699a1822e8a53c54f0d17baf7a395c7a3b89d03e8381b1904528e19"},
-    {file = "pyproject_pre_commit-0.0.12.tar.gz", hash = "sha256:e6b1bc220b27582200d60af1256bc42f9b1269f3449d3b5e5ef732fc7e9f0df5"},
+    {file = "pyproject_pre_commit-0.0.15-py3-none-any.whl", hash = "sha256:e295551860186c1432524965ca661e73faf9dadc0b66c5b3672c517afea46714"},
+    {file = "pyproject_pre_commit-0.0.15.tar.gz", hash = "sha256:78a47f27240e7fa46c6f57717967aebfa25bc19ec92b989f03be6d4b7a34dd4c"},
 ]
 
 [package.dependencies]
@@ -1074,9 +1074,9 @@ autoflake = "2.1.1"
 autopep8 = "2.0.2"
 bandit = {version = "1.7.5", extras = ["toml"]}
 black = "23.3.0"
-blacken-docs = "1.13.0"
+blacken-docs = "1.14.0"
 flake8-annotations-complexity = "0.0.7"
-flake8-bugbear = "23.5.9"
+flake8-bugbear = "23.6.5"
 flake8-builtins = "2.1.0"
 flake8-comprehensions = "3.12.0"
 flake8-debugger = "4.1.2"
@@ -1094,9 +1094,9 @@ mdformat-frontmatter = "2.0.1"
 mdformat-gfm = "0.3.5"
 mypy = "1.3.0"
 pep8-naming = "0.13.3"
-pre-commit = "3.3.2"
+pre-commit = "3.3.3"
 pycodestyle = "2.10.0"
-shellcheck-py = "0.9.0.2"
+shellcheck-py = "0.9.0.5"
 
 [[package]]
 name = "pytest"
@@ -1330,16 +1330,16 @@ testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (
 
 [[package]]
 name = "shellcheck-py"
-version = "0.9.0.2"
+version = "0.9.0.5"
 description = "Python wrapper around invoking shellcheck (https://www.shellcheck.net/)"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "shellcheck_py-0.9.0.2-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:ddb9b9fd4750d726b9ac24df8b63599dc742c8749477bcdfd4ed639b22de21ae"},
-    {file = "shellcheck_py-0.9.0.2-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bbaaba3044d266e793964e391c8caad4fcccafcd64e63de24e9b87a31a0c7aff"},
-    {file = "shellcheck_py-0.9.0.2-py2.py3-none-win_amd64.whl", hash = "sha256:6a1be188d0a7183fc4bfcf52087512d879519bb6beb67d76927e0331edb45eb1"},
-    {file = "shellcheck_py-0.9.0.2.tar.gz", hash = "sha256:1c29aa5864cc937f037b84b8e6b13b7016d25a45f7a07a1f1f16d38e387c76b4"},
+    {file = "shellcheck_py-0.9.0.5-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:98d9668f72afeb65c7a8e60f02202b00d64f2de9e9b103dfb5d0067ded391ef3"},
+    {file = "shellcheck_py-0.9.0.5-py2.py3-none-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:65ddc19a1ae4249802a663682834ed452f9e75615d58c3ce6b3f1b0d2a484f32"},
+    {file = "shellcheck_py-0.9.0.5-py2.py3-none-win_amd64.whl", hash = "sha256:9f50a7354f355753f365668e79aa3d410cb6f4d9358e4c5d8464018cf2b4863a"},
+    {file = "shellcheck_py-0.9.0.5.tar.gz", hash = "sha256:50b2057fac7227fd83614a9bf9d123042e53e03d92f2c7f1778448a8937f07a4"},
 ]
 
 [[package]]
@@ -1460,4 +1460,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "8747feb15b1bcc545d5682c65b4fed6ca202c71b856e8a280b2aac84baaeb5db"
+content-hash = "cf5eecf33ccabb83b32dcb42bd8253ed2698ab9a0eac3abe00ea403a4ab7adc2"
