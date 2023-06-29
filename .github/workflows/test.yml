@@ -97,7 +97,7 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
         with:
           test-bot: false
-      - uses: rcmdnk/python-action@v1
+      - uses: rcmdnk/python-action@v2
         with:
           python-version: "${{ matrix.python-version }}"
           pytest-cov-path: "bin"
