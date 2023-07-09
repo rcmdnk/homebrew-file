@@ -21,14 +21,14 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "autoflake"
-version = "2.1.1"
+version = "2.2.0"
 description = "Removes unused imports and unused variables"
 category = "dev"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "autoflake-2.1.1-py3-none-any.whl", hash = "sha256:94e330a2bcf5ac01384fb2bf98bea60c6383eaa59ea62be486e376622deba985"},
-    {file = "autoflake-2.1.1.tar.gz", hash = "sha256:75524b48d42d6537041d91f17573b8a98cb645642f9f05c7fcc68de10b1cade3"},
+    {file = "autoflake-2.2.0-py3-none-any.whl", hash = "sha256:de409b009a34c1c2a7cc2aae84c4c05047f9773594317c6a6968bd497600d4a0"},
+    {file = "autoflake-2.2.0.tar.gz", hash = "sha256:62e1f74a0fdad898a96fee6f99fe8241af90ad99c7110c884b35855778412251"},
 ]
 
 [package.dependencies]
@@ -397,14 +397,14 @@ test = ["pytest"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.12.0"
+version = "3.13.0"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "flake8_comprehensions-3.12.0-py3-none-any.whl", hash = "sha256:013234637ec7dfcb7cd2900578fb53c512f81db909cefe371c019232695c362d"},
-    {file = "flake8_comprehensions-3.12.0.tar.gz", hash = "sha256:419ef1a6e8de929203791a5e8ff5e3906caeba13eb3290eebdbf88a9078d502e"},
+    {file = "flake8_comprehensions-3.13.0-py3-none-any.whl", hash = "sha256:cc0d6dbb336ff4e9cdf4eb605a3f719ea59261f2d6ba52034871a173c40e1f60"},
+    {file = "flake8_comprehensions-3.13.0.tar.gz", hash = "sha256:83cf98e816c9e23360f36aaf47de59a5b21437fdff8a056c46e2ad49f81861bf"},
 ]
 
 [package.dependencies]
@@ -1059,18 +1059,18 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.16"
+version = "0.0.17"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.16-py3-none-any.whl", hash = "sha256:e220c1bb38f6e94141ee45f6413d39c80fc8b54c764314fac60dd7d905e2840b"},
-    {file = "pyproject_pre_commit-0.0.16.tar.gz", hash = "sha256:0aa34f2b0e908bf98321eedf36440d78a0283289fef3250ceb1153a8a659b47f"},
+    {file = "pyproject_pre_commit-0.0.17-py3-none-any.whl", hash = "sha256:6581b2ce69540915b8afa4748ef2835604844cd2699d6cb685d9cacbe04671e2"},
+    {file = "pyproject_pre_commit-0.0.17.tar.gz", hash = "sha256:f37bbb788e5be23a2f25097f2fa0500a888903cb8831c2fa644852d4142de1f3"},
 ]
 
 [package.dependencies]
-autoflake = "2.1.1"
+autoflake = "2.2.0"
 autopep8 = "2.0.2"
 bandit = {version = "1.7.5", extras = ["toml"]}
 black = "23.3.0"
@@ -1078,7 +1078,7 @@ blacken-docs = "1.14.0"
 flake8-annotations-complexity = "0.0.8"
 flake8-bugbear = "23.6.5"
 flake8-builtins = "2.1.0"
-flake8-comprehensions = "3.12.0"
+flake8-comprehensions = "3.13.0"
 flake8-debugger = "4.1.2"
 flake8-docstrings = "1.7.0"
 flake8-executable = "2.1.3"
@@ -1460,4 +1460,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "4311096e95ea4a291edda28116c943e1faccdbdc71b188e6c90ac9521d5eea2a"
+content-hash = "a6366247688f938be5048729c366a07473c1aa955428876c13508b1dac719237"
