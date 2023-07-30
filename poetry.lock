@@ -394,14 +394,14 @@ test = ["pytest"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.13.0"
+version = "3.14.0"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "flake8_comprehensions-3.13.0-py3-none-any.whl", hash = "sha256:cc0d6dbb336ff4e9cdf4eb605a3f719ea59261f2d6ba52034871a173c40e1f60"},
-    {file = "flake8_comprehensions-3.13.0.tar.gz", hash = "sha256:83cf98e816c9e23360f36aaf47de59a5b21437fdff8a056c46e2ad49f81861bf"},
+    {file = "flake8_comprehensions-3.14.0-py3-none-any.whl", hash = "sha256:7b9d07d94aa88e62099a6d1931ddf16c344d4157deedf90fe0d8ee2846f30e97"},
+    {file = "flake8_comprehensions-3.14.0.tar.gz", hash = "sha256:81768c61bfc064e1a06222df08a2580d97de10cb388694becaf987c331c6c0cf"},
 ]
 
 [package.dependencies]
@@ -1056,14 +1056,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.19"
+version = "0.0.20"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.19-py3-none-any.whl", hash = "sha256:e56abc39367c08d08fbf6b7d507c326fd5490738a1c90559e9bea3ddb7ebb2ef"},
-    {file = "pyproject_pre_commit-0.0.19.tar.gz", hash = "sha256:669c6ed474ef9e12d9a915791aaa087eea6d4ac25ad5db62b79044b084db0b6b"},
+    {file = "pyproject_pre_commit-0.0.20-py3-none-any.whl", hash = "sha256:7f084b128cf4ef132e08d011ae21a01498080b42af185c87d6085eb1a79c770c"},
+    {file = "pyproject_pre_commit-0.0.20.tar.gz", hash = "sha256:17ce36b5b415e703d1e516364f0f2ff0e391aa59c27b80bf69afc214183ea429"},
 ]
 
 [package.dependencies]
@@ -1075,7 +1075,7 @@ blacken-docs = "1.15.0"
 flake8-annotations-complexity = "0.0.8"
 flake8-bugbear = "23.7.10"
 flake8-builtins = "2.1.0"
-flake8-comprehensions = "3.13.0"
+flake8-comprehensions = "3.14.0"
 flake8-debugger = "4.1.2"
 flake8-docstrings = "1.7.0"
 flake8-executable = "2.1.3"
@@ -1457,4 +1457,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "1d441e641db8aaee829f8c08b9b62601c5b0d906905370b4f7e68f3935c96a3d"
+content-hash = "c2223bb610738dc93c0589e5cff01f14b0b807fe7a1c728c78926cc80187f3f7"
