@@ -283,16 +283,20 @@ class BrewHelper:
             [x["token"] for x in self.get_cask_info() if x["tap"] == tap]
         )
 
-    def get_leaves(self) -> list[str]:
-        if "leaves_list" in self.opt:
-            return self.opt["leaves_list"]
+    def get_leaves(self, on_request: bool = False) -> list[str]:
+        var_name = f"leaves_list_{on_request}"
+        if var_name in self.opt:
+            return self.opt[var_name]
+        cmd = "brew leaves"
+        if on_request:
+            cmd += " --installed-on-request"
         _, leaves_list = self.proc(
-            "brew leaves",
+            cmd,
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
         )
         leaves_list = [x.split("/")[-1] for x in leaves_list]
-        self.opt["leaves_list"] = leaves_list
+        self.opt[var_name] = leaves_list
         return leaves_list

@@ -924,18 +924,10 @@ class BrewFile:
             info = self.helper.get_info()
             full_list = self.helper.get_formula_list()
             self.brewinfo.brew_full_list.extend(full_list)
-            if self.opt["on_request"]:
-                packages = []
-                for p in info:
-                    installed = self.helper.get_installed(p, info[p])
-                    if (
-                        installed["installed_on_request"] is True
-                        or installed["installed_on_request"] is None
-                    ):
-                        packages.append(p)
-
-            elif self.opt["leaves"]:
-                packages = self.helper.get_leaves()
+            if self.opt["on_request"] or self.opt["leaves"]:
+                packages = self.helper.get_leaves(
+                    on_request=self.opt["on_request"]
+                )
             else:
                 packages = copy.deepcopy(full_list)
 
@@ -1208,20 +1200,18 @@ class BrewFile:
 
     def clean_non_request(self) -> None:
         """Clean up non requested packages."""
-        info = self.helper.get_info()
         leaves = self.helper.get_leaves()
-        for p in info:
-            if p not in leaves:
+        leaves_on_request = self.helper.get_leaves(on_request=True)
+        for p in leaves:
+            if p in leaves_on_request:
                 continue
-            installed = self.helper.get_installed(p, info[p])
-            if installed["installed_on_request"] is False:
-                cmd = "brew uninstall " + p
-                _ = self.helper.proc(
-                    cmd,
-                    print_cmd=False,
-                    print_out=True,
-                    dryrun=self.opt["dryrun"],
-                )
+            cmd = "brew uninstall " + p
+            _ = self.helper.proc(
+                cmd,
+                print_cmd=False,
+                print_out=True,
+                dryrun=self.opt["dryrun"],
+            )
 
     def cleanup(self, delete_cache: bool = True) -> None:
         """Clean up."""
