@@ -45,8 +45,6 @@ class BrewFile:
         self.int_opts: list[str] = []
         self.float_opts: list[str] = []
 
-        self.set_input(self.opt["input"])
-
         # fix up opt
         self.set_args()
 
@@ -239,7 +237,7 @@ class BrewFile:
             appstore = 0
         self.opt["appstore"] = to_num(appstore)
 
-        self.brewinfo.file = self.opt["input"]
+        self.set_input(self.opt["input"])
 
     def ask_yn(self, question: str) -> bool:
         """Helper for yes/no."""
