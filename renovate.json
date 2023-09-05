@@ -4,16 +4,35 @@
     "config:base",
     ":timezone(Asia/Tokyo)"
   ],
+  "prHourlyLimit": 0,
   "automerge": true,
+  "platformAutomerge": true,
+  "automergeType": "branch",
+  "automergeStrategy": "rebase",
+  "commitBodyTable": true,
   "schedule": ["before 3am on Monday"],
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
+    "platformAutomerge": true,
     "schedule": [
       "before 6am on Monday"
     ]
   },
   "pre-commit": {
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    }
+  ]
 }
