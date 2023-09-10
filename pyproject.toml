@@ -11,7 +11,7 @@ python = ">=3.8.1,<3.12"
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 pytest-xdist = "^3.3.1"
-pyproject-pre-commit = "^0.0.24"
+pyproject-pre-commit = "^0.0.26"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
