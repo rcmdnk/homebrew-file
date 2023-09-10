@@ -20,13 +20,13 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "autoflake"
-version = "2.2.0"
+version = "2.2.1"
 description = "Removes unused imports and unused variables"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "autoflake-2.2.0-py3-none-any.whl", hash = "sha256:de409b009a34c1c2a7cc2aae84c4c05047f9773594317c6a6968bd497600d4a0"},
-    {file = "autoflake-2.2.0.tar.gz", hash = "sha256:62e1f74a0fdad898a96fee6f99fe8241af90ad99c7110c884b35855778412251"},
+    {file = "autoflake-2.2.1-py3-none-any.whl", hash = "sha256:265cde0a43c1f44ecfb4f30d95b0437796759d07be7706a2f70e4719234c0f79"},
+    {file = "autoflake-2.2.1.tar.gz", hash = "sha256:62b7b6449a692c3c9b0c916919bbc21648da7281e8506bcf8d3f8280e431ebc1"},
 ]
 
 [package.dependencies]
@@ -993,53 +993,53 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.0.24"
+version = "0.0.26"
 description = "pre-commit hooks for python projects using pyproject.toml."
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "pyproject_pre_commit-0.0.24-py3-none-any.whl", hash = "sha256:946b0550b39a599c108a1ac1b6addaa91e19e615fa3e6108fcb4360c9b15f85c"},
-    {file = "pyproject_pre_commit-0.0.24.tar.gz", hash = "sha256:3a2eb1aefa3a1ea70a1ad0111d0eb76b031316ef589278965f2be32bae4c2b39"},
+    {file = "pyproject_pre_commit-0.0.26-py3-none-any.whl", hash = "sha256:08544d8e4c9de99db1dcd1a4af3aa54164cc55e36bcef2931e27712a0547f9e5"},
+    {file = "pyproject_pre_commit-0.0.26.tar.gz", hash = "sha256:3df72336ee0d43fbbf0cfacc77e172a3c4ddaf507acde098ad1b3bbb8b269cfb"},
 ]
 
 [package.dependencies]
-autoflake = "2.2.0"
-autopep8 = "2.0.4"
-bandit = {version = "1.7.5", extras = ["toml"]}
-black = "23.7.0"
-blacken-docs = "1.16.0"
-flake8-annotations-complexity = "0.0.8"
-flake8-bugbear = "23.7.10"
-flake8-builtins = "2.1.0"
-flake8-comprehensions = "3.14.0"
-flake8-debugger = "4.1.2"
-flake8-docstrings = "1.7.0"
-flake8-executable = "2.1.3"
+autoflake = ">=2.2.1,<3.0.0"
+autopep8 = ">=2.0.4,<3.0.0"
+bandit = {version = ">=1.7.5,<2.0.0", extras = ["toml"]}
+black = ">=23.7.0,<24.0.0"
+blacken-docs = ">=1.16.0,<2.0.0"
+flake8-annotations-complexity = ">=0.0.8,<0.0.9"
+flake8-bugbear = ">=23.7.10,<24.0.0"
+flake8-builtins = ">=2.1.0,<3.0.0"
+flake8-comprehensions = ">=3.14.0,<4.0.0"
+flake8-debugger = ">=4.1.2,<5.0.0"
+flake8-docstrings = ">=1.7.0,<2.0.0"
+flake8-executable = ">=2.1.3,<3.0.0"
 flake8-pep3101 = ">=2.0.0,<3.0.0"
-flake8-print = "5.0.0"
-flake8-pyproject = "1.2.3"
-flake8-rst-docstrings = "0.3.0"
-flake8-string-format = "0.3.0"
-isort = "5.12.0"
-mdformat = "0.7.17"
-mdformat-footnote = "0.1.1"
-mdformat-frontmatter = "2.0.1"
-mdformat-gfm = "0.3.5"
-mypy = "1.5.1"
-pep8-naming = "0.13.3"
-pre-commit = "3.3.3"
-pycodestyle = "2.11.0"
-shellcheck-py = "0.9.0.5"
+flake8-print = ">=5.0.0,<6.0.0"
+flake8-pyproject = ">=1.2.3,<2.0.0"
+flake8-rst-docstrings = ">=0.3.0,<0.4.0"
+flake8-string-format = ">=0.3.0,<0.4.0"
+isort = ">=5.12.0,<6.0.0"
+mdformat = ">=0.7.17,<0.8.0"
+mdformat-footnote = ">=0.1.1,<0.2.0"
+mdformat-frontmatter = ">=2.0.1,<3.0.0"
+mdformat-gfm = ">=0.3.5,<0.4.0"
+mypy = ">=1.5.1,<2.0.0"
+pep8-naming = ">=0.13.3,<0.14.0"
+pre-commit = ">=3.3.3,<4.0.0"
+pycodestyle = ">=2.11.0,<3.0.0"
+shellcheck-py = ">=0.9.0.5,<0.10.0.0"
 
 [[package]]
 name = "pytest"
-version = "7.4.1"
+version = "7.4.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-7.4.1-py3-none-any.whl", hash = "sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f"},
-    {file = "pytest-7.4.1.tar.gz", hash = "sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab"},
+    {file = "pytest-7.4.2-py3-none-any.whl", hash = "sha256:1d881c6124e08ff0a1bb75ba3ec0bfd8b5354a01c194ddd5a0a870a48d99b002"},
+    {file = "pytest-7.4.2.tar.gz", hash = "sha256:a766259cfab564a2ad52cb1aae1b881a75c3eb7e34ca3779697c23ed47c47069"},
 ]
 
 [package.dependencies]
@@ -1214,7 +1214,8 @@ files = [
     {file = "ruamel.yaml.clib-0.2.7-cp310-cp310-win32.whl", hash = "sha256:763d65baa3b952479c4e972669f679fe490eee058d5aa85da483ebae2009d231"},
     {file = "ruamel.yaml.clib-0.2.7-cp310-cp310-win_amd64.whl", hash = "sha256:d000f258cf42fec2b1bbf2863c61d7b8918d31ffee905da62dede869254d3b8a"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:045e0626baf1c52e5527bd5db361bc83180faaba2ff586e763d3d5982a876a9e"},
-    {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_12_6_arm64.whl", hash = "sha256:721bc4ba4525f53f6a611ec0967bdcee61b31df5a56801281027a3a6d1c2daf5"},
+    {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:1a6391a7cabb7641c32517539ca42cf84b87b667bad38b78d4d42dd23e957c81"},
+    {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-manylinux2014_aarch64.whl", hash = "sha256:9c7617df90c1365638916b98cdd9be833d31d337dbcd722485597b43c4a215bf"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:41d0f1fa4c6830176eef5b276af04c89320ea616655d01327d5ce65e50575c94"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-win32.whl", hash = "sha256:f6d3d39611ac2e4f62c3128a9eed45f19a6608670c5a2f4f07f24e8de3441d38"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-win_amd64.whl", hash = "sha256:da538167284de58a52109a9b89b8f6a53ff8437dd6dc26d33b57bf6699153122"},
@@ -1384,4 +1385,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "ff27ceebf9e5b7339b9da7a5dab93e0d426a900cd730a878ba755fed30eb8a8f"
+content-hash = "3a2c1b1af57f43d3b9388f07e2f978c772397dae14537e49e6d00f3e4e2c1591"
