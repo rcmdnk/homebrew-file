@@ -182,6 +182,7 @@ class BrewHelper:
         self, package: str, package_info: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Get installed version of brew package."""
+        installed = {}
         if package_info is None:
             package_info = self.get_info(package)[package]
 
@@ -205,10 +206,10 @@ class BrewHelper:
 
         opt = ""
         installed = self.get_installed(package, package_info)
-        if installed["used_options"]:
-            opt = " " + " ".join(installed["used_options"])
-        for k, v in package_info["versions"].items():
-            if installed["version"] == v and k != "stable":
+        if used_options := installed.get("used_options", []):
+            opt = " " + " ".join(used_options)
+        for k, v in package_info.get("versions", {}).items():
+            if installed.get("version", None) == v and k != "stable":
                 if k == "head":
                     opt += " --HEAD"
                 else:

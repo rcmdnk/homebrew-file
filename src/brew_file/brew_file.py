@@ -930,10 +930,10 @@ class BrewFile:
                 packages = []
                 for p in info:
                     installed = self.helper.get_installed(p, info[p])
-                    if (
-                        installed["installed_on_request"] is True
-                        or installed["installed_on_request"] is None
-                    ):
+                    if installed.get("installed_on_request", True) in [
+                        True,
+                        None,
+                    ]:
                         packages.append(p)
 
             else:
@@ -1214,7 +1214,7 @@ class BrewFile:
             if p not in leaves:
                 continue
             installed = self.helper.get_installed(p, info[p])
-            if installed["installed_on_request"] is False:
+            if installed.get("installed_on_request", False) is False:
                 cmd = "brew uninstall " + p
                 _ = self.helper.proc(
                     cmd,

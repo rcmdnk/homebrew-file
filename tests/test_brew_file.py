@@ -469,9 +469,12 @@ def test_get_files(bf, tap, caplog):
     ]
     caplog.clear()
     assert bf.get_files() == files
-    assert caplog.record_tuples == [
-        ("tests.brew_file", 20, "$ brew tap rcmdnk/rcmdnkpac"),
-    ]
+    # record could include 'Error: Another active Homebrew update process is already in progress.' by another test
+    assert (
+        "tests.brew_file",
+        20,
+        "$ brew tap rcmdnk/rcmdnkpac",
+    ) in caplog.record_tuples
 
     bf.set_input(file)
     bf.opt["read"] = False
