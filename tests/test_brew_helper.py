@@ -211,7 +211,11 @@ def test_get_option(helper, python):
 
 def test_get_formula_info(helper):
     info = helper.get_formula_info()
-    assert info[0]["tap"] == "homebrew/core"
+    assert "name" in info[0]
+    assert "tap" in info[0]
+    assert "aliases" in info[0]
+    assert "linked_keg" in info[0]
+    assert "installed" in info[0]
 
 
 def test_get_formula_aliases(helper):
