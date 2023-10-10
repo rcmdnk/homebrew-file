@@ -33,6 +33,13 @@
         "minor",
         "patch"
       ]
+    },
+    {
+      "groupName": "Python",
+      "groupSlug": "Python",
+      "matchPackagePatterns": [
+        "python"
+      ]
     }
   ]
 }
