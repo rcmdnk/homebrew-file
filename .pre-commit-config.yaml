@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.0.26
+    rev: v0.0.28
     hooks:
       - id: black-diff
       - id: black
@@ -18,7 +18,7 @@ repos:
       - id: mdformat-check
       - id: mdformat
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-byte-order-marker
       - id: check-yaml
