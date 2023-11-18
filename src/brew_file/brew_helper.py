@@ -7,7 +7,9 @@ import shlex
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Generator, NotRequired, TypedDict, Unpack
+from typing import Any, Generator, TypedDict
+
+from typing_extensions import NotRequired, Unpack
 
 
 class ProcParams(TypedDict):
