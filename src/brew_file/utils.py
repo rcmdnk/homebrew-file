@@ -103,11 +103,7 @@ class OpenWrapper:
     mode: str = "w"
 
     def __enter__(self) -> Any:
-        if (
-            Path(self.name).parent != ""
-            and not Path(self.name).parent.exists()
-        ):
-            Path(self.name).parent.mkdir(parents=True)
+        Path(self.name).parent.mkdir(parents=True, exist_ok=True)
         self.file = open(self.name, self.mode)
         return self.file
 

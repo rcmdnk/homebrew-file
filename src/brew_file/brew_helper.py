@@ -7,7 +7,21 @@ import shlex
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any, Generator, NotRequired, TypedDict, Unpack
+
+
+class ProcParams(TypedDict):
+    """Parameters for BrewHelper.proc()."""
+
+    cmd: NotRequired[str | list[str]]
+    print_cmd: NotRequired[bool]
+    print_out: NotRequired[bool]
+    exit_on_err: NotRequired[bool]
+    separate_err: NotRequired[bool]
+    print_err: NotRequired[bool]
+    env: NotRequired[dict[str, str] | None]
+    cwd: NotRequired[str | Path | None]
+    dryrun: NotRequired[bool]
 
 
 class CmdError(Exception):
@@ -30,7 +44,9 @@ class BrewHelper:
     def readstdout(
         self, proc: subprocess.Popen[str]
     ) -> Generator[str, None, None]:
-        for line in iter(proc.stdout.readline, ""):  # type: ignore
+        if proc.stdout is None:
+            return
+        for line in iter(proc.stdout.readline, ""):
             line = line.rstrip()
             if line == "":
                 continue
@@ -148,18 +164,24 @@ class BrewHelper:
     def brew_info_v1(
         self,
         info_opt: str,
-        **kw: str | list[str] | bool | dict[str, str] | Path | None,
+        **kw: Unpack[ProcParams],
     ) -> list[dict[str, Any]]:
-        ret, lines = self.proc("brew info --json=v1 " + info_opt, **kw)  # type: ignore
+        params: ProcParams = {
+            "cmd": "brew info --json=v1 " + info_opt,
+        }
+        params.update(kw)
+        ret, lines = self.proc(**params)
         info = lines[lines.index("[") :]
         return json.loads("".join(info))
 
     def brew_info_v2(
-        self,
-        info_opt: str,
-        **kw: str | list[str] | bool | dict[str, str] | Path | None,
+        self, info_opt: str, **kw: Unpack[ProcParams]
     ) -> dict[str, Any]:
-        ret, lines = self.proc("brew info --json=v2 " + info_opt, **kw)  # type: ignore
+        params: ProcParams = {
+            "cmd": "brew info --json=v2 " + info_opt,
+        }
+        params.update(kw)
+        ret, lines = self.proc(**params)
         info = lines[lines.index("{") :]
         return json.loads("".join(info))
 
