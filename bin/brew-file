@@ -14,19 +14,7 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Literal,
-    NotRequired,
-    Tuple,
-    Type,
-    TypedDict,
-    Unpack,
-    cast,
-)
+from typing import Any, Dict, Generator, List, Literal, Tuple, Type, cast
 from urllib.parse import quote
 
 __prog__ = "brew-file"
@@ -164,20 +152,6 @@ class StrRe(str):
 
     def __eq__(self, pattern: Any) -> bool:
         return True if re.search(pattern, self.var) is not None else False
-
-
-class ProcParams(TypedDict):
-    """Parameters for BrewHelper.proc()."""
-
-    cmd: NotRequired[str | list[str]]
-    print_cmd: NotRequired[bool]
-    print_out: NotRequired[bool]
-    exit_on_err: NotRequired[bool]
-    separate_err: NotRequired[bool]
-    print_err: NotRequired[bool]
-    env: NotRequired[dict[str, str] | None]
-    cwd: NotRequired[str | Path | None]
-    dryrun: NotRequired[bool]
 
 
 class CmdError(Exception):
@@ -320,24 +294,18 @@ class BrewHelper:
     def brew_info_v1(
         self,
         info_opt: str,
-        **kw: Unpack[ProcParams],
+        **kw: str | list[str] | bool | dict[str, str] | Path | None,
     ) -> list[dict[str, Any]]:
-        params: ProcParams = {
-            "cmd": "brew info --json=v1 " + info_opt,
-        }
-        params.update(kw)
-        ret, lines = self.proc(**params)
+        ret, lines = self.proc("brew info --json=v1 " + info_opt, **kw)  # type: ignore
         info = lines[lines.index("[") :]
         return json.loads("".join(info))
 
     def brew_info_v2(
-        self, info_opt: str, **kw: Unpack[ProcParams]
+        self,
+        info_opt: str,
+        **kw: str | list[str] | bool | dict[str, str] | Path | None,
     ) -> dict[str, Any]:
-        params: ProcParams = {
-            "cmd": "brew info --json=v2 " + info_opt,
-        }
-        params.update(kw)
-        ret, lines = self.proc(**params)
+        ret, lines = self.proc("brew info --json=v2 " + info_opt, **kw)  # type: ignore
         info = lines[lines.index("{") :]
         return json.loads("".join(info))
 
