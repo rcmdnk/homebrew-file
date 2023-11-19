@@ -1180,7 +1180,7 @@ class BrewFile:
             raise RuntimeError(
                 "Ok, please prepare brewfile\n"
                 "or you can initialize {self.brewinfo.file} with:"
-                f"    $ { __prog__} init"
+                f"    $ {__prog__} init"
             )
 
     def get_files(
