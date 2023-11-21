@@ -69,7 +69,7 @@ class BrewFile:
     def parse_env_opts(
         self, env_var: str, base_opts: dict[str, Any] | None = None
     ) -> dict[str, str]:
-        """Returns a dictionary parsed from an environment variable."""
+        """Return a dictionary parsed from an environment variable."""
         opts: dict[str, Any] = {}
         if base_opts is not None:
             opts.update(base_opts)

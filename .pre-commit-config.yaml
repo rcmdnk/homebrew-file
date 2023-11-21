@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.1.0
+    rev: v0.1.1
     hooks:
       - id: black-diff
       - id: black
@@ -14,6 +14,7 @@ repos:
       - id: flake8
       - id: bandit
       - id: mypy
+      - id: numpydoc-validation
       - id: shellcheck
       - id: mdformat-check
       - id: mdformat

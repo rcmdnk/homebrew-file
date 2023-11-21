@@ -11,7 +11,7 @@ python = "^3.8.1"
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 pytest-xdist = "^3.3.1"
-pyproject-pre-commit = "^0.1.0"
+pyproject-pre-commit = "^0.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -65,6 +65,18 @@ ignore_missing_imports = true
 scripts_are_modules = true
 install_types = true
 non_interactive = true
+
+[tool.numpydoc_validation]
+checks = [
+    "all",   # report on all checks, except the below
+    "EX01",  # "No examples section found"
+    "ES01",  # "No extended summary found"
+    "SA01",  # "See Also section not found"
+    "GL08",  # "The object does not have a docstring"
+    "PR01",  # "Parameters {missing_params} not documented"
+    "RT01",  # "No Returns section found"
+]
+
 
 [tool.poetry.scripts]
 brew-file = "brew_file.main:main"
