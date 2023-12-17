@@ -1585,14 +1585,14 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.1.2"
+version = "0.1.4"
 description = "pre-commit hooks for python projects using pyproject.toml."
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<4.0.0"
 files = [
-    {file = "pyproject_pre_commit-0.1.2-py3-none-any.whl", hash = "sha256:b428558e3bd0d1b01dabc4e861ccb8bef8fcc4771081102f44f30e5fa2058104"},
-    {file = "pyproject_pre_commit-0.1.2.tar.gz", hash = "sha256:2fe493b1c90f843b67e6d3beb736ffdf060c79d11494eba7c983882f6bc2f7c8"},
+    {file = "pyproject_pre_commit-0.1.4-py3-none-any.whl", hash = "sha256:545cec7927a4133f858f515fdc07c976d00a25f95174b2e13ef483525076a5af"},
+    {file = "pyproject_pre_commit-0.1.4.tar.gz", hash = "sha256:cc63b6a60e4c987b697e4bf106bb5465482bf5819bfeda3db17267297ad5e87b"},
 ]
 
 [package.dependencies]
