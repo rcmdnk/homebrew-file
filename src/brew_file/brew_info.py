@@ -278,8 +278,12 @@ class BrewInfo:
                 elif cmd == "mas" and line.find(",") != -1:
                     if not self.helper.opt.get("form"):
                         self.helper.opt["form"] = "bundle"
-                    p = line.split()[1].strip(",").strip("'").strip('"')
-                    pid = line.split()[3]
+                    p = (
+                        " ".join(line.split(",")[0].split()[1:])
+                        .strip("'")
+                        .strip('"')
+                    )
+                    pid = line.split(",")[1].split()[1]
                     self.appstore_input.append(pid + " " + p)
                 elif cmd in ["appstore", "mas"]:
                     self.appstore_input.append(
