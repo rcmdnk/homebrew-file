@@ -1231,13 +1231,13 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.1.5"
+version = "0.1.6"
 description = "pre-commit hooks for python projects using pyproject.toml."
 optional = false
 python-versions = ">=3.8.1,<4.0.0"
 files = [
-    {file = "pyproject_pre_commit-0.1.5-py3-none-any.whl", hash = "sha256:c98ea838011f32a7181206de08f905a000127c8d91246e0ef2e8ac92c973d827"},
-    {file = "pyproject_pre_commit-0.1.5.tar.gz", hash = "sha256:27363faecfdec8dea7d8a6b52a673d68d0ddcdcade1a300e1c4f974b4c7b07de"},
+    {file = "pyproject_pre_commit-0.1.6-py3-none-any.whl", hash = "sha256:9498bf26268f1214fbcb63a77758f075d8aaba74f8daeb0ef1e1283e1909d67a"},
+    {file = "pyproject_pre_commit-0.1.6.tar.gz", hash = "sha256:142c13310e66894281863d33ffaa09d28f14e06f0d7086a4227d56cd925965e6"},
 ]
 
 [package.dependencies]
@@ -1437,13 +1437,13 @@ docutils = ">=0.11,<1.0"
 
 [[package]]
 name = "rich"
-version = "13.7.0"
+version = "13.7.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
-    {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+    {file = "rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
+    {file = "rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
 ]
 
 [package.dependencies]
