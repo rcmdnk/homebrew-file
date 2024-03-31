@@ -1232,20 +1232,20 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.1.6"
+version = "0.1.8"
 description = "pre-commit hooks for python projects using pyproject.toml."
 optional = false
-python-versions = ">=3.8.1,<4.0.0"
+python-versions = "<4.0.0,>=3.8.1"
 files = [
-    {file = "pyproject_pre_commit-0.1.6-py3-none-any.whl", hash = "sha256:9498bf26268f1214fbcb63a77758f075d8aaba74f8daeb0ef1e1283e1909d67a"},
-    {file = "pyproject_pre_commit-0.1.6.tar.gz", hash = "sha256:142c13310e66894281863d33ffaa09d28f14e06f0d7086a4227d56cd925965e6"},
+    {file = "pyproject_pre_commit-0.1.8-py3-none-any.whl", hash = "sha256:732ce6bf4fec32d194872a0922c66b9a3b74e34a731709a2177a4f073c72ff00"},
+    {file = "pyproject_pre_commit-0.1.8.tar.gz", hash = "sha256:83b0cb5353cd6ea4cf4e42a8b300897cae8932d24c0379f320d9e474ded12918"},
 ]
 
 [package.dependencies]
 autoflake = ">=2.2.1,<3.0.0"
 autopep8 = ">=2.0.4,<3.0.0"
 bandit = {version = ">=1.7.5,<2.0.0", extras = ["toml"]}
-black = ">=24.0.0,<25.0.0"
+black = ">=24.3.0,<25.0.0"
 blacken-docs = ">=1.16.0,<2.0.0"
 flake8-annotations-complexity = ">=0.0.8,<0.0.9"
 flake8-bugbear = ">=24.0.0,<25.0.0"
