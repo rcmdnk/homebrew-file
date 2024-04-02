@@ -427,18 +427,18 @@ testing = ["hatch", "pre-commit", "pytest", "tox"]
 
 [[package]]
 name = "filelock"
-version = "3.13.1"
+version = "3.13.3"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "filelock-3.13.1-py3-none-any.whl", hash = "sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c"},
-    {file = "filelock-3.13.1.tar.gz", hash = "sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e"},
+    {file = "filelock-3.13.3-py3-none-any.whl", hash = "sha256:5ffa845303983e7a0b7ae17636509bc97997d58afeafa72fb141a17b152284cb"},
+    {file = "filelock-3.13.3.tar.gz", hash = "sha256:a79895a25bbefdf55d1a2a0a80968f7dbb28edcd6d4234a0afb3f37ecde4b546"},
 ]
 
 [package.extras]
-docs = ["furo (>=2023.9.10)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.24)"]
-testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)", "pytest-timeout (>=2.2)"]
+docs = ["furo (>=2023.9.10)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
+testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)", "pytest-timeout (>=2.2)"]
 typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
@@ -491,13 +491,13 @@ dev = ["coverage", "hypothesis", "hypothesmith (>=0.2)", "pre-commit", "pytest",
 
 [[package]]
 name = "flake8-builtins"
-version = "2.2.0"
+version = "2.4.0"
 description = "Check for python builtins being used as variables or parameters"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "flake8_builtins-2.2.0-py3-none-any.whl", hash = "sha256:7ee5766d9c60e5d579dfda84e65c6d0e6c26005f6f59cb9bf722462d7987a807"},
-    {file = "flake8_builtins-2.2.0.tar.gz", hash = "sha256:392d5af3a0720c5a863aa93dc47f48c879081345a143fe9f20d995fe9ff5686a"},
+    {file = "flake8_builtins-2.4.0-py3-none-any.whl", hash = "sha256:a9a2002855947081019a14e292200ab6e17ed637c0056aaa87ef23ea46fe8070"},
+    {file = "flake8_builtins-2.4.0.tar.gz", hash = "sha256:03ddfdbb40c6a0ad5375668b89d9d919970d026d65e6bb53185081c99822e466"},
 ]
 
 [package.dependencies]
@@ -1061,18 +1061,17 @@ setuptools = "*"
 
 [[package]]
 name = "numpydoc"
-version = "1.6.0"
+version = "1.7.0"
 description = "Sphinx extension to support docstrings in Numpy format"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "numpydoc-1.6.0-py3-none-any.whl", hash = "sha256:b6ddaa654a52bdf967763c1e773be41f1c3ae3da39ee0de973f2680048acafaa"},
-    {file = "numpydoc-1.6.0.tar.gz", hash = "sha256:ae7a5380f0a06373c3afe16ccd15bd79bc6b07f2704cbc6f1e7ecc94b4f5fc0d"},
+    {file = "numpydoc-1.7.0-py3-none-any.whl", hash = "sha256:5a56419d931310d79a06cfc2a126d1558700feeb9b4f3d8dcae1a8134be829c9"},
+    {file = "numpydoc-1.7.0.tar.gz", hash = "sha256:866e5ae5b6509dcf873fc6381120f5c31acf13b135636c1a81d68c166a95f921"},
 ]
 
 [package.dependencies]
-Jinja2 = ">=2.10"
-sphinx = ">=5"
+sphinx = ">=6"
 tabulate = ">=0.8.10"
 tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
 
