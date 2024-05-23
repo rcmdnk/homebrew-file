@@ -69,9 +69,11 @@ def err_cmd():
         },
         "ls /path/to/not/exist": {
             "ret": 1 if brew_file.is_mac() else 2,
-            "out": "ls: /path/to/not/exist: No such file or directory"
-            if brew_file.is_mac()
-            else "ls: cannot access '/path/to/not/exist': No such file or directory",
+            "out": (
+                "ls: /path/to/not/exist: No such file or directory"
+                if brew_file.is_mac()
+                else "ls: cannot access '/path/to/not/exist': No such file or directory"
+            ),
             "oserr": False,
         },
     }
