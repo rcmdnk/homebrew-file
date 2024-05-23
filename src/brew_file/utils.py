@@ -30,9 +30,9 @@ class LogFormatter(logging.Formatter):
                 logging.CRITICAL: "31",
             }
             for level in colors:
-                self.formats[
-                    level
-                ] = f"\033[{colors[level]};1m{self.formats[level]}\033[m"
+                self.formats[level] = (
+                    f"\033[{colors[level]};1m{self.formats[level]}\033[m"
+                )
 
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         fmt = self.formats.get(record.levelno, self.default_format)

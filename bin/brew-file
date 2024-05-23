@@ -40,8 +40,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.15"
-__date__ = "27/Dec/2023"
+__version__ = "9.0.16"
+__date__ = "23/May/2024"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -66,9 +66,9 @@ class LogFormatter(logging.Formatter):
                 logging.CRITICAL: "31",
             }
             for level in colors:
-                self.formats[
-                    level
-                ] = f"\033[{colors[level]};1m{self.formats[level]}\033[m"
+                self.formats[level] = (
+                    f"\033[{colors[level]};1m{self.formats[level]}\033[m"
+                )
 
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         fmt = self.formats.get(record.levelno, self.default_format)
@@ -625,9 +625,9 @@ class BrewInfo:
         self.cask_nocask_list.sort()
 
         self.appstore_list.sort(
-            key=lambda x: x.split()[1].lower()
-            if len(x.split()) > 1
-            else x.split()[0]
+            key=lambda x: (
+                x.split()[1].lower() if len(x.split()) > 1 else x.split()[0]
+            )
         )
 
     def get_list(self, name: str) -> list[str]:
@@ -2731,11 +2731,10 @@ class BrewFile:
                                     cask_tap, []
                                 ) + [(app_path, token)]
                             else:
-                                non_latest_cask_apps[
-                                    cask_tap
-                                ] = non_latest_cask_apps.get(cask_tap, []) + [
-                                    (app_path, token)
-                                ]
+                                non_latest_cask_apps[cask_tap] = (
+                                    non_latest_cask_apps.get(cask_tap, [])
+                                    + [(app_path, token)]
+                                )
                             if token in installed_casks[cask_tap]:
                                 installed_casks[cask_tap].remove(token)
                         else:

@@ -151,9 +151,9 @@ class BrewInfo:
         self.cask_nocask_list.sort()
 
         self.appstore_list.sort(
-            key=lambda x: x.split()[1].lower()
-            if len(x.split()) > 1
-            else x.split()[0]
+            key=lambda x: (
+                x.split()[1].lower() if len(x.split()) > 1 else x.split()[0]
+            )
         )
 
     def get_list(self, name: str) -> list[str]:

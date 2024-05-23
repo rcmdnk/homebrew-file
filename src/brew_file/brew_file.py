@@ -1713,11 +1713,10 @@ class BrewFile:
                                     cask_tap, []
                                 ) + [(app_path, token)]
                             else:
-                                non_latest_cask_apps[
-                                    cask_tap
-                                ] = non_latest_cask_apps.get(cask_tap, []) + [
-                                    (app_path, token)
-                                ]
+                                non_latest_cask_apps[cask_tap] = (
+                                    non_latest_cask_apps.get(cask_tap, [])
+                                    + [(app_path, token)]
+                                )
                             if token in installed_casks[cask_tap]:
                                 installed_casks[cask_tap].remove(token)
                         else:
