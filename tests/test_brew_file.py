@@ -635,15 +635,15 @@ def execute_fixture(monkeypatch) -> None:
         ("dump", "check_repo () {}\ninitialize () {}\n"),  # noqa: P103
         (
             "edit",
-            "check_repo () {}\ncheck_input_file () {}\nedit_brewfile () {}\n",  # noqa: P103
+            "check_repo () {}\nedit_brewfile () {}\n",  # noqa: P103
         ),
         (
             "cat",
-            "check_repo () {}\ncheck_input_file () {}\ncat_brewfile () {}\n",  # noqa: P103
+            "check_repo () {}\ncat_brewfile () {}\n",  # noqa: P103
         ),
         (
             "get_files",
-            "check_repo () {}\ncheck_input_file () {}\nget_files () {'is_print': True, 'all_files': False}\n",  # noqa: P103
+            "check_repo () {}\nget_files () {'is_print': True, 'all_files': False}\n",  # noqa: P103
         ),
         (
             "clean_non_request",

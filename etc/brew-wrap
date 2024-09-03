@@ -60,13 +60,22 @@ brew () {
   fi
 
   # Execute command
-  local brewfile=$(brew-file cat)
+  local brewfile="$(brew-file cat)"
+  if [ $? -ne 0 ];then
+    brewfile=""
+  fi
   eval $env $exe "$@"
   ret=$?
 
   # Commands after brew command
-  if ! command diff <(echo "$brewfile") <(brew-file cat) >/dev/null;then
-    _post_brewfile_update
+  local brewfile_after="$(brew-file cat)"
+  if [ $? -ne 0 ];then
+    brewfile_after=""
+  fi
+  if [ $ret -eq 0 ];then
+    if ! command diff <(echo "$brewfile") <(echo "$brewfile_after") >/dev/null;then
+      _post_brewfile_update
+    fi
   fi
 
   return $?

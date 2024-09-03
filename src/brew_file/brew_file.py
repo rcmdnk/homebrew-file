@@ -1184,7 +1184,10 @@ class BrewFile:
             )
 
     def get_files(
-        self, is_print: bool = False, all_files: bool = False
+        self,
+        is_print: bool = False,
+        all_files: bool = False,
+        error_no_file: bool = True,
     ) -> list[Path]:
         """Get Brewfiles."""
         self.read_all()
@@ -1193,6 +1196,10 @@ class BrewFile:
             for x in [self.brewinfo_main] + self.brewinfo_ext
             if all_files or x.file.exists()
         ]
+        if error_no_file and not files:
+            raise RuntimeError(
+                "No Brewfile found. Please run `brew file init` first."
+            )
         if is_print:
             self.log.info("\n".join([str(x) for x in files]))
         return files
@@ -1928,10 +1935,6 @@ class BrewFile:
             _ = self.initialize()
             return
 
-        # Check input file
-        # If the file doesn't exist, initialize it.
-        self.check_input_file()
-
         # Edit
         if self.opt["command"] == "edit":
             self.edit_brewfile()
@@ -1946,6 +1949,10 @@ class BrewFile:
         if self.opt["command"] == "get_files":
             self.get_files(is_print=True, all_files=self.opt["all_files"])
             return
+
+        # Check input file
+        # If the file doesn't exist, initialize it.
+        self.check_input_file()
 
         # Cleanup non request
         if self.opt["command"] == "clean_non_request":
