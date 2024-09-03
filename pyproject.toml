@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "brew-file"
-version = "9.0.16"
+version = "9.0.17"
 description = "Brewfile manager for Homebrew"
 authors = ["rcmdnk <rcmdnk@gmail.com>"]
 
