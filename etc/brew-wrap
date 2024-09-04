@@ -78,7 +78,7 @@ brew () {
     fi
   fi
 
-  return $?
+  return $ret
 }
 
 _post_brewfile_update () {
