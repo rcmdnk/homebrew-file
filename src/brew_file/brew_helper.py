@@ -284,11 +284,6 @@ class BrewHelper:
         if "cask_info" in self.opt:
             return self.opt["cask_info"]
 
-        _, lines = self.proc(
-            "brew info --eval-all --json=v2",
-            print_cmd=False,
-            print_out=False,
-        )
         info = self.brew_info_v2(
             info_opt="--eval-all", print_cmd=False, print_out=False
         )["casks"]

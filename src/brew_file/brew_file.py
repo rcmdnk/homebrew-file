@@ -1656,12 +1656,12 @@ class BrewFile:
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
         apps_check = {
-            "cask": {d: 0 for d in app_dirs},
-            "has_cask": {d: 0 for d in app_dirs},
-            "brew": {d: 0 for d in app_dirs},
-            "has_brew": {d: 0 for d in app_dirs},
-            "appstore": {d: 0 for d in app_dirs},
-            "no_cask": {d: 0 for d in app_dirs},
+            "cask": dict.fromkeys(app_dirs, 0),
+            "has_cask": dict.fromkeys(app_dirs, 0),
+            "brew": dict.fromkeys(app_dirs, 0),
+            "has_brew": dict.fromkeys(app_dirs, 0),
+            "appstore": dict.fromkeys(app_dirs, 0),
+            "no_cask": dict.fromkeys(app_dirs, 0),
         }
 
         appstore_apps: dict[str, str] = {}

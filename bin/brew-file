@@ -440,11 +440,6 @@ class BrewHelper:
         if "cask_info" in self.opt:
             return self.opt["cask_info"]
 
-        _, lines = self.proc(
-            "brew info --eval-all --json=v2",
-            print_cmd=False,
-            print_out=False,
-        )
         info = self.brew_info_v2(
             info_opt="--eval-all", print_cmd=False, print_out=False
         )["casks"]
@@ -2674,12 +2669,12 @@ class BrewFile:
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
         apps_check = {
-            "cask": {d: 0 for d in app_dirs},
-            "has_cask": {d: 0 for d in app_dirs},
-            "brew": {d: 0 for d in app_dirs},
-            "has_brew": {d: 0 for d in app_dirs},
-            "appstore": {d: 0 for d in app_dirs},
-            "no_cask": {d: 0 for d in app_dirs},
+            "cask": dict.fromkeys(app_dirs, 0),
+            "has_cask": dict.fromkeys(app_dirs, 0),
+            "brew": dict.fromkeys(app_dirs, 0),
+            "has_brew": dict.fromkeys(app_dirs, 0),
+            "appstore": dict.fromkeys(app_dirs, 0),
+            "no_cask": dict.fromkeys(app_dirs, 0),
         }
 
         appstore_apps: dict[str, str] = {}
