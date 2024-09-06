@@ -883,12 +883,18 @@ class BrewFile:
 
     def get_appstore_dict(self) -> dict[str, list[str]]:
         apps: dict[str, list[str]] = {}
-        ret, apps_tmp = self.helper.proc(
+        _, apps_tmp = self.helper.proc(
             "mdfind 'kMDItemAppStoreHasReceipt=1'",
             print_cmd=False,
             print_out=False,
         )
         for a in apps_tmp:
+            if not a.endswith(".app"):
+                self.log.warning(f"Incorrect app name in mdfind: {a}")
+                continue
+            if not Path(a).is_dir():
+                self.log.warning(f"App doesn't exist: {a}")
+                continue
             _, lines = self.helper.proc(
                 f"mdls -attr kMDItemAppStoreAdamID -attr kMDItemVersion '{a}'",
                 print_cmd=False,

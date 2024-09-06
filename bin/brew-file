@@ -40,8 +40,8 @@ __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.0.18"
-__date__ = "4/Sep/2024"
+__version__ = "9.0.19"
+__date__ = "6/Sep/2024"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -1896,12 +1896,18 @@ class BrewFile:
 
     def get_appstore_dict(self) -> dict[str, list[str]]:
         apps: dict[str, list[str]] = {}
-        ret, apps_tmp = self.helper.proc(
+        _, apps_tmp = self.helper.proc(
             "mdfind 'kMDItemAppStoreHasReceipt=1'",
             print_cmd=False,
             print_out=False,
         )
         for a in apps_tmp:
+            if not a.endswith(".app"):
+                self.log.warning(f"Incorrect app name in mdfind: {a}")
+                continue
+            if not Path(a).is_dir():
+                self.log.warning(f"App doesn't exist: {a}")
+                continue
             _, lines = self.helper.proc(
                 f"mdls -attr kMDItemAppStoreAdamID -attr kMDItemVersion '{a}'",
                 print_cmd=False,
