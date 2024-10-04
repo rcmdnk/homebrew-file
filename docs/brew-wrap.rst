@@ -2,11 +2,11 @@ brew-wrap
 =========
 
 If you want to automatically update Brewfile after ``brew install/uninstall``,
-or ``mas install/uninstall``
+``mas install/uninstall``, ``whalebrew install/uninstall`` and ``code --install-extension/uninstall-extension``,
 please use ``brew-wrap``.
 
-`homebrew-file/etc/brew-wrap <https://github.com/rcmdnk/homebrew-file/blob/master/etc/brew-wrap>`_
-has a wrapper function ``brew``/``mas``.
+`homebrew-file/etc/brew-wrap <https://github.com/rcmdnk/homebrew-file/blob/main/etc/brew-wrap>`_
+has a wrapper function for these commands.
 
 Feature summary
 ---------------
@@ -43,7 +43,7 @@ Or, for Fish Shell add the following lines in your **config.fish** to wrap ``bre
       source (brew --prefix)/etc/brew-wrap.fish
     end
 
-``brew``/``mas`` function in ``brew-wrap`` executes original ``brew``/``mas``
+Command wrapper functions in ``brew-wrap`` executes original commands
 if ``brew-file`` is not included.
 
 Therefore, you can safely uninstall/re-install brew-file

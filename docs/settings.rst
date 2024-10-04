@@ -16,4 +16,6 @@ Following environmental variables can be used.
    HOMEBREW_BREWFILE_EDITOR       | Set editor to be used by `brew file edit`. If you use `brew-wrap` or call `brew-file` directly, the environmental variable `EDITOR` also works. If you do not use `brew-file` and do not set this variable, `EDITOR` does not work and the system default editor will be used.| \"\"
    HOMEBREW_BREWFILE_VERBOSE      | Set verbose level ("debug", "info", "warning", "error", "critical"). | "info"
    HOMEBREW_BREWFILE_APPSTORE     | Set Appstore application management level. 0: do not, 1: manage fully, 2: use list to install, but do not update by init command even if new App is added (but package is removed from the list at ``brew file brew mas uninstall <app id>``).| 1
+   HOMEBREW_BREWFILE_WHALEBREW    | Set 1 if you want to manage whalebrew images by `brew-file`.| 0
+   HOMEBREW_BREWFILE_VSCODE       | Set 1 if you want to manage vscode extensions by `brew-file`.| 0
    HOMEBREW_CASK_OPTS             | This is `Cask's option <https://github.com/homebrew/homebrew-cask/blob/master/USAGE.md>`_ to set cask environment. If appdir or fontdir is set with these options, Brew-file uses these values in it. | \"\"
