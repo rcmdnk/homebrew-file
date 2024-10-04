@@ -73,6 +73,8 @@ tapall           ``brew tap X``, and installs all packages of Formulae in the ta
 cask             ``brew install --cask X``.
 cask_args        Arguments for cask command. e.g. ``cask_args appdir: "~/Applications", require_sha: true`` for ``brewdler``, ``bundle`` case, ``cask_args --appdir=~/Applications --require_sha``.
 appstore         Apps installed from AppStore. The line is like: `appstore <identifier> <App Name>`. Identifier can be obtained by `argon/mas <https://github.com/argon/mas>`_. (It will be installed automatically.) For older OS X, it might be not available. For such a case, only App names are listed by ``init``, and ``install`` command just warns like ``Please install <App Name> from App Store!``.
+whalebrew        Images managed by `Whalebrew <https://github.com/whalebrew/whalebrew>`_.
+vscode           `Visual Studio Code extensions <https://marketplace.visualstudio.com/vscode>`_.
 main             Main file. If it exists, new packages will be written to the main file instead of the top file.
 file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
 brewfile         Same as ``file``.
