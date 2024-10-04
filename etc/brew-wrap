@@ -5,8 +5,12 @@ brew () {
   [ -z "$ZSH_VERSION" ] || emulate -L ksh
 
   # Set exe
-  local exe="command brew"
+  local exe=("command" "brew")
 
+  if ! type brew-file >/dev/null 2>&1;then
+    "${exe[@]}" "$@"
+    return
+  fi
   # Do wrap
   # Check args
   local nargs=0
@@ -29,47 +33,43 @@ brew () {
     # brew file
     file)
       shift
-      exe="brew-file"
+      exe=("brew-file")
       ;;
     # brew install/uninstall/tap
     install|reinstall|tap|rm|remove|uninstall|untap)
       if [ $nargs -gt 1 ];then
-        exe="brew-file brew"
+        exe=("brew-file" "brew")
       fi
       ;;
     # brew cask install/uninstall
     cask)
-      if [ $nargs -gt 2 ];then
-        if [ "$cmd2" = "rm" ] || [ "$cmd2" = "remove" ] || \
-            [ "$cmd2" = "uninstall" ] || [ "$cmd2" = "install" ] || \
-            [ "$cmd2" = "instal" ];then
-          exe="brew-file brew"
-        fi
+      if ((nargs > 2)) && [[ "$cmd2" =~ ^(rm|remove|uninstall|install|instal)$ ]]; then
+        exe=("brew-file" "brew")
       fi
       ;;
     *)
-      if echo " brew init dump set_repo set_local pull push clean clean_non_request casklist get_files version "|grep -q -- " $1 ";then
-        exe="brew-file"
+      if [[ " brew init dump set_repo set_local pull push clean clean_non_request casklist get_files version " =~ " $cmd " ]]; then
+        exe=("brew-file")
       fi
       ;;
   esac
 
   # Remove noinit option for pure brew command
-  if [ "$exe" = "command brew" ] &&  [ "$1" = "noinit" ];then
+  if [ "${exe[*]}" = "command brew" ] &&  [ "$1" = "noinit" ];then
     shift
   fi
 
   # Execute command
-  local brewfile="$(brew-file cat)"
-  if [ $? -ne 0 ];then
+  local brewfile
+  if ! brewfile="$(brew-file cat)" 2>/dev/null;then
     brewfile=""
   fi
-  eval $env $exe "$@"
-  ret=$?
+  $env "${exe[@]}" "$@"
+  local ret=$?
 
   # Commands after brew command
-  local brewfile_after="$(brew-file cat)"
-  if [ $? -ne 0 ];then
+  local brewfile_after
+  if ! brewfile_after="$(brew-file cat)" 2>/dev/null;then
     brewfile_after=""
   fi
   if [ $ret -eq 0 ];then
@@ -115,7 +115,7 @@ _brew_completion_wrap () {
     _brew_file "$@"
   else
     _brew
-    if [ $cword -eq 1 ];then
+    if [ "$cword" -eq 1 ];then
       if [ -n "$ZSH_VERSION" ];then
         # Use longest brew's subcommand 'reinstall' to align with other brew commands.
         _values 'Subcommands' 'file[manage Brewfile]'
@@ -137,16 +137,16 @@ mas () {
   [ -z "$ZSH_VERSION" ] || emulate -L ksh
 
   # Set exe
-  exe="command mas"
+  exe=("command" "mas")
 
   # Do wrap
-  if type -a brew-file >/dev/null 2>&1;then
+  if type brew-file >/dev/null 2>&1;then
     # Check args
     cmd=$1
 
     case "$cmd" in
       purchase|install|uninstall)
-        exe="brew-file brew mas"
+        exe=("brew-file" "brew" "mas")
         ;;
       *)
         ;;
@@ -154,6 +154,57 @@ mas () {
   fi
 
   # Execute command
-  eval $exe "$@"
-  return $?
+  "${exe[@]}" "$@"
+}
+
+# whalebrew command wrapper for brew-file
+whalebrew () {
+  # Emulate ksh / local options if zsh
+  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+
+  # Set exe
+  exe=("command" "whalebrew")
+
+  # Do wrap
+  if type brew-file >/dev/null 2>&1;then
+    # Check args
+    cmd=$1
+
+    case "$cmd" in
+      install|uninstall)
+        exe=("brew-file" "brew" "whalebrew")
+        ;;
+      *)
+        ;;
+    esac
+  fi
+
+  # Execute command
+  "${exe[@]}" "$@"
+}
+
+# code (for VSCode) command wrapper for brew-file
+code () {
+  # Emulate ksh / local options if zsh
+  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+
+  # Set exe
+  exe=("command" "code")
+
+  # Do wrap
+  if type brew-file >/dev/null 2>&1;then
+    # Check args
+    cmd=$1
+
+    case "$cmd" in
+      --install-extension|--uninstall-extension)
+        exe=("brew-file" "brew" "code")
+        ;;
+      *)
+        ;;
+    esac
+  fi
+
+  # Execute command
+  "${exe[@]}" "$@"
 }
