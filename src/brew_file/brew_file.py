@@ -117,6 +117,8 @@ class BrewFile:
         opt["cask_repo"] = f"{opt['homebrew_tap_prefix']}cask"
         opt["reattach_formula"] = "reattach-to-user-namespace"
         opt["mas_formula"] = "mas"
+        opt["whalebrew_formula"] = "whalebrew"
+        opt["vscode_formula"] = "vscode"
         opt["my_editor"] = os.getenv(
             "HOMEBREW_BREWFILE_EDITOR", os.getenv("EDITOR", "vim")
         )
@@ -125,6 +127,13 @@ class BrewFile:
         opt["is_mas_cmd"] = 0
         opt["mas_cmd_installed"] = False
         opt["reattach_cmd_installed"] = False
+        opt["whalebrew_cmd"] = "whalebrew"
+        opt["is_whalebrew_cmd"] = 0
+        opt["whalebrew_cmd_installed"] = False
+        opt["vscode_cmd"] = "code"
+        opt["is_vscode_cmd"] = 0
+        opt["vscode_cmd_installed"] = False
+        opt["docker_running"] = 0
         opt["args"] = []
         opt["yn"] = False
         opt["brew_packages"] = ""
@@ -158,6 +167,9 @@ class BrewFile:
 
         opt["appstore"] = to_num(os.getenv("HOMEBREW_BREWFILE_APPSTORE", -1))
         opt["no_appstore"] = False
+
+        opt["whalebrew"] = to_num(os.getenv("HOMEBREW_BREWFILE_WHALEBREW", 0))
+        opt["vscode"] = to_num(os.getenv("HOMEBREW_BREWFILE_VSCODE", 0))
 
         opt["all_files"] = False
         opt["read"] = False
@@ -265,16 +277,12 @@ class BrewFile:
             raise RuntimeError("Cannot find main Brewfile.")
         self.brewinfo_main = main
         self.brewinfo_ext.remove(self.brewinfo_main)
-        if self.opt["mas_cmd_installed"]:
-            p = Path(self.opt["mas_formula"]).name
-            if p not in self.get_list("brew_input"):
-                self.brewinfo_main.brew_input.append(p)
-                self.brewinfo_main.brew_input_opt[p] = ""
-        if self.opt["reattach_cmd_installed"]:
-            p = Path(self.opt["reattach_formula"]).name
-            if p not in self.get_list("brew_input"):
-                self.brewinfo_main.brew_input.append(p)
-                self.brewinfo_main.brew_input_opt[p] = ""
+        for cmd in ["mas", "reattach", "whalebrew", "vscode"]:
+            if self.opt[f"{cmd}_cmd_installed"]:
+                p = Path(self.opt["{cmd}_formula"]).name
+                if p not in self.get_list("brew_input"):
+                    self.brewinfo_main.brew_input.append(p)
+                    self.brewinfo_main.brew_input_opt[p] = ""
         self.opt["read"] = True
 
     def read(
@@ -316,6 +324,12 @@ class BrewFile:
         )
         self.brewinfo_main.add_to_list(
             "appstore_list", self.brewinfo.appstore_list
+        )
+        self.brewinfo_main.add_to_list(
+            "whalebrew_list", self.brewinfo.whalebrew_list
+        )
+        self.brewinfo_main.add_to_list(
+            "vscode_list", self.brewinfo.vscode_list
         )
         self.brewinfo_main.add_to_dict(
             "brew_list_opt", self.brewinfo.brew_list_opt
@@ -627,12 +641,24 @@ class BrewFile:
                 exe = ["sudo", "mas"]
             package = self.opt["args"][1:] if len(self.opt["args"]) > 1 else ""
             if self.check_mas_cmd(True) != 1:
-                self.log.error("\n'mas' command is not available.\n")
+                msg = "\n'mas' command is not available.\n"
                 if package:
-                    self.log.error(
-                        "Please install 'mas' or "
-                        f"{subcmd} {' '.join(package)} manually"
-                    )
+                    msg += f"Please install 'mas' or manage {' '.join(package)} manually"
+                raise RuntimeError(msg)
+        if cmd == "whalebrew":
+            exe = ["whalebrew"]
+            self.opt["args"].pop(0)
+            if subcmd == "uninstall":
+                self.opt["args"].append("-y")
+            if self.check_whalebrew_cmd(True) != 1:
+                raise RuntimeError("\n'whalebrew' command is not available.\n")
+        if cmd == "code":
+            exe = ["code"]
+            self.opt["args"].pop(0)
+            if self.check_vscode_cmd(True) != 1:
+                raise RuntimeError(
+                    "\n'code' command (for VSCode) is not available.\n"
+                )
 
         ret, lines = self.helper.proc(
             exe + self.opt["args"],
@@ -646,15 +672,15 @@ class BrewFile:
 
         if (
             noinit
+            or (cmd == "mas" and self.opt["appstore"] != 1)
+            or (cmd == "whalebrew" and self.opt["whalebrew"] != 1)
+            or (cmd == "code" and self.opt["vscode"] != 1)
             or (
-                cmd == "mas"
-                and subcmd != "uninstall"
-                and self.opt["appstore"] != 1
+                ret != 0
+                and "Not installed" not in " ".join(lines)
+                and "No installed keg or cask with the name"
+                not in " ".join(lines)
             )
-        ) or (
-            ret != 0
-            and "Not installed" not in " ".join(lines)
-            and "No installed keg or cask with the name" not in " ".join(lines)
         ):
             return
 
@@ -677,6 +703,8 @@ class BrewFile:
                 "untap",
                 "cask",
                 "mas",
+                "whalebrew",
+                "code",
             ]
             or nargs == 0
             or (
@@ -687,6 +715,12 @@ class BrewFile:
             or (
                 cmd == "mas"
                 and subcmd not in ["purchase", "install", "uninstall"]
+            )
+            or (cmd == "whalebrew" and subcmd not in ["install", "uninstall"])
+            or (
+                cmd == "code"
+                and subcmd
+                not in ["--install-extension", "--uninstall-extension"]
             )
         ):
             # Not install/remove command, no init.
@@ -768,6 +802,49 @@ class BrewFile:
             )
         return True
 
+    def check_cmd(
+        self, flag: str, cmd: str, formula: str, force: bool = False
+    ) -> Literal[-2, -1, 0, 1]:
+        """Check command is installed or not."""
+        if self.opt[flag] != 0:
+            return self.opt[flag]
+
+        ret, _ = self.helper.proc(
+            f"type {cmd}", print_cmd=False, print_out=False, exit_on_err=False
+        )
+        if ret != 0:
+            self.log.info(f"{formula} has not been installed.")
+            if not force:
+                ans = self.ask_yn(f"Do you want to install {formula}?")
+                if not ans:
+                    self.log.warning("If you need it, please do:")
+                    self.log.warning(f"    $ brew install {formula}")
+                    self.opt[flag] = -2
+                    return self.opt[flag]
+            ret, _ = self.helper.proc(
+                ["brew", "install", formula],
+                print_cmd=True,
+                print_out=True,
+                exit_on_err=False,
+            )
+            if ret != 0:
+                self.log.error(f"\nFailed to install {formula}\n")
+                self.opt[flag] = -1
+                return self.opt[flag]
+            p = Path(formula).name
+            if p not in self.get_list("brew_list"):
+                self.brewinfo.brew_list.append(p)
+                self.brewinfo.brew_list_opt[p] = ""
+
+        ret, _ = self.helper.proc(
+            f"type {cmd}", print_cmd=False, print_out=False, exit_on_err=False
+        )
+        if ret != 0:
+            raise RuntimeError(f"Failed to prepare {cmd} command.")
+
+        self.opt[flag] = 1
+        return self.opt[flag]
+
     def check_mas_cmd(self, force: bool = False) -> Literal[-2, -1, 0, 1]:
         """Check mas is installed or not."""
         if self.opt["is_mas_cmd"] != 0:
@@ -776,68 +853,31 @@ class BrewFile:
         if not is_mac():
             raise RuntimeError("mas is not available on Linux!")
 
-        ret, _ = self.helper.proc(
-            "type mas", print_cmd=False, print_out=False, exit_on_err=False
-        )
-        if ret != 0:
-            _, lines = self.helper.proc(
-                "sw_vers -productVersion",
-                print_cmd=False,
-                print_out=False,
-                exit_on_err=False,
-            )
-            sw_vers = lines[0].split(".")
-            if int(sw_vers[0]) < 10 or (
-                int(sw_vers[0]) == 10 and int(sw_vers[1]) < 11
-            ):
-                self.log.warning("You are using older OS X. mas is not used.")
-                self.opt["is_mas_cmd"] = -1
-                return self.opt["is_mas_cmd"]
-            self.log.info(f"{self.opt['mas_formula']} has not been installed.")
-            if not force:
-                ans = self.ask_yn(
-                    "Do you want to install {self.opt['mas_formula']}?"
-                )
-                if not ans:
-                    self.log.warning("If you need it, please do:")
-                    self.log.warning(
-                        "    $ brew install {self.opt['mas_formula']}"
-                    )
-                    self.opt["is_mas_cmd"] = -2
-                    return self.opt["is_mas_cmd"]
-            ret, _ = self.helper.proc(
-                ["brew", "install", self.opt["mas_formula"]],
-                print_cmd=True,
-                print_out=True,
-                exit_on_err=False,
-            )
-            if ret != 0:
-                self.log.error(
-                    "\nFailed to install " + self.opt["mas_formula"] + "\n"
-                )
-                self.opt["is_mas_cmd"] = -1
-                return self.opt["is_mas_cmd"]
-            p = Path(self.opt["mas_formula"]).name
-            if p not in self.get_list("brew_list"):
-                self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = ""
-
-        ret, _ = self.helper.proc(
-            self.opt["mas_cmd"],
+        _, lines = self.helper.proc(
+            "sw_vers -productVersion",
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
         )
-        if ret != 0:
-            raise RuntimeError("Failed to prepare mas command.")
+        sw_vers = lines[0].split(".")
+        if int(sw_vers[0]) < 10 or (
+            int(sw_vers[0]) == 10 and int(sw_vers[1]) < 11
+        ):
+            self.log.warning("You are using older OS X. mas can not be used.")
+            self.opt["is_mas_cmd"] = -1
+            return self.opt["is_mas_cmd"]
 
-        # Disable check until this issue is solved:
-        # https://github.com/mas-cli/mas#%EF%B8%8F-known-issues
+        cmd_ret = self.check_cmd(
+            "is_mas_cmd", self.opt["mas_cmd"], self.opt["mas_formula"], force
+        )
+        if cmd_ret != 1:
+            return cmd_ret
+
+        # # Disable check until this issue is solved:
+        # # https://github.com/mas-cli/mas#%EF%B8%8F-known-issues
         # if self.helper.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
         #             print_out=False, exit_on_err=False)[0] != 0:
         #    raise RuntimeError("Please sign in to the App Store.")
-
-        self.opt["is_mas_cmd"] = 1
 
         is_tmux = os.getenv("TMUX", "")
         if is_tmux != "":
@@ -857,6 +897,7 @@ class BrewFile:
                         self.log.warning(
                             f"    $ brew install {self.opt['reattach_formula']}"
                         )
+                        self.opt["is_mas_cmd"] = -2
                         return self.opt["is_mas_cmd"]
                 ret, _ = self.helper.proc(
                     ["brew", "install", self.opt["reattach_formula"]],
@@ -880,6 +921,54 @@ class BrewFile:
             self.opt["mas_cmd"] = "reattach-to-user-namespace mas"
 
         return self.opt["is_mas_cmd"]
+
+    def check_whalebrew_cmd(
+        self, force: bool = False
+    ) -> Literal[-2, -1, 0, 1]:
+        """Check whalebrew is installed or not."""
+        if self.opt["is_whalebrew_cmd"] != 0:
+            return self.opt["is_whalebrew_cmd"]
+
+        return self.check_cmd(
+            "is_whalebrew_cmd",
+            self.opt["whalebrew_cmd"],
+            self.opt["whalebrew_formula"],
+            force,
+        )
+
+    def check_vscode_cmd(self, force: bool = False) -> Literal[-2, -1, 0, 1]:
+        """Check code (for VSCode) is installed or not."""
+        if self.opt["is_vscode_cmd"] != 0:
+            return self.opt["is_vscode_cmd"]
+
+        return self.check_cmd(
+            "is_vscode_cmd",
+            self.opt["vscode_cmd"],
+            self.opt["vscode_formula"],
+            force,
+        )
+
+    def check_docker_running(self) -> Literal[-2, -1, 0, 1]:
+        """Check if Docker is running."""
+        if self.opt["docker_running"] != 0:
+            return self.opt["docker_running"]
+        ret, _ = self.helper.proc(
+            "type docker", print_cmd=False, print_out=False, exit_on_err=False
+        )
+        if ret != 0:
+            self.opt["docker_running"] = -1
+            return self.opt["docker_running"]
+        ret, _ = self.helper.proc(
+            "docker ps",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+        )
+        if ret != 0:
+            self.opt["docker_running"] = -2
+            return self.opt["docker_running"]
+        self.opt["docker_running"] = 1
+        return self.opt["docker_running"]
 
     def get_appstore_dict(self) -> dict[str, list[str]]:
         apps: dict[str, list[str]] = {}
@@ -914,6 +1003,33 @@ class BrewFile:
         return [
             f"{v[0]} {k} {v[1]}" for k, v in self.get_appstore_dict().items()
         ]
+
+    def get_whalebrew_list(self) -> list[str]:
+        if self.opt["whalebrew"] != 1:
+            return []
+        if self.check_whalebrew_cmd(False) != 1:
+            return []
+        _, lines = self.helper.proc(
+            f"{self.opt['whalebrew_cmd']} list",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+        )
+        images = [x.split()[1] for x in lines if x.split()[0] != "COMMAND"]
+        return images
+
+    def get_vscode_list(self) -> list[str]:
+        if self.opt["vscode"] != 1:
+            return []
+        if self.check_vscode_cmd(False) != 1:
+            return []
+        _, lines = self.helper.proc(
+            f"{self.opt['vscode_cmd']} --list-extensions",
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+        )
+        return lines
 
     def get_installed_packages(
         self, force_appstore_list: bool = False
@@ -1004,6 +1120,16 @@ class BrewFile:
                     "appstore_list",
                     list(self.get_list("appstore_input")),
                 )
+
+        # Whalebrew commands
+        if self.opt["whalebrew"]:
+            self.brewinfo.set_list_val(
+                "whalebrew_list", self.get_whalebrew_list()
+            )
+
+        # VSCode extensions
+        if self.opt["vscode"]:
+            self.brewinfo.set_list_val("vscode_list", self.get_vscode_list())
 
     def clean_list(self) -> None:
         """Remove duplications between brewinfo.list to extra files' input."""
@@ -1259,6 +1385,44 @@ class BrewFile:
             if p not in info:
                 continue
             add_dependncies(p)
+
+        # Clean up Whalebrew images
+        if self.opt["whalebrew"] == 1 and self.get_list("whalebrew_list"):
+            self.banner("# Clean up Whalebrew images")
+
+            for image in self.get_list("whalebrew_list"):
+                if image in self.get_list("whalebrew_input"):
+                    continue
+
+                if self.check_mas_cmd(True) == 1:
+                    cmd = f"{self.opt['whalebrew_cmd']} uninstall -y {image.split('/')[-1]}"
+                    _ = self.helper.proc(
+                        cmd,
+                        print_cmd=True,
+                        print_out=True,
+                        exit_on_err=False,
+                        dryrun=self.opt["dryrun"],
+                    )
+                    self.remove_pack("whalebrew_list", image)
+
+        # Clean up VSCode extensions
+        if self.opt["vscode"] == 1 and self.get_list("vscode_list"):
+            self.banner("# Clean up VSCode extensions")
+
+            for e in self.get_list("vscode_list"):
+                if e in self.get_list("vscode_input"):
+                    continue
+
+                if self.check_mas_cmd(True) == 1:
+                    cmd = f"{self.opt['vscode_cmd']} --uninstall-extension {e}"
+                    _ = self.helper.proc(
+                        cmd,
+                        print_cmd=True,
+                        print_out=True,
+                        exit_on_err=False,
+                        dryrun=self.opt["dryrun"],
+                    )
+                    self.remove_pack("vscode_list", e)
 
         # Clean up App Store applications
         if self.opt["appstore"] == 1 and self.get_list("appstore_list"):
@@ -1553,6 +1717,49 @@ class BrewFile:
                         "Please install it manually.",
                     )
 
+        # Whalebrew commands
+        if self.opt["whalebrew"]:
+            images = self.get_list("whalebrew_list")
+            for image in self.get_list("whalebrew_input"):
+                if image in images:
+                    continue
+                self.log.info(f"Installing {image}")
+                if self.opt["dryrun"] or self.check_whalebrew_cmd(True) == 1:
+                    if not self.opt[
+                        "dryrun"
+                    ] and self.check_docker_running() in [-1, -2]:
+                        if self.check_docker_running() == -1:
+                            self.log.warning(
+                                "Docker command is not available."
+                            )
+                        elif self.check_docker_running() == -2:
+                            self.log.warning("Docker is not running.")
+                        self.log.warning(
+                            f"Please install {image} by whalebrew after docker is ready."
+                        )
+                        continue
+                    _ = self.helper.proc(
+                        self.opt["whalebrew_cmd"] + " install " + image,
+                        dryrun=self.opt["dryrun"],
+                    )
+                else:
+                    self.log.warning(f"Please install {image} by whalebrew.")
+
+        # VSCode extensions
+        if self.opt["vscode"]:
+            extensions = self.get_list("vscode_list")
+            for e in self.get_list("vscode_input"):
+                if e in extensions:
+                    continue
+                self.log.info(f"Installing {e}")
+                if self.opt["dryrun"] or self.check_vscode_cmd(True) == 1:
+                    _ = self.helper.proc(
+                        self.opt["vscode_cmd"] + " --install-extension " + e,
+                        dryrun=self.opt["dryrun"],
+                    )
+                else:
+                    self.log.warning(f"Please install {e} to VSCode.")
+
         # Other commands
         for c in self.get_list("cmd_input"):
             _ = self.helper.proc(c, dryrun=self.opt["dryrun"])
@@ -1562,12 +1769,17 @@ class BrewFile:
             _ = self.helper.proc(c, dryrun=self.opt["dryrun"])
 
         # Initialize if commands are installed
-        if (
-            self.opt["mas_cmd_installed"]
-            or self.opt["reattach_cmd_installed"]
-            or reinit
+        if reinit or max(
+            [
+                self.opt[f"{x}_cmd_installed"]
+                for x in ["mas", "reattach", "whalebrew", "vscode"]
+            ]
         ):
-            self.opt["mas_cmd_installed"] = self.opt["reattach_cmd_installed"]
+            self.opt["mas_cmd_installed"] = self.opt[
+                "reattach_cmd_installed"
+            ] = self.opt["whalebrew_cmd_installed"] = self.opt[
+                "vscode_cmd_installed"
+            ] = False
             self.input_to_list()
             self.initialize_write(debug_out=True)
 

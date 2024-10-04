@@ -28,6 +28,8 @@ class BrewInfo:
         self.tap_input: list[str] = []
         self.cask_input: list[str] = []
         self.appstore_input: list[str] = []
+        self.whalebrew_input: list[str] = []
+        self.vscode_input: list[str] = []
         self.main_input: list[str] = []
         self.file_input: list[str] = []
 
@@ -44,6 +46,8 @@ class BrewInfo:
         self.tap_list: list[str] = []
         self.cask_list: list[str] = []
         self.appstore_list: list[str] = []
+        self.whalebrew_list: list[str] = []
+        self.vscode_list: list[str] = []
         self.main_list: list[str] = []
         self.file_list: list[str] = []
 
@@ -54,6 +58,8 @@ class BrewInfo:
             "tap_input": self.tap_input,
             "cask_input": self.cask_input,
             "appstore_input": self.appstore_input,
+            "whalebrew_input": self.whalebrew_input,
+            "vscode_input": self.vscode_input,
             "main_input": self.main_input,
             "file_input": self.file_input,
             "before_input": self.before_input,
@@ -65,6 +71,8 @@ class BrewInfo:
             "cask_list": self.cask_list,
             "cask_nocask_list": self.cask_nocask_list,
             "appstore_list": self.appstore_list,
+            "whalebrew_list": self.whalebrew_list,
+            "vscode_list": self.vscode_list,
             "main_list": self.main_list,
             "file_list": self.file_list,
         }
@@ -90,6 +98,8 @@ class BrewInfo:
         del self.tap_input[:]
         del self.cask_input[:]
         del self.appstore_input[:]
+        del self.whalebrew_input[:]
+        del self.vscode_input[:]
         del self.main_input[:]
         del self.file_input[:]
 
@@ -108,6 +118,8 @@ class BrewInfo:
         del self.cask_list[:]
         del self.cask_nocask_list[:]
         del self.appstore_list[:]
+        del self.whalebrew_list[:]
+        del self.vscode_list[:]
         del self.main_list[:]
         del self.file_list[:]
 
@@ -122,6 +134,8 @@ class BrewInfo:
         self.tap_list.extend(self.tap_input)
         self.cask_list.extend(self.cask_input)
         self.appstore_list.extend(self.appstore_input)
+        self.whalebrew_list.extend(self.whalebrew_input)
+        self.vscode_list.extend(self.vscode_input)
         self.main_list.extend(self.main_input)
         self.file_list.extend(self.file_input)
 
@@ -155,6 +169,9 @@ class BrewInfo:
                 x.split()[1].lower() if len(x.split()) > 1 else x.split()[0]
             )
         )
+
+        self.whalebrew_list.sort()
+        self.vscode_list.sort()
 
     def get_list(self, name: str) -> list[str]:
         return copy.deepcopy(self.lists[name])
@@ -292,6 +309,16 @@ class BrewInfo:
                         .strip("'")
                         .strip('"')
                     )
+                elif cmd == "whalebrew":
+                    if p.split()[0] == "install":
+                        self.whalebrew_input.append(p.split()[1])
+                    else:
+                        self.whalebrew_input.append(p)
+                elif cmd in ["vscode", "code"]:
+                    if p.split()[0] == "--install-extension":
+                        self.vscode_input.append(p.split()[1])
+                    else:
+                        self.vscode_input.append(p)
                 elif cmd == "main":
                     self.main_input.append(p)
                     self.file_input.append(p)
@@ -359,6 +386,8 @@ class BrewInfo:
         cmd_cask = "cask "
         cmd_cask_nocask = "#cask "
         cmd_appstore = "appstore "
+        cmd_whalebrew = "whalebrew "
+        cmd_vscode = "vscode "
         cmd_main = "main "
         cmd_file = "file "
         if self.helper.opt["form"] in ["brewdler", "bundle"]:
@@ -368,6 +397,8 @@ class BrewInfo:
             cmd_other = "#"
             cmd_cask_nocask = "#cask "
             cmd_appstore = "mas "
+            cmd_whalebrew = "whalebrew "
+            cmd_vscode = "vscode "
             cmd_main = "#main "
             cmd_file = "#file "
         elif self.helper.opt["form"] in ["command", "cmd"]:
@@ -395,6 +426,8 @@ fi
             cmd_cask = "brew install "
             cmd_cask_nocask = "#brew install "
             cmd_appstore = "mas install "
+            cmd_vscode = "whalebrew install "
+            cmd_vscode = "code --install-extension "
             cmd_main = "#main "
             cmd_file = "#file "
 
@@ -510,6 +543,18 @@ fi
             output += "\n# App Store applications\n"
             for a in self.appstore_list:
                 output += cmd_appstore + self.mas_pack(a) + "\n"
+
+        # Whalebrew images
+        if self.helper.opt["whalebrew"] and self.whalebrew_list:
+            output += "\n# Whalebrew images\n"
+            for i in self.whalebrew_list:
+                output += cmd_whalebrew + self.packout(i) + "\n"
+
+        # VSCode extensions
+        if self.helper.opt["vscode"] and self.vscode_list:
+            output += "\n# VSCode extensions\n"
+            for e in self.vscode_list:
+                output += cmd_vscode + self.packout(e) + "\n"
 
         # Main file
         if self.main_list:
