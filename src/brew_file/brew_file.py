@@ -1023,11 +1023,16 @@ class BrewFile:
             return []
         if self.check_vscode_cmd(False) != 1:
             return []
+        # Remove stderr output for SecCodeCheckValidity issue:
+        # https://github.com/microsoft/vscode/issues/204085
+        # https://github.com/microsoft/vscode/issues/204447
         _, lines = self.helper.proc(
             f"{self.opt['vscode_cmd']} --list-extensions",
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
+            separate_err=True,
+            print_err=False,
         )
         return lines
 
