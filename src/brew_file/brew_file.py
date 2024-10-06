@@ -1425,6 +1425,8 @@ class BrewFile:
                         print_cmd=True,
                         print_out=True,
                         exit_on_err=False,
+                        separate_err=True,
+                        print_err=False,
                         dryrun=self.opt["dryrun"],
                     )
                     self.remove_pack("vscode_list", e)
@@ -1760,6 +1762,8 @@ class BrewFile:
                 if self.opt["dryrun"] or self.check_vscode_cmd(True) == 1:
                     _ = self.helper.proc(
                         self.opt["vscode_cmd"] + " --install-extension " + e,
+                        separate_err=True,
+                        print_err=False,
                         dryrun=self.opt["dryrun"],
                     )
                 else:
