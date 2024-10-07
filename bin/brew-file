@@ -34,14 +34,14 @@ Brew-file: Manager for packages of Homebrew.
 
 https://github.com/rcmdnk/homebrew-file
 
-requirement: Python 3.9 or later
+requirement: Python 3.9.0 or later
 """
 __author__ = "rcmdnk"
 __copyright__ = "Copyright (c) 2013 rcmdnk"
 __credits__ = ["rcmdnk"]
 __license__ = "MIT"
-__version__ = "9.1.0"
-__date__ = "5/Oct/2024"
+__version__ = "9.1.2"
+__date__ = "7/Oct/2024"
 __maintainer__ = "rcmdnk"
 __email__ = "rcmdnk@gmail.com"
 __status__ = "Prototype"
@@ -2081,11 +2081,16 @@ class BrewFile:
             return []
         if self.check_vscode_cmd(False) != 1:
             return []
+        # Remove stderr output for SecCodeCheckValidity issue:
+        # https://github.com/microsoft/vscode/issues/204085
+        # https://github.com/microsoft/vscode/issues/204447
         _, lines = self.helper.proc(
             f"{self.opt['vscode_cmd']} --list-extensions",
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
+            separate_err=True,
+            print_err=False,
         )
         return lines
 
@@ -2478,6 +2483,8 @@ class BrewFile:
                         print_cmd=True,
                         print_out=True,
                         exit_on_err=False,
+                        separate_err=True,
+                        print_err=False,
                         dryrun=self.opt["dryrun"],
                     )
                     self.remove_pack("vscode_list", e)
@@ -2813,6 +2820,8 @@ class BrewFile:
                 if self.opt["dryrun"] or self.check_vscode_cmd(True) == 1:
                     _ = self.helper.proc(
                         self.opt["vscode_cmd"] + " --install-extension " + e,
+                        separate_err=True,
+                        print_err=False,
                         dryrun=self.opt["dryrun"],
                     )
                 else:
