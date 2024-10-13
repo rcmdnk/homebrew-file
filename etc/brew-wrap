@@ -23,12 +23,6 @@ brew () {
   local cmd=$1
   local cmd2=$2
 
-  # No auto update for tap listing
-  local env=""
-  if [ "$cmd" = "tap" ] && [ $nargs -eq 1 ];then
-    env="HOMEBREW_NO_AUTO_UPDATE=1"
-  fi
-
   case "$cmd" in
     # brew file
     file)

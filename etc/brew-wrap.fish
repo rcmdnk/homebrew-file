@@ -19,12 +19,6 @@ function brew
   set -l cmd $argv[1]
   set -l cmd2 $argv[2]
 
-  # No auto update for tap listing
-  set -l env ""
-  if test "$cmd" = "tap" -a $nargs -eq 1
-    set env "HOMEBREW_NO_AUTO_UPDATE=1"
-  end
-
   switch "$cmd"
     case 'file'
       set exe brew-file
