@@ -23,17 +23,21 @@ def check_brew(tmp_path_factory):
 
 @pytest.fixture(scope="session", autouse=False)
 def tap(tmp_path_factory):
+    taps = ["rcmdnk/rcmdnkpac", "rcmdnk/rcmdnkcask"]
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     with FileLock(root_tmp_dir / "tap.lock"):
         bf = brew_file.BrewFile({})
-        bf.helper.proc("brew tap rcmdnk/rcmdnkpac")
-        bf.helper.proc("brew tap rcmdnk/rcmdnkcask")
+        bf.helper.proc(f"brew tap {taps[0]}")
+        bf.helper.proc(f"brew tap {taps[1]}")
+    return taps
 
 
 @pytest.fixture(scope="session", autouse=False)
 def python(tmp_path_factory):
+    python_formula = "python@3.10"
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     with FileLock(root_tmp_dir / "python.lock"):
         bf = brew_file.BrewFile({})
         # To ignore 2to3 conflict with OS's python (@macOS on GitHub Actions)
-        bf.helper.proc("brew install python@3.10", exit_on_err=False)
+        bf.helper.proc(f"brew install {python_formula}", exit_on_err=False)
+    return python_formula

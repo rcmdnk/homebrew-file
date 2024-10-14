@@ -186,7 +186,7 @@ def test_brew_val(helper):
 
 def test_get_formula_list(helper, python):
     formula_list = helper.get_formula_list()
-    assert "python@3.10" in formula_list
+    assert python in formula_list
 
 
 def test_get_cask_list(helper):
@@ -196,51 +196,53 @@ def test_get_cask_list(helper):
 
 
 def test_get_info(helper, python):
-    info = helper.get_info("python@3.10")
-    assert info["python@3.10"]["installed"][0]["used_options"] == []
+    info = helper.get_info()["formulae"][python]
+    assert info["installed"][0]["used_options"] == []
 
 
 def test_get_installed(helper, python):
-    installed = helper.get_installed("python@3.10")
+    installed = helper.get_installed(python)
     # brew version can contained additional number with '_'
-    assert installed["version"].split("_")[0].startswith("3.10")
+    assert installed["version"].split("_")[0].startswith(python.split("@")[1])
 
 
 def test_get_option(helper, python):
-    opt = helper.get_option("python@3.10")
+    opt = helper.get_option(python)
     assert opt == ""
 
 
 def test_get_formula_info(helper):
-    info = helper.get_formula_info()
-    assert "name" in info[0]
-    assert "tap" in info[0]
-    assert "aliases" in info[0]
-    assert "linked_keg" in info[0]
-    assert "installed" in info[0]
+    info = list(helper.get_info()["formulae"].values())[0]
+    assert "name" in info
+    assert "tap" in info
+    assert "aliases" in info
+    assert "linked_keg" in info
+    assert "installed" in info
 
 
 def test_get_formula_aliases(helper):
     aliases = helper.get_formula_aliases()
-    assert aliases["python"].startswith("python@")
+    assert aliases["homebrew/core"]["python"].startswith("python@")
 
 
 def test_get_tap_packs(helper, tap):
-    packs = helper.get_tap_packs("rcmdnk/rcmdnkpac")
-    assert "sentaku" in packs
+    packs = helper.get_tap_packs(tap[0])
+    assert "sentaku" in packs["formulae"]
 
 
 def test_get_cask_info(helper):
     if not brew_file.is_mac():
         pytest.skip("only for mac")
-    info = helper.get_cask_info()
-    assert info[0]["tap"] == "homebrew/cask"
+    info = list(helper.get_info()["casks"].values())[0]
+    assert "token" in info
+    assert "tap" in info
+    assert "old_tokens" in info
 
 
 def test_get_tap_casks(helper, tap):
     if not brew_file.is_mac():
         pytest.skip("only for mac")
-    casks = helper.get_tap_casks("rcmdnk/rcmdnkcask")
+    casks = helper.get_tap_packs(tap[1])["casks"]
     assert "vem" in casks
 
 

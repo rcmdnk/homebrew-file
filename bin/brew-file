@@ -2887,24 +2887,21 @@ class BrewFile:
         casks: dict[str, dict[str, str | bool]] = {}
         apps: dict[str, str] = {}
         installed_casks: dict[str, list[str]] = {self.opt["cask_repo"]: []}
-        for cask_info in info:
+        for cask in info:
             apps_in_cask = []
-            # installed = True if cask_info["installed"] is not None else False
-            installed = cask_info["token"] in cask_list
+            installed = cask in cask_list
             latest = False
             if installed:
-                if cask_info["installed"] is None:
-                    # No AMI info by --eval-all, using json, which does not have installed information
-                    # In addition, some AMI casks (e.g. firefox, zoom) can not work with brew info.
+                if info[cask]["installed"] is None:
                     latest = True
                 else:
-                    latest = cask_info["installed"] == cask_info["version"]
-                installed_casks[cask_info["tap"]] = installed_casks.get(
-                    cask_info["tap"], []
-                ) + [cask_info["token"]]
+                    latest = info[cask]["installed"] == info[cask]["version"]
+                installed_casks[info[cask]["tap"]] = installed_casks.get(
+                    info[cask]["tap"], []
+                ) + [cask]
 
-            if "artifacts" in cask_info:
-                for artifact in cask_info["artifacts"]:
+            if "artifacts" in info[cask]:
+                for artifact in info[cask]["artifacts"]:
                     if "app" in artifact:
                         for a in artifact["app"]:
                             if isinstance(a, str):
@@ -2917,15 +2914,15 @@ class BrewFile:
                                         ".app"
                                     ):
                                         apps_in_cask.append(a)
-            casks[cask_info["token"]] = {
-                "tap": cask_info["tap"],
+            casks[cask] = {
+                "tap": info[cask]["tap"],
                 "installed": installed,
                 "latest": latest,
             }
             apps_in_cask = list(set(apps_in_cask))
             for a in apps_in_cask:
                 if a not in apps or installed:
-                    apps[a] = cask_info["token"]
+                    apps[a] = cask
         # brew
         formulae = self.helper.get_formula_list()
         formulae_all = self.helper.get_all_formulae()
