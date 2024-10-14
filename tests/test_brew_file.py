@@ -223,7 +223,6 @@ def test_read_all(bf, tap):
         "vim": " --HEAD",
     }
     assert bf.get_list("tap_input") == {
-        "direct",
         "homebrew/cask",
         "homebrew/core",
         "rcmdnk/rcmdnkcask",
