@@ -412,8 +412,10 @@ class BrewHelper:
             "casks": [x.split("/")[-1] for x in self.taps[tap]["cask_tokens"]],
         }
         if alias:
-            packs["formulae"] += self.get_formula_aliases().get(tap, {}).keys()
-            packs["casks"] += self.get_cask_aliases().get(tap, {}).keys()
+            packs["formulae"] += list(
+                self.get_formula_aliases().get(tap, {}).keys()
+            )
+            packs["casks"] += list(self.get_cask_aliases().get(tap, {}).keys())
         return packs
 
     def get_leaves(self, on_request: bool = False) -> list[str]:
@@ -911,12 +913,15 @@ fi
             for t in self.tap_list:
                 isfirst_pack = True
                 direct_first = False
-                tap_packs = self.helper.get_tap_packs(t)
 
                 if t == "direct":
-                    if not tap_packs["formulae"] and not tap_packs["casks"]:
-                        continue
                     direct_first = True
+                    tap_packs: dict[str, list[str]] = {
+                        "formulae": [],
+                        "casks": [],
+                    }
+                else:
+                    tap_packs = self.helper.get_tap_packs(t)
 
                 if not self.helper.opt["caskonly"]:
                     output += first_tap_pack_write(
@@ -2595,7 +2600,7 @@ class BrewFile:
         if self.get_list("tap_list"):
             self.banner("# Clean up tap packages")
             for p in self.get_list("tap_list"):
-                if p in self.get_list("tap_input"):
+                if p in self.get_list("tap_input") or p == "direct":
                     continue
                 packs = self.helper.get_tap_packs(p)
                 untapflag = True

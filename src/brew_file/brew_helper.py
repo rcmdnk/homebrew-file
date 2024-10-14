@@ -256,8 +256,10 @@ class BrewHelper:
             "casks": [x.split("/")[-1] for x in self.taps[tap]["cask_tokens"]],
         }
         if alias:
-            packs["formulae"] += self.get_formula_aliases().get(tap, {}).keys()
-            packs["casks"] += self.get_cask_aliases().get(tap, {}).keys()
+            packs["formulae"] += list(
+                self.get_formula_aliases().get(tap, {}).keys()
+            )
+            packs["casks"] += list(self.get_cask_aliases().get(tap, {}).keys())
         return packs
 
     def get_leaves(self, on_request: bool = False) -> list[str]:
