@@ -255,7 +255,6 @@ def test_read(brew_info):
     assert brew_info.brew_input_opt == {"python@3.10": "", "vim": " --HEAD"}
     assert brew_info.brew_input == ["python@3.10", "vim"]
     assert brew_info.tap_input == [
-        "direct",
         "homebrew/core",
         "homebrew/cask",
         "rcmdnk/rcmdnkcask",
