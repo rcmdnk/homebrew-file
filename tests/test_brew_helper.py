@@ -220,7 +220,7 @@ def test_get_formula_info(helper):
     assert "installed" in info
 
 
-def test_get_formula_aliases(helper):
+def test_get_formula_aliases(helper, python):
     aliases = helper.get_formula_aliases()
     assert aliases["homebrew/core"]["python"].startswith("python@")
 
