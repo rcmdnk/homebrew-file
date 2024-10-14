@@ -1093,7 +1093,6 @@ class BrewFile:
             and self.opt["cask_repo"] not in self.brewinfo.get_list("tap_list")
         ):
             self.brewinfo.add_to_list("tap_list", [self.opt["cask_repo"]])
-        self.brewinfo.add_to_list("tap_list", ["direct"])
 
         # Casks
         if is_mac():
@@ -1572,7 +1571,7 @@ class BrewFile:
         if self.get_list("tap_list"):
             self.banner("# Clean up tap packages")
             for p in self.get_list("tap_list"):
-                if p in self.get_list("tap_input") or p == "direct":
+                if p in self.get_list("tap_input"):
                     continue
                 packs = self.helper.get_tap_packs(p)
                 untapflag = True
@@ -1627,7 +1626,7 @@ class BrewFile:
 
         # Tap
         for p in self.get_list("tap_input"):
-            if p in self.get_list("tap_list") or p == "direct":
+            if p in self.get_list("tap_list"):
                 continue
             _ = self.helper.proc("brew tap " + p, dryrun=self.opt["dryrun"])
 
