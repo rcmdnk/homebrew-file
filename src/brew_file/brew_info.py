@@ -17,11 +17,9 @@ class BrewInfo:
 
     helper: BrewHelper
     file: Path = field(default_factory=lambda: Path())
-    log: logging.Logger = field(
-        default_factory=lambda: logging.getLogger(__name__)
-    )
 
     def __post_init__(self) -> None:
+        self.log = logging.getLogger(__name__)
         self.brew_input_opt: dict[str, str] = {}
 
         self.brew_input: list[str] = []
@@ -284,11 +282,12 @@ class BrewInfo:
                 elif cmd == "tapall":
                     _ = self.helper.proc(f"brew tap {p}")
                     self.tap_input.append(p)
-                    for tp in self.helper.get_tap_packs(p):
+                    tap_packs = self.helper.get_tap_packs(p)
+                    for tp in tap_packs["formulae"]:
                         self.brew_input.append(tp)
                         self.brew_input_opt[tp] = ""
                     if is_mac():
-                        for tp in self.helper.get_tap_casks(p):
+                        for tp in tap_packs["casks"]:
                             self.cask_input.append(tp)
                 elif cmd == "cask":
                     self.cask_input.append(p)
@@ -483,7 +482,7 @@ fi
                 tap_packs = self.helper.get_tap_packs(t)
 
                 if t == "direct":
-                    if not tap_packs:
+                    if not tap_packs["formulae"] and not tap_packs["casks"]:
                         continue
                     direct_first = True
 
@@ -494,7 +493,10 @@ fi
                     isfirst = isfirst_pack = False
 
                     for p in self.brew_list[:]:
-                        if p.split("/")[-1].replace(".rb", "") in tap_packs:
+                        if (
+                            p.split("/")[-1].replace(".rb", "")
+                            in tap_packs["formulae"]
+                        ):
                             if direct_first:
                                 direct_first = False
                                 output += "\n## " + "Direct install\n"
@@ -506,7 +508,7 @@ fi
                             del self.brew_list_opt[p]
                 if not is_mac():
                     continue
-                tap_casks = self.helper.get_tap_casks(t)
+                tap_casks = tap_packs["casks"]
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
