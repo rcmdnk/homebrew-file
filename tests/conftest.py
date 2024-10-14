@@ -34,7 +34,7 @@ def tap(tmp_path_factory):
 
 @pytest.fixture(scope="session", autouse=False)
 def python(tmp_path_factory):
-    python_formula = "python@3.10"
+    python_formula = "python@3.13"
     root_tmp_dir = tmp_path_factory.getbasetemp().parent
     with FileLock(root_tmp_dir / "python.lock"):
         bf = brew_file.BrewFile({})
