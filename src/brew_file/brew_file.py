@@ -1572,7 +1572,7 @@ class BrewFile:
         if self.get_list("tap_list"):
             self.banner("# Clean up tap packages")
             for p in self.get_list("tap_list"):
-                if p in self.get_list("tap_input"):
+                if p in self.get_list("tap_input") or p == "direct":
                     continue
                 packs = self.helper.get_tap_packs(p)
                 untapflag = True

@@ -479,12 +479,15 @@ fi
             for t in self.tap_list:
                 isfirst_pack = True
                 direct_first = False
-                tap_packs = self.helper.get_tap_packs(t)
 
                 if t == "direct":
-                    if not tap_packs["formulae"] and not tap_packs["casks"]:
-                        continue
                     direct_first = True
+                    tap_packs: dict[str, list[str]] = {
+                        "formulae": [],
+                        "casks": [],
+                    }
+                else:
+                    tap_packs = self.helper.get_tap_packs(t)
 
                 if not self.helper.opt["caskonly"]:
                     output += first_tap_pack_write(
