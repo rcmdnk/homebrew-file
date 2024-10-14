@@ -215,7 +215,6 @@ class BrewInfo:
         with open(self.file, "r") as f:
             lines = f.readlines()
             is_ignore = False
-            self.tap_input.append("direct")
             for line in lines:
                 if re.match("# *BREWFILE_ENDIGNORE", line):
                     is_ignore = False
@@ -464,7 +463,6 @@ fi
 
             def first_tap_pack_write(
                 isfirst: bool,
-                direct_first: bool,
                 isfirst_pack: bool,
                 tap: str,
                 cmd_tap: str,
@@ -472,26 +470,18 @@ fi
                 output = ""
                 if isfirst:
                     output += "\n# tap repositories and their packages\n"
-                if not direct_first and isfirst_pack:
+                if isfirst_pack:
                     output += "\n" + cmd_tap + self.packout(tap) + "\n"
                 return output
 
             for t in self.tap_list:
                 isfirst_pack = True
-                direct_first = False
 
-                if t == "direct":
-                    direct_first = True
-                    tap_packs: dict[str, list[str]] = {
-                        "formulae": [],
-                        "casks": [],
-                    }
-                else:
-                    tap_packs = self.helper.get_tap_packs(t)
+                tap_packs = self.helper.get_tap_packs(t)
 
                 if not self.helper.opt["caskonly"]:
                     output += first_tap_pack_write(
-                        isfirst, direct_first, isfirst_pack, t, cmd_tap
+                        isfirst, isfirst_pack, t, cmd_tap
                     )
                     isfirst = isfirst_pack = False
 
@@ -500,9 +490,6 @@ fi
                             p.split("/")[-1].replace(".rb", "")
                             in tap_packs["formulae"]
                         ):
-                            if direct_first:
-                                direct_first = False
-                                output += "\n## " + "Direct install\n"
                             pack = self.packout(p) + self.convert_option(
                                 self.brew_list_opt[p]
                             )
@@ -515,7 +502,7 @@ fi
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
-                            isfirst, False, isfirst_pack, t, cmd_tap
+                            isfirst, isfirst_pack, t, cmd_tap
                         )
                         isfirst = isfirst_pack = False
                         output += cmd_cask + self.packout(p) + "\n"
