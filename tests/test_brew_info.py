@@ -8,9 +8,7 @@ from . import brew_file
 @pytest.fixture
 def brew_info():
     file = "BrewfileTest" if brew_file.is_mac() else "BrewfileTestLinux"
-    bf = brew_file.BrewFile(
-        {"input": Path(__file__).parent / "files" / file}
-    )
+    bf = brew_file.BrewFile({"input": Path(__file__).parent / "files" / file})
     return bf.brewinfo
 
 
@@ -331,11 +329,13 @@ def test_write(brew_info, tmp_path, tap):
     brew_info.helper.opt["form"] = "bundle"
     brew_info.write()
     if brew_file.is_mac():
-        cask_tap = "tap 'homebrew/cask'\n\ntap 'rcmdnk/rcmdnkcask'\n"
+        cask_tap1 = "\ntap 'homebrew/cask'\n\ntap 'rcmdnk/rcmdnkcask'\n"
+        cask_tap2 = "\nbrew tap homebrew/cask\n\nbrew tap rcmdnk/rcmdnkcask\n"
         appstore1 = "\n# App Store applications\nmas '', id: Keynote\n"
         appstore2 = "\n# App Store applications\nmas install Keynote\n"
     else:
-        cask_tap = ""
+        cask_tap1 = ""
+        cask_tap2 = ""
         appstore1 = ""
         appstore2 = ""
 
@@ -348,7 +348,7 @@ def test_write(brew_info, tmp_path, tap):
 # tap repositories and their packages
 
 tap 'homebrew/core'
-{cask_tap}{appstore1}
+{cask_tap1}{appstore1}
 # Main file
 #main 'BrewfileMain'
 
@@ -390,7 +390,7 @@ echo before
 # tap repositories and their packages
 
 brew tap homebrew/core
-{cask_tap}{appstore2}
+{cask_tap2}{appstore2}
 # Main file
 #main BrewfileMain
 
