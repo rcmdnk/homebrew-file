@@ -1,0 +1,42 @@
+---
+name: tmate
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'os'
+        type: string
+        required: false
+        default: "ubuntu-latest"
+        options:
+          - "macos-12"
+          - "ubuntu-latest"
+      py_ver:
+        description: 'py ver'
+        type: string
+        required: false
+        default: "3.9"
+        options:
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+          - "3.8"
+jobs:
+  tmate:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.py_ver }}
+    - name: Install poetry
+      run: |
+        pipx install poetry
+        poetry install
+      shell: bash
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
