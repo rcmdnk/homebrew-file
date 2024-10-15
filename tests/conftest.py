@@ -15,6 +15,7 @@ def check_brew(tmp_path_factory):
         if not (Path(bf.opt["cache"]) / "api/formula.jws.json").exists():
             # pseudo code to download api json
             bf.helper.proc("brew search python")
+    bf.helper.proc("command brew install wget")
     os.environ["HOMEBREW_API_AUTO_UPDATE_SECS"] = "100000"
     os.environ["HOMEBREW_AUTO_UPDATE_SECS"] = "100000"
     if "HOMEBREW_BREWFILE_VERBOSE" in os.environ:
