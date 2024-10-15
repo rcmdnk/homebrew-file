@@ -7,8 +7,9 @@ from . import brew_file
 
 @pytest.fixture
 def brew_info():
+    file = "BrewfileTest" if brew_file.is_mac() else "BrewfileTestLinux"
     bf = brew_file.BrewFile(
-        {"input": Path(__file__).parent / "files" / "BrewfileTest"}
+        {"input": Path(__file__).parent / "files" / file}
     )
     return bf.brewinfo
 
@@ -254,13 +255,18 @@ def test_read(brew_info):
     brew_info.read()
     assert brew_info.brew_input_opt == {"python@3.10": "", "vim": " --HEAD"}
     assert brew_info.brew_input == ["python@3.10", "vim"]
-    assert brew_info.tap_input == [
-        "homebrew/core",
-        "homebrew/cask",
-        "rcmdnk/rcmdnkcask",
-    ]
-    assert brew_info.cask_input == ["iterm2", "font-migu1m"]
-    assert brew_info.appstore_input == ["Keynote"]
+    if brew_file.is_mac():
+        assert brew_info.tap_input == [
+            "homebrew/core",
+            "homebrew/cask",
+            "rcmdnk/rcmdnkcask",
+        ]
+        assert brew_info.cask_input == ["iterm2", "font-migu1m"]
+        assert brew_info.appstore_input == ["Keynote"]
+    else:
+        assert brew_info.tap_input == [
+            "homebrew/core",
+        ]
     assert brew_info.main_input == ["BrewfileMain"]
     assert brew_info.file_input == [
         "BrewfileMain",
@@ -318,26 +324,18 @@ def test_write(brew_info, tmp_path, tap):
     brew_info.write()
     with open(default_file) as f1:
         default_txt = f1.readlines()
-        if not brew_file.is_mac():
-            default_txt = [
-                x
-                for x in default_txt
-                if not x.startswith("cask ") and not x.startswith("appstore ")
-            ]
         default_txt = "".join(default_txt)
-        if not brew_file.is_mac():
-            default_txt = default_txt.replace(
-                "# App Store applications\n\n", ""
-            )
     with open(tmp_file) as f2:
         tmp_txt = f2.read()
     assert tmp_txt == default_txt
     brew_info.helper.opt["form"] = "bundle"
     brew_info.write()
     if brew_file.is_mac():
+        cask_tap = "tap 'homebrew/cask'\n\ntap 'rcmdnk/rcmdnkcask'\n"
         appstore1 = "\n# App Store applications\nmas '', id: Keynote\n"
         appstore2 = "\n# App Store applications\nmas install Keynote\n"
     else:
+        cask_tap = ""
         appstore1 = ""
         appstore2 = ""
 
@@ -350,11 +348,7 @@ def test_write(brew_info, tmp_path, tap):
 # tap repositories and their packages
 
 tap 'homebrew/core'
-
-tap 'homebrew/cask'
-
-tap 'rcmdnk/rcmdnkcask'
-{appstore1}
+{cask_tap}{appstore1}
 # Main file
 #main 'BrewfileMain'
 
@@ -396,11 +390,7 @@ echo before
 # tap repositories and their packages
 
 brew tap homebrew/core
-
-brew tap homebrew/cask
-
-brew tap rcmdnk/rcmdnkcask
-{appstore2}
+{cask_tap}{appstore2}
 # Main file
 #main BrewfileMain
 

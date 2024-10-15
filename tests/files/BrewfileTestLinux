@@ -1,0 +1,23 @@
+# Before commands
+before echo before
+
+# tap repositories and their packages
+
+tap homebrew/core
+brew python@3.10
+brew vim --HEAD
+
+# Main file
+main BrewfileMain
+
+# Additional files
+file BrewfileExt
+file BrewfileExt2
+file BrewfileNotExist
+file ~/BrewfileHomeForTestingNotExists
+
+# Other commands
+echo other commands
+
+# After commands
+after echo after
