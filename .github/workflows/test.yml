@@ -97,6 +97,8 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
         with:
           test-bot: false
+      - name: Install wget
+        run: brew install wget
       - uses: rcmdnk/python-action@v2
         with:
           checkout: 1
