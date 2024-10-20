@@ -17,9 +17,9 @@ on:
       main_os:
         description: "Main os for coverage/tmate."
         type: choice
-        default: "macos-12"
+        default: "macos-latest"
         options:
-          - "macos-12"
+          - "macos-latest"
           - "ubuntu-latest"
       main_py_ver:
         description: "Main python version for coverage/tmate."
@@ -30,7 +30,6 @@ on:
           - "3.11"
           - "3.10"
           - "3.9"
-          - "3.8"
       tmate:
         type: boolean
         description: "Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate). This is only for main strategy and others will be stopped."
@@ -39,7 +38,7 @@ on:
 
 env:
   MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
-  MAIN_OS: ${{ inputs.main_os || 'ubuntu-latest' }}
+  MAIN_OS: ${{ inputs.main_os || 'macos-latest' }}
   MAIN_PY_VER: ${{ inputs.main_py_ver || '3.10' }}
   TMATE: ${{ inputs.tmate || 'false' }}
 
@@ -51,7 +50,7 @@ jobs:
   install:
     strategy:
       matrix:
-        os: [macos-12, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
@@ -66,7 +65,7 @@ jobs:
   formula:
     strategy:
       matrix:
-        os: [macos-12, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
@@ -83,8 +82,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, ubuntu-latest]
-        python-version: ['3.12', '3.11', '3.10', '3.9', '3.8']
+        os: [macos-latest, ubuntu-latest]
+        python-version: ['3.12', '3.11', '3.10', '3.9']
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
