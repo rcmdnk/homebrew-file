@@ -37,5 +37,10 @@ jobs:
         pipx install poetry
         poetry install
       shell: bash
+    - name: Set up Homebrew
+      id: set-up-homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+      with:
+        test-bot: false
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
