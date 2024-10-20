@@ -63,6 +63,22 @@ jobs:
           chmod 755 ./install.sh
           ./install.sh
           rm -f install.sh
+  formula:
+    strategy:
+      matrix:
+        os: [macos-12, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Exit workflow
+        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
+        run: exit 1
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        with:
+          test-bot: false
+      - name: Install homebrew-file
+        run: brew install rcmdnk/file/brew-file
   test:
     strategy:
       fail-fast: false
