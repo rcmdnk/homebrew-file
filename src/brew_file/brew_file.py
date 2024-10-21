@@ -1854,30 +1854,25 @@ class BrewFile:
         # First, get App Store applications
         appstore_list = self.get_appstore_dict()
 
-        # Check installed casks untill brew info --eval-all contains core/cask for AMI
-        # once fixed, compare info['token']['version'] and installed to check latest
-        cask_list = self.helper.get_cask_list()
+        # Get all available formulae/casks information
+        all_info = self.helper.get_all_info()
 
-        # Get cask information
-        info = self.helper.get_info()["casks"]
         casks: dict[str, dict[str, str | bool]] = {}
         apps: dict[str, str] = {}
         installed_casks: dict[str, list[str]] = {self.opt["cask_repo"]: []}
-        for cask in info:
-            apps_in_cask = []
-            installed = cask in cask_list
+        for cask, info in all_info["casks"].items():
+            installed = False
             latest = False
-            if installed:
-                if info[cask]["installed"] is None:
-                    latest = True
-                else:
-                    latest = info[cask]["installed"] == info[cask]["version"]
-                installed_casks[info[cask]["tap"]] = installed_casks.get(
-                    info[cask]["tap"], []
+            apps_in_cask = []
+            if "installed" in info and info["installed"]:
+                installed = True
+                latest = info["installed"] == info["version"]
+                installed_casks[info["tap"]] = installed_casks.get(
+                    info["tap"], []
                 ) + [cask]
 
-            if "artifacts" in info[cask]:
-                for artifact in info[cask]["artifacts"]:
+            if "artifacts" in info:
+                for artifact in info["artifacts"]:
                     if "app" in artifact:
                         for a in artifact["app"]:
                             if isinstance(a, str):
@@ -1891,7 +1886,7 @@ class BrewFile:
                                     ):
                                         apps_in_cask.append(a)
             casks[cask] = {
-                "tap": info[cask]["tap"],
+                "tap": info["tap"],
                 "installed": installed,
                 "latest": latest,
             }
@@ -1899,9 +1894,6 @@ class BrewFile:
             for a in apps_in_cask:
                 if a not in apps or installed:
                     apps[a] = cask
-        # brew
-        formulae = self.helper.get_formula_list()
-        formulae_all = self.helper.get_all_formulae()
 
         # Set applications directories
         app_dirs = self.opt["appdirlist"]
@@ -1981,9 +1973,11 @@ class BrewFile:
                             has_cask_apps[cask_tap] = has_cask_apps.get(
                                 cask_tap, []
                             ) + [(app_path, token)]
-                    elif token in formulae_all:
-                        brew_tap = cast(str, formulae_all[token]["tap"])
-                        if token in formulae:
+                    elif token in all_info["formulae"]:
+                        brew_tap = cast(
+                            str, all_info["formulae"][token]["tap"]
+                        )
+                        if all_info["formulae"][token]["installed"]:
                             check = "brew"
                             brew_apps[brew_tap] = brew_apps.get(
                                 brew_tap, []
