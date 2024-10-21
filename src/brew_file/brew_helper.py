@@ -43,8 +43,12 @@ class BrewHelper:
     def __post_init__(self) -> None:
         self.log = logging.getLogger(__name__)
 
+        self.all_info: dict[str, dict[str, Any]] | None = None
         self.info: dict[str, dict[str, Any]] | None = None
-        self.all_formulae: dict[str, Any] | None = None
+
+        self.formulae: list[str] | None = None
+        self.casks: list[str] | None = None
+
         self.formula_aliases: dict[str, dict[str, str]] | None = None
         self.cask_aliases: dict[str, dict[str, str]] | None = None
         self.taps: dict[str, Any] | None = None
@@ -133,6 +137,101 @@ class BrewHelper:
             self.opt[name] = lines[0]
         return self.opt[name]
 
+    def get_formulae(self) -> list[str]:
+        if self.formulae is None:
+            _, lines = self.proc(
+                cmd="brew formulae",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=True,
+                separate_err=True,
+            )
+            # test formulae in a deep direcotyr was found for hashicorp/tap
+            self.formulae = [
+                x for x in lines if len(x.split("/")[-1]) in (1, 3)
+            ]
+        return self.formulae
+
+    def get_casks(self) -> list[str]:
+        if self.casks is None:
+            _, lines = self.proc(
+                cmd="brew casks",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=True,
+                separate_err=True,
+            )
+            self.casks = lines
+        return self.casks
+
+    def get_packages(self) -> list[str]:
+        formulae = self.get_formulae()
+        casks = self.get_casks()
+        return formulae + casks
+
+    def get_all_info(self) -> dict[str, Any]:
+        """Get info of all available brew package."""
+        if self.all_info is None:
+            ret, lines = self.proc(
+                cmd="brew info --json=v2 --eval-all",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=False,
+                separate_err=False,
+            )
+            if ret != 0:
+                formulae = self.get_formulae()
+                casks = self.get_casks()
+
+            _, lines = self.proc(
+                cmd=f"brew info --json=v2 --cask {' '.join(casks)}",
+                print_cmd=False,
+                print_out=False,
+                exit_on_err=True,
+                separate_err=True,
+            )
+            lines = lines[lines.index("{") :]
+            data = json.loads("".join(lines))
+            self.all_info = {
+                "formulae": {},
+                "casks": {x["token"]: x for x in data["casks"]},
+            }
+            while ret != 0:
+                ret, lines = self.proc(
+                    cmd=f"brew info --json=v2 --formula {' '.join(formulae)}",
+                    print_cmd=False,
+                    print_out=False,
+                    exit_on_err=False,
+                    separate_err=False,
+                )
+                if ret == 0:
+                    break
+                formulae_updated = 0
+                for line in lines:
+                    # Remove package from list if it has no URL
+                    # https://github.com/hashicorp/homebrew-tap/issues/258
+                    if "formula requires at least a URL" in line:
+                        formula = line.split()[1]
+                        if formula in formulae:
+                            formulae.remove(formula)
+                            formulae_updated = 1
+                        if formula.split("/")[-1] in formulae:
+                            formulae.remove(formula.split("/")[-1])
+                            formulae_updated = 1
+                        continue
+                if formulae_updated:
+                    continue
+                msg = "Failed to get info of all packages.\n\n"
+                msg += "\n".join(lines)
+                raise RuntimeError(msg)
+
+            lines = lines[lines.index("{") :]
+            data = json.loads("".join(lines))
+            self.all_info["formulae"] = {
+                x["name"]: x for x in data["formulae"]
+            }
+        return self.all_info
+
     def get_info(self) -> dict[str, Any]:
         """Get info of installed brew package."""
         if self.info is None:
@@ -150,21 +249,6 @@ class BrewHelper:
                 "casks": {x["token"]: x for x in data["casks"]},
             }
         return self.info
-
-    def get_all_formulae(self) -> dict[str, Any]:
-        """Get info of all formulae."""
-        if self.all_formulae is None:
-            _, lines = self.proc(
-                cmd="brew info --json=v1 --eval-all",
-                print_cmd=False,
-                print_out=False,
-                exit_on_err=True,
-                separate_err=True,
-            )
-            lines = lines[lines.index("[") :]
-            data = json.loads("".join(lines))
-            self.all_formulae = {x["name"]: x for x in data}
-        return self.all_formulae
 
     def get_formula_list(self) -> list[str]:
         info = self.get_info()
