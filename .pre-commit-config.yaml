@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.2.4
+    rev: v0.2.5
     hooks:
       - id: black-diff
       - id: black

@@ -1194,13 +1194,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "3.8.0"
+version = "4.0.1"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pre_commit-3.8.0-py2.py3-none-any.whl", hash = "sha256:9a90a53bf82fdd8778d58085faf8d83df56e40dfe18f45b19446e26bf1b3a63f"},
-    {file = "pre_commit-3.8.0.tar.gz", hash = "sha256:8bb6494d4a20423842e198980c9ecf9f96607a07ea29549e180eef9ae80fe7af"},
+    {file = "pre_commit-4.0.1-py2.py3-none-any.whl", hash = "sha256:efde913840816312445dc98787724647c65473daefe420785f885e8ed9a06878"},
+    {file = "pre_commit-4.0.1.tar.gz", hash = "sha256:80905ac375958c0444c65e9cebebd948b3cdb518f335a091a670a89d652139d2"},
 ]
 
 [package.dependencies]
@@ -1265,13 +1265,13 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyproject-pre-commit"
-version = "0.2.4"
+version = "0.2.5"
 description = "pre-commit hooks for python projects using pyproject.toml."
 optional = false
 python-versions = "<4.0.0,>=3.9.0"
 files = [
-    {file = "pyproject_pre_commit-0.2.4-py3-none-any.whl", hash = "sha256:ff5a7e6abd20451bc0638c9c0600ca948587e7eaad5d3695ec3795b1d3642ec6"},
-    {file = "pyproject_pre_commit-0.2.4.tar.gz", hash = "sha256:dfdc44efa82a700236248f9efd925be99e87be353ada9d62fa28614ce8182646"},
+    {file = "pyproject_pre_commit-0.2.5-py3-none-any.whl", hash = "sha256:a7d00119d4280001788f42af36d6db63927c34d3f86df2f48a6933c5ac8bae7b"},
+    {file = "pyproject_pre_commit-0.2.5.tar.gz", hash = "sha256:72141b3fecce999ef0df87790c4956535bb1bb81616c7ea0feda9e64b9240f6a"},
 ]
 
 [package.dependencies]
@@ -1300,7 +1300,7 @@ mdformat-gfm = ">=0.3.5,<0.4.0"
 mypy = ">=1.5.1,<2.0.0"
 numpydoc = ">=1.8.0,<2.0.0"
 pep8-naming = ">=0.14.0,<0.15.0"
-pre-commit = ">=3.3.3,<4.0.0"
+pre-commit = ">=4.0.0,<5.0.0"
 pycodestyle = ">=2.11.0,<3.0.0"
 shellcheck-py = ">=0.9.0.5,<0.10.0.0"
 
