@@ -9,7 +9,7 @@ python = "^3.9.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
-pytest-cov = "^5.0.0"
+pytest-cov = "^6.0.0"
 pytest-xdist = "^3.3.1"
 pyproject-pre-commit = "^0.2.4"
 
