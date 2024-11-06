@@ -114,16 +114,12 @@ jobs:
           test-bot: false
       - name: Install wget
         run: brew install wget
-      - uses: rcmdnk/python-action@v2
+      - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
           setup-python: 1
           python-version: "${{ matrix.python-version }}"
-          pip: 'pip'
-          setup-cmd: 'poetry install'
-          pip-packages: ''
-          poetry: 1
-          cache: 'poetry'
+          setup-type: 'uv'
           pytest: 1
           pytest-tests-path: 'tests/'
           pytest-ignore: ''

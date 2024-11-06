@@ -1,7 +1,11 @@
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.2.5
+    rev: v0.3.0
     hooks:
+      - id: ruff-lint-diff
+      - id: ruff-lint
+      - id: ruff-format-diff
+      - id: ruff-format
       - id: black-diff
       - id: black
       - id: blacken-docs

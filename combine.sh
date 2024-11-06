@@ -50,10 +50,8 @@ done
   echo "$contents"
 } > "$dest"
 
-black "$dest"
-autoflake --in-place "$dest"
-autopep8 --in-place "$dest"
-isort "$dest"
+ruff check --fix "$dest"
+ruff format "$dest"
 
 if [ -f "$tmp_backup" ];then
   diff -u "$tmp_backup" "$dest"

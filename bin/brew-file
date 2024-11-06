@@ -2862,7 +2862,10 @@ class BrewFile:
                 if self.opt["dryrun"] or self.check_whalebrew_cmd(True) == 1:
                     if not self.opt[
                         "dryrun"
-                    ] and self.check_docker_running() in [-1, -2]:
+                    ] and self.check_docker_running() in [
+                        -1,
+                        -2,
+                    ]:
                         if self.check_docker_running() == -1:
                             self.log.warning(
                                 "Docker command is not available."
