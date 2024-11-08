@@ -77,7 +77,9 @@ def is_mac() -> bool:
 def to_bool(val: bool | int | str) -> bool:
     if isinstance(val, bool):
         return val
-    if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
+    if isinstance(val, int) or (
+        isinstance(val, str) and val.lstrip('+-').isdigit()
+    ):
         return bool(int(val))
     return isinstance(val, str) and val.lower() == 'true'
 
@@ -85,7 +87,9 @@ def to_bool(val: bool | int | str) -> bool:
 def to_num(val: bool | int | str) -> int:
     if isinstance(val, bool):
         return int(val)
-    if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
+    if isinstance(val, int) or (
+        isinstance(val, str) and val.lstrip('+-').isdigit()
+    ):
         return int(val)
     if isinstance(val, str) and val.lower() == 'true':
         return 1
