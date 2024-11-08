@@ -4,9 +4,13 @@ repos:
     rev: v0.3.0
     hooks:
       - id: ruff-lint-diff
+        stages: [pre-commit]
       - id: ruff-lint
+        stages: [pre-commit]
       - id: ruff-format-diff
+        stages: [pre-commit]
       - id: ruff-format
+        stages: [pre-commit]
       - id: black-diff
         stages: [manual]
       - id: black
@@ -30,30 +34,48 @@ repos:
       - id: bandit
         stages: [manual]
       - id: mypy
+        stages: [pre-commit]
       - id: numpydoc-validation
+        stages: [pre-commit]
       - id: shellcheck
+        stages: [pre-commit]
       - id: mdformat-check
+        stages: [pre-commit]
       - id: mdformat
+        stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: check-byte-order-marker
+        stages: [pre-commit]
       - id: check-yaml
+        stages: [pre-commit]
       - id: check-json
+        stages: [pre-commit]
       - id: check-toml
+        stages: [pre-commit]
       - id: check-case-conflict
+        stages: [pre-commit]
       - id: check-merge-conflict
         args:
           - "--assume-in-merge"
+        stages: [pre-commit]
       - id: end-of-file-fixer
+        stages: [pre-commit]
       - id: fix-byte-order-marker
+        stages: [pre-commit]
       - id: mixed-line-ending
+        stages: [pre-commit]
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: debug-statements
+        stages: [pre-commit]
       - id: detect-private-key
+        stages: [pre-commit]
       - id: detect-aws-credentials
         args:
           - "--allow-missing-credentials"
+        stages: [pre-commit]
   - repo: local
     hooks:
       - id: combine
