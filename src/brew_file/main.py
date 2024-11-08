@@ -28,11 +28,16 @@ def main() -> int:
         'allow_abbrev': False,
     }
     pre_parser = argparse.ArgumentParser(
-        usage=f'{__prog__}...', **arg_parser_opts
+        usage=f'{__prog__}...',
+        **arg_parser_opts,
     )
     group = pre_parser.add_mutually_exclusive_group()
     group.add_argument(
-        '-i', '--init', action='store_const', dest='command', const='init'
+        '-i',
+        '--init',
+        action='store_const',
+        dest='command',
+        const='init',
     )
     group.add_argument(
         '-s',
@@ -42,22 +47,43 @@ def main() -> int:
         const='set_repo',
     )
     group.add_argument(
-        '--set_local', action='store_const', dest='command', const='set_local'
+        '--set_local',
+        action='store_const',
+        dest='command',
+        const='set_local',
     )
     group.add_argument(
-        '-c', '--clean', action='store_const', dest='command', const='clean'
+        '-c',
+        '--clean',
+        action='store_const',
+        dest='command',
+        const='clean',
     )
     group.add_argument(
-        '-u', '--update', action='store_const', dest='command', const='update'
+        '-u',
+        '--update',
+        action='store_const',
+        dest='command',
+        const='update',
     )
     group.add_argument(
-        '-e', '--edit', action='store_const', dest='command', const='edit'
+        '-e',
+        '--edit',
+        action='store_const',
+        dest='command',
+        const='edit',
     )
     group.add_argument(
-        '--cat', action='store_const', dest='command', const='cat'
+        '--cat',
+        action='store_const',
+        dest='command',
+        const='cat',
     )
     group.add_argument(
-        '--commands', action='store_const', dest='command', const='commands'
+        '--commands',
+        action='store_const',
+        dest='command',
+        const='commands',
     )
     group.add_argument(
         '-v',
@@ -328,7 +354,10 @@ def main() -> int:
     )
 
     subparsers = parser.add_subparsers(
-        title='subcommands', metavar='[command]', help='', dest='command'
+        title='subcommands',
+        metavar='[command]',
+        help='',
+        dest='command',
     )
 
     help_doc = (
@@ -340,7 +369,7 @@ def main() -> int:
         'install',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [dryrun_parser],
+        parents=[*min_parsers, dryrun_parser],
         **subparser_opts,
     )
     help_doc = (
@@ -362,12 +391,12 @@ def main() -> int:
         'init',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [link_parser, repo_parser],
+        parents=[*min_parsers, link_parser, repo_parser],
         **subparser_opts,
     )
     subparsers.add_parser(
         'dump',
-        parents=min_parsers + [link_parser, repo_parser],
+        parents=[*min_parsers, link_parser, repo_parser],
         **subparser_opts,
     )
     help_doc = (
@@ -378,7 +407,7 @@ def main() -> int:
         'set_repo',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [repo_parser],
+        parents=[*min_parsers, repo_parser],
         **subparser_opts,
     )
     help_doc = 'or --set_local\nSet BREWFILE to local file.'
@@ -394,7 +423,7 @@ def main() -> int:
         'pull',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [dryrun_parser],
+        parents=[*min_parsers, dryrun_parser],
         **subparser_opts,
     )
     help_doc = 'Push your BREWFILE to the repository.'
@@ -402,7 +431,7 @@ def main() -> int:
         'push',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [dryrun_parser],
+        parents=[*min_parsers, dryrun_parser],
         **subparser_opts,
     )
     help_doc = (
@@ -415,7 +444,7 @@ def main() -> int:
         'clean',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [dryrun_parser],
+        parents=[*min_parsers, dryrun_parser],
         **subparser_opts,
     )
     help_doc = (
@@ -427,7 +456,7 @@ def main() -> int:
         'clean_non_request',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers + [dryrun_parser],
+        parents=[*min_parsers, dryrun_parser],
         **subparser_opts,
     )
     help_doc = (
@@ -441,8 +470,13 @@ def main() -> int:
         'update',
         description=help_doc,
         help=help_doc,
-        parents=min_parsers
-        + [fetch_parser, link_parser, noupgradeatupdate_parser, dryrun_parser],
+        parents=[
+            *min_parsers,
+            fetch_parser,
+            link_parser,
+            noupgradeatupdate_parser,
+            dryrun_parser,
+        ],
         **subparser_opts,
     )
     help_doc = 'or -e/--edit\nEdit input files.'
@@ -479,15 +513,24 @@ def main() -> int:
     )
     help_doc = 'or --commands\nShow commands.'
     subparsers.add_parser(
-        'commands', description=help_doc, help=help_doc, **subparser_opts
+        'commands',
+        description=help_doc,
+        help=help_doc,
+        **subparser_opts,
     )
     help_doc = 'or -v/--version\nShow version.'
     subparsers.add_parser(
-        'version', description=help_doc, help=help_doc, **subparser_opts
+        'version',
+        description=help_doc,
+        help=help_doc,
+        **subparser_opts,
     )
     help_doc = 'or -h/--help\nPrint Help (this message) and exit.'
     subparsers.add_parser(
-        'help', description=help_doc, help=help_doc, **subparser_opts
+        'help',
+        description=help_doc,
+        help=help_doc,
+        **subparser_opts,
     )
 
     info = f'{parser.format_usage()}\n\nExecute `{__prog__} help` to get help.\n\nRefer https://homebrew-file.readthedocs.io for more details.'
@@ -500,12 +543,12 @@ def main() -> int:
     else:
         (ns, args) = pre_parser.parse_known_args()
         if ns.command is not None:
-            args = [ns.command] + args
+            args = [ns.command, *args]
         else:
             for a in args[:]:
                 if a in subparsers.choices:
                     args.remove(a)
-                    args = [a] + args
+                    args = [a, *args]
                     break
         if args[0] in ['-h', '--help']:
             args[0] = 'help'
@@ -526,7 +569,7 @@ def main() -> int:
     if b.opt['command'] == 'help':
         log.info(parser.format_help())
         return 0
-    elif b.opt['command'] == 'brew':
+    if b.opt['command'] == 'brew':
         if args_tmp and args_tmp[0] in ['-h', '--help']:
             log.info(subparsers.choices[b.opt['command']].format_help())
             return 0
@@ -606,7 +649,7 @@ def main() -> int:
         log.info(
             f"commands: {' '.join(commands)}\n"
             f"commands_hyphen: {''.join(commands_hyphen)}\n"
-            f"options: {' '.join(options)}"
+            f"options: {' '.join(options)}",
         )
         return 0
     elif b.opt['command'] == 'version':
@@ -619,10 +662,10 @@ def main() -> int:
     except KeyboardInterrupt:
         return 1
     except CmdError as e:
-        b.log.error(str(e))
+        b.log.exception('')
         return e.return_code
-    except RuntimeError as e:
-        b.log.error(str(e))
+    except RuntimeError:
+        b.log.exception('')
         return 1
     return 0
 

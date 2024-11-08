@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import io
 import logging
 import os
@@ -6,37 +8,36 @@ from unittest.mock import patch
 
 import pytest
 
-from . import brew_file
+from .brew_file import BrewFile, BrewHelper, BrewInfo, __prog__, is_mac
 
 
 @pytest.fixture
-def bf():
-    obj = brew_file.BrewFile({})
-    return obj
+def bf() -> BrewFile:
+    return BrewFile({})
 
 
-def test_default_opt(bf):
+def test_default_opt(bf: BrewFile) -> None:
     pass
 
 
-def test_set_input(bf):
+def test_set_input(bf: BrewFile) -> None:
     bf.set_input('/path/to/file')
     assert bf.opt['input'] == Path('/path/to/file')
     assert bf.brewinfo.file == Path('/path/to/file')
 
 
-def test_banner(bf, caplog):
+def test_banner(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     bf.banner('test banner')
     assert caplog.record_tuples == [
         (
             'tests.brew_file',
             logging.INFO,
             '\n###########\ntest banner\n###########\n',
-        )
+        ),
     ]
 
 
-def test_dryrun_banner(bf, caplog):
+def test_dryrun_banner(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     bf.opt['dryrun'] = False
     with bf.DryrunBanner(bf):
         bf.log.info('test')
@@ -70,7 +71,7 @@ def test_dryrun_banner(bf, caplog):
     ]
 
 
-def test_parse_env_opts(bf):
+def test_parse_env_opts(bf: BrewFile) -> None:
     with patch.dict('os.environ', {'TEST_OPT': '--opt2=3 --opt3 opt4=4'}):
         opts = bf.parse_env_opts('TEST_OPT', {'--opt1': '1', '--opt2': '2'})
         assert opts == {
@@ -81,7 +82,7 @@ def test_parse_env_opts(bf):
         }
 
 
-def test_set_verbose(bf):
+def test_set_verbose(bf: BrewFile) -> None:
     bf.set_verbose()
     assert bf.opt['verbose'] == 'info'
     assert bf.log.getEffectiveLevel() == logging.INFO
@@ -94,7 +95,7 @@ def test_set_verbose(bf):
     assert bf.log.getEffectiveLevel() == logging.DEBUG
 
 
-def test_set_args(bf):
+def test_set_args(bf: BrewFile) -> None:
     bf.opt['appstore'] = 1
     bf.opt['no_appstore'] = 1
     bf.set_args(a='1', verbose='1')
@@ -116,7 +117,7 @@ def test_set_args(bf):
 
 
 @pytest.mark.parametrize(
-    'input_value, ret, out',
+    ('input_value', 'ret', 'out'),
     [
         ('y\n', True, 'Question? [y/n]: '),
         ('Y\n', True, 'Question? [y/n]: '),
@@ -135,22 +136,29 @@ def test_set_args(bf):
         ),
     ],
 )
-def test_ask_yn(bf, capsys, monkeypatch, input_value, ret, out):
+def test_ask_yn(
+    bf: BrewFile,
+    capsys: pytest.CaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    input_value: str,
+    ret: bool,
+    out: str,
+) -> None:
     monkeypatch.setattr('sys.stdin', io.StringIO(input_value))
     assert bf.ask_yn('Question?') == ret
     captured = capsys.readouterr()
     assert captured.out == out
 
 
-def test_ask_yn_y(bf, caplog):
+def test_ask_yn_y(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     bf.opt['yn'] = True
     assert bf.ask_yn('Question?')
     assert caplog.record_tuples == [
-        ('tests.brew_file', logging.INFO, 'Question? [y/n]: y')
+        ('tests.brew_file', logging.INFO, 'Question? [y/n]: y'),
     ]
 
 
-def test_read_all(bf, tap):
+def test_read_all(bf: BrewFile) -> None:
     parent = Path(__file__).parent / 'files'
     file = parent / 'BrewfileTest'
     bf.set_input(file)
@@ -247,24 +255,24 @@ def test_read_all(bf, tap):
     }
 
 
-def test_read(bf, tmp_path):
-    helper = brew_file.BrewHelper({})
+def test_read(bf: BrewFile, tmp_path: Path) -> None:
+    helper = BrewHelper({})
 
     bf.brewinfo_ext = []
     file = Path(f'{Path(__file__).parent}/files/BrewfileMain')
-    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
+    brewinfo = BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
     assert ret.file == file
 
     bf.brewinfo_ext = []
     file = Path(f'{Path(__file__).parent}/files/BrewfileMain')
-    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
+    brewinfo = BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, False)
     assert ret is None
 
     bf.brewinfo_ext = []
     file = Path(f'{Path(__file__).parent}/files/BrewfileTest')
-    brewinfo = brew_file.BrewInfo(helper=helper, file=file)
+    brewinfo = BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
     file = Path(f'{Path(__file__).parent}/files/BrewfileMain')
     assert ret.file == file
@@ -283,67 +291,69 @@ def test_read(bf, tmp_path):
     f1 = tmp_path / 'f1'
     f2 = tmp_path / 'f2'
     f3 = tmp_path / 'f3'
-    with open(f1, 'w') as f:
+    with Path(f1).open('w') as f:
         f.write(f'main {f2}')
-    with open(f2, 'w') as f:
+    with Path(f2).open('w') as f:
         f.write(f'main {f3}')
 
     bf.brewinfo_ext = []
-    brewinfo = brew_file.BrewInfo(helper=helper, file=f1)
+    brewinfo = BrewInfo(helper=helper, file=f1)
     ret = bf.read(brewinfo, True)
     assert ret.file == Path(f3)
 
 
-def test_list_to_main(bf):
+def test_list_to_main(bf: BrewFile) -> None:
     pass
 
 
-def test_input_to_list(bf):
+def test_input_to_list(bf: BrewFile) -> None:
     pass
 
 
-def test_write(bf):
+def test_write(bf: BrewFile) -> None:
     pass
 
 
-def test_get(bf):
+def test_get(bf: BrewFile) -> None:
     pass
 
 
-def test_remove_pack(bf):
+def test_remove_pack(bf: BrewFile) -> None:
     pass
 
 
-def test_repo_name(bf):
+def test_repo_name(bf: BrewFile) -> None:
     bf.opt['repo'] = 'git@github.com:abc/def.git'
     assert bf.repo_name() == 'def'
     bf.opt['repo'] = 'https://github.com/abc/def.git'
     assert bf.repo_name() == 'def'
 
 
-def test_user_name(bf):
+def test_user_name(bf: BrewFile) -> None:
     bf.opt['repo'] = 'git@github.com:abc/def.git'
     assert bf.user_name() == 'abc'
     bf.opt['repo'] = 'https://github.com/abc/def.git'
     assert bf.user_name() == 'abc'
 
 
-def test_input_dir(bf):
+def test_input_dir(bf: BrewFile) -> None:
     pass
 
 
-def test_input_file(bf):
+def test_input_file(bf: BrewFile) -> None:
     pass
 
 
-def test_repo_file(bf):
+def test_repo_file(bf: BrewFile) -> None:
     bf.set_input('/path/to/input')
     bf.user_name = lambda: 'user'
     bf.opt['repo'] = 'repo.git'
     assert bf.repo_file() == Path('/path/to/user_repo/input')
 
 
-def test_init_repo(bf, caplog, tmp_path):
+def test_init_repo(
+    bf: BrewFile, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
     bf.check_gitconfig = lambda: False
     file = tmp_path / 'Brewfile'
     bf.helper.proc('git init', cwd=tmp_path)
@@ -355,21 +365,21 @@ def test_init_repo(bf, caplog, tmp_path):
             'tests.brew_file',
             logging.INFO,
             'Initialize the repository with README.md/Brewfile.',
-        )
+        ),
     ]
     assert (tmp_path / 'README.md').exists()
     assert file.exists()
 
 
-def test_clone_repo(bf):
+def test_clone_repo(bf: BrewFile) -> None:
     pass
 
 
-def test_check_github_repo(bf):
+def test_check_github_repo(bf: BrewFile) -> None:
     pass
 
 
-def test_check_local_repo(bf, tmp_path):
+def test_check_local_repo(bf: BrewFile, tmp_path: Path) -> None:
     bf.opt['repo'] = f'file:///{tmp_path}/repo'
     bf.clone_repo = lambda: None
     bf.check_local_repo()
@@ -377,83 +387,83 @@ def test_check_local_repo(bf, tmp_path):
     assert (tmp_path / 'repo' / '.git').exists()
 
 
-def test_check_repo(bf):
+def test_check_repo(bf: BrewFile) -> None:
     pass
 
 
-def test_check_gitconfig(bf):
+def test_check_gitconfig(bf: BrewFile) -> None:
     pass
 
 
-def test_repomgr(bf):
+def test_repomgr(bf: BrewFile) -> None:
     pass
 
 
-def test_brew_cmd(bf):
+def test_brew_cmd(bf: BrewFile) -> None:
     pass
 
 
-def test_add_path(bf):
+def test_add_path(bf: BrewFile) -> None:
     pass
 
 
-def test_which_brew(bf):
+def test_which_brew(bf: BrewFile) -> None:
     pass
 
 
-def test_check_brew_cmd(bf):
+def test_check_brew_cmd(bf: BrewFile) -> None:
     pass
 
 
-def test_check_mas_cmd(bf):
+def test_check_mas_cmd(bf: BrewFile) -> None:
     pass
 
 
-def test_get_appstore_dict(bf):
+def test_get_appstore_dict(bf: BrewFile) -> None:
     pass
 
 
-def test_get_appstore_list(bf):
+def test_get_appstore_list(bf: BrewFile) -> None:
     pass
 
 
-def test_get_cask_list(bf):
+def test_get_cask_list(bf: BrewFile) -> None:
     pass
 
 
-def test_get_list(bf):
+def test_get_list(bf: BrewFile) -> None:
     pass
 
 
-def test_clean_list(bf):
+def test_clean_list(bf: BrewFile) -> None:
     pass
 
 
-def test_input_backup(bf):
+def test_input_backup(bf: BrewFile) -> None:
     pass
 
 
-def test_set_brewfile_repo(bf):
+def test_set_brewfile_repo(bf: BrewFile) -> None:
     pass
 
 
-def test_set_brewfile_local(bf):
+def test_set_brewfile_local(bf: BrewFile) -> None:
     pass
 
 
-def test_initialize(bf):
+def test_initialize(bf: BrewFile) -> None:
     pass
 
 
-def test_initialize_write(bf):
+def test_initialize_write(bf: BrewFile) -> None:
     pass
 
 
-def test_check_input_file(bf):
+def test_check_input_file(bf: BrewFile) -> None:
     pass
 
 
-def test_get_files(bf, tap, caplog):
+def test_get_files(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     parent = Path(__file__).parent / 'files'
     file = parent / 'BrewfileTest'
     bf.set_input(file)
@@ -486,8 +496,8 @@ def test_get_files(bf, tap, caplog):
             'BrewfileExt2',
             'BrewfileExt3',
             'BrewfileNotExist',
+            Path(os.environ['HOME']) / 'BrewfileHomeForTestingNotExists',
         ]
-        + [Path(os.environ['HOME']) / 'BrewfileHomeForTestingNotExists']
     ]
     caplog.clear()
     assert bf.get_files(is_print=True, all_files=True) == files
@@ -501,85 +511,87 @@ def test_get_files(bf, tap, caplog):
     ]
 
 
-def test_edit_brewfile(bf):
+def test_edit_brewfile(bf: BrewFile) -> None:
     pass
 
 
-def test_cat_brewfile(bf):
+def test_cat_brewfile(bf: BrewFile) -> None:
     pass
 
 
-def test_clean_non_request(bf, caplog):
+def test_clean_non_request(bf: BrewFile) -> None:
     bf.opt['dryrun'] = True
     bf.clean_non_request()
 
 
-def test_cleanup(bf):
+def test_cleanup(bf: BrewFile) -> None:
     pass
 
 
-def test_install(bf):
+def test_install(bf: BrewFile) -> None:
     pass
 
 
 @pytest.mark.parametrize(
-    'app, token',
+    ('app', 'token'),
     [
         ('/App/ABC.app', 'abc'),
         ('/App/--A B  C--D+E@f-9.app', 'a-b-c-dpluseatf9'),
     ],
 )
-def test_generate_cask_token(bf, app, token):
+def test_generate_cask_token(bf: BrewFile, app: str, token: str) -> None:
     assert bf.generate_cask_token(app) == token
 
 
-def test_find_app(bf):
+def test_find_app(bf: BrewFile) -> None:
     pass
 
 
-def test_find_brew_app(bf):
+def test_find_brew_app(bf: BrewFile) -> None:
     pass
 
 
-def test_make_brew_app_cmd(bf):
+def test_make_brew_app_cmd(bf: BrewFile) -> None:
     assert (
         bf.make_brew_app_cmd('abc', '/path/to/app')
         == 'brew abc # /path/to/app'
     )
 
 
-def test_make_cask_app_cmd(bf):
+def test_make_cask_app_cmd(bf: BrewFile) -> None:
     assert (
         bf.make_cask_app_cmd('abc', '/path/to/app')
         == 'cask abc # /path/to/app'
     )
 
 
-def test_make_appstore_app_cmd(bf):
+def test_make_appstore_app_cmd(bf: BrewFile) -> None:
     assert (
         bf.make_appstore_app_cmd('abc', '/path/to/app')
         == 'appstore abc # /path/to/app'
     )
 
 
-def test_check_cask(bf, caplog, tmp_path):
+def test_check_cask(
+    bf: BrewFile, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
     os.chdir(tmp_path)
-    if not brew_file.is_mac():
+    if not is_mac():
         with pytest.raises(RuntimeError) as excinfo:
             bf.check_cask()
-            assert str(excinfo.value) == 'Cask is not available on Linux!'
+        assert str(excinfo.value) == 'Cask is not available on Linux!'
         return
     bf.check_cask()
     assert '# Starting to check applications for Cask...' in caplog.messages[0]
     assert '# Summary' in ''.join(caplog.messages)
     assert Path('Caskfile').exists()
-    with open('Caskfile', 'r') as f:
+    with Path('Caskfile').open() as f:
         lines = f.readlines()
     assert lines[0] == '# Cask applications\n'
 
 
 @pytest.fixture
-def execute_fixture(monkeypatch) -> None:
+def execute_fixture(monkeypatch: pytest.MonkeyPatch) -> BrewFile:
     for func in [
         'check_brew_cmd',
         'check_cask',
@@ -598,63 +610,69 @@ def execute_fixture(monkeypatch) -> None:
         'install',
     ]:
 
-        def set_func(func):
+        def set_func(func: str) -> None:
             # make local variable, needed to keep in print view
             name = func
             monkeypatch.setattr(
-                brew_file.BrewFile,
+                BrewFile,
                 func,
                 lambda self, *args, **kw: print(name, args, kw),  # noqa: T201
             )
 
         set_func(func)
     monkeypatch.setattr(
-        brew_file.BrewFile, 'check_brew_cmd', lambda self: None
+        BrewFile,
+        'check_brew_cmd',
+        lambda self: None,
     )
-    monkeypatch.setattr(brew_file.BrewHelper, 'brew_val', lambda self, x: x)
+    monkeypatch.setattr(BrewHelper, 'brew_val', lambda self, x: x)
     monkeypatch.setattr(
-        brew_file.BrewHelper,
+        BrewHelper,
         'proc',
         lambda self, *args, **kw: print('proc', args, kw),  # noqa: T201
     )
-    bf = brew_file.BrewFile({})
-    return bf
+    return BrewFile({})
 
 
 @pytest.mark.parametrize(
-    'command, out',
+    ('command', 'out'),
     [
-        ('casklist', 'check_cask () {}\n'),  # noqa: P103
-        ('set_repo', 'set_brewfile_repo () {}\n'),  # noqa: P103
-        ('set_local', 'set_brewfile_local () {}\n'),  # noqa: P103
-        ('pull', "check_repo () {}\nrepomgr ('pull',) {}\n"),  # noqa: P103
-        ('push', "check_repo () {}\nrepomgr ('push',) {}\n"),  # noqa: P103
-        ('brew', 'check_repo () {}\nbrew_cmd () {}\n'),  # noqa: P103
-        ('init', 'check_repo () {}\ninitialize () {}\n'),  # noqa: P103
-        ('dump', 'check_repo () {}\ninitialize () {}\n'),  # noqa: P103
+        ('casklist', 'check_cask () {}\n'),
+        ('set_repo', 'set_brewfile_repo () {}\n'),
+        ('set_local', 'set_brewfile_local () {}\n'),
+        ('pull', "check_repo () {}\nrepomgr ('pull',) {}\n"),
+        ('push', "check_repo () {}\nrepomgr ('push',) {}\n"),
+        ('brew', 'check_repo () {}\nbrew_cmd () {}\n'),
+        ('init', 'check_repo () {}\ninitialize () {}\n'),
+        ('dump', 'check_repo () {}\ninitialize () {}\n'),
         (
             'edit',
-            'check_repo () {}\nedit_brewfile () {}\n',  # noqa: P103
+            'check_repo () {}\nedit_brewfile () {}\n',
         ),
         (
             'cat',
-            'check_repo () {}\ncat_brewfile () {}\n',  # noqa: P103
+            'check_repo () {}\ncat_brewfile () {}\n',
         ),
         (
             'get_files',
-            "check_repo () {}\nget_files () {'is_print': True, 'all_files': False}\n",  # noqa: P103
+            "check_repo () {}\nget_files () {'is_print': True, 'all_files': False}\n",
         ),
         (
             'clean_non_request',
-            'check_repo () {}\ncheck_input_file () {}\nclean_non_request () {}\n',  # noqa: P103
+            'check_repo () {}\ncheck_input_file () {}\nclean_non_request () {}\n',
         ),
         (
             'clean',
-            'check_repo () {}\ncheck_input_file () {}\ncleanup () {}\n',  # noqa: P103
+            'check_repo () {}\ncheck_input_file () {}\ncleanup () {}\n',
         ),
     ],
 )
-def test_execute(execute_fixture, capsys, command, out):
+def test_execute(
+    execute_fixture: BrewFile,
+    capsys: pytest.CaptureFixture,
+    command: str,
+    out: str,
+) -> None:
     bf = execute_fixture
     bf.opt['command'] = command
     bf.execute()
@@ -662,29 +680,31 @@ def test_execute(execute_fixture, capsys, command, out):
     assert captured.out == out
 
 
-def test_execute_update(execute_fixture, capsys):
+def test_execute_update(
+    execute_fixture: BrewFile, capsys: pytest.CaptureFixture
+) -> None:
     bf = execute_fixture
     bf.opt['command'] = 'update'
     bf.execute()
     captured = capsys.readouterr()
-    if brew_file.is_mac():
+    if is_mac():
         assert (
             captured.out
-            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False, 'debug_out': True}\n"  # noqa: P103
+            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\nproc ('brew upgrade --cask',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False, 'debug_out': True}\n"
         )
     else:
         assert (
             captured.out
-            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False, 'debug_out': True}\n"  # noqa: P103
+            == "check_repo () {}\ncheck_input_file () {}\nproc ('brew update',) {'dryrun': False}\nproc ('brew upgrade --formula ',) {'dryrun': False}\ninstall () {}\ncleanup () {'delete_cache': False}\ninitialize () {'check': False, 'debug_out': True}\n"
         )
 
 
-def test_execute_err(execute_fixture):
+def test_execute_err(execute_fixture: BrewFile) -> None:
     bf = execute_fixture
     bf.opt['command'] = 'wrong_command'
     with pytest.raises(RuntimeError) as excinfo:
         bf.execute()
     assert (
         str(excinfo.value)
-        == f'Wrong command: wrong_command\nExecute `{brew_file.__prog__} help` for more information.'
+        == f'Wrong command: wrong_command\nExecute `{__prog__} help` for more information.'
     )

@@ -165,7 +165,7 @@ class BrewInfo:
         self.appstore_list.sort(
             key=lambda x: (
                 x.split()[1].lower() if len(x.split()) > 1 else x.split()[0]
-            )
+            ),
         )
 
         self.whalebrew_list.sort()
@@ -212,7 +212,7 @@ class BrewInfo:
 
         if not self.file.exists():
             return
-        with open(self.file, 'r') as f:
+        with Path(self.file).open() as f:
             lines = f.readlines()
             is_ignore = False
             for line in lines:
@@ -267,10 +267,12 @@ class BrewInfo:
                     opt = ''
                 excmd = ' '.join(line.split()[1:]).strip()
 
-                if not self.helper.opt.get('form'):
-                    if cmd in ['brew', 'tap', 'tapall']:
-                        if '"' in line or "'" in line:
-                            self.helper.opt['form'] = 'bundle'
+                if not self.helper.opt.get('form') and (
+                    cmd in ['brew', 'tap', 'tapall']
+                    and '"' in line
+                    or "'" in line
+                ):
+                    self.helper.opt['form'] = 'bundle'
 
                 cmd = cmd.lower()
                 if cmd in ['brew', 'install']:
@@ -305,7 +307,7 @@ class BrewInfo:
                         re.sub('^ *appstore *', '', line)
                         .strip()
                         .strip("'")
-                        .strip('"')
+                        .strip('"'),
                     )
                 elif cmd == 'whalebrew':
                     if p.split()[0] == 'install':
@@ -350,7 +352,7 @@ class BrewInfo:
             opt = (
                 ', args: ['
                 + ', '.join(
-                    ["'" + re.sub('^--', '', x) + "'" for x in opt.split()]
+                    ["'" + re.sub('^--', '', x) + "'" for x in opt.split()],
                 )
                 + ']'
             )
@@ -481,7 +483,10 @@ fi
 
                 if not self.helper.opt['caskonly']:
                     output += first_tap_pack_write(
-                        isfirst, isfirst_pack, t, cmd_tap
+                        isfirst,
+                        isfirst_pack,
+                        t,
+                        cmd_tap,
                     )
                     isfirst = isfirst_pack = False
 
@@ -491,7 +496,7 @@ fi
                             in tap_packs['formulae']
                         ):
                             pack = self.packout(p) + self.convert_option(
-                                self.brew_list_opt[p]
+                                self.brew_list_opt[p],
                             )
                             output += cmd_install + pack + '\n'
                             self.brew_list.remove(p)
@@ -502,7 +507,10 @@ fi
                 for p in self.cask_list[:]:
                     if p in tap_casks:
                         output += first_tap_pack_write(
-                            isfirst, isfirst_pack, t, cmd_tap
+                            isfirst,
+                            isfirst_pack,
+                            t,
+                            cmd_tap,
                         )
                         isfirst = isfirst_pack = False
                         output += cmd_cask + self.packout(p) + '\n'
@@ -513,7 +521,7 @@ fi
             output += '\n# Other Homebrew packages\n'
             for p in self.brew_list:
                 pack = self.packout(p) + self.convert_option(
-                    self.brew_list_opt[p]
+                    self.brew_list_opt[p],
                 )
                 output += cmd_install + pack + '\n'
 
@@ -577,7 +585,7 @@ fi
         if output:
             output = output_prefix + output
             self.get_dir().mkdir(parents=True, exist_ok=True)
-            with open(self.file, 'w') as fout:
+            with Path(self.file).open('w') as fout:
                 fout.write(output)
             self.log.debug(output)
 

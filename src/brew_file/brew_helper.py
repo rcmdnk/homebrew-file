@@ -5,25 +5,26 @@ import logging
 import os
 import shlex
 import subprocess
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator, TypedDict
+from typing import Any, TypedDict
 
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+from typing_extensions import NotRequired
 
-    class ProcParams(TypedDict):
-        """Parameters for BrewHelper.proc()."""
 
-        cmd: NotRequired[str | list[str]]
-        print_cmd: NotRequired[bool]
-        print_out: NotRequired[bool]
-        exit_on_err: NotRequired[bool]
-        separate_err: NotRequired[bool]
-        print_err: NotRequired[bool]
-        env: NotRequired[dict[str, str] | None]
-        cwd: NotRequired[str | Path | None]
-        dryrun: NotRequired[bool]
+class ProcParams(TypedDict):
+    """Parameters for BrewHelper.proc()."""
+
+    cmd: NotRequired[str | list[str]]
+    print_cmd: NotRequired[bool]
+    print_out: NotRequired[bool]
+    exit_on_err: NotRequired[bool]
+    separate_err: NotRequired[bool]
+    print_err: NotRequired[bool]
+    env: NotRequired[dict[str, str] | None]
+    cwd: NotRequired[str | Path | None]
+    dryrun: NotRequired[bool]
 
 
 class CmdError(Exception):
@@ -56,12 +57,13 @@ class BrewHelper:
         self.leaves_list_on_request: list[str] | None = None
 
     def readstdout(
-        self, proc: subprocess.Popen[str]
+        self,
+        proc: subprocess.Popen[str],
     ) -> Generator[str, None, None]:
         if proc.stdout is None:
             return
-        for line in iter(proc.stdout.readline, ''):
-            line = line.rstrip()
+        for out_line in iter(proc.stdout.readline, ''):
+            line = out_line.rstrip()
             if line == '':
                 continue
             yield line
@@ -83,7 +85,7 @@ class BrewHelper:
             env = {}
         if not isinstance(cmd, list):
             cmd = shlex.split(cmd)
-        cmd_orig = ' '.join(['$'] + cmd)
+        cmd_orig = ' '.join(['$', *cmd])
         if cmd[0] == 'brew':
             cmd[0] = self.opt.get('brew_cmd', 'brew')
         if print_cmd or dryrun:
@@ -95,10 +97,7 @@ class BrewHelper:
         lines = []
         try:
             if separate_err:
-                if print_err:
-                    stderr = None
-                else:
-                    stderr = subprocess.DEVNULL
+                stderr = None if print_err else subprocess.PIPE
             else:
                 stderr = subprocess.STDOUT
             p = subprocess.Popen(
@@ -117,7 +116,7 @@ class BrewHelper:
         except OSError as e:
             if separate_err:
                 if print_err:
-                    self.log.error(str(e))
+                    self.log.error(str(e))  # noqa: TRY400
             else:
                 lines += str(e).splitlines()
                 if print_out:
@@ -127,7 +126,8 @@ class BrewHelper:
         if exit_on_err and ret != 0:
             output = '\n'.join(lines)
             raise CmdError(
-                f"Failed at command: {' '.join(cmd)}\n{output}", ret
+                f"Failed at command: {' '.join(cmd)}\n{output}",
+                ret,
             )
         return ret, lines
 
@@ -266,12 +266,14 @@ class BrewHelper:
                 tap = formula['tap']
                 for o in formula.get('oldnames', []):
                     self.formula_aliases[tap] = self.formula_aliases.get(
-                        tap, {}
+                        tap,
+                        {},
                     )
                     self.formula_aliases[tap][o] = formula['name']
                 for a in formula.get('aliases', []):
                     self.formula_aliases[tap] = self.formula_aliases.get(
-                        tap, {}
+                        tap,
+                        {},
                     )
                     self.formula_aliases[tap][a] = formula['name']
         return self.formula_aliases
@@ -319,7 +321,9 @@ class BrewHelper:
         return opt
 
     def get_tap_packs(
-        self, tap: str, alias: bool = False
+        self,
+        tap: str,
+        alias: bool = False,
     ) -> dict[str, list[str]]:
         if self.taps is None:
             _, lines = self.proc(
@@ -341,7 +345,7 @@ class BrewHelper:
         }
         if alias:
             packs['formulae'] += list(
-                self.get_formula_aliases().get(tap, {}).keys()
+                self.get_formula_aliases().get(tap, {}).keys(),
             )
             packs['casks'] += list(self.get_cask_aliases().get(tap, {}).keys())
         return packs

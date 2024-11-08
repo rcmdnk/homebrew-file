@@ -8,7 +8,8 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Type
+from types import TracebackType
+from typing import Any
 
 
 class LogFormatter(logging.Formatter):
@@ -34,7 +35,7 @@ class LogFormatter(logging.Formatter):
                     f'\033[{colors[level]};1m{self.formats[level]}\033[m'
                 )
 
-    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+    def format(self, record: logging.LogRecord) -> str:
         fmt = self.formats.get(record.levelno, self.default_format)
         formatter = logging.Formatter(fmt)
         return formatter.format(record)
@@ -49,10 +50,7 @@ def to_bool(val: bool | int | str) -> bool:
         return val
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
         return bool(int(val))
-    if isinstance(val, str):
-        if val.lower() == 'true':
-            return True
-    return False
+    return isinstance(val, str) and val.lower() == 'true'
 
 
 def to_num(val: bool | int | str) -> int:
@@ -60,9 +58,8 @@ def to_num(val: bool | int | str) -> int:
         return int(val)
     if isinstance(val, int) or (isinstance(val, str) and val.isdigit()):
         return int(val)
-    if isinstance(val, str):
-        if val.lower() == 'true':
-            return 1
+    if isinstance(val, str) and val.lower() == 'true':
+        return 1
     return 0
 
 
@@ -70,7 +67,10 @@ shell_envs: dict[str, str] = {
     'HOSTNAME': os.uname().nodename,
     'HOSTTYPE': os.uname().machine,
     'OSTYPE': subprocess.run(
-        ['bash', '-c', 'echo $OSTYPE'], capture_output=True, text=True
+        ['bash', '-c', 'echo $OSTYPE'],
+        capture_output=True,
+        text=True,
+        check=False,
     ).stdout.strip(),
     'PLATFORM': sys.platform,
 }
@@ -104,14 +104,14 @@ class OpenWrapper:
 
     def __enter__(self) -> Any:
         Path(self.name).parent.mkdir(parents=True, exist_ok=True)
-        self.file = open(self.name, self.mode)
+        self.file = Path(self.name).open(self.mode)
         return self.file
 
     def __exit__(
         self,
-        exception_type: Type[BaseException],
-        exception_value: BaseException,
-        traceback: Any,
+        exception_type: type[BaseException] | None,
+        exception_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> bool:
         if exception_type is not None:
             return False
@@ -125,5 +125,5 @@ class StrRe(str):
 
     var: str
 
-    def __eq__(self, pattern: Any) -> bool:
-        return True if re.search(pattern, self.var) is not None else False
+    def __eq__(self, pattern: object) -> bool:
+        return re.search(str(pattern), self.var) is not None
