@@ -7,16 +7,27 @@ repos:
       - id: ruff-format-diff
       - id: ruff-format
       - id: black-diff
+        stages: [manual]
       - id: black
+        stages: [manual]
       - id: blacken-docs
+        stages: [manual]
       - id: autoflake-diff
+        stages: [manual]
       - id: autoflake
+        stages: [manual]
       - id: autopep8-diff
+        stages: [manual]
       - id: autopep8
+        stages: [manual]
       - id: isort-diff
+        stages: [manual]
       - id: isort
+        stages: [manual]
       - id: flake8
+        stages: [manual]
       - id: bandit
+        stages: [manual]
       - id: mypy
       - id: numpydoc-validation
       - id: shellcheck
@@ -42,3 +53,19 @@ repos:
       - id: detect-aws-credentials
         args:
           - "--allow-missing-credentials"
+  - repo: local
+    hooks:
+      - id: combine
+        name: combine
+        language: system
+        entry: uv run ./combine.sh
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+      - id: pytest-version
+        name: pytest-version
+        language: system
+        entry: uv run pytest ./tests/test_version.py
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
