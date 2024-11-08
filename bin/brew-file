@@ -269,7 +269,8 @@ class BrewHelper:
             ret = e.errno
 
         if exit_on_err and ret != 0:
-            msg = f"Failed at command: {' '.join(cmd)}\n{'\n'.join(lines)}"
+            output = '\n'.join(lines)
+            msg = f"Failed at command: {' '.join(cmd)}\n{output}"
             raise CmdError(msg, ret)
         return ret, lines
 
