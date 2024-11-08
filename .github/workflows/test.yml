@@ -114,8 +114,6 @@ jobs:
           test-bot: false
       - name: Install wget
         run: brew install wget
-      - name: Install python
-        run: brew install python
       - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
