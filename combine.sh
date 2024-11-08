@@ -3,10 +3,8 @@
 src="./src/brew_file"
 dest="./bin/brew-file"
 
-black "$src"
-autoflake --in-place "$src/"*.py
-autopep8 --in-place "$src/"*.py
-isort "$src"
+ruff check --fix "$src"
+ruff format "$src"
 
 tmp_backup=$(mktemp)
 if [ -f "$dest" ];then
@@ -50,10 +48,11 @@ done
   echo "$contents"
 } > "$dest"
 
+chmod 755 "$dest"
+
 ruff check --fix "$dest"
 ruff format "$dest"
 
 if [ -f "$tmp_backup" ];then
   diff -u "$tmp_backup" "$dest"
 fi
-chmod 755 "$dest"
