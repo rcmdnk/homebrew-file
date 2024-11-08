@@ -15,38 +15,38 @@ def helper():
 
 def test_readstdout(helper):
     proc = subprocess.Popen(
-        ["printf", "abc\n def \n\nghi"],
+        ['printf', 'abc\n def \n\nghi'],
         stdout=subprocess.PIPE,
         stderr=None,
         text=True,
     )
-    results = ["abc", " def", "ghi"]
+    results = ['abc', ' def', 'ghi']
     for a, b in zip(helper.readstdout(proc), results):
         assert a == b
 
 
 @pytest.mark.parametrize(
-    "cmd, ret, lines, exit_on_err, separate_err, env",
+    'cmd, ret, lines, exit_on_err, separate_err, env',
     [
-        ("echo test text", 0, ["test text"], True, False, None),
-        (["echo", "test", "text"], 0, ["test text"], True, False, None),
+        ('echo test text', 0, ['test text'], True, False, None),
+        (['echo', 'test', 'text'], 0, ['test text'], True, False, None),
         (
-            "grep a no_such_file",
+            'grep a no_such_file',
             2,
-            ["grep: no_such_file: No such file or directory"],
+            ['grep: no_such_file: No such file or directory'],
             False,
             False,
             None,
         ),
-        ("grep a no_such_file", 2, [], False, True, None),
-        ("_wrong_command_ test", 2, None, False, False, None),
+        ('grep a no_such_file', 2, [], False, True, None),
+        ('_wrong_command_ test', 2, None, False, False, None),
         (
-            [f"{Path(__file__).parent}/scripts/proc_env_test.sh"],
+            [f'{Path(__file__).parent}/scripts/proc_env_test.sh'],
             0,
-            ["abc"],
+            ['abc'],
             False,
             False,
-            {"TEST_VAL": "abc"},
+            {'TEST_VAL': 'abc'},
         ),
     ],
 )
@@ -62,19 +62,19 @@ def test_proc(helper, cmd, ret, lines, exit_on_err, separate_err, env):
 @pytest.fixture
 def err_cmd():
     cmd = {
-        "ech test": {
-            "ret": 2,
-            "out": "[Errno 2] No such file or directory: 'ech'",
-            "oserr": True,
+        'ech test': {
+            'ret': 2,
+            'out': "[Errno 2] No such file or directory: 'ech'",
+            'oserr': True,
         },
-        "ls /path/to/not/exist": {
-            "ret": 1 if brew_file.is_mac() else 2,
-            "out": (
-                "ls: /path/to/not/exist: No such file or directory"
+        'ls /path/to/not/exist': {
+            'ret': 1 if brew_file.is_mac() else 2,
+            'out': (
+                'ls: /path/to/not/exist: No such file or directory'
                 if brew_file.is_mac()
                 else "ls: cannot access '/path/to/not/exist': No such file or directory"
             ),
-            "oserr": False,
+            'oserr': False,
         },
     }
     return cmd
@@ -86,39 +86,39 @@ def test_proc_err(helper, caplog, err_cmd, capfd):
         ret_proc, lines_proc = helper.proc(
             cmd, separate_err=False, exit_on_err=False
         )
-        assert ret_proc == err_cmd[cmd]["ret"]
-        assert lines_proc == [err_cmd[cmd]["out"]]
+        assert ret_proc == err_cmd[cmd]['ret']
+        assert lines_proc == [err_cmd[cmd]['out']]
         assert caplog.record_tuples == [
-            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
+            ('tests.brew_file', logging.INFO, f'$ {cmd}'),
             (
-                "tests.brew_file",
+                'tests.brew_file',
                 logging.INFO,
                 f"{err_cmd[cmd]['out']}",
             ),
         ]
         out, err = capfd.readouterr()
-        assert out == ""
-        assert err == ""
+        assert out == ''
+        assert err == ''
 
     for cmd in err_cmd:
         caplog.clear()
         ret_proc, lines_proc = helper.proc(
             cmd, separate_err=True, exit_on_err=False
         )
-        assert ret_proc == err_cmd[cmd]["ret"]
+        assert ret_proc == err_cmd[cmd]['ret']
         assert lines_proc == []
-        if err_cmd[cmd]["oserr"]:
+        if err_cmd[cmd]['oserr']:
             record = [
-                ("tests.brew_file", logging.INFO, f"$ {cmd}"),
-                ("tests.brew_file", logging.ERROR, err_cmd[cmd]["out"]),
+                ('tests.brew_file', logging.INFO, f'$ {cmd}'),
+                ('tests.brew_file', logging.ERROR, err_cmd[cmd]['out']),
             ]
-            syserr = ""
+            syserr = ''
         else:
-            record = [("tests.brew_file", logging.INFO, f"$ {cmd}")]
-            syserr = err_cmd[cmd]["out"] + "\n"
+            record = [('tests.brew_file', logging.INFO, f'$ {cmd}')]
+            syserr = err_cmd[cmd]['out'] + '\n'
         assert caplog.record_tuples == record
         out, err = capfd.readouterr()
-        assert out == ""
+        assert out == ''
         assert err == syserr
 
 
@@ -133,17 +133,17 @@ def test_proc_err_exit_on_err(helper, caplog, err_cmd, capfd):
                 exit_on_err=True,
             )
         assert e.type == brew_file.CmdError
-        assert e.value.return_code == err_cmd[cmd]["ret"]
+        assert e.value.return_code == err_cmd[cmd]['ret']
         assert (
             str(e.value) == f"Failed at command: {cmd}\n{err_cmd[cmd]['out']}"
         )
         assert caplog.record_tuples == [
-            ("tests.brew_file", logging.INFO, f"$ {cmd}"),
-            ("tests.brew_file", logging.INFO, err_cmd[cmd]["out"]),
+            ('tests.brew_file', logging.INFO, f'$ {cmd}'),
+            ('tests.brew_file', logging.INFO, err_cmd[cmd]['out']),
         ]
         out, err = capfd.readouterr()
-        assert out == ""
-        assert err == ""
+        assert out == ''
+        assert err == ''
 
     for cmd in err_cmd:
         caplog.clear()
@@ -155,33 +155,33 @@ def test_proc_err_exit_on_err(helper, caplog, err_cmd, capfd):
                 exit_on_err=True,
             )
 
-        if err_cmd[cmd]["oserr"]:
+        if err_cmd[cmd]['oserr']:
             record = [
-                ("tests.brew_file", logging.INFO, f"$ {cmd}"),
-                ("tests.brew_file", logging.ERROR, err_cmd[cmd]["out"]),
+                ('tests.brew_file', logging.INFO, f'$ {cmd}'),
+                ('tests.brew_file', logging.ERROR, err_cmd[cmd]['out']),
             ]
-            syserr = ""
+            syserr = ''
         else:
-            record = [("tests.brew_file", logging.INFO, f"$ {cmd}")]
-            syserr = err_cmd[cmd]["out"] + "\n"
+            record = [('tests.brew_file', logging.INFO, f'$ {cmd}')]
+            syserr = err_cmd[cmd]['out'] + '\n'
         assert e.type == brew_file.CmdError
-        assert e.value.return_code == err_cmd[cmd]["ret"]
-        assert str(e.value) == f"Failed at command: {cmd}\n"
+        assert e.value.return_code == err_cmd[cmd]['ret']
+        assert str(e.value) == f'Failed at command: {cmd}\n'
         assert caplog.record_tuples == record
         out, err = capfd.readouterr()
-        assert out == ""
+        assert out == ''
         assert err == syserr
 
 
 def test_proc_dryrun(helper):
-    ret_proc, lines_proc = helper.proc("echo test", dryrun=True)
+    ret_proc, lines_proc = helper.proc('echo test', dryrun=True)
     assert ret_proc == 0
-    assert lines_proc == ["echo test"]
+    assert lines_proc == ['echo test']
 
 
 def test_brew_val(helper):
-    prefix = Path(helper.proc("which brew")[1][0]).parents[1]
-    assert helper.brew_val("prefix") == str(prefix)
+    prefix = Path(helper.proc('which brew')[1][0]).parents[1]
+    assert helper.brew_val('prefix') == str(prefix)
 
 
 def test_get_formula_list(helper, python):
@@ -191,59 +191,59 @@ def test_get_formula_list(helper, python):
 
 def test_get_cask_list(helper):
     if not brew_file.is_mac():
-        pytest.skip("only for mac")
+        pytest.skip('only for mac')
     assert isinstance(helper.get_cask_list(), list)
 
 
 def test_get_info(helper, python):
-    info = helper.get_info()["formulae"][python]
-    assert info["installed"][0]["used_options"] == []
+    info = helper.get_info()['formulae'][python]
+    assert info['installed'][0]['used_options'] == []
 
 
 def test_get_installed(helper, python):
     installed = helper.get_installed(python)
     # brew version can contained additional number with '_'
-    assert installed["version"].split("_")[0].startswith(python.split("@")[1])
+    assert installed['version'].split('_')[0].startswith(python.split('@')[1])
 
 
 def test_get_option(helper, python):
     opt = helper.get_option(python)
-    assert opt == ""
+    assert opt == ''
 
 
 def test_get_formula_info(helper):
-    info = list(helper.get_info()["formulae"].values())[0]
-    assert "name" in info
-    assert "tap" in info
-    assert "aliases" in info
-    assert "linked_keg" in info
-    assert "installed" in info
+    info = list(helper.get_info()['formulae'].values())[0]
+    assert 'name' in info
+    assert 'tap' in info
+    assert 'aliases' in info
+    assert 'linked_keg' in info
+    assert 'installed' in info
 
 
 def test_get_formula_aliases(helper, python):
     aliases = helper.get_formula_aliases()
-    assert aliases["homebrew/core"]["python"].startswith("python@")
+    assert aliases['homebrew/core']['python'].startswith('python@')
 
 
 def test_get_tap_packs(helper, tap):
     packs = helper.get_tap_packs(tap[0])
-    assert "sentaku" in packs["formulae"]
+    assert 'sentaku' in packs['formulae']
 
 
 def test_get_cask_info(helper):
     if not brew_file.is_mac():
-        pytest.skip("only for mac")
-    info = list(helper.get_info()["casks"].values())[0]
-    assert "token" in info
-    assert "tap" in info
-    assert "old_tokens" in info
+        pytest.skip('only for mac')
+    info = list(helper.get_info()['casks'].values())[0]
+    assert 'token' in info
+    assert 'tap' in info
+    assert 'old_tokens' in info
 
 
 def test_get_tap_casks(helper, tap):
     if not brew_file.is_mac():
-        pytest.skip("only for mac")
-    casks = helper.get_tap_packs(tap[1])["casks"]
-    assert "vem" in casks
+        pytest.skip('only for mac')
+    casks = helper.get_tap_packs(tap[1])['casks']
+    assert 'vem' in casks
 
 
 def test_get_leaves(helper):

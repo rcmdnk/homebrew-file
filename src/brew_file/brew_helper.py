@@ -60,9 +60,9 @@ class BrewHelper:
     ) -> Generator[str, None, None]:
         if proc.stdout is None:
             return
-        for line in iter(proc.stdout.readline, ""):
+        for line in iter(proc.stdout.readline, ''):
             line = line.rstrip()
-            if line == "":
+            if line == '':
                 continue
             yield line
 
@@ -83,13 +83,13 @@ class BrewHelper:
             env = {}
         if not isinstance(cmd, list):
             cmd = shlex.split(cmd)
-        cmd_orig = " ".join(["$"] + cmd)
-        if cmd[0] == "brew":
-            cmd[0] = self.opt.get("brew_cmd", "brew")
+        cmd_orig = ' '.join(['$'] + cmd)
+        if cmd[0] == 'brew':
+            cmd[0] = self.opt.get('brew_cmd', 'brew')
         if print_cmd or dryrun:
             self.log.info(cmd_orig)
         if dryrun:
-            return 0, [" ".join(cmd)]
+            return 0, [' '.join(cmd)]
         all_env = os.environ.copy()
         all_env.update(env)
         lines = []
@@ -125,7 +125,7 @@ class BrewHelper:
             ret = e.errno
 
         if exit_on_err and ret != 0:
-            output = "\n".join(lines)
+            output = '\n'.join(lines)
             raise CmdError(
                 f"Failed at command: {' '.join(cmd)}\n{output}", ret
             )
@@ -133,14 +133,14 @@ class BrewHelper:
 
     def brew_val(self, name: str) -> Any:
         if name not in self.opt:
-            _, lines = self.proc("brew --" + name, False, False)
+            _, lines = self.proc('brew --' + name, False, False)
             self.opt[name] = lines[0]
         return self.opt[name]
 
     def get_formulae(self) -> list[str]:
         if self.formulae is None:
             _, lines = self.proc(
-                cmd="brew formulae",
+                cmd='brew formulae',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
@@ -148,14 +148,14 @@ class BrewHelper:
             )
             # test formulae in a deep direcotyr was found for hashicorp/tap
             self.formulae = [
-                x for x in lines if len(x.split("/")[-1]) in (1, 3)
+                x for x in lines if len(x.split('/')[-1]) in (1, 3)
             ]
         return self.formulae
 
     def get_casks(self) -> list[str]:
         if self.casks is None:
             _, lines = self.proc(
-                cmd="brew casks",
+                cmd='brew casks',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
@@ -173,7 +173,7 @@ class BrewHelper:
         """Get info of all available brew package."""
         if self.all_info is None:
             ret, lines = self.proc(
-                cmd="brew info --json=v2 --eval-all",
+                cmd='brew info --json=v2 --eval-all',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=False,
@@ -190,11 +190,11 @@ class BrewHelper:
                 exit_on_err=True,
                 separate_err=True,
             )
-            lines = lines[lines.index("{") :]
-            data = json.loads("".join(lines))
+            lines = lines[lines.index('{') :]
+            data = json.loads(''.join(lines))
             self.all_info = {
-                "formulae": {},
-                "casks": {x["token"]: x for x in data["casks"]},
+                'formulae': {},
+                'casks': {x['token']: x for x in data['casks']},
             }
             while ret != 0:
                 ret, lines = self.proc(
@@ -210,25 +210,25 @@ class BrewHelper:
                 for line in lines:
                     # Remove package from list if it has no URL
                     # https://github.com/hashicorp/homebrew-tap/issues/258
-                    if "formula requires at least a URL" in line:
+                    if 'formula requires at least a URL' in line:
                         formula = line.split()[1]
                         if formula in formulae:
                             formulae.remove(formula)
                             formulae_updated = 1
-                        if formula.split("/")[-1] in formulae:
-                            formulae.remove(formula.split("/")[-1])
+                        if formula.split('/')[-1] in formulae:
+                            formulae.remove(formula.split('/')[-1])
                             formulae_updated = 1
                         continue
                 if formulae_updated:
                     continue
-                msg = "Failed to get info of all packages.\n\n"
-                msg += "\n".join(lines)
+                msg = 'Failed to get info of all packages.\n\n'
+                msg += '\n'.join(lines)
                 raise RuntimeError(msg)
 
-            lines = lines[lines.index("{") :]
-            data = json.loads("".join(lines))
-            self.all_info["formulae"] = {
-                x["name"]: x for x in data["formulae"]
+            lines = lines[lines.index('{') :]
+            data = json.loads(''.join(lines))
+            self.all_info['formulae'] = {
+                x['name']: x for x in data['formulae']
             }
         return self.all_info
 
@@ -236,86 +236,86 @@ class BrewHelper:
         """Get info of installed brew package."""
         if self.info is None:
             _, lines = self.proc(
-                cmd="brew info --json=v2 --installed",
+                cmd='brew info --json=v2 --installed',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
                 separate_err=True,
             )
-            lines = lines[lines.index("{") :]
-            data = json.loads("".join(lines))
+            lines = lines[lines.index('{') :]
+            data = json.loads(''.join(lines))
             self.info = {
-                "formulae": {x["name"]: x for x in data["formulae"]},
-                "casks": {x["token"]: x for x in data["casks"]},
+                'formulae': {x['name']: x for x in data['formulae']},
+                'casks': {x['token']: x for x in data['casks']},
             }
         return self.info
 
     def get_formula_list(self) -> list[str]:
         info = self.get_info()
-        return list(info["formulae"].keys())
+        return list(info['formulae'].keys())
 
     def get_cask_list(self) -> list[str]:
         info = self.get_info()
-        return list(info["casks"].keys())
+        return list(info['casks'].keys())
 
     def get_formula_aliases(self) -> dict[str, dict[str, str]]:
         if self.formula_aliases is None:
             self.formula_aliases = {}
             info = self.get_info()
-            for formula in info["formulae"].values():
-                tap = formula["tap"]
-                for o in formula.get("oldnames", []):
+            for formula in info['formulae'].values():
+                tap = formula['tap']
+                for o in formula.get('oldnames', []):
                     self.formula_aliases[tap] = self.formula_aliases.get(
                         tap, {}
                     )
-                    self.formula_aliases[tap][o] = formula["name"]
-                for a in formula.get("aliases", []):
+                    self.formula_aliases[tap][o] = formula['name']
+                for a in formula.get('aliases', []):
                     self.formula_aliases[tap] = self.formula_aliases.get(
                         tap, {}
                     )
-                    self.formula_aliases[tap][a] = formula["name"]
+                    self.formula_aliases[tap][a] = formula['name']
         return self.formula_aliases
 
     def get_cask_aliases(self) -> dict[str, dict[str, str]]:
         if self.cask_aliases is None:
             self.cask_aliases = {}
             info = self.get_info()
-            for cask in info["casks"].values():
-                tap = cask["tap"]
-                for o in cask.get("old_tokens", []):
+            for cask in info['casks'].values():
+                tap = cask['tap']
+                for o in cask.get('old_tokens', []):
                     self.cask_aliases[tap] = self.cask_aliases.get(tap, {})
-                    self.cask_aliases[tap][o] = cask["name"]
+                    self.cask_aliases[tap][o] = cask['name']
         return self.cask_aliases
 
     def get_installed(self, package: str) -> dict[str, Any]:
         """Get installed version of brew package."""
         installed = {}
-        package_info = self.get_info()["formulae"][package]
+        package_info = self.get_info()['formulae'][package]
 
-        if (version := package_info["linked_keg"]) is None:
-            version = package_info["installed"][-1]["version"]
+        if (version := package_info['linked_keg']) is None:
+            version = package_info['installed'][-1]['version']
 
-        if version != "":
-            for i in package_info["installed"]:
-                if i["version"].replace(".reinstall", "") == version:
+        if version != '':
+            for i in package_info['installed']:
+                if i['version'].replace('.reinstall', '') == version:
                     installed = i
                     break
         return installed
 
     def get_option(self, package: str) -> str:
         """Get install options from brew info."""
-        opt = ""
-        if used_options := self.get_installed(package).get("used_options", []):
-            opt = " " + " ".join(used_options)
-        if version := self.get_installed(package).get("version", None):
-            info = self.get_info()["formulae"][package]
+        opt = ''
+        if used_options := self.get_installed(package).get('used_options', []):
+            opt = ' ' + ' '.join(used_options)
+        if version := self.get_installed(package).get('version', None):
+            info = self.get_info()['formulae'][package]
 
-            for k, v in info.get("versions", {}).items():
-                if version == v and k != "stable":
-                    if k == "head":
-                        opt += " --HEAD"
+            for k, v in info.get('versions', {}).items():
+                if version == v and k != 'stable':
+                    if k == 'head':
+                        opt += ' --HEAD'
                     else:
-                        opt += " --" + k
+                        opt += ' --' + k
         return opt
 
     def get_tap_packs(
@@ -323,27 +323,27 @@ class BrewHelper:
     ) -> dict[str, list[str]]:
         if self.taps is None:
             _, lines = self.proc(
-                cmd="brew tap-info --json --installed",
+                cmd='brew tap-info --json --installed',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
                 separate_err=True,
             )
-            lines = lines[lines.index("[") :]
-            data = json.loads("".join(lines))
-            self.taps = {x["name"]: x for x in data}
+            lines = lines[lines.index('[') :]
+            data = json.loads(''.join(lines))
+            self.taps = {x['name']: x for x in data}
 
         packs = {
-            "formulae": [
-                x.split("/")[-1] for x in self.taps[tap]["formula_names"]
+            'formulae': [
+                x.split('/')[-1] for x in self.taps[tap]['formula_names']
             ],
-            "casks": [x.split("/")[-1] for x in self.taps[tap]["cask_tokens"]],
+            'casks': [x.split('/')[-1] for x in self.taps[tap]['cask_tokens']],
         }
         if alias:
-            packs["formulae"] += list(
+            packs['formulae'] += list(
                 self.get_formula_aliases().get(tap, {}).keys()
             )
-            packs["casks"] += list(self.get_cask_aliases().get(tap, {}).keys())
+            packs['casks'] += list(self.get_cask_aliases().get(tap, {}).keys())
         return packs
 
     def get_leaves(self, on_request: bool = False) -> list[str]:
@@ -355,9 +355,9 @@ class BrewHelper:
         if leaves_list is not None:
             return leaves_list
 
-        cmd = "brew leaves"
+        cmd = 'brew leaves'
         if on_request:
-            cmd += " --installed-on-request"
+            cmd += ' --installed-on-request'
         _, lines = self.proc(
             cmd,
             print_cmd=False,
@@ -365,7 +365,7 @@ class BrewHelper:
             separate_err=True,
             print_err=False,
         )
-        leaves_list = [x.split("/")[-1] for x in lines]
+        leaves_list = [x.split('/')[-1] for x in lines]
         if on_request:
             self.leaves_list_on_request = leaves_list
         else:
