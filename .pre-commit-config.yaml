@@ -7,27 +7,27 @@ repos:
       - id: ruff-format-diff
       - id: ruff-format
       - id: black-diff
-        stages: [manual]
+        stages: ["manual"]
       - id: black
-        stages: [manual]
+        stages: ["manual"]
       - id: blacken-docs
-        stages: [manual]
+        stages: ["manual"]
       - id: autoflake-diff
-        stages: [manual]
+        stages: ["manual"]
       - id: autoflake
-        stages: [manual]
+        stages: ["manual"]
       - id: autopep8-diff
-        stages: [manual]
+        stages: ["manual"]
       - id: autopep8
-        stages: [manual]
+        stages: ["manual"]
       - id: isort-diff
-        stages: [manual]
+        stages: ["manual"]
       - id: isort
-        stages: [manual]
+        stages: ["manual"]
       - id: flake8
-        stages: [manual]
+        stages: ["manual"]
       - id: bandit
-        stages: [manual]
+        stages: ["manual"]
       - id: mypy
       - id: numpydoc-validation
       - id: shellcheck
@@ -61,11 +61,12 @@ repos:
         entry: uv run ./combine.sh
         pass_filenames: false
         always_run: true
-        stages: [pre-push]
+        stages: ["pre-push"]
       - id: pytest-version
         name: pytest-version
         language: system
         entry: uv run pytest ./tests/test_version.py
         pass_filenames: false
         always_run: true
-        stages: [pre-push]
+        stages:
+            - "push"
