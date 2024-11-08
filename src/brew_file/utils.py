@@ -6,10 +6,10 @@ import platform
 import re
 import subprocess
 import sys
+from _io import TextIOWrapper
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Any
 
 
 class LogFormatter(logging.Formatter):
@@ -102,7 +102,7 @@ class OpenWrapper:
     name: str
     mode: str = 'w'
 
-    def __enter__(self) -> Any:
+    def __enter__(self) -> TextIOWrapper:
         Path(self.name).parent.mkdir(parents=True, exist_ok=True)
         self.file = Path(self.name).open(self.mode)
         return self.file

@@ -97,7 +97,7 @@ def test_proc_err(
     helper: BrewHelper,
     caplog: pytest.LogCaptureFixture,
     err_cmd: dict[str, Any],
-    capfd: Any,
+    capfd: pytest.CaptureFixture,
 ) -> None:
     for cmd in err_cmd:
         caplog.clear()

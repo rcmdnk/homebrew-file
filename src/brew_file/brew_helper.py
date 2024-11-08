@@ -124,14 +124,11 @@ class BrewHelper:
             ret = e.errno
 
         if exit_on_err and ret != 0:
-            output = '\n'.join(lines)
-            raise CmdError(
-                f"Failed at command: {' '.join(cmd)}\n{output}",
-                ret,
-            )
+            msg = f"Failed at command: {' '.join(cmd)}\n{'\n'.join(lines)}"
+            raise CmdError(msg, ret)
         return ret, lines
 
-    def brew_val(self, name: str) -> Any:
+    def brew_val(self, name: str) -> str:
         if name not in self.opt:
             _, lines = self.proc('brew --' + name, False, False)
             self.opt[name] = lines[0]

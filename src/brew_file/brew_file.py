@@ -174,7 +174,7 @@ class BrewFile:
         opt['no_appstore'] = False
 
         opt['whalebrew'] = to_num(
-            os.getenv('HOMEBREW_BREWFILE_WHALEBREW', '0')
+            os.getenv('HOMEBREW_BREWFILE_WHALEBREW', '0'),
         )
         opt['vscode'] = to_num(os.getenv('HOMEBREW_BREWFILE_VSCODE', '0'))
 
@@ -262,7 +262,7 @@ class BrewFile:
         self.set_input(self.opt['input'])
 
     def ask_yn(self, question: str) -> bool:
-        """Helper for yes/no."""
+        """Ask yes/no question."""
         if self.opt['yn']:
             self.log.info(f'{question} [y/n]: y')
             return True
@@ -284,7 +284,8 @@ class BrewFile:
         self.brewinfo_ext = [self.brewinfo]
         main = self.read(self.brewinfo, is_main=True)
         if not main:
-            raise RuntimeError('Cannot find main Brewfile.')
+            msg = 'Cannot find main Brewfile.'
+            raise RuntimeError(msg)
         self.brewinfo_main = main
         self.brewinfo_ext.remove(self.brewinfo_main)
         for cmd in ['mas', 'reattach', 'whalebrew', 'vscode']:
@@ -418,7 +419,8 @@ class BrewFile:
                 )
                 user = lines[0] if lines else ''
             if not user:
-                raise RuntimeError('Can not find git (github) user name')
+                msg = 'Can not find git (github) user name'
+                raise RuntimeError(msg)
         return user
 
     def input_dir(self) -> Path:
@@ -428,7 +430,7 @@ class BrewFile:
         return self.opt['input'].name
 
     def repo_file(self) -> Path:
-        """Helper to build Brewfile path for the repository."""
+        """Return the Brewfile path for the repository."""
         return Path(
             self.input_dir(),
             self.user_name() + '_' + self.repo_name(),
@@ -482,26 +484,28 @@ class BrewFile:
         )
         if ret != 0:
             if exit_on_err:
-                raise RuntimeError(
+                msg = (
                     f"Can not clone {self.opt['repo']}.\n"
-                    "please check the repository, or reset with\n"
-                    f"    $ {__prog__} set_repo",
+                    f"please check the repository, or reset with\n"
+                    f"    $ {__prog__} set_repo"
                 )
+                raise RuntimeError(msg)
             return False
         self.init_repo()
         return True
 
     def check_github_repo(self) -> None:
-        """Helper to check and create GitHub repository."""
+        """Check GitHub repository."""
         # Check if the repository already exists or not.
         if self.clone_repo(exit_on_err=False):
             return
 
         # Create new repository #
-        raise RuntimeError(
+        msg = (
             f"GitHub repository: {self.user_name()}/{self.repo_name()} doesn't exist.\n"
-            'Please create the repository first, then try again',
+            'Please create the repository first, then try again'
         )
+        raise RuntimeError(msg)
 
     def check_local_repo(self) -> None:
         dirname = self.opt['repo'].replace('file:///', '')
@@ -596,13 +600,14 @@ class BrewFile:
         return True
 
     def repomgr(self, cmd: str = 'pull') -> None:
-        """Helper of repository management."""
+        """Manage repository."""
         # Check the repository
         if self.opt['repo'] == '':
-            raise RuntimeError(
-                'Please set a repository, or reset with:\n'
-                f'    $ {__prog__} set_repo\n',
+            msg = (
+                f'Please set a repository, or reset with:\n'
+                f'$ {__prog__} set_repo\n'
             )
+            raise RuntimeError(msg)
 
         # Clone if it doesn't exist
         if not self.brewinfo.check_dir():
@@ -619,7 +624,8 @@ class BrewFile:
             cwd=dirname,
         )
         if ret != 0:
-            raise RuntimeError('\n'.join(lines))
+            msg = '\n'.join(lines)
+            raise RuntimeError(msg)
         if lines and self.check_gitconfig():
             _ = self.helper.proc(
                 'git add -A',
@@ -666,14 +672,14 @@ class BrewFile:
             if subcmd == 'uninstall':
                 self.opt['args'].append('-y')
             if self.check_whalebrew_cmd(True) != 1:
-                raise RuntimeError("\n'whalebrew' command is not available.\n")
+                msg = "\n'whalebrew' command is not available.\n"
+                raise RuntimeError(msg)
         if cmd == 'code':
             exe = ['code']
             self.opt['args'].pop(0)
             if self.check_vscode_cmd(True) != 1:
-                raise RuntimeError(
-                    "\n'code' command (for VSCode) is not available.\n",
-                )
+                msg = "\n'code' command (for VSCode) is not available.\n"
+                raise RuntimeError(msg)
 
         ret, lines = self.helper.proc(
             exe + self.opt['args'],
@@ -865,7 +871,8 @@ class BrewFile:
             exit_on_err=False,
         )
         if ret != 0:
-            raise RuntimeError(f'Failed to prepare {cmd} command.')
+            msg = f'Failed to prepare {cmd} command.'
+            raise RuntimeError(msg)
 
         self.opt[flag] = 1
         return self.opt[flag]
@@ -876,7 +883,8 @@ class BrewFile:
             return self.opt['is_mas_cmd']
 
         if not is_mac():
-            raise RuntimeError('mas is not available on Linux!')
+            msg = 'mas is not available on Linux!'
+            raise RuntimeError(msg)
 
         _, lines = self.helper.proc(
             'sw_vers -productVersion',
@@ -905,7 +913,8 @@ class BrewFile:
         # # https://github.com/mas-cli/mas#%EF%B8%8F-known-issues
         # if self.helper.proc(self.opt["mas_cmd"] + " account", print_cmd=False,
         #             print_out=False, exit_on_err=False)[0] != 0:
-        #    raise RuntimeError("Please sign in to the App Store.")
+        #    msg = "Please sign in to the App Store."
+        #    raise RuntimeError(msg)
 
         is_tmux = os.getenv('TMUX', '')
         if is_tmux != '':
@@ -935,7 +944,7 @@ class BrewFile:
                 )
                 if ret != 0:
                     self.log.error(
-                        f'\nFailed to install {self.opt["reattach_formula"]}\n'
+                        f'\nFailed to install {self.opt["reattach_formula"]}\n',
                     )
                     self.opt['is_mas_cmd'] = -1
                     return self.opt['is_mas_cmd']
@@ -1376,11 +1385,11 @@ class BrewFile:
             if ans:
                 _ = self.initialize(check=False)
 
-            raise RuntimeError(
-                'Ok, please prepare brewfile\n'
-                'or you can initialize {self.brewinfo.file} with:'
-                f'    $ {__prog__} init',
+            msg = (
+                f'Ok, please prepare brewfile\n'
+                f'or you can initialize {self.brewinfo.file} with:    $ {__prog__} init'
             )
+            raise RuntimeError(msg)
 
     def get_files(
         self,
@@ -1396,9 +1405,8 @@ class BrewFile:
             if all_files or x.file.exists()
         ]
         if error_no_file and not files:
-            raise RuntimeError(
-                'No Brewfile found. Please run `brew file init` first.',
-            )
+            msg = 'No Brewfile found. Please run `brew file init` first.'
+            raise RuntimeError(msg)
         if is_print:
             self.log.info('\n'.join([str(x) for x in files]))
         return files
@@ -1883,7 +1891,8 @@ class BrewFile:
     def check_cask(self) -> None:
         """Check applications for Cask."""
         if not is_mac():
-            raise RuntimeError('Cask is not available on Linux!')
+            msg = 'Cask is not available on Linux!'
+            raise RuntimeError(msg)
 
         self.banner('# Starting to check applications for Cask...')
 
@@ -2205,7 +2214,7 @@ class BrewFile:
             self.log.info('')
 
     def execute(self) -> None:
-        """Main execute function."""
+        """Execute."""
         # Cask list check
         if self.opt['command'] == 'casklist':
             self.check_cask()
@@ -2309,7 +2318,8 @@ class BrewFile:
             return
 
         # No command found
-        raise RuntimeError(
+        msg = (
             f"Wrong command: {self.opt['command']}\n"
-            f"Execute `{__prog__} help` for more information.",
+            f"Execute `{__prog__} help` for more information."
         )
+        raise RuntimeError(msg)

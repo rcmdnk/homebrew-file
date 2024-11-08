@@ -352,7 +352,9 @@ def test_repo_file(bf: BrewFile) -> None:
 
 
 def test_init_repo(
-    bf: BrewFile, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    bf: BrewFile,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     bf.check_gitconfig = lambda: False
     file = tmp_path / 'Brewfile'
@@ -573,7 +575,9 @@ def test_make_appstore_app_cmd(bf: BrewFile) -> None:
 
 
 def test_check_cask(
-    bf: BrewFile, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    bf: BrewFile,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     os.chdir(tmp_path)
     if not is_mac():
@@ -681,7 +685,8 @@ def test_execute(
 
 
 def test_execute_update(
-    execute_fixture: BrewFile, capsys: pytest.CaptureFixture
+    execute_fixture: BrewFile,
+    capsys: pytest.CaptureFixture,
 ) -> None:
     bf = execute_fixture
     bf.opt['command'] = 'update'
