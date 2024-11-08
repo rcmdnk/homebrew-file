@@ -523,9 +523,7 @@ def test_cat_brewfile(bf: BrewFile) -> None:
     pass
 
 
-def test_clean_non_request(
-    bf: BrewFile, caplot: pytest.LogCaptureFixture
-) -> None:
+def test_clean_non_request(bf: BrewFile) -> None:
     bf.opt['dryrun'] = True
     bf.clean_non_request()
 
