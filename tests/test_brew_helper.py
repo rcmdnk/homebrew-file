@@ -247,7 +247,7 @@ def test_get_formula_info(helper: BrewHelper) -> None:
     assert 'installed' in info
 
 
-def test_get_formula_aliases(helper: BrewHelper) -> None:
+def test_get_formula_aliases(helper: BrewHelper, python: str) -> None:
     aliases = helper.get_formula_aliases()
     assert aliases['homebrew/core']['python'].startswith('python@')
 

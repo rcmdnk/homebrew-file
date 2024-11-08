@@ -311,7 +311,7 @@ def test_mas_pack(brew_info: BrewInfo) -> None:
 
 # Ignore DeprecationWarning to allow \$
 @pytest.mark.filterwarnings('ignore::DeprecationWarning')
-def test_write(brew_info: BrewInfo, tmp_path: Path) -> None:
+def test_write(brew_info: BrewInfo, tmp_path: Path, tap: list[str]) -> None:
     tmp_file = tmp_path / 'f'
     default_file = brew_info.file
     brew_info.helper.opt['caskonly'] = False

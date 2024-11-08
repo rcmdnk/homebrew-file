@@ -158,7 +158,7 @@ def test_ask_yn_y(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     ]
 
 
-def test_read_all(bf: BrewFile) -> None:
+def test_read_all(bf: BrewFile, tap: list[str]) -> None:
     parent = Path(__file__).parent / 'files'
     file = parent / 'BrewfileTest'
     bf.set_input(file)
@@ -465,7 +465,9 @@ def test_check_input_file(bf: BrewFile) -> None:
     pass
 
 
-def test_get_files(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
+def test_get_files(
+    bf: BrewFile, tap: list[str], caplog: pytest.LogCaptureFixture
+) -> None:
     parent = Path(__file__).parent / 'files'
     file = parent / 'BrewfileTest'
     bf.set_input(file)
@@ -521,7 +523,9 @@ def test_cat_brewfile(bf: BrewFile) -> None:
     pass
 
 
-def test_clean_non_request(bf: BrewFile) -> None:
+def test_clean_non_request(
+    bf: BrewFile, caplot: pytest.LogCaptureFixture
+) -> None:
     bf.opt['dryrun'] = True
     bf.clean_non_request()
 
