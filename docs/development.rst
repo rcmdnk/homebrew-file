@@ -4,13 +4,19 @@ Development
 Preparation
 -----------
 
-To develop this package, use poetry::
+To develop this package, use `uv <https://docs.astral.sh/uv/>`_::
 
-    $ pip install poetry
-    $ poetry install
-    $ poetry shell
+    $ uv sync
+    $ source .venv/bin/activate
 
 Then, you can run ``brew-file`` command made from ``src`` directory.
+
+Now you can also use `pre-commit` command.
+
+Install `pre-commit` settings by::
+
+    $ pre-commit install --hook-type pre-commit --hook-type pre-push
+
 
 Update scripts
 --------------
@@ -36,7 +42,7 @@ Tests in ``tests`` will test ``bin/brew-file`` instead of files in ``src``, ther
 Commit
 ------
 
-When you run ``git commit``, ``pre-commit`` will run ``black`` and other linters.
+When you run ``git commit``, ``pre-commit`` will run ``ruff`` and other linters/formatters.
 
 Some of parts will be automatically fixed
 and you need just rerun ``git commit``.
@@ -44,3 +50,5 @@ and you need just rerun ``git commit``.
 Some of parts will be remained and you need to fix them manually.
 
 Fix them and rerun ``git commit``.
+
+`pre-push` will be run before push, which will confirm if `combine.sh` is run or not and version information is updated or not.
