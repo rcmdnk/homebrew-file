@@ -55,4 +55,7 @@ ruff format "$dest"
 
 if [ -f "$tmp_backup" ];then
   diff -u "$tmp_backup" "$dest"
+else
+  echo "bin/brew-file was created newly"
+  exit 1
 fi
