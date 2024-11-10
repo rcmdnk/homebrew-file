@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass, field
@@ -834,13 +835,7 @@ class BrewFile:
         if self.opt[flag] != 0:
             return self.opt[flag]
 
-        ret, _ = self.helper.proc(
-            f'type {cmd}',
-            print_cmd=False,
-            print_out=False,
-            exit_on_err=False,
-        )
-        if ret != 0:
+        if shutil.which(cmd) is None:
             self.log.info(f'{formula} has not been installed.')
             if not force:
                 ans = self.ask_yn(f'Do you want to install {formula}?')
@@ -864,13 +859,7 @@ class BrewFile:
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_list_opt[p] = ''
 
-        ret, _ = self.helper.proc(
-            f'type {cmd}',
-            print_cmd=False,
-            print_out=False,
-            exit_on_err=False,
-        )
-        if ret != 0:
+        if shutil.which(cmd) is None:
             msg = f'Failed to prepare {cmd} command.'
             raise RuntimeError(msg)
 
