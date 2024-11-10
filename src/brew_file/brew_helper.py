@@ -10,21 +10,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TypedDict
 
-from typing_extensions import NotRequired
-
 
 class ProcParams(TypedDict):
     """Parameters for BrewHelper.proc()."""
 
-    cmd: NotRequired[str | list[str]]
-    print_cmd: NotRequired[bool]
-    print_out: NotRequired[bool]
-    exit_on_err: NotRequired[bool]
-    separate_err: NotRequired[bool]
-    print_err: NotRequired[bool]
-    env: NotRequired[dict[str, str] | None]
-    cwd: NotRequired[str | Path | None]
-    dryrun: NotRequired[bool]
+    cmd: str | list[str]
+    print_cmd: bool
+    print_out: bool
+    exit_on_err: bool
+    separate_err: bool
+    print_err: bool
+    env: dict[str, str] | None
+    cwd: str | Path | None
+    dryrun: bool
 
 
 class CmdError(Exception):

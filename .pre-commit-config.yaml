@@ -1,7 +1,7 @@
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.3.0
+    rev: v0.3.2
     hooks:
       - id: ruff-lint-diff
         stages: [pre-commit]
