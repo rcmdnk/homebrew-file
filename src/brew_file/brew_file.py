@@ -1024,7 +1024,7 @@ class BrewFile:
                 self.log.warning(f"App doesn't exist: {a}")
                 continue
             _, lines = self.helper.proc(
-                f"mdls -attr kMDItemAppStoreAdamID -attr kMDItemVersion '{a}'",
+                f'mdls -attr kMDItemAppStoreAdamID -attr kMDItemVersion {shlex.quote(a)}',
                 print_cmd=False,
                 print_out=False,
             )
