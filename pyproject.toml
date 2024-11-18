@@ -1,6 +1,6 @@
 [project]
 name = "brew-file"
-version = "9.2.2"
+version = "10.0.0"
 description = "Brewfile manager for Homebrew"
 authors = [
   { name = "rcmdnk", email = "rcmdnk@gmail.com" }
