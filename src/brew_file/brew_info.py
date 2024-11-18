@@ -269,8 +269,7 @@ class BrewInfo:
 
                 if not self.helper.opt.get('form') and (
                     cmd in ['brew', 'tap', 'tapall']
-                    and '"' in line
-                    or "'" in line
+                    and ('"' in line or "'" in line)
                 ):
                     self.helper.opt['form'] = 'bundle'
 
