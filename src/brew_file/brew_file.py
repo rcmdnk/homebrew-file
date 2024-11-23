@@ -829,21 +829,16 @@ class BrewFile:
         flag: str,
         cmd: str,
         formula: str,
-        force: bool = False,
+        install: bool = False,
     ) -> Literal[-2, -1, 0, 1]:
         """Check command is installed or not."""
         if self.opt[flag] != 0:
             return self.opt[flag]
 
         if shutil.which(cmd) is None:
+            if not install:
+                return self.opt[flag]
             self.log.info(f'{formula} has not been installed.')
-            if not force:
-                ans = self.ask_yn(f'Do you want to install {formula}?')
-                if not ans:
-                    self.log.warning('If you need it, please do:')
-                    self.log.warning(f'    $ brew install {formula}')
-                    self.opt[flag] = -2
-                    return self.opt[flag]
             ret, _ = self.helper.proc(
                 ['brew', 'install', formula],
                 print_cmd=True,
@@ -866,7 +861,7 @@ class BrewFile:
         self.opt[flag] = 1
         return self.opt[flag]
 
-    def check_mas_cmd(self, force: bool = False) -> Literal[-2, -1, 0, 1]:
+    def check_mas_cmd(self, install: bool = False) -> Literal[-2, -1, 0, 1]:
         """Check mas is installed or not."""
         if self.opt['is_mas_cmd'] != 0:
             return self.opt['is_mas_cmd']
@@ -893,7 +888,7 @@ class BrewFile:
             'is_mas_cmd',
             self.opt['mas_cmd'],
             self.opt['mas_formula'],
-            force,
+            install,
         )
         if cmd_ret != 1:
             return cmd_ret
@@ -914,17 +909,7 @@ class BrewFile:
                 exit_on_err=False,
             )
             if ret != 0:
-                if not force:
-                    ans = self.ask_yn(
-                        f"You need {self.opt['reattach_formula']} in tmux. Do you want to install it?",
-                    )
-                    if not ans:
-                        self.log.warning('If you need it, please do:')
-                        self.log.warning(
-                            f"    $ brew install {self.opt['reattach_formula']}",
-                        )
-                        self.opt['is_mas_cmd'] = -2
-                        return self.opt['is_mas_cmd']
+                f"You need {self.opt['reattach_formula']} in tmux. Installing it."
                 ret, _ = self.helper.proc(
                     ['brew', 'install', self.opt['reattach_formula']],
                     print_cmd=True,
@@ -948,7 +933,7 @@ class BrewFile:
 
     def check_whalebrew_cmd(
         self,
-        force: bool = False,
+        install: bool = False,
     ) -> Literal[-2, -1, 0, 1]:
         """Check whalebrew is installed or not."""
         if self.opt['is_whalebrew_cmd'] != 0:
@@ -958,10 +943,10 @@ class BrewFile:
             'is_whalebrew_cmd',
             self.opt['whalebrew_cmd'],
             self.opt['whalebrew_formula'],
-            force,
+            install,
         )
 
-    def check_vscode_cmd(self, force: bool = False) -> Literal[-2, -1, 0, 1]:
+    def check_vscode_cmd(self, install: bool = False) -> Literal[-2, -1, 0, 1]:
         """Check code (for VSCode) is installed or not."""
         if self.opt['is_vscode_cmd'] != 0:
             return self.opt['is_vscode_cmd']
@@ -970,7 +955,7 @@ class BrewFile:
             'is_vscode_cmd',
             self.opt['vscode_cmd'],
             self.opt['vscode_formula'],
-            force,
+            install,
         )
 
     def check_docker_running(self) -> Literal[-2, -1, 0, 1]:
@@ -1458,7 +1443,7 @@ class BrewFile:
                 if image in self.get_list('whalebrew_input'):
                     continue
 
-                if self.check_mas_cmd(True) == 1:
+                if self.check_whalebrew_cmd(True) == 1:
                     cmd = f"{self.opt['whalebrew_cmd']} uninstall -y {image.split('/')[-1]}"
                     _ = self.helper.proc(
                         cmd,
@@ -1477,7 +1462,7 @@ class BrewFile:
                 if e in self.get_list('vscode_input'):
                     continue
 
-                if self.check_mas_cmd(True) == 1:
+                if self.check_vscode_cmd(True) == 1:
                     cmd = f"{self.opt['vscode_cmd']} --uninstall-extension {e}"
                     _ = self.helper.proc(
                         cmd,
