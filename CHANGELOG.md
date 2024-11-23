@@ -33,12 +33,12 @@
 
 **Merged pull requests:**
 
-- chore(deps): update dependency pytest-xdist to v3.2.0 [#149](https://github.com/rcmdnk/homebrew-file/pull/149) ([renovate\[bot\]](https://github.com/apps/renovate))
-- chore(deps): update pre-commit hook rcmdnk/pyproject-pre-commit to v0.0.5 [#144](https://github.com/rcmdnk/homebrew-file/pull/144) ([renovate\[bot\]](https://github.com/apps/renovate))
-- chore(deps): update dependency pyproject-pre-commit to v0.0.5 [#143](https://github.com/rcmdnk/homebrew-file/pull/143) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update actions/setup-dotnet action to v3 [#132](https://github.com/rcmdnk/homebrew-file/pull/132) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update actions/setup-python action to v4 [#131](https://github.com/rcmdnk/homebrew-file/pull/131) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update dependency docutils to v0.19 [#130](https://github.com/rcmdnk/homebrew-file/pull/130) ([renovate\[bot\]](https://github.com/apps/renovate))
+- chore(deps): update dependency pytest-xdist to v3.2.0 [#149](https://github.com/rcmdnk/homebrew-file/pull/149) ([renovate[bot]](https://github.com/apps/renovate))
+- chore(deps): update pre-commit hook rcmdnk/pyproject-pre-commit to v0.0.5 [#144](https://github.com/rcmdnk/homebrew-file/pull/144) ([renovate[bot]](https://github.com/apps/renovate))
+- chore(deps): update dependency pyproject-pre-commit to v0.0.5 [#143](https://github.com/rcmdnk/homebrew-file/pull/143) ([renovate[bot]](https://github.com/apps/renovate))
+- Update actions/setup-dotnet action to v3 [#132](https://github.com/rcmdnk/homebrew-file/pull/132) ([renovate[bot]](https://github.com/apps/renovate))
+- Update actions/setup-python action to v4 [#131](https://github.com/rcmdnk/homebrew-file/pull/131) ([renovate[bot]](https://github.com/apps/renovate))
+- Update dependency docutils to v0.19 [#130](https://github.com/rcmdnk/homebrew-file/pull/130) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [v8.5.12](https://github.com/rcmdnk/homebrew-file/tree/v8.5.12) (2022-08-02)
 
@@ -51,7 +51,7 @@
 **Merged pull requests:**
 
 - Use diff directly, no aliases or functions [#125](https://github.com/rcmdnk/homebrew-file/pull/125) ([hurricanehrndz](https://github.com/hurricanehrndz))
-- Update github/codeql-action action to v2 [#124](https://github.com/rcmdnk/homebrew-file/pull/124) ([renovate\[bot\]](https://github.com/apps/renovate))
+- Update github/codeql-action action to v2 [#124](https://github.com/rcmdnk/homebrew-file/pull/124) ([renovate[bot]](https://github.com/apps/renovate))
 
 ## [v8.5.10](https://github.com/rcmdnk/homebrew-file/tree/v8.5.10) (2022-03-19)
 
@@ -63,12 +63,12 @@
 
 **Merged pull requests:**
 
-- Update actions/checkout action to v3 [#120](https://github.com/rcmdnk/homebrew-file/pull/120) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update actions/setup-dotnet action to v2 [#119](https://github.com/rcmdnk/homebrew-file/pull/119) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update github/super-linter Docker tag to v4 [#118](https://github.com/rcmdnk/homebrew-file/pull/118) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update actions/checkout action to v2 [#117](https://github.com/rcmdnk/homebrew-file/pull/117) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Update dependency docutils to v0.18.1 [#115](https://github.com/rcmdnk/homebrew-file/pull/115) ([renovate\[bot\]](https://github.com/apps/renovate))
-- Configure Renovate [#113](https://github.com/rcmdnk/homebrew-file/pull/113) ([renovate\[bot\]](https://github.com/apps/renovate))
+- Update actions/checkout action to v3 [#120](https://github.com/rcmdnk/homebrew-file/pull/120) ([renovate[bot]](https://github.com/apps/renovate))
+- Update actions/setup-dotnet action to v2 [#119](https://github.com/rcmdnk/homebrew-file/pull/119) ([renovate[bot]](https://github.com/apps/renovate))
+- Update github/super-linter Docker tag to v4 [#118](https://github.com/rcmdnk/homebrew-file/pull/118) ([renovate[bot]](https://github.com/apps/renovate))
+- Update actions/checkout action to v2 [#117](https://github.com/rcmdnk/homebrew-file/pull/117) ([renovate[bot]](https://github.com/apps/renovate))
+- Update dependency docutils to v0.18.1 [#115](https://github.com/rcmdnk/homebrew-file/pull/115) ([renovate[bot]](https://github.com/apps/renovate))
+- Configure Renovate [#113](https://github.com/rcmdnk/homebrew-file/pull/113) ([renovate[bot]](https://github.com/apps/renovate))
 - Correcting a few typos in Usage [#112](https://github.com/rcmdnk/homebrew-file/pull/112) ([MattLewin](https://github.com/MattLewin))
 
 ## [v8.5.9](https://github.com/rcmdnk/homebrew-file/tree/v8.5.9) (2022-03-15)
@@ -130,7 +130,7 @@
 
 **Closed issues:**
 
-- GitHub REST API  no longer accepts account passwords when authenticating [#104](https://github.com/rcmdnk/homebrew-file/issues/104)
+- GitHub REST API no longer accepts account passwords when authenticating [#104](https://github.com/rcmdnk/homebrew-file/issues/104)
 - check install package if formula or cask [#102](https://github.com/rcmdnk/homebrew-file/issues/102)
 - Add `main file` option [#97](https://github.com/rcmdnk/homebrew-file/issues/97)
 - implement `mas purchase` [#96](https://github.com/rcmdnk/homebrew-file/issues/96)
@@ -413,7 +413,7 @@
 
 **Closed issues:**
 
-- macOS 10.13 \[beta\] : Setting up a fresh install from existing Brewfile (GitHub) [#74](https://github.com/rcmdnk/homebrew-file/issues/74)
+- macOS 10.13 [beta] : Setting up a fresh install from existing Brewfile (GitHub) [#74](https://github.com/rcmdnk/homebrew-file/issues/74)
 
 ## [v4.1.18](https://github.com/rcmdnk/homebrew-file/tree/v4.1.18) (2017-07-07)
 
@@ -784,8 +784,8 @@
 
 **Closed issues:**
 
-- \[Feature\] Support Brew Gem [#34](https://github.com/rcmdnk/homebrew-file/issues/34)
-- \[Feature\] Support Brew Pip [#33](https://github.com/rcmdnk/homebrew-file/issues/33)
+- [Feature] Support Brew Gem [#34](https://github.com/rcmdnk/homebrew-file/issues/34)
+- [Feature] Support Brew Pip [#33](https://github.com/rcmdnk/homebrew-file/issues/33)
 
 ## [v3.8.1](https://github.com/rcmdnk/homebrew-file/tree/v3.8.1) (2016-01-05)
 
