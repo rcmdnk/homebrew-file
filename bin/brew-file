@@ -58,9 +58,9 @@ class LogFormatter(logging.Formatter):
                 logging.ERROR: '31',
                 logging.CRITICAL: '31',
             }
-            for level in colors:
+            for level, color in colors.items():
                 self.formats[level] = (
-                    f'\033[{colors[level]};1m{self.formats[level]}\033[m'
+                    f'\033[{color};1m{self.formats[level]}\033[m'
                 )
 
     def format(self, record: logging.LogRecord) -> str:
@@ -110,10 +110,10 @@ shell_envs: dict[str, str] = {
 
 def expandpath(path: str | Path) -> Path:
     path = str(path)
-    for k in shell_envs:
+    for k, v in shell_envs.items():
         for kk in [f'${k}', f'${{{k}}}']:
             if kk in path:
-                path = path.replace(kk, shell_envs[k])
+                path = path.replace(kk, v)
     path = re.sub(
         r'(?<!\\)\$(\w+|\{([^}]*)\})',
         lambda x: os.getenv(x.group(2) or x.group(1), ''),
