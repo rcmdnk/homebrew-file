@@ -11,7 +11,7 @@ A powerful Brewfile manager for [Homebrew](http://brew.sh/) on macOS and Linux.
 Install Brew-file via Homebrew:
 
 ```sh
-brew install rcmdnk/rcmdnkpac/homebrew-file
+brew install rcmdnk/file/brew-file
 ```
 
 Once installed, you can use the `brew file` command.
