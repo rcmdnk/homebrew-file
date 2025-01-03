@@ -10,6 +10,7 @@ from _io import TextIOWrapper
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
+from typing import Literal
 
 
 class LogFormatter(logging.Formatter):
@@ -104,7 +105,7 @@ class OpenWrapper:
     """Wrapper function to open a file even if it doesn't exist."""
 
     name: str
-    mode: str = 'w'
+    mode: Literal['w', 'r', 'a'] = 'w'
 
     def __enter__(self) -> TextIOWrapper:
         Path(self.name).parent.mkdir(parents=True, exist_ok=True)

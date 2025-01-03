@@ -132,7 +132,7 @@ class OpenWrapper:
     """Wrapper function to open a file even if it doesn't exist."""
 
     name: str
-    mode: str = 'w'
+    mode: Literal['w', 'r', 'a'] = 'w'
 
     def __enter__(self) -> TextIOWrapper:
         Path(self.name).parent.mkdir(parents=True, exist_ok=True)
@@ -269,7 +269,7 @@ class BrewHelper:
                 lines += str(e).splitlines()
                 if print_out:
                     self.log.info(str(e))
-            ret = e.errno
+            ret = e.errno if e.errno is not None else 1
 
         if exit_on_err and ret != 0:
             output = '\n'.join(lines)

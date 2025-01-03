@@ -119,7 +119,7 @@ class BrewHelper:
                 lines += str(e).splitlines()
                 if print_out:
                     self.log.info(str(e))
-            ret = e.errno
+            ret = e.errno if e.errno is not None else 1
 
         if exit_on_err and ret != 0:
             output = '\n'.join(lines)
