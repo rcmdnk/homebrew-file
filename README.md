@@ -40,6 +40,7 @@ Brew-file enhances your Homebrew experience with the following features:
 
   - Easily share and manage your Brewfile using [Git integration](https://homebrew-file.readthedocs.io/en/latest/usage.html#manage-brewfile-with-git).
   - `brew file update` will pull the latest changes from the remote repository, install/uninstall based on the changes, update Brewfile, commit and push the changes.
+    - WARNING: It will enforce the state recorded in the Brewfile, potentially removing packages installed without `brew-wrap`. If you want to keep all packages in the system, you should better to run `brew file init` before running `brew file update`.
 
 - **Flexible Brewfile Organization**
 

@@ -273,7 +273,7 @@ class BrewHelper:
 
         if exit_on_err and ret != 0:
             output = '\n'.join(lines)
-            msg = f"Failed at command: {' '.join(cmd)}\n{output}"
+            msg = f'Failed at command: {" ".join(cmd)}\n{output}'
             raise CmdError(msg, ret)
         return ret, lines
 
@@ -330,7 +330,7 @@ class BrewHelper:
                 casks = self.get_casks()
 
             _, lines = self.proc(
-                cmd=f"brew info --json=v2 --cask {' '.join(casks)}",
+                cmd=f'brew info --json=v2 --cask {" ".join(casks)}',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
@@ -344,7 +344,7 @@ class BrewHelper:
             }
             while ret != 0:
                 ret, lines = self.proc(
-                    cmd=f"brew info --json=v2 --formula {' '.join(formulae)}",
+                    cmd=f'brew info --json=v2 --formula {" ".join(formulae)}',
                     print_cmd=False,
                     print_out=False,
                     exit_on_err=False,
@@ -845,7 +845,7 @@ class BrewInfo:
                         'bundle',
                     ]:
                         for arg in excmd.split(','):
-                            k = f"--{arg.split(':')[0]}"
+                            k = f'--{arg.split(":")[0]}'
                             v = arg.split(':')[1]
                             if v == 'true':
                                 v = ''
@@ -937,7 +937,7 @@ fi
             cmd_cask = 'brew install '
             cmd_cask_nocask = '#brew install '
             cmd_appstore = 'mas install '
-            cmd_vscode = 'whalebrew install '
+            cmd_whalebrew = 'whalebrew install '
             cmd_vscode = 'code --install-extension '
             cmd_main = '#main '
             cmd_file = '#file '
@@ -1215,8 +1215,8 @@ class BrewFile:
         opt['dryrun'] = False
         opt['initialized'] = False
         opt['homebrew_tap_prefix'] = 'homebrew/'
-        opt['core_repo'] = f"{opt['homebrew_tap_prefix']}core"
-        opt['cask_repo'] = f"{opt['homebrew_tap_prefix']}cask"
+        opt['core_repo'] = f'{opt["homebrew_tap_prefix"]}core'
+        opt['cask_repo'] = f'{opt["homebrew_tap_prefix"]}cask'
         opt['reattach_formula'] = 'reattach-to-user-namespace'
         opt['mas_formula'] = 'mas'
         opt['whalebrew_formula'] = 'whalebrew'
@@ -1292,7 +1292,7 @@ class BrewFile:
         width = 0
         for line in text.split('\n'):
             width = max(width, len(line))
-        output = f"\n{'#' * width}\n{text}\n{'#' * width}\n"
+        output = f'\n{"#" * width}\n{text}\n{"#" * width}\n'
         if debug_out:
             self.log.debug(output)
         else:
@@ -1584,9 +1584,9 @@ class BrewFile:
         if ret != 0:
             if exit_on_err:
                 msg = (
-                    f"Can not clone {self.opt['repo']}.\n"
-                    f"please check the repository, or reset with\n"
-                    f"    $ {__prog__} set_repo"
+                    f'Can not clone {self.opt["repo"]}.\n'
+                    f'please check the repository, or reset with\n'
+                    f'    $ {__prog__} set_repo'
                 )
                 raise RuntimeError(msg)
             return False
@@ -1669,8 +1669,8 @@ class BrewFile:
             'repo'
         ].startswith('http'):
             self.log.info(
-                f"You are using repository of {self.opt['repo']}\n"
-                "Use ssh protocol to push your Brewfile update.",
+                f'You are using repository of {self.opt["repo"]}\n'
+                'Use ssh protocol to push your Brewfile update.',
             )
             return False
         _, name = self.helper.proc(
@@ -2007,7 +2007,7 @@ class BrewFile:
                 exit_on_err=False,
             )
             if ret != 0:
-                f"You need {self.opt['reattach_formula']} in tmux. Installing it."
+                f'You need {self.opt["reattach_formula"]} in tmux. Installing it.'
                 ret, _ = self.helper.proc(
                     ['brew', 'install', self.opt['reattach_formula']],
                     print_cmd=True,
@@ -2121,7 +2121,7 @@ class BrewFile:
         if self.check_whalebrew_cmd(False) != 1:
             return []
         _, lines = self.helper.proc(
-            f"{self.opt['whalebrew_cmd']} list",
+            f'{self.opt["whalebrew_cmd"]} list',
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
@@ -2137,7 +2137,7 @@ class BrewFile:
         # https://github.com/microsoft/vscode/issues/204085
         # https://github.com/microsoft/vscode/issues/204447
         _, lines = self.helper.proc(
-            f"{self.opt['vscode_cmd']} --list-extensions",
+            f'{self.opt["vscode_cmd"]} --list-extensions',
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
@@ -2334,7 +2334,7 @@ class BrewFile:
     def input_backup(self) -> bool:
         if self.opt['backup'] != '':
             Path(self.opt['input']).rename(Path(self.opt['backup']))
-            self.log.info(f"Old input file was moved to {self.opt['backup']}")
+            self.log.info(f'Old input file was moved to {self.opt["backup"]}')
         else:
             ans = self.ask_yn('Do you want to overwrite it?')
             if not ans:
@@ -2362,7 +2362,7 @@ class BrewFile:
                     break
             if self.opt['repo'] == '':
                 self.log.info(
-                    f"Input file: {self.opt['input']} is already there.",
+                    f'Input file: {self.opt["input"]} is already there.',
                 )
                 if prev_repo != '':
                     self.log.info(
@@ -2375,13 +2375,13 @@ class BrewFile:
         # Get repository
         if self.opt['repo'] == '':
             self.log.info(
-                "\nSet repository,\n"
+                '\nSet repository,\n'
                 '"non" (or empty) for local Brewfile '
-                f"({self.opt['input']}),\n"
-                "/path/to/repo for local git repository,\n"
-                "https://your/git/repository "
-                "(or ssh://user@server.project.git) for git repository,\n"
-                "or (<user>/)<repo> for github repository,",
+                f'({self.opt["input"]}),\n'
+                '/path/to/repo for local git repository,\n'
+                'https://your/git/repository '
+                '(or ssh://user@server.project.git) for git repository,\n'
+                'or (<user>/)<repo> for github repository,',
             )
             self.opt['repo'] = input('or full path for other git repository: ')
             self.banner('# Set Brewfile repository as ' + self.opt['repo'])
@@ -2415,10 +2415,10 @@ class BrewFile:
                     return False
             elif self.opt['repo'] != '':
                 self.log.info(
-                    f"You are using Brewfile of {self.opt['repo']}.",
+                    f'You are using Brewfile of {self.opt["repo"]}.',
                 )
             else:
-                self.log.info(f"{self.opt['input']} is already there.")
+                self.log.info(f'{self.opt["input"]} is already there.')
                 if not self.input_backup():
                     return False
 
@@ -2542,7 +2542,7 @@ class BrewFile:
                     continue
 
                 if self.check_whalebrew_cmd(True) == 1:
-                    cmd = f"{self.opt['whalebrew_cmd']} uninstall -y {image.split('/')[-1]}"
+                    cmd = f'{self.opt["whalebrew_cmd"]} uninstall -y {image.split("/")[-1]}'
                     _ = self.helper.proc(
                         cmd,
                         print_cmd=True,
@@ -2561,7 +2561,7 @@ class BrewFile:
                     continue
 
                 if self.check_vscode_cmd(True) == 1:
-                    cmd = f"{self.opt['vscode_cmd']} --uninstall-extension {e}"
+                    cmd = f'{self.opt["vscode_cmd"]} --uninstall-extension {e}'
                     _ = self.helper.proc(
                         cmd,
                         print_cmd=True,
@@ -2941,8 +2941,7 @@ class BrewFile:
     def generate_cask_token(self, app: str) -> str:
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
         token = app.split('/')[-1]
-        if token.endswith('.app'):
-            token = token[:-4]
+        token = token.removesuffix('.app')
         token = token.replace('+', 'plus')
         token = token.replace('@', 'at')
         token = token.replace(' ', '-').lower()
@@ -3053,8 +3052,7 @@ class BrewFile:
                 check = 'no_cask'
                 app_path = home_tilde(f'{d}/{app}')
                 aname = app
-                if aname.endswith('.app'):
-                    aname = aname[:-4]
+                aname = aname.removesuffix('.app')
                 if app in apps:
                     token = apps[app]
                 elif app_path in apps:
@@ -3245,7 +3243,7 @@ class BrewFile:
                 if apps_check['cask'][d] == 0:
                     continue
                 self.log.info(
-                    f"{home_tilde(d):{maxlen}s} : {apps_check['cask'][d]}",
+                    f'{home_tilde(d):{maxlen}s} : {apps_check["cask"][d]}',
                 )
             self.log.info('')
         if sum(apps_check['brew'].values()) > 0:
@@ -3254,7 +3252,7 @@ class BrewFile:
                 if apps_check['brew'][d] == 0:
                     continue
                 self.log.info(
-                    f"{home_tilde(d):{maxlen}s} : {apps_check['brew'][d]}",
+                    f'{home_tilde(d):{maxlen}s} : {apps_check["brew"][d]}',
                 )
             self.log.info('')
         if sum(apps_check['has_cask'].values()) > 0:
@@ -3263,7 +3261,7 @@ class BrewFile:
                 if apps_check['has_cask'][d] == 0:
                     continue
                 self.log.info(
-                    f"{home_tilde(d):{maxlen}s} : {apps_check['has_cask'][d]}",
+                    f'{home_tilde(d):{maxlen}s} : {apps_check["has_cask"][d]}',
                 )
             self.log.info('')
         if sum(apps_check['appstore'].values()) > 0:
@@ -3272,7 +3270,7 @@ class BrewFile:
                 if apps_check['appstore'][d] == 0:
                     continue
                 self.log.info(
-                    f"{home_tilde(d):{maxlen}s} : {apps_check['appstore'][d]}",
+                    f'{home_tilde(d):{maxlen}s} : {apps_check["appstore"][d]}',
                 )
             self.log.info('')
         if sum(apps_check['no_cask'].values()) > 0:
@@ -3281,7 +3279,7 @@ class BrewFile:
                 if apps_check['no_cask'][d] == 0:
                     continue
                 self.log.info(
-                    f"{home_tilde(d):{maxlen}s} : {apps_check['no_cask'][d]}",
+                    f'{home_tilde(d):{maxlen}s} : {apps_check["no_cask"][d]}',
                 )
             self.log.info('')
 
@@ -3391,8 +3389,8 @@ class BrewFile:
 
         # No command found
         msg = (
-            f"Wrong command: {self.opt['command']}\n"
-            f"Execute `{__prog__} help` for more information."
+            f'Wrong command: {self.opt["command"]}\n'
+            f'Execute `{__prog__} help` for more information.'
         )
         raise RuntimeError(msg)
 
@@ -3487,8 +3485,8 @@ def main() -> int:
         action='store',
         dest='input',
         default=b.opt['input'],
-        help='Set input file (default: %(default)s). \n'
-        'You can set input file by environmental variable,\n'
+        help='Set input file (default: %(default)s). '
+        'You can set input file by environmental variable, '
         'HOMEBREW_BREWFILE, like:\n'
         '    export HOMEBREW_BREWFILE=~/.brewfile',
     )
@@ -3500,10 +3498,10 @@ def main() -> int:
         action='store',
         dest='backup',
         default=b.opt['backup'],
-        help='Set backup file (default: %(default)s). \n'
-        'If it is empty, no backup is made.\n'
-        'You can set backup file by environmental variable,\n'
-        ' HOMEBREW_BREWFILE_BACKUP, like:\n'
+        help='Set backup file (default: %(default)s). '
+        'If it is empty, no backup is made. '
+        'You can set backup file by environmental variable, '
+        'HOMEBREW_BREWFILE_BACKUP, like:\n'
         '    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup',
     )
 
@@ -3531,9 +3529,9 @@ def main() -> int:
         action='store_true',
         default=b.opt['leaves'],
         dest='leaves',
-        help='Make list only for leaves (taken by `brew leaves`).\n'
-        'You can set this by environmental variable,'
-        ' HOMEBREW_BREWFILE_LEAVES, like:\n'
+        help='Make list only for leaves (taken by `brew leaves`). '
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_LEAVES, like:\n'
         '    export HOMEBREW_BREWFILE_LEAVES=1',
     )
 
@@ -3543,10 +3541,10 @@ def main() -> int:
         action='store_true',
         default=b.opt['on_request'],
         dest='on_request',
-        help='Make list only for packages installed on request.\n'
-        "This option is given priority over 'leaves'.\n"
-        'You can set this by environmental variable,'
-        ' HOMEBREW_BREWFILE_ON_REQUEST, like:\n'
+        help='Make list only for packages installed on request. '
+        "This option is given priority over 'leaves'. "
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_ON_REQUEST, like:\n'
         '    export HOMEBREW_BREWFILE_ON_REQUEST=1',
     )
 
@@ -3556,10 +3554,10 @@ def main() -> int:
         action='store',
         default=b.opt['top_packages'],
         dest='top_packages',
-        help='Packages to be listed even if they are under dependencies\n'
-        "and `leaves`/'on_request' option is used.\n"
-        'You can set this by environmental variable,\n'
-        " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
+        help='Packages to be listed even if they are under dependencies '
+        "and `leaves`/'on_request' option is used. "
+        'You can set this by environmental variable, '
+        "HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
         '    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils',
     )
 
@@ -3619,9 +3617,9 @@ def main() -> int:
         default=b.opt['appstore'],
         dest='appstore',
         help='Set AppStore application check level.\n'
-        '0: do not check,\n1: check and manage,\n'
-        '2: check for installation,'
-        'but do not add to Brewfile when Apps are added.\n'
+        '0: do not check,\n'
+        '1: check and manage,\n'
+        '2: check for installation, but do not add to Brewfile when Apps are added. '
         'You can set the level by environmental variable:\n'
         '    export HOMEBREW_BREWFILE_APPSTORE=0',
     )
@@ -3632,8 +3630,8 @@ def main() -> int:
         action='store_true',
         default=b.opt['no_appstore'],
         dest='no_appstore',
-        help='Set AppStore application check level to 0.\n'
-        "(legacy option, works same as '--appstore 0'.)\n",
+        help='Set AppStore application check level to 0. '
+        "(legacy option, works same as '--appstore 0'.)",
     )
 
     all_files_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -3642,7 +3640,7 @@ def main() -> int:
         action='store_true',
         default=b.opt['all_files'],
         dest='all_files',
-        help='Show all files including non-existing files.\n',
+        help='Show all files including non-existing files.',
     )
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -3747,9 +3745,8 @@ def main() -> int:
     )
 
     help_doc = (
-        'Install packages in BREWFILE if no <package> is given.\n'
-        'If <package> is given, the package is installed and it is added\n'
-        'in BREWFILE.'
+        'Install packages in BREWFILE if no <package> is given. '
+        'If <package> is given, the package is installed and it is added in BREWFILE.'
     )
     subparsers.add_parser(
         'install',
@@ -3759,7 +3756,7 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'Execute brew command, and update BREWFILE.\n'
+        'Execute brew command, and update BREWFILE. '
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     )
     subparsers.add_parser(
@@ -3770,8 +3767,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or dump/-i/--init\nInitialize/Update BREWFILE '
-        'with installed packages.'
+        'or dump/-i/--init\n'
+        'Initialize/Update BREWFILE with installed packages.'
     )
     subparsers.add_parser(
         'init',
@@ -3786,8 +3783,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -s/--set_repo\nSet BREWFILE repository '
-        '(e.g. rcmdnk/Brewfile or full path to your repository).'
+        'or -s/--set_repo\n'
+        'Set BREWFILE repository (e.g. rcmdnk/Brewfile or full path to your repository).'
     )
     subparsers.add_parser(
         'set_repo',
@@ -3821,10 +3818,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -c/--clean\nCleanup.\n'
-        'Uninstall packages not in the list.\n'
-        'Untap packages not in the list.\n'
-        'Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).\n'
+        'or -c/--clean\n'
+        'Cleanup. Uninstall packages not in the list. Untap packages not in the list. Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).'
     )
     subparsers.add_parser(
         'clean',
@@ -3835,8 +3830,7 @@ def main() -> int:
     )
     help_doc = (
         'or --clean_non_request.\n'
-        'Uninstall packages which were installed as dependencies \n'
-        'but parent packages of which were already uninstalled.\n'
+        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled.'
     )
     subparsers.add_parser(
         'clean_non_request',
@@ -3846,11 +3840,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -u/--update\nDo brew update/upgrade, cask upgrade, pull,'
-        'install,\n'
-        'init and push.\n'
-        'In addition, pull and push\n'
-        'will be done if the repository is assigned.\n'
+        'or -u/--update\n'
+        'Do brew update/upgrade, cask upgrade, pull, install, init and push. In addition, pull and push will be done if the repository is assigned.\nIt will enforce the state recorded in the Brewfile, potentially removing packages installed without `brew-wrap`. If you want to keep all packages in the system, you should better to run `brew file init` before running `brew file update`.'
     )
     subparsers.add_parser(
         'update',
@@ -4033,9 +4024,9 @@ def main() -> int:
             '--verbose',
         ]
         log.info(
-            f"commands: {' '.join(commands)}\n"
-            f"commands_hyphen: {''.join(commands_hyphen)}\n"
-            f"options: {' '.join(options)}",
+            f'commands: {" ".join(commands)}\n'
+            f'commands_hyphen: {"".join(commands_hyphen)}\n'
+            f'options: {" ".join(options)}',
         )
         return 0
     elif b.opt['command'] == 'version':

@@ -57,7 +57,7 @@ def test_to_num(val: bool | int | str, result: bool) -> None:
         ('/normal/path', '/normal/path'),
         (
             '${HOSTNAME}/$HOSTTYPE/${OSTYPE}/$PLATFORM',
-            f"{brew_file.shell_envs['HOSTNAME']}/{brew_file.shell_envs['HOSTTYPE']}/{brew_file.shell_envs['OSTYPE']}/{brew_file.shell_envs['PLATFORM']}",
+            f'{brew_file.shell_envs["HOSTNAME"]}/{brew_file.shell_envs["HOSTTYPE"]}/{brew_file.shell_envs["OSTYPE"]}/{brew_file.shell_envs["PLATFORM"]}',
         ),
         ('~/test', Path('~/test').expanduser()),
         ('$HOME/', Path('~/').expanduser()),

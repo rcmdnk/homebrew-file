@@ -333,7 +333,7 @@ class BrewInfo:
                         'bundle',
                     ]:
                         for arg in excmd.split(','):
-                            k = f"--{arg.split(':')[0]}"
+                            k = f'--{arg.split(":")[0]}'
                             v = arg.split(':')[1]
                             if v == 'true':
                                 v = ''
@@ -425,7 +425,7 @@ fi
             cmd_cask = 'brew install '
             cmd_cask_nocask = '#brew install '
             cmd_appstore = 'mas install '
-            cmd_vscode = 'whalebrew install '
+            cmd_whalebrew = 'whalebrew install '
             cmd_vscode = 'code --install-extension '
             cmd_main = '#main '
             cmd_file = '#file '

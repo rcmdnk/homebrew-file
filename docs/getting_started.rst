@@ -71,6 +71,10 @@ at a lunch time (12:30) every day.
 This command also does ``brew update && brew upgrade``,
 and removes packages not listed in ``Brewfile``.
 
+.. warning::
+
+   ``brew file update`` will enforce the state recorded in the Brewfile, potentially removing extensions installed without ``brew-wrap``. If you do not remove packages at the ``brew file update``, you should better to run ``brew file init`` before running ``brew file update``. For the cron job, ``brew file init && brew file update`` could be better.
+
 If you want to do only installing new packages, then set as::
 
     30 12 * * * brew file install
@@ -136,3 +140,7 @@ It is good if you have such a cron job like::
     30 12 * * * brew file update
 
 The repository is updated at lunch time every day.
+
+.. warning::
+
+   ``brew file update`` will enforce the state recorded in the Brewfile, potentially removing extensions installed without ``brew-wrap``. If you do not remove packages at the ``brew file update``, you should better to run ``brew file init`` before running ``brew file update``. For the cron job, ``brew file init && brew file update`` could be better.

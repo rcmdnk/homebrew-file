@@ -101,8 +101,8 @@ def main() -> int:
         action='store',
         dest='input',
         default=b.opt['input'],
-        help='Set input file (default: %(default)s). \n'
-        'You can set input file by environmental variable,\n'
+        help='Set input file (default: %(default)s). '
+        'You can set input file by environmental variable, '
         'HOMEBREW_BREWFILE, like:\n'
         '    export HOMEBREW_BREWFILE=~/.brewfile',
     )
@@ -114,10 +114,10 @@ def main() -> int:
         action='store',
         dest='backup',
         default=b.opt['backup'],
-        help='Set backup file (default: %(default)s). \n'
-        'If it is empty, no backup is made.\n'
-        'You can set backup file by environmental variable,\n'
-        ' HOMEBREW_BREWFILE_BACKUP, like:\n'
+        help='Set backup file (default: %(default)s). '
+        'If it is empty, no backup is made. '
+        'You can set backup file by environmental variable, '
+        'HOMEBREW_BREWFILE_BACKUP, like:\n'
         '    export HOMEBREW_BREWFILE_BACKUP=~/brewfile.backup',
     )
 
@@ -145,9 +145,9 @@ def main() -> int:
         action='store_true',
         default=b.opt['leaves'],
         dest='leaves',
-        help='Make list only for leaves (taken by `brew leaves`).\n'
-        'You can set this by environmental variable,'
-        ' HOMEBREW_BREWFILE_LEAVES, like:\n'
+        help='Make list only for leaves (taken by `brew leaves`). '
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_LEAVES, like:\n'
         '    export HOMEBREW_BREWFILE_LEAVES=1',
     )
 
@@ -157,10 +157,10 @@ def main() -> int:
         action='store_true',
         default=b.opt['on_request'],
         dest='on_request',
-        help='Make list only for packages installed on request.\n'
-        "This option is given priority over 'leaves'.\n"
-        'You can set this by environmental variable,'
-        ' HOMEBREW_BREWFILE_ON_REQUEST, like:\n'
+        help='Make list only for packages installed on request. '
+        "This option is given priority over 'leaves'. "
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_ON_REQUEST, like:\n'
         '    export HOMEBREW_BREWFILE_ON_REQUEST=1',
     )
 
@@ -170,10 +170,10 @@ def main() -> int:
         action='store',
         default=b.opt['top_packages'],
         dest='top_packages',
-        help='Packages to be listed even if they are under dependencies\n'
-        "and `leaves`/'on_request' option is used.\n"
-        'You can set this by environmental variable,\n'
-        " HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
+        help='Packages to be listed even if they are under dependencies '
+        "and `leaves`/'on_request' option is used. "
+        'You can set this by environmental variable, '
+        "HOMEBREW_BREWFILE_TOP_PACKAGES (',' separated), like:\n"
         '    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils',
     )
 
@@ -233,9 +233,9 @@ def main() -> int:
         default=b.opt['appstore'],
         dest='appstore',
         help='Set AppStore application check level.\n'
-        '0: do not check,\n1: check and manage,\n'
-        '2: check for installation,'
-        'but do not add to Brewfile when Apps are added.\n'
+        '0: do not check,\n'
+        '1: check and manage,\n'
+        '2: check for installation, but do not add to Brewfile when Apps are added. '
         'You can set the level by environmental variable:\n'
         '    export HOMEBREW_BREWFILE_APPSTORE=0',
     )
@@ -246,8 +246,8 @@ def main() -> int:
         action='store_true',
         default=b.opt['no_appstore'],
         dest='no_appstore',
-        help='Set AppStore application check level to 0.\n'
-        "(legacy option, works same as '--appstore 0'.)\n",
+        help='Set AppStore application check level to 0. '
+        "(legacy option, works same as '--appstore 0'.)",
     )
 
     all_files_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -256,7 +256,7 @@ def main() -> int:
         action='store_true',
         default=b.opt['all_files'],
         dest='all_files',
-        help='Show all files including non-existing files.\n',
+        help='Show all files including non-existing files.',
     )
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -361,9 +361,8 @@ def main() -> int:
     )
 
     help_doc = (
-        'Install packages in BREWFILE if no <package> is given.\n'
-        'If <package> is given, the package is installed and it is added\n'
-        'in BREWFILE.'
+        'Install packages in BREWFILE if no <package> is given. '
+        'If <package> is given, the package is installed and it is added in BREWFILE.'
     )
     subparsers.add_parser(
         'install',
@@ -373,7 +372,7 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'Execute brew command, and update BREWFILE.\n'
+        'Execute brew command, and update BREWFILE. '
         "Use 'brew noinit <brew command>' to suppress Brewfile initialization."
     )
     subparsers.add_parser(
@@ -384,8 +383,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or dump/-i/--init\nInitialize/Update BREWFILE '
-        'with installed packages.'
+        'or dump/-i/--init\n'
+        'Initialize/Update BREWFILE with installed packages.'
     )
     subparsers.add_parser(
         'init',
@@ -400,8 +399,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -s/--set_repo\nSet BREWFILE repository '
-        '(e.g. rcmdnk/Brewfile or full path to your repository).'
+        'or -s/--set_repo\n'
+        'Set BREWFILE repository (e.g. rcmdnk/Brewfile or full path to your repository).'
     )
     subparsers.add_parser(
         'set_repo',
@@ -435,10 +434,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -c/--clean\nCleanup.\n'
-        'Uninstall packages not in the list.\n'
-        'Untap packages not in the list.\n'
-        'Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).\n'
+        'or -c/--clean\n'
+        'Cleanup. Uninstall packages not in the list. Untap packages not in the list. Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).'
     )
     subparsers.add_parser(
         'clean',
@@ -449,8 +446,7 @@ def main() -> int:
     )
     help_doc = (
         'or --clean_non_request.\n'
-        'Uninstall packages which were installed as dependencies \n'
-        'but parent packages of which were already uninstalled.\n'
+        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled.'
     )
     subparsers.add_parser(
         'clean_non_request',
@@ -460,11 +456,8 @@ def main() -> int:
         **subparser_opts,
     )
     help_doc = (
-        'or -u/--update\nDo brew update/upgrade, cask upgrade, pull,'
-        'install,\n'
-        'init and push.\n'
-        'In addition, pull and push\n'
-        'will be done if the repository is assigned.\n'
+        'or -u/--update\n'
+        'Do brew update/upgrade, cask upgrade, pull, install, init and push. In addition, pull and push will be done if the repository is assigned.\nIt will enforce the state recorded in the Brewfile, potentially removing packages installed without `brew-wrap`. If you want to keep all packages in the system, you should better to run `brew file init` before running `brew file update`.'
     )
     subparsers.add_parser(
         'update',
@@ -647,9 +640,9 @@ def main() -> int:
             '--verbose',
         ]
         log.info(
-            f"commands: {' '.join(commands)}\n"
-            f"commands_hyphen: {''.join(commands_hyphen)}\n"
-            f"options: {' '.join(options)}",
+            f'commands: {" ".join(commands)}\n'
+            f'commands_hyphen: {"".join(commands_hyphen)}\n'
+            f'options: {" ".join(options)}',
         )
         return 0
     elif b.opt['command'] == 'version':

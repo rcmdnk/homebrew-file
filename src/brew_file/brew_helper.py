@@ -123,7 +123,7 @@ class BrewHelper:
 
         if exit_on_err and ret != 0:
             output = '\n'.join(lines)
-            msg = f"Failed at command: {' '.join(cmd)}\n{output}"
+            msg = f'Failed at command: {" ".join(cmd)}\n{output}'
             raise CmdError(msg, ret)
         return ret, lines
 
@@ -180,7 +180,7 @@ class BrewHelper:
                 casks = self.get_casks()
 
             _, lines = self.proc(
-                cmd=f"brew info --json=v2 --cask {' '.join(casks)}",
+                cmd=f'brew info --json=v2 --cask {" ".join(casks)}',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=True,
@@ -194,7 +194,7 @@ class BrewHelper:
             }
             while ret != 0:
                 ret, lines = self.proc(
-                    cmd=f"brew info --json=v2 --formula {' '.join(formulae)}",
+                    cmd=f'brew info --json=v2 --formula {" ".join(formulae)}',
                     print_cmd=False,
                     print_out=False,
                     exit_on_err=False,

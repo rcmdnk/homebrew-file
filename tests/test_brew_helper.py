@@ -113,7 +113,7 @@ def test_proc_err(
             (
                 'tests.brew_file',
                 logging.INFO,
-                f"{err_cmd[cmd]['out']}",
+                f'{err_cmd[cmd]["out"]}',
             ),
         ]
         out, err = capfd.readouterr()
@@ -162,7 +162,7 @@ def test_proc_err_exit_on_err(
         assert e.type == CmdError
         assert e.value.return_code == err_cmd[cmd]['ret']
         assert (
-            str(e.value) == f"Failed at command: {cmd}\n{err_cmd[cmd]['out']}"
+            str(e.value) == f'Failed at command: {cmd}\n{err_cmd[cmd]["out"]}'
         )
         assert caplog.record_tuples == [
             ('tests.brew_file', logging.INFO, f'$ {cmd}'),
