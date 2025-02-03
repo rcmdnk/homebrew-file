@@ -1,7 +1,7 @@
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.3.6
+    rev: v0.4.0
     hooks:
       - id: ruff-lint-diff
         stages: [pre-commit]
@@ -11,28 +11,6 @@ repos:
         stages: [pre-commit]
       - id: ruff-format
         stages: [pre-commit]
-      - id: black-diff
-        stages: [manual]
-      - id: black
-        stages: [manual]
-      - id: blacken-docs
-        stages: [manual]
-      - id: autoflake-diff
-        stages: [manual]
-      - id: autoflake
-        stages: [manual]
-      - id: autopep8-diff
-        stages: [manual]
-      - id: autopep8
-        stages: [manual]
-      - id: isort-diff
-        stages: [manual]
-      - id: isort
-        stages: [manual]
-      - id: flake8
-        stages: [manual]
-      - id: bandit
-        stages: [manual]
       - id: mypy
         stages: [pre-commit]
       - id: numpydoc-validation
@@ -42,6 +20,10 @@ repos:
       - id: mdformat-check
         stages: [pre-commit]
       - id: mdformat
+        stages: [pre-commit]
+      - id: actionlint
+        stages: [pre-commit]
+      - id: validate-pyproject
         stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -92,7 +74,3 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
-    hooks:
-      - id: actionlint
