@@ -92,10 +92,10 @@ jobs:
         id: is_main
         run: |
           if [ "${{ github.ref }}" = "refs/heads/${{ env.MAIN_BRANCH }}" ] && [ "${{ matrix.os }}" = "${{ env.MAIN_OS }}" ] && [ "${{ matrix.python-version }}" = "${{ env.MAIN_PY_VER }}" ];then
-            echo "IS_MAIN=1" >> $GITHUB_ENV
+            echo "IS_MAIN=1" >> "$GITHUB_ENV"
             is_main=1
           else
-            echo "IS_MAIN=0" >> $GITHUB_ENV
+            echo "IS_MAIN=0" >> "$GITHUB_ENV"
             is_main=0
           fi
           if [ "${{ env.TMATE }}" = "true" ];then
@@ -103,9 +103,9 @@ jobs:
               echo "Tmate is enabled and this is not main, skip tests"
               exit 1
             fi
-            echo "DEBUG=1" >> $GITHUB_ENV
+            echo "DEBUG=1" >> "$GITHUB_ENV"
           else
-            echo "DEBUG=0" >> $GITHUB_ENV
+            echo "DEBUG=0" >> "$GITHUB_ENV"
           fi
       - name: Set up Homebrew
         id: set-up-homebrew

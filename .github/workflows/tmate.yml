@@ -5,7 +5,7 @@ on:
     inputs:
       os:
         description: 'os'
-        type: string
+        type: choice
         required: false
         default: "macos-latest"
         options:
@@ -13,7 +13,7 @@ on:
           - "ubuntu-latest"
       py_ver:
         description: 'py ver'
-        type: string
+        type: choice
         required: false
         default: "3.9"
         options:
