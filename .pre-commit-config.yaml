@@ -1,7 +1,7 @@
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/rcmdnk/pyproject-pre-commit
-    rev: v0.4.0
+    rev: v0.4.1
     hooks:
       - id: ruff-lint-diff
         stages: [pre-commit]
@@ -13,6 +13,8 @@ repos:
         stages: [pre-commit]
       - id: mypy
         stages: [pre-commit]
+        #- id: dmypy
+        #  stages: [pre-commit]
       - id: numpydoc-validation
         stages: [pre-commit]
       - id: shellcheck

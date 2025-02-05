@@ -1158,7 +1158,14 @@ class BrewFile:
             cask_aliases.update(aliases)
 
         for b in [*self.brewinfo_ext, self.brewinfo_main]:
-            for line in ['brew', 'tap', 'cask', 'appstore']:
+            for line in [
+                'brew',
+                'tap',
+                'cask',
+                'appstore',
+                'whalebrew',
+                'vscode',
+            ]:
                 for p in b.get_list(line + '_input'):
                     # Keep aliases
                     if (
@@ -1214,7 +1221,14 @@ class BrewFile:
         # Loop over lists to remove duplications.
         # tap_list is not checked for overlap removal.
         # Keep it in main list in any case.
-        for name in ['brew', 'cask', 'cask_nocask', 'appstore']:
+        for name in [
+            'brew',
+            'cask',
+            'cask_nocask',
+            'appstore',
+            'whalebrew',
+            'vscode',
+        ]:
             i = 'cask' if name == 'cask_nocask' else name
             for p in self.brewinfo_main.get_list(name + '_list'):
                 if p in self.get_list(i + '_input', True):
