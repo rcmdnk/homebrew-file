@@ -28,6 +28,7 @@ class BrewInfo:
         self.appstore_input: list[str] = []
         self.whalebrew_input: list[str] = []
         self.vscode_input: list[str] = []
+        self.cursor_input: list[str] = []
         self.main_input: list[str] = []
         self.file_input: list[str] = []
 
@@ -46,6 +47,7 @@ class BrewInfo:
         self.appstore_list: list[str] = []
         self.whalebrew_list: list[str] = []
         self.vscode_list: list[str] = []
+        self.cursor_list: list[str] = []
         self.main_list: list[str] = []
         self.file_list: list[str] = []
 
@@ -58,6 +60,7 @@ class BrewInfo:
             'appstore_input': self.appstore_input,
             'whalebrew_input': self.whalebrew_input,
             'vscode_input': self.vscode_input,
+            'cursor_input': self.cursor_input,
             'main_input': self.main_input,
             'file_input': self.file_input,
             'before_input': self.before_input,
@@ -71,6 +74,7 @@ class BrewInfo:
             'appstore_list': self.appstore_list,
             'whalebrew_list': self.whalebrew_list,
             'vscode_list': self.vscode_list,
+            'cursor_list': self.cursor_list,
             'main_list': self.main_list,
             'file_list': self.file_list,
         }
@@ -98,6 +102,7 @@ class BrewInfo:
         del self.appstore_input[:]
         del self.whalebrew_input[:]
         del self.vscode_input[:]
+        del self.cursor_input[:]
         del self.main_input[:]
         del self.file_input[:]
 
@@ -118,6 +123,7 @@ class BrewInfo:
         del self.appstore_list[:]
         del self.whalebrew_list[:]
         del self.vscode_list[:]
+        del self.cursor_list[:]
         del self.main_list[:]
         del self.file_list[:]
 
@@ -134,6 +140,7 @@ class BrewInfo:
         self.appstore_list.extend(self.appstore_input)
         self.whalebrew_list.extend(self.whalebrew_input)
         self.vscode_list.extend(self.vscode_input)
+        self.cursor_list.extend(self.cursor_input)
         self.main_list.extend(self.main_input)
         self.file_list.extend(self.file_input)
 
@@ -170,6 +177,7 @@ class BrewInfo:
 
         self.whalebrew_list.sort()
         self.vscode_list.sort()
+        self.cursor_list.sort()
 
     def get_list(self, name: str) -> list[str]:
         return copy.deepcopy(self.lists[name])
@@ -318,6 +326,11 @@ class BrewInfo:
                         self.vscode_input.append(p.split()[1])
                     else:
                         self.vscode_input.append(p)
+                elif cmd == 'cursor':
+                    if p.split()[0] == '--install-extension':
+                        self.cursor_input.append(p.split()[1])
+                    else:
+                        self.cursor_input.append(p)
                 elif cmd == 'main':
                     self.main_input.append(p)
                     self.file_input.append(p)
@@ -387,6 +400,7 @@ class BrewInfo:
         cmd_appstore = 'appstore '
         cmd_whalebrew = 'whalebrew '
         cmd_vscode = 'vscode '
+        cmd_cursor = 'cursor '
         cmd_main = 'main '
         cmd_file = 'file '
         if self.helper.opt['form'] in ['brewdler', 'bundle']:
@@ -398,6 +412,7 @@ class BrewInfo:
             cmd_appstore = 'mas '
             cmd_whalebrew = 'whalebrew '
             cmd_vscode = 'vscode '
+            cmd_cursor = 'cursor '
             cmd_main = '#main '
             cmd_file = '#file '
         elif self.helper.opt['form'] in ['command', 'cmd']:
@@ -427,6 +442,7 @@ fi
             cmd_appstore = 'mas install '
             cmd_whalebrew = 'whalebrew install '
             cmd_vscode = 'code --install-extension '
+            cmd_cursor = 'cursor --install-extension '
             cmd_main = '#main '
             cmd_file = '#file '
 
@@ -554,6 +570,12 @@ fi
             output += '\n# VSCode extensions\n'
             for e in self.vscode_list:
                 output += cmd_vscode + self.packout(e) + '\n'
+
+        # Cursor extensions
+        if self.helper.opt['cursor'] and self.cursor_list:
+            output += '\n# Cursor extensions\n'
+            for e in self.cursor_list:
+                output += cmd_cursor + self.packout(e) + '\n'
 
         # Main file
         if self.main_list:

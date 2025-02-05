@@ -122,7 +122,8 @@ class BrewFile:
         opt['reattach_formula'] = 'reattach-to-user-namespace'
         opt['mas_formula'] = 'mas'
         opt['whalebrew_formula'] = 'whalebrew'
-        opt['vscode_formula'] = 'vscode'
+        opt['vscode_formula'] = 'visual-studio-code'
+        opt['cursor_formula'] = 'cursor'
         opt['my_editor'] = os.getenv(
             'HOMEBREW_BREWFILE_EDITOR',
             os.getenv('EDITOR', 'vim'),
@@ -138,6 +139,9 @@ class BrewFile:
         opt['vscode_cmd'] = 'code'
         opt['is_vscode_cmd'] = 0
         opt['vscode_cmd_installed'] = False
+        opt['cursor_cmd'] = 'cursor'
+        opt['is_cursor_cmd'] = 0
+        opt['cursor_cmd_installed'] = False
         opt['docker_running'] = 0
         opt['args'] = []
         opt['yn'] = False
@@ -178,6 +182,7 @@ class BrewFile:
             os.getenv('HOMEBREW_BREWFILE_WHALEBREW', '0'),
         )
         opt['vscode'] = to_num(os.getenv('HOMEBREW_BREWFILE_VSCODE', '0'))
+        opt['cursor'] = to_num(os.getenv('HOMEBREW_BREWFILE_CURSOR', '0'))
 
         opt['all_files'] = False
         opt['read'] = False
@@ -289,7 +294,7 @@ class BrewFile:
             raise RuntimeError(msg)
         self.brewinfo_main = main
         self.brewinfo_ext.remove(self.brewinfo_main)
-        for cmd in ['mas', 'reattach', 'whalebrew', 'vscode']:
+        for cmd in ['mas', 'reattach', 'whalebrew', 'vscode', 'cursor']:
             if self.opt[f'{cmd}_cmd_installed']:
                 p = Path(self.opt['{cmd}_formula']).name
                 if p not in self.get_list('brew_input'):
@@ -346,6 +351,10 @@ class BrewFile:
         self.brewinfo_main.add_to_list(
             'vscode_list',
             self.brewinfo.vscode_list,
+        )
+        self.brewinfo_main.add_to_list(
+            'cursor_list',
+            self.brewinfo.cursor_list,
         )
         self.brewinfo_main.add_to_dict(
             'brew_list_opt',
@@ -681,6 +690,12 @@ class BrewFile:
             if self.check_vscode_cmd(True) != 1:
                 msg = "\n'code' command (for VSCode) is not available.\n"
                 raise RuntimeError(msg)
+        if cmd == 'cursor':
+            exe = ['cursor']
+            self.opt['args'].pop(0)
+            if self.check_cursor_cmd(True) != 1:
+                msg = "\n'cursor' command is not available.\n"
+                raise RuntimeError(msg)
 
         ret, lines = self.helper.proc(
             exe + self.opt['args'],
@@ -697,6 +712,7 @@ class BrewFile:
             or (cmd == 'mas' and self.opt['appstore'] != 1)
             or (cmd == 'whalebrew' and self.opt['whalebrew'] != 1)
             or (cmd == 'code' and self.opt['vscode'] != 1)
+            or (cmd == 'cursor' and self.opt['cursor'] != 1)
             or (
                 ret != 0
                 and 'Not installed' not in ' '.join(lines)
@@ -958,6 +974,18 @@ class BrewFile:
             install,
         )
 
+    def check_cursor_cmd(self, install: bool = False) -> Literal[-2, -1, 0, 1]:
+        """Check cursor is installed or not."""
+        if self.opt['is_cursor_cmd'] != 0:
+            return self.opt['is_cursor_cmd']
+
+        return self.check_cmd(
+            'is_cursor_cmd',
+            self.opt['cursor_cmd'],
+            self.opt['cursor_formula'],
+            install,
+        )
+
     def check_docker_running(self) -> Literal[-2, -1, 0, 1]:
         """Check if Docker is running."""
         if self.opt['docker_running'] != 0:
@@ -1040,6 +1068,21 @@ class BrewFile:
         # https://github.com/microsoft/vscode/issues/204447
         _, lines = self.helper.proc(
             f'{self.opt["vscode_cmd"]} --list-extensions',
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+            separate_err=True,
+            print_err=False,
+        )
+        return lines
+
+    def get_cursor_list(self) -> list[str]:
+        if self.opt['cursor'] != 1:
+            return []
+        if self.check_cursor_cmd(False) != 1:
+            return []
+        _, lines = self.helper.proc(
+            f'{self.opt["cursor_cmd"]} --list-extensions',
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
@@ -1147,6 +1190,10 @@ class BrewFile:
         if self.opt['vscode']:
             self.brewinfo.set_list_val('vscode_list', self.get_vscode_list())
 
+        # Cursor extensions
+        if self.opt['cursor']:
+            self.brewinfo.set_list_val('cursor_list', self.get_cursor_list())
+
     def clean_list(self) -> None:
         """Remove duplications between brewinfo.list to extra files' input."""
         # Cleanup extra files
@@ -1165,6 +1212,7 @@ class BrewFile:
                 'appstore',
                 'whalebrew',
                 'vscode',
+                'cursor',
             ]:
                 for p in b.get_list(line + '_input'):
                     # Keep aliases
@@ -1228,6 +1276,7 @@ class BrewFile:
             'appstore',
             'whalebrew',
             'vscode',
+            'cursor',
         ]:
             i = 'cask' if name == 'cask_nocask' else name
             for p in self.brewinfo_main.get_list(name + '_list'):
@@ -1488,6 +1537,27 @@ class BrewFile:
                         dryrun=self.opt['dryrun'],
                     )
                     self.remove_pack('vscode_list', e)
+
+        # Clean up Cursor extensions
+        if self.opt['cursor'] == 1 and self.get_list('cursor_list'):
+            self.banner('# Clean up Cursor extensions')
+
+            for e in self.get_list('cursor_list'):
+                if e in self.get_list('cursor_input'):
+                    continue
+
+                if self.check_cursor_cmd(True) == 1:
+                    cmd = f'{self.opt["cursor_cmd"]} --uninstall-extension {e}'
+                    _ = self.helper.proc(
+                        cmd,
+                        print_cmd=True,
+                        print_out=True,
+                        exit_on_err=False,
+                        separate_err=True,
+                        print_err=False,
+                        dryrun=self.opt['dryrun'],
+                    )
+                    self.remove_pack('cursor_list', e)
 
         # Clean up App Store applications
         if self.opt['appstore'] == 1 and self.get_list('appstore_list'):
@@ -1831,6 +1901,23 @@ class BrewFile:
                 else:
                     self.log.warning(f'Please install {e} to VSCode.')
 
+        # Cursor extensions
+        if self.opt['cursor']:
+            extensions = self.get_list('cursor_list')
+            for e in self.get_list('cursor_input'):
+                if e in extensions:
+                    continue
+                self.log.info(f'Installing {e}')
+                if self.opt['dryrun'] or self.check_cursor_cmd(True) == 1:
+                    _ = self.helper.proc(
+                        self.opt['cursor_cmd'] + ' --install-extension ' + e,
+                        separate_err=True,
+                        print_err=False,
+                        dryrun=self.opt['dryrun'],
+                    )
+                else:
+                    self.log.warning(f'Please install {e} to Cursor.')
+
         # Other commands
         for c in self.get_list('cmd_input'):
             _ = self.helper.proc(c, dryrun=self.opt['dryrun'])
@@ -1843,14 +1930,14 @@ class BrewFile:
         if reinit or max(
             [
                 self.opt[f'{x}_cmd_installed']
-                for x in ['mas', 'reattach', 'whalebrew', 'vscode']
+                for x in ['mas', 'reattach', 'whalebrew', 'vscode', 'cursor']
             ],
         ):
             self.opt['mas_cmd_installed'] = self.opt[
                 'reattach_cmd_installed'
             ] = self.opt['whalebrew_cmd_installed'] = self.opt[
                 'vscode_cmd_installed'
-            ] = False
+            ] = self.opt['cursor_cmd_installed'] = False
             self.input_to_list()
             self.initialize_write(debug_out=True)
 
