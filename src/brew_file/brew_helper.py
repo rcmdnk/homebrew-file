@@ -142,7 +142,7 @@ class BrewHelper:
                 exit_on_err=True,
                 separate_err=True,
             )
-            # test formulae in a deep direcotyr was found for hashicorp/tap
+            # test formulae in a deep directory was found for hashicorp/tap
             self.formulae = [
                 x for x in lines if len(x.split('/')[-1]) in (1, 3)
             ]
@@ -371,3 +371,15 @@ class BrewHelper:
         else:
             self.leaves_list = leaves_list
         return leaves_list
+
+    def get_full_name(self, package: str) -> str:
+        """Get full name (user/tap/package) of a package."""
+        info = self.get_info()
+        tap = ''
+        if package in info['formulae']:
+            tap = info['formulae'][package]['tap']
+        elif package in info['casks']:
+            tap = info['casks'][package]['tap']
+        if not tap or tap in [self.opt['core_repo'], self.opt['cask_repo']]:
+            return package
+        return f'{tap}/{package}'

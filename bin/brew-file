@@ -292,7 +292,7 @@ class BrewHelper:
                 exit_on_err=True,
                 separate_err=True,
             )
-            # test formulae in a deep direcotyr was found for hashicorp/tap
+            # test formulae in a deep directory was found for hashicorp/tap
             self.formulae = [
                 x for x in lines if len(x.split('/')[-1]) in (1, 3)
             ]
@@ -521,6 +521,18 @@ class BrewHelper:
         else:
             self.leaves_list = leaves_list
         return leaves_list
+
+    def get_full_name(self, package: str) -> str:
+        """Get full name (user/tap/package) of a package."""
+        info = self.get_info()
+        tap = ''
+        if package in info['formulae']:
+            tap = info['formulae'][package]['tap']
+        elif package in info['casks']:
+            tap = info['casks'][package]['tap']
+        if not tap or tap in [self.opt['core_repo'], self.opt['cask_repo']]:
+            return package
+        return f'{tap}/{package}'
 
 
 @dataclass
@@ -883,6 +895,9 @@ class BrewInfo:
         return opt
 
     def packout(self, pack: str) -> str:
+        """Get package name for output."""
+        if self.helper.opt['full_name']:
+            pack = self.helper.get_full_name(pack)
         if self.helper.opt['form'] in ['brewdler', 'bundle']:
             return "'" + pack + "'"
         return pack
@@ -1297,6 +1312,10 @@ class BrewFile:
 
         opt['appstore'] = to_num(os.getenv('HOMEBREW_BREWFILE_APPSTORE', '-1'))
         opt['no_appstore'] = False
+        opt['full_name'] = to_bool(
+            os.getenv('HOMEBREW_BREWFILE_FULL_NAME', '')
+        )
+        opt['all_files'] = False
 
         opt['whalebrew'] = to_num(
             os.getenv('HOMEBREW_BREWFILE_WHALEBREW', '0'),
@@ -1304,7 +1323,6 @@ class BrewFile:
         opt['vscode'] = to_num(os.getenv('HOMEBREW_BREWFILE_VSCODE', '0'))
         opt['cursor'] = to_num(os.getenv('HOMEBREW_BREWFILE_CURSOR', '0'))
 
-        opt['all_files'] = False
         opt['read'] = False
 
         return opt
@@ -3684,6 +3702,16 @@ def main() -> int:
         '    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils',
     )
 
+    full_name_parser = argparse.ArgumentParser(**arg_parser_opts)
+    full_name_parser.add_argument(
+        '--full-name',
+        action='store_true',
+        help='Use full names (tap/package) for packages. '
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_FULL_NAME, like:\n'
+        '    export HOMEBREW_BREWFILE_FULL_NAME=1',
+    )
+
     noupgradeatupdate_parser = argparse.ArgumentParser(**arg_parser_opts)
     noupgradeatupdate_parser.add_argument(
         '-U',
@@ -3763,7 +3791,7 @@ def main() -> int:
         action='store_true',
         default=b.opt['all_files'],
         dest='all_files',
-        help='Show all files including non-existing files.',
+        help='Show all Brewfile files including non-existing files.',
     )
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -3820,6 +3848,7 @@ def main() -> int:
         leaves_parser,
         on_request_parser,
         top_packages_parser,
+        full_name_parser,
         appstore_parser,
         no_appstore_parser,
         caskonly_parser,
@@ -3842,6 +3871,7 @@ def main() -> int:
             leaves_parser,
             on_request_parser,
             top_packages_parser,
+            full_name_parser,
             noupgradeatupdate_parser,
             repo_parser,
             fetch_parser,

@@ -177,6 +177,16 @@ def main() -> int:
         '    export HOMEBREW_BREWFILE_TOP_PACKAGES=go,coreutils',
     )
 
+    full_name_parser = argparse.ArgumentParser(**arg_parser_opts)
+    full_name_parser.add_argument(
+        '--full-name',
+        action='store_true',
+        help='Use full names (tap/package) for packages. '
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_FULL_NAME, like:\n'
+        '    export HOMEBREW_BREWFILE_FULL_NAME=1',
+    )
+
     noupgradeatupdate_parser = argparse.ArgumentParser(**arg_parser_opts)
     noupgradeatupdate_parser.add_argument(
         '-U',
@@ -256,7 +266,7 @@ def main() -> int:
         action='store_true',
         default=b.opt['all_files'],
         dest='all_files',
-        help='Show all files including non-existing files.',
+        help='Show all Brewfile files including non-existing files.',
     )
 
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
@@ -313,6 +323,7 @@ def main() -> int:
         leaves_parser,
         on_request_parser,
         top_packages_parser,
+        full_name_parser,
         appstore_parser,
         no_appstore_parser,
         caskonly_parser,
@@ -335,6 +346,7 @@ def main() -> int:
             leaves_parser,
             on_request_parser,
             top_packages_parser,
+            full_name_parser,
             noupgradeatupdate_parser,
             repo_parser,
             fetch_parser,

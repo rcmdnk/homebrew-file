@@ -371,6 +371,9 @@ class BrewInfo:
         return opt
 
     def packout(self, pack: str) -> str:
+        """Get package name for output."""
+        if self.helper.opt['full_name']:
+            pack = self.helper.get_full_name(pack)
         if self.helper.opt['form'] in ['brewdler', 'bundle']:
             return "'" + pack + "'"
         return pack

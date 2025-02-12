@@ -177,6 +177,10 @@ class BrewFile:
 
         opt['appstore'] = to_num(os.getenv('HOMEBREW_BREWFILE_APPSTORE', '-1'))
         opt['no_appstore'] = False
+        opt['full_name'] = to_bool(
+            os.getenv('HOMEBREW_BREWFILE_FULL_NAME', '')
+        )
+        opt['all_files'] = False
 
         opt['whalebrew'] = to_num(
             os.getenv('HOMEBREW_BREWFILE_WHALEBREW', '0'),
@@ -184,7 +188,6 @@ class BrewFile:
         opt['vscode'] = to_num(os.getenv('HOMEBREW_BREWFILE_VSCODE', '0'))
         opt['cursor'] = to_num(os.getenv('HOMEBREW_BREWFILE_CURSOR', '0'))
 
-        opt['all_files'] = False
         opt['read'] = False
 
         return opt
