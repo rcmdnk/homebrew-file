@@ -59,7 +59,7 @@ wheels = [
 
 [[package]]
 name = "brew-file"
-version = "10.0.7"
+version = "10.0.8"
 source = { editable = "." }
 
 [package.dev-dependencies]
@@ -74,7 +74,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "pyproject-pre-commit", extras = ["ruff"], specifier = ">=0.4.0" },
+    { name = "pyproject-pre-commit", extras = ["ruff"], specifier = ">=0.4.1" },
     { name = "pytest", specifier = ">=8.3.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-xdist", specifier = ">=3.3.1" },
