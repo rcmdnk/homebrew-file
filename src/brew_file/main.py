@@ -143,8 +143,8 @@ def main() -> int:
     leaves_parser.add_argument(
         '--leaves',
         action='store_true',
-        default=b.opt['leaves'],
         dest='leaves',
+        default=b.opt['leaves'],
         help='Make list only for leaves (taken by `brew leaves`). '
         'You can set this by environmental variable, '
         'HOMEBREW_BREWFILE_LEAVES, like:\n'
@@ -155,8 +155,8 @@ def main() -> int:
     on_request_parser.add_argument(
         '--on_request',
         action='store_true',
-        default=b.opt['on_request'],
         dest='on_request',
+        default=b.opt['on_request'],
         help='Make list only for packages installed on request. '
         "This option is given priority over 'leaves'. "
         'You can set this by environmental variable, '
@@ -168,8 +168,8 @@ def main() -> int:
     top_packages_parser.add_argument(
         '--top_packages',
         action='store',
-        default=b.opt['top_packages'],
         dest='top_packages',
+        default=b.opt['top_packages'],
         help='Packages to be listed even if they are under dependencies '
         "and `leaves`/'on_request' option is used. "
         'You can set this by environmental variable, '
@@ -181,6 +181,8 @@ def main() -> int:
     full_name_parser.add_argument(
         '--full-name',
         action='store_true',
+        dest='full_name',
+        default=b.opt['full_name'],
         help='Use full names (tap/package) for packages. '
         'You can set this by environmental variable, '
         'HOMEBREW_BREWFILE_FULL_NAME, like:\n'
@@ -192,8 +194,8 @@ def main() -> int:
         '-U',
         '--noupgrade',
         action='store_true',
-        default=b.opt['noupgradeatupdate'],
         dest='noupgradeatupdate',
+        default=b.opt['noupgradeatupdate'],
         help='Do not execute `brew update/brew upgrade`'
         ' at `brew file update`.',
     )
@@ -203,8 +205,8 @@ def main() -> int:
         '-r',
         '--repo',
         action='store',
-        default=b.opt['repo'],
         dest='repo',
+        default=b.opt['repo'],
         help='Set repository name. Use with set_repo.',
     )
 
@@ -212,8 +214,8 @@ def main() -> int:
     fetch_parser.add_argument(
         '--fetch-HEAD',
         action='store_true',
-        default=b.opt['fetch_head'],
         dest='fetch_head',
+        default=b.opt['fetch_head'],
         help='Fetch HEAD at update.',
     )
 
@@ -222,8 +224,8 @@ def main() -> int:
         '-n',
         '--nolink',
         action='store_false',
-        default=b.opt['link'],
         dest='link',
+        default=b.opt['link'],
         help="Don't make links for Apps.",
     )
 
@@ -231,8 +233,8 @@ def main() -> int:
     caskonly_parser.add_argument(
         '--caskonly',
         action='store_true',
-        default=b.opt['caskonly'],
         dest='caskonly',
+        default=b.opt['caskonly'],
         help='Write out only cask related packages',
     )
 
@@ -240,8 +242,8 @@ def main() -> int:
     appstore_parser.add_argument(
         '--appstore',
         action='store',
-        default=b.opt['appstore'],
         dest='appstore',
+        default=b.opt['appstore'],
         help='Set AppStore application check level.\n'
         '0: do not check,\n'
         '1: check and manage,\n'
@@ -254,8 +256,8 @@ def main() -> int:
     no_appstore_parser.add_argument(
         '--no_appstore',
         action='store_true',
-        default=b.opt['no_appstore'],
         dest='no_appstore',
+        default=b.opt['no_appstore'],
         help='Set AppStore application check level to 0. '
         "(legacy option, works same as '--appstore 0'.)",
     )
@@ -264,8 +266,8 @@ def main() -> int:
     all_files_parser.add_argument(
         '--all_files',
         action='store_true',
-        default=b.opt['all_files'],
         dest='all_files',
+        default=b.opt['all_files'],
         help='Show all Brewfile files including non-existing files.',
     )
 
@@ -274,8 +276,8 @@ def main() -> int:
         '-d',
         '--dry_run',
         action='store_true',
-        default=b.opt['dryrun'],
         dest='dryrun',
+        default=b.opt['dryrun'],
         help='Set dry run mode.',
     )
 
@@ -284,8 +286,8 @@ def main() -> int:
         '-y',
         '--yes',
         action='store_true',
-        default=b.opt['yn'],
         dest='yn',
+        default=b.opt['yn'],
         help='Answer yes to all yes/no questions.',
     )
 
@@ -301,8 +303,8 @@ def main() -> int:
             'error',
             'critical',
         ],
-        default=b.opt['verbose'],
         dest='verbose',
+        default=b.opt['verbose'],
         help='Verbose level',
     )
 
@@ -311,8 +313,8 @@ def main() -> int:
         '-h',
         '--help',
         action='store_true',
-        default=False,
         dest='help',
+        default=False,
         help='Print Help (this message) and exit.',
     )
 

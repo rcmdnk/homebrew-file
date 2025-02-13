@@ -133,6 +133,12 @@ class BrewHelper:
             self.opt[name] = lines[0]
         return self.opt[name]
 
+    def name_key(self) -> str:
+        return 'full_name' if self.opt['full_name'] else 'name'
+
+    def token_key(self) -> str:
+        return 'full_token' if self.opt['full_name'] else 'token'
+
     def get_formulae(self) -> list[str]:
         if self.formulae is None:
             _, lines = self.proc(
@@ -190,7 +196,7 @@ class BrewHelper:
             data = json.loads(''.join(lines))
             self.all_info = {
                 'formulae': {},
-                'casks': {x['token']: x for x in data['casks']},
+                'casks': {x[self.token_key()]: x for x in data['casks']},
             }
             while ret != 0:
                 ret, lines = self.proc(
@@ -224,7 +230,7 @@ class BrewHelper:
             lines = lines[lines.index('{') :]
             data = json.loads(''.join(lines))
             self.all_info['formulae'] = {
-                x['name']: x for x in data['formulae']
+                x[self.name_key()]: x for x in data['formulae']
             }
         return self.all_info
 
@@ -241,8 +247,8 @@ class BrewHelper:
             lines = lines[lines.index('{') :]
             data = json.loads(''.join(lines))
             self.info = {
-                'formulae': {x['name']: x for x in data['formulae']},
-                'casks': {x['token']: x for x in data['casks']},
+                'formulae': {x[self.name_key()]: x for x in data['formulae']},
+                'casks': {x[self.token_key()]: x for x in data['casks']},
             }
         return self.info
 
@@ -265,13 +271,13 @@ class BrewHelper:
                         tap,
                         {},
                     )
-                    self.formula_aliases[tap][o] = formula['name']
+                    self.formula_aliases[tap][o] = formula[self.name_key()]
                 for a in formula.get('aliases', []):
                     self.formula_aliases[tap] = self.formula_aliases.get(
                         tap,
                         {},
                     )
-                    self.formula_aliases[tap][a] = formula['name']
+                    self.formula_aliases[tap][a] = formula[self.name_key()]
         return self.formula_aliases
 
     def get_cask_aliases(self) -> dict[str, dict[str, str]]:
@@ -282,7 +288,7 @@ class BrewHelper:
                 tap = cask['tap']
                 for o in cask.get('old_tokens', []):
                     self.cask_aliases[tap] = self.cask_aliases.get(tap, {})
-                    self.cask_aliases[tap][o] = cask['name']
+                    self.cask_aliases[tap][o] = cask[self.token_key()]
         return self.cask_aliases
 
     def get_installed(self, package: str) -> dict[str, Any]:
@@ -334,11 +340,15 @@ class BrewHelper:
             self.taps = {x['name']: x for x in data}
 
         packs = {
-            'formulae': [
-                x.split('/')[-1] for x in self.taps[tap]['formula_names']
-            ],
-            'casks': [x.split('/')[-1] for x in self.taps[tap]['cask_tokens']],
+            'formulae': self.taps[tap]['formula_names'],
+            'casks': self.taps[tap]['cask_tokens'],
         }
+        if not self.opt['full_name']:
+            packs = {
+                'formulae': [x.split('/')[-1] for x in packs['formulae']],
+                'casks': [x.split('/')[-1] for x in packs['casks']],
+            }
+
         if alias:
             packs['formulae'] += list(
                 self.get_formula_aliases().get(tap, {}).keys(),

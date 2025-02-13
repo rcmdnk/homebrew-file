@@ -372,8 +372,6 @@ class BrewInfo:
 
     def packout(self, pack: str) -> str:
         """Get package name for output."""
-        if self.helper.opt['full_name']:
-            pack = self.helper.get_full_name(pack)
         if self.helper.opt['form'] in ['brewdler', 'bundle']:
             return "'" + pack + "'"
         return pack
@@ -509,10 +507,7 @@ fi
                     isfirst = isfirst_pack = False
 
                     for p in self.brew_list[:]:
-                        if (
-                            p.split('/')[-1].replace('.rb', '')
-                            in tap_packs['formulae']
-                        ):
+                        if p in tap_packs['formulae']:
                             pack = self.packout(p) + self.convert_option(
                                 self.brew_list_opt[p],
                             )
