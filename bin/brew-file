@@ -352,7 +352,7 @@ class BrewHelper:
                     # Remove non-package
                     # This can be found in hashicorp/tap
                     # ("util" directory is misunderstood as a package)
-                    package = line.split()[7].strip('".')
+                    package = line.split('with the name ')[1].strip('".')
                 if package:
                     if package in packages:
                         packages.remove(package)
