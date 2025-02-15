@@ -147,11 +147,8 @@ class BrewHelper:
             exit_on_err=True,
             separate_err=True,
         )
-        # Test formulae in a deep directory was found in hashicorp/tap
-        # Allow only short name and tap + name
-        packages = [x for x in lines if len(x.split('/')) in (1, 3)]
-        self.packages[package_type] = packages
-        return packages
+        self.packages[package_type] = lines
+        return self.packages[package_type]
 
     def get_formulae(self) -> list[str]:
         return self.get_packages('formulae')
@@ -192,24 +189,35 @@ class BrewHelper:
                 return info[package_type]
 
             updated = 0
-            for line in info:
+            for _line in info:
+                line = _line.replace('Error: ', '').replace('::error::', '')
                 package = ''
                 if 'requires at least a URL' in line:
                     # Remove package from list if it has no URL
                     # https://github.com/hashicorp/homebrew-tap/issues/258
-                    package = line.split()[1].strip(':')
+                    package = line.split()[0].strip(':')
                 elif 'No available' in line:
                     # Remove non-package
                     # This can be found in hashicorp/tap
-                    # ("util" directory is misunderstood as a package)
-                    package = line.split('with the name ')[1].strip('".')
+                    # "util" directory is misunderstood as a package
+                    # Some formulae files under more than 2 directories are found as formulae
+                    # but not inofo is available
+                    package = (
+                        line.split('with the name ')[1]
+                        .split('".')[0]
+                        .strip('"')
+                    )
                 if package:
-                    if package in packages:
-                        packages.remove(package)
-                        updated = 1
-                    if (short_name := package.split('/')[-1]) in packages:
-                        packages.remove(short_name)
-                        updated = 1
+                    packages_keep = packages.copy()
+                    for p in packages:
+                        if (
+                            p == package
+                            or p.split('/')[-1] == package
+                            or p.split('/')[-1] == package.split('/')[-1]
+                        ):
+                            packages_keep.remove(p)
+                            updated = 1
+                    packages = packages_keep
             if updated:
                 continue
             msg = f'Failed to get info of all {package_type}.\n\n'
