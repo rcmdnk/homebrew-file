@@ -189,31 +189,33 @@ class BrewHelper:
                 return info[package_type]
 
             updated = 0
-            for _line in info:
-                line = _line.replace('Error: ', '').replace('::error::', '')
+            for line in info:
+                err_msg = line.replace('Error: ', '').replace('::error::', '')
                 package = ''
-                if 'requires at least a URL' in line:
+                if 'requires at least a URL' in err_msg:
                     # Remove package from list if it has no URL
                     # https://github.com/hashicorp/homebrew-tap/issues/258
-                    package = line.split()[0].strip(':')
-                elif 'No available' in line:
+                    package = err_msg.split()[0].strip(':').lower()
+                elif 'No available' in err_msg:
                     # Remove non-package
                     # This can be found in hashicorp/tap
                     # "util" directory is misunderstood as a package
                     # Some formulae files under more than 2 directories are found as formulae
                     # but not inofo is available
                     package = (
-                        line.split('with the name ')[1]
+                        err_msg.split('with the name ')[1]
                         .split('".')[0]
                         .strip('"')
+                        .lower()
                     )
                 if package:
                     packages_keep = packages.copy()
                     for p in packages:
+                        pl = p.lower()
                         if (
-                            p == package
-                            or p.split('/')[-1] == package
-                            or p.split('/')[-1] == package.split('/')[-1]
+                            pl == package
+                            or pl.split('/')[-1] == package
+                            or pl.split('/')[-1] == package.split('/')[-1]
                         ):
                             packages_keep.remove(p)
                             updated = 1
