@@ -121,3 +121,22 @@ function code
   # Execute command
   $exe $argv
 end
+
+# cursor (for Cursor) command wrapper for brew-file
+function cursor
+  # Set exe
+  set -l exe command cursor
+
+  if type -q brew-file
+    # Check args
+    set -l cmd $argv[1]
+
+    switch "$cmd"
+      case '--install-extension' '--uninstall-extension'
+        set exe brew-file brew cursor
+    end
+  end
+
+  # Execute command
+  $exe $argv
+end

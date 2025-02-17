@@ -202,3 +202,29 @@ code () {
   # Execute command
   "${exe[@]}" "$@"
 }
+
+# cursor (for Cursor) command wrapper for brew-file
+cursor () {
+  # Emulate ksh / local options if zsh
+  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+
+  # Set exe
+  exe=("command" "cursor")
+
+  # Do wrap
+  if type brew-file >/dev/null 2>&1;then
+    # Check args
+    cmd=$1
+
+    case "$cmd" in
+      --install-extension|--uninstall-extension)
+        exe=("brew-file" "brew" "cursor")
+        ;;
+      *)
+        ;;
+    esac
+  fi
+
+  # Execute command
+  "${exe[@]}" "$@"
+}
