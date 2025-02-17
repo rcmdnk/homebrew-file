@@ -59,7 +59,7 @@ wheels = [
 
 [[package]]
 name = "brew-file"
-version = "10.0.10"
+version = "10.0.11"
 source = { editable = "." }
 
 [package.dev-dependencies]
