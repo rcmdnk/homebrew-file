@@ -2048,11 +2048,11 @@ class BrewFile:
         for d in app_dirs:
             for app in sorted(
                 [
-                    a
-                    for a in os.listdir(d)
-                    if not a.startswith('.')
-                    and a != 'Utilities'
-                    and Path(d + '/' + a).is_dir()
+                    str(a)
+                    for a in Path(d).iterdir()
+                    if not str(a).startswith('.')
+                    and str(a) != 'Utilities'
+                    and (Path(d) / a).is_dir()
                 ],
             ):
                 check = 'no_cask'
@@ -2080,7 +2080,7 @@ class BrewFile:
                     else:
                         appstore_apps[name] = app_path
                 elif token in casks:
-                    cask_tap = cast(str, casks[token]['tap'])
+                    cask_tap = cast('str', casks[token]['tap'])
                     if casks[token]['installed']:
                         check = 'cask'
                         if casks[token]['latest']:
@@ -2113,7 +2113,7 @@ class BrewFile:
                         ]
                 elif token in all_info['formulae']:
                     brew_tap = cast(
-                        str,
+                        'str',
                         all_info['formulae'][token]['tap'],
                     )
                     if all_info['formulae'][token]['installed']:

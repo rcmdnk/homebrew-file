@@ -248,7 +248,7 @@ class BrewHelper:
             return self.info
 
         self.info = cast(
-            dict[str, Any], self.get_json_info('--installed', True)
+            'dict[str, Any]', self.get_json_info('--installed', True)
         )
         return self.info
 
