@@ -2,7 +2,7 @@
 # brew command wrapper for brew-file
 brew () {
   # Emulate ksh / local options if zsh
-  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
 
   # Set exe
   local exe=("command" "brew")
@@ -17,7 +17,7 @@ brew () {
   local a
   for a in "$@";do
     if [[ ! "$a" =~ ^- ]];then
-      ((nargs++))
+      nargs=$(( nargs + 1 ))
     fi
   done
   local cmd=$1
@@ -58,7 +58,7 @@ brew () {
   if ! brewfile="$(brew-file cat)" 2>/dev/null;then
     brewfile=""
   fi
-  $env "${exe[@]}" "$@"
+  ${env:-} "${exe[@]}" "$@"
   local ret=$?
 
   # Commands after brew command
@@ -82,9 +82,9 @@ _post_brewfile_update () {
 # Wrap the brew command completion, to use the completion on `brew file`.
 if ! type -a _brew >& /dev/null;then
   return
-elif [ -z "$ZSH_VERSION" ] && ! type -a _brew_file >& /dev/null;then
+elif [ -z "${ZSH_VERSION:-}" ] && ! type -a _brew_file >& /dev/null;then
   return
-elif [ -n "$ZSH_VERSION" ];then
+elif [ -n "${ZSH_VERSION:-}" ];then
   if ! type -a _brew-file >& /dev/null;then
     return
   fi
@@ -92,7 +92,7 @@ elif [ -n "$ZSH_VERSION" ];then
 fi
 
 _brew_completion_wrap () {
-  if [ -n "$ZSH_VERSION" ];then
+  if [ -n "${ZSH_VERSION:-}" ];then
     local cword=$CURRENT
     local w
     w=("${words[@]}")
@@ -110,7 +110,7 @@ _brew_completion_wrap () {
   else
     _brew
     if [ "$cword" -eq 1 ];then
-      if [ -n "$ZSH_VERSION" ];then
+      if [ -n "${ZSH_VERSION:-}" ];then
         # Use longest brew's subcommand 'reinstall' to align with other brew commands.
         _values 'Subcommands' 'file[manage Brewfile]'
       else
@@ -119,7 +119,7 @@ _brew_completion_wrap () {
     fi
   fi
 }
-if [ -n "$ZSH_VERSION" ];then
+if [ -n "${ZSH_VERSION:-}" ];then
   compdef _brew_completion_wrap brew
 else
   complete -o bashdefault -o default -F _brew_completion_wrap brew
@@ -128,7 +128,7 @@ fi
 # mas command wrapper for brew-file
 mas () {
   # Emulate ksh / local options if zsh
-  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
 
   # Set exe
   exe=("command" "mas")
@@ -154,7 +154,7 @@ mas () {
 # whalebrew command wrapper for brew-file
 whalebrew () {
   # Emulate ksh / local options if zsh
-  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
 
   # Set exe
   exe=("command" "whalebrew")
@@ -180,7 +180,7 @@ whalebrew () {
 # code (for VSCode) command wrapper for brew-file
 code () {
   # Emulate ksh / local options if zsh
-  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
 
   # Set exe
   exe=("command" "code")
@@ -206,7 +206,7 @@ code () {
 # cursor (for Cursor) command wrapper for brew-file
 cursor () {
   # Emulate ksh / local options if zsh
-  [ -z "$ZSH_VERSION" ] || emulate -L ksh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
 
   # Set exe
   exe=("command" "cursor")
