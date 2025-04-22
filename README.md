@@ -1,9 +1,9 @@
-commit: [22460cb40a72b64a91950733003f77bde68034cc](https://github.com/rcmdnk/homebrew-file/tree/22460cb40a72b64a91950733003f77bde68034cc)
+commit: [2f30022c137d7c3a1183303db2e256747d452063](https://github.com/rcmdnk/homebrew-file/tree/2f30022c137d7c3a1183303db2e256747d452063)
 
 condition: branch=main, os=macos-latest, python_version=3.10
 
-[![test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/runs/14460211125)
+[![test](https://github.com/rcmdnk/homebrew-file/actions/workflows/test.yml/badge.svg)](https://github.com/rcmdnk/homebrew-file/actions/runs/14586161850)
 | Tests | Skipped | Failures | Errors | Time |
 | ----- | ------- | -------- | -------- | ------------------ |
-| 152 | 0 :zzz: | 0 :x: | 0 :fire: | 3m 31s :stopwatch: |
+| 152 | 0 :zzz: | 0 :x: | 0 :fire: | 49.938s :stopwatch: |
 
