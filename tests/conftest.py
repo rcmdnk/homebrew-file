@@ -17,22 +17,11 @@ def check_brew(tmp_path_factory: pytest.TempPathFactory) -> None:
         if not (Path(bf.opt['cache']) / 'api/formula.jws.json').exists():
             # pseudo code to download api json
             bf.helper.proc('brew search python')
+    for env in os.environ:
+        if env.startswith('HOMEBREW_BREWFILE'):
+            del os.environ[env]
     os.environ['HOMEBREW_API_AUTO_UPDATE_SECS'] = '100000'
     os.environ['HOMEBREW_AUTO_UPDATE_SECS'] = '100000'
-    os.environ['HOMEBREW_BREWFILE_VERBOSE'] = 'info'
-    os.environ['HOMEBREW_BREWFILE'] = ''
-    os.environ['HOMEBREW_BREWFILE_BACKUP'] = ''
-    os.environ['HOMEBREW_BREWFILE_LEAVES'] = ''
-    os.environ['HOMEBREW_BREWFILE_ON_REQUEST'] = ''
-    os.environ['HOMEBREW_BREWFILE_TOP_PACKAGES'] = ''
-    os.environ['HOMEBREW_BREWFILE_FETCH_HEAD'] = ''
-    os.environ['HOMEBREW_BREWFILE_EDITOR'] = 'vim'
-    os.environ['HOMEBREW_BREWFILE_NO_INSTALL_FROM_API'] = ''
-    os.environ['HOMEBREW_BREWFILE_APPSTORE'] = '-1'
-    os.environ['HOMEBREW_BREWFILE_FULL_NAME'] = '0'
-    os.environ['HOMEBREW_BREWFILE_WHALEBREW'] = '0'
-    os.environ['HOMEBREW_BREWFILE_VSCODE'] = '0'
-    os.environ['HOMEBREW_BREWFILE_CURSOR'] = '0'
 
 
 @pytest.fixture(scope='session', autouse=False)
