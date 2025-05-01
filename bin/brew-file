@@ -663,7 +663,8 @@ class BrewInfo:
     def input_to_list(self) -> None:
         # Keep brew_opt made from brew command and ignore brew_opt_input to
         # keep actual options
-        brew_opt = self.brew_opt_list.copy()
+        brew_opt = self.brew_opt_input.copy()
+        brew_opt.update(self.brew_opt_list)
         for k, v in self.brew_opt_input.items():
             if k in brew_opt and v != brew_opt[k]:
                 self.log.warning(

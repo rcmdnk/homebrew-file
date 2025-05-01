@@ -156,7 +156,7 @@ def test_input_to_list(brew_info: BrewInfo) -> None:
     assert brew_info.main_input == ['main']
     assert brew_info.file_input == ['file']
 
-    assert brew_info.brew_opt_list == {'brew_input': 'opt'}
+    assert brew_info.brew_opt_list == {'brew_input': 'opt', 'abc': 'abc'}
     assert brew_info.brew_list == ['brew']
     assert brew_info.tap_list == ['tap']
     assert brew_info.cask_list == ['cask']
