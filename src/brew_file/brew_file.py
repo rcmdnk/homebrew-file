@@ -1249,19 +1249,7 @@ class BrewFile:
                         in self.brewinfo.get_list('cask_list')
                     ):
                         self.brewinfo.add_to_list('cask_list', [p])
-                        self.brewinfo.add_to_dict(
-                            'cask_list_args_input',
-                            {
-                                p: self.brewinfo.get_dict(
-                                    'cask_list_args_input',
-                                )[cask_aliases[p]],
-                            },
-                        )
                         self.brewinfo.remove('cask_list', cask_aliases[p])
-                        self.brewinfo.remove(
-                            'cask_list_args_input',
-                            cask_aliases[p],
-                        )
 
                     if p not in self.brewinfo.get_list(line + '_list'):
                         b.remove(line + '_input', p)
