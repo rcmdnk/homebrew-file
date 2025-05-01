@@ -1,0 +1,38 @@
+---
+name: check
+
+on:
+#  push:
+#    branches:
+#      - master
+  schedule:
+      - cron:  '0 0 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interface:
+    permissions:
+      contents: read
+      models: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Get source
+        id: source
+        run: echo code="$(cat bin/brew-file)" >> "$GITHUB_OUTPUT"
+      - name: ai interface
+        id: inference
+        uses: actions/ai-inference@v1
+        with:
+          max-tokens: 2000
+          prompt: "Read the following code and make suggestions:\n---\n${{ steps.source.outputs.code }}"
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.inference.outputs.response }}" >> "$GITHUB_STEP_SUMMARY"

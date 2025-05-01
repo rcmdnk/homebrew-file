@@ -23,8 +23,9 @@ repos:
         stages: [pre-commit]
       - id: mdformat
         stages: [pre-commit]
-      - id: actionlint
-        stages: [pre-commit]
+      # models is not included in check
+      #- id: actionlint
+      #  stages: [pre-commit]
       - id: validate-pyproject
         stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
