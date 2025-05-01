@@ -302,7 +302,7 @@ class BrewFile:
                 p = Path(self.opt['{cmd}_formula']).name
                 if p not in self.get_list('brew_input'):
                     self.brewinfo_main.brew_input.append(p)
-                    self.brewinfo_main.brew_input_opt[p] = ''
+                    self.brewinfo_main.brew_opt_input[p] = ''
         self.opt['read'] = True
 
     def read(
@@ -360,8 +360,8 @@ class BrewFile:
             self.brewinfo.cursor_list,
         )
         self.brewinfo_main.add_to_dict(
-            'brew_list_opt',
-            self.brewinfo.brew_list_opt,
+            'brew_opt_list',
+            self.brewinfo.brew_opt_list,
         )
 
     def input_to_list(self, only_ext: bool = False) -> None:
@@ -871,7 +871,7 @@ class BrewFile:
             p = Path(formula).name
             if p not in self.get_list('brew_list'):
                 self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = ''
+                self.brewinfo.brew_opt_list[p] = ''
 
         if shutil.which(cmd) is None:
             msg = f'Failed to prepare {cmd} command.'
@@ -944,7 +944,7 @@ class BrewFile:
                 p = Path(self.opt['reattach_formula']).name
                 if p not in self.get_list('brew_list'):
                     self.brewinfo.brew_list.append(p)
-                    self.brewinfo.brew_list_opt[p] = ''
+                    self.brewinfo.brew_opt_list[p] = ''
                 self.opt['reattach_cmd_installed'] = True
             self.opt['mas_cmd'] = 'reattach-to-user-namespace mas'
 
@@ -1132,7 +1132,7 @@ class BrewFile:
 
             for p in packages:
                 self.brewinfo.brew_list.append(p)
-                self.brewinfo.brew_list_opt[p] = self.helper.get_option(p)
+                self.brewinfo.brew_opt_list[p] = self.helper.get_option(p)
 
         # Taps
         _, lines = self.helper.proc(
@@ -1227,9 +1227,9 @@ class BrewFile:
                     ):
                         self.brewinfo.add_to_list('brew_list', [p])
                         self.brewinfo.add_to_dict(
-                            'brew_list_opt',
+                            'brew_opt_list',
                             {
-                                p: self.brewinfo.get_dict('brew_list_opt')[
+                                p: self.brewinfo.get_dict('brew_opt_list')[
                                     formula_aliases[p]
                                 ],
                             },
@@ -1239,7 +1239,7 @@ class BrewFile:
                             formula_aliases[p],
                         )
                         self.brewinfo.remove(
-                            'brew_list_opt',
+                            'brew_opt_list',
                             formula_aliases[p],
                         )
                     if (
@@ -1493,7 +1493,7 @@ class BrewFile:
                     continue
                 if p not in self.get_list('brew_input'):
                     self.brewinfo.brew_input.append(p)
-                    self.brewinfo.brew_input_opt[p] = ''
+                    self.brewinfo.brew_opt_input[p] = ''
                     add_dependncies(p)
 
         for p in self.get_list('brew_input'):
@@ -1675,9 +1675,9 @@ class BrewFile:
             for p in self.get_list('tap_list'):
                 if p in self.get_list('tap_input'):
                     continue
-                packs = self.helper.get_tap_packs(p)
+                tap_packs = self.helper.get_tap_packs(p, alias=True)
                 untapflag = True
-                for tp in packs['formulae']:
+                for tp in tap_packs['formulae']:
                     if tp in self.get_list('brew_input'):
                         # Keep the Tap as related package is remained
                         untapflag = False
@@ -1685,7 +1685,7 @@ class BrewFile:
                 if not untapflag:
                     continue
                 if is_mac():
-                    for tc in packs['casks']:
+                    for tc in tap_packs['casks']:
                         if tc in self.get_list('cask_input'):
                             # Keep the Tap as related cask is remained
                             untapflag = False
@@ -1768,9 +1768,9 @@ class BrewFile:
                 cmd = 'install'
                 pack = formula_aliases.get(p, p)
                 if pack in self.get_list('brew_full_list'):
-                    if p not in self.get_dict('brew_list_opt') or sorted(
-                        self.get_dict('brew_input_opt')[p].split(),
-                    ) == sorted(self.get_dict('brew_list_opt')[p].split()):
+                    if p not in self.get_dict('brew_opt_list') or sorted(
+                        self.get_dict('brew_opt_input')[p].split(),
+                    ) == sorted(self.get_dict('brew_opt_list')[p].split()):
                         continue
                     # Uninstall to install the package with new options
                     # `reinstall` does not accept options such a --HEAD.
@@ -1783,7 +1783,7 @@ class BrewFile:
                     + cmd
                     + ' '
                     + p
-                    + self.get_dict('brew_input_opt')[p],
+                    + self.get_dict('brew_opt_input')[p],
                     dryrun=self.opt['dryrun'],
                 )
                 if ret != 0:
@@ -1803,11 +1803,11 @@ class BrewFile:
                         _ = self.helper.proc('brew linkapps')
                 if (
                     p in self.get_list('brew_list')
-                    and self.get_dict('brew_input_opt')[p]
-                    != self.get_dict('brew_list_opt')[p]
+                    and self.get_dict('brew_opt_input')[p]
+                    != self.get_dict('brew_opt_list')[p]
                 ):
                     self.brewinfo.add_to_dict(
-                        'brew_input_opt',
+                        'brew_opt_input',
                         {p: self.helper.get_option(p)},
                     )
                     reinit = 1

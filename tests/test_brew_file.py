@@ -211,7 +211,7 @@ def test_read_all(bf: BrewFile, tap: list[str], full_name: bool) -> None:
         f'{tap}smenu',
         f'{tap}stow_reset',
     }
-    assert bf.get_dict('brew_input_opt') == {
+    assert bf.get_dict('brew_opt_input') == {
         'cmake': '',
         'python@3.10': '',
         'vim': ' --HEAD',

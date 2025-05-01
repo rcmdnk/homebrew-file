@@ -20,8 +20,8 @@ class BrewInfo:
 
     def __post_init__(self) -> None:
         self.log = logging.getLogger(__name__)
-        self.brew_input_opt: dict[str, str] = {}
 
+        self.brew_opt_input: dict[str, str] = {}
         self.brew_input: list[str] = []
         self.tap_input: list[str] = []
         self.cask_input: list[str] = []
@@ -31,15 +31,12 @@ class BrewInfo:
         self.cursor_input: list[str] = []
         self.main_input: list[str] = []
         self.file_input: list[str] = []
-
         self.before_input: list[str] = []
         self.after_input: list[str] = []
         self.cmd_input: list[str] = []
-
         self.cask_args_input: dict[str, str] = {}
 
-        self.brew_list_opt: dict[str, str] = {}
-
+        self.brew_opt_list: dict[str, str] = {}
         self.brew_list: list[str] = []
         self.brew_full_list: list[str] = []
         self.tap_list: list[str] = []
@@ -50,7 +47,6 @@ class BrewInfo:
         self.cursor_list: list[str] = []
         self.main_list: list[str] = []
         self.file_list: list[str] = []
-
         self.cask_nocask_list: list[str] = []
 
         self.lists: dict[str, list[str]] = {
@@ -79,9 +75,9 @@ class BrewInfo:
             'file_list': self.file_list,
         }
         self.dicts: dict[str, dict[str, str]] = {
-            'brew_input_opt': self.brew_input_opt,
+            'brew_opt_input': self.brew_opt_input,
             'cask_args_input': self.cask_args_input,
-            'brew_list_opt': self.brew_list_opt,
+            'brew_opt_list': self.brew_opt_list,
         }
 
     def get_dir(self) -> Path:
@@ -94,7 +90,7 @@ class BrewInfo:
         return self.get_dir().exists()
 
     def clear_input(self) -> None:
-        self.brew_input_opt.clear()
+        self.brew_opt_input.clear()
 
         del self.brew_input[:]
         del self.tap_input[:]
@@ -113,7 +109,7 @@ class BrewInfo:
         self.cask_args_input.clear()
 
     def clear_list(self) -> None:
-        self.brew_list_opt.clear()
+        self.brew_opt_list.clear()
 
         del self.brew_list[:]
         del self.brew_full_list[:]
@@ -134,7 +130,7 @@ class BrewInfo:
     def input_to_list(self) -> None:
         self.clear_list()
         self.brew_list.extend(self.brew_input)
-        self.brew_list_opt.update(self.brew_input_opt)
+        self.brew_opt_list.update(self.brew_opt_input)
         self.tap_list.extend(self.tap_input)
         self.cask_list.extend(self.cask_input)
         self.appstore_list.extend(self.appstore_input)
@@ -284,7 +280,7 @@ class BrewInfo:
                 cmd = cmd.lower()
                 if cmd in ['brew', 'install']:
                     self.brew_input.append(p)
-                    self.brew_input_opt[p] = opt
+                    self.brew_opt_input[p] = opt
                 elif cmd == 'tap':
                     self.tap_input.append(p)
                 elif cmd == 'tapall':
@@ -293,7 +289,7 @@ class BrewInfo:
                     tap_packs = self.helper.get_tap_packs(p)
                     for tp in tap_packs['formulae']:
                         self.brew_input.append(tp)
-                        self.brew_input_opt[tp] = ''
+                        self.brew_opt_input[tp] = ''
                     if is_mac():
                         for tp in tap_packs['casks']:
                             self.cask_input.append(tp)
@@ -495,7 +491,7 @@ fi
             for t in self.tap_list:
                 isfirst_pack = True
 
-                tap_packs = self.helper.get_tap_packs(t)
+                tap_packs = self.helper.get_tap_packs(t, alias=True)
 
                 if not self.helper.opt['caskonly']:
                     output += first_tap_pack_write(
@@ -509,11 +505,11 @@ fi
                     for p in self.brew_list[:]:
                         if p in tap_packs['formulae']:
                             pack = self.packout(p) + self.convert_option(
-                                self.brew_list_opt[p],
+                                self.brew_opt_list[p],
                             )
                             output += cmd_install + pack + '\n'
                             self.brew_list.remove(p)
-                            del self.brew_list_opt[p]
+                            del self.brew_opt_list[p]
                 if not is_mac():
                     continue
                 tap_casks = tap_packs['casks']
@@ -534,7 +530,7 @@ fi
             output += '\n# Other Homebrew packages\n'
             for p in self.brew_list:
                 pack = self.packout(p) + self.convert_option(
-                    self.brew_list_opt[p],
+                    self.brew_opt_list[p],
                 )
                 output += cmd_install + pack + '\n'
 
