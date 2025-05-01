@@ -26,7 +26,10 @@ jobs:
           fetch-depth: 0
       - name: Get source
         id: source
-        run: echo code="$(cat bin/brew-file)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "code<<EOF" >> "$GITHUB_OUTPUT"
+          cat bin/brew-file >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
       - name: ai interface
         id: inference
         uses: actions/ai-inference@v1
