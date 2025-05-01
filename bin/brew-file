@@ -661,9 +661,20 @@ class BrewInfo:
         self.clear_list()
 
     def input_to_list(self) -> None:
+        # Keep brew_opt made from brew command and ignore brew_opt_input to
+        # keep actual options
+        brew_opt = self.brew_opt_list.copy()
+        for k, v in self.brew_opt_input.items():
+            if k in brew_opt and v != brew_opt[k]:
+                self.log.warning(
+                    f'Installed options for "{k}" ("{brew_opt[k]}") are '
+                    f'different from options in Brewfile ("{v}"). '
+                    f'Replace them by installed ones.'
+                )
+
         self.clear_list()
+        self.brew_opt_list.update(brew_opt)
         self.brew_list.extend(self.brew_input)
-        self.brew_opt_list.update(self.brew_opt_input)
         self.tap_list.extend(self.tap_input)
         self.cask_list.extend(self.cask_input)
         self.appstore_list.extend(self.appstore_input)
@@ -2342,6 +2353,7 @@ class BrewFile:
         for aliases in self.helper.get_cask_aliases().values():
             cask_aliases.update(aliases)
 
+        # Remove aliases and not installed packages
         for b in [*self.brewinfo_ext, self.brewinfo_main]:
             for line in [
                 'brew',

@@ -1207,6 +1207,7 @@ class BrewFile:
         for aliases in self.helper.get_cask_aliases().values():
             cask_aliases.update(aliases)
 
+        # Remove aliases and not installed packages
         for b in [*self.brewinfo_ext, self.brewinfo_main]:
             for line in [
                 'brew',
