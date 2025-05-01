@@ -5,8 +5,8 @@ on:
 #  push:
 #    branches:
 #      - master
-  schedule:
-      - cron:  '0 0 * * *'
+#  schedule:
+#      - cron:  '0 0 * * *'
   workflow_dispatch: {}
 
 concurrency:
@@ -34,6 +34,8 @@ jobs:
         id: inference
         uses: actions/ai-inference@v1
         with:
+          # Even with 200000 (default 200), following error:
+          # Error: An error occurred trying to start process '/home/runner/runners/2.323.0/externals/node20/bin/node' with working directory '/home/runner/work/homebrew-file/homebrew-file'. Argument list too long
           max-tokens: 200000
           prompt: "Read the following code and make suggestions:\n---\n${{ steps.source.outputs.code }}"
       - name: Print Output
