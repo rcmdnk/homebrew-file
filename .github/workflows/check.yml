@@ -34,7 +34,7 @@ jobs:
         id: inference
         uses: actions/ai-inference@v1
         with:
-          max-tokens: 2000
+          max-tokens: 200000
           prompt: "Read the following code and make suggestions:\n---\n${{ steps.source.outputs.code }}"
       - name: Print Output
         id: output
