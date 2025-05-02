@@ -381,20 +381,30 @@ class BrewFile:
             b.write()
 
     def get_list(self, name: str, only_ext: bool = False) -> set[str]:
-        list_copy = self.brewinfo_main.get_list(name)
-        if only_ext:
-            del list_copy[:]
+        list_copy = [] if only_ext else self.brewinfo_main.get_list(name)
         for b in self.brewinfo_ext:
             list_copy += b.get_list(name)
         return set(list_copy)
 
     def get_dict(self, name: str, only_ext: bool = False) -> dict[str, str]:
-        dict_copy = self.brewinfo_main.get_dict(name)
-        if only_ext:
-            dict_copy.clear()
+        dict_copy = {} if only_ext else self.brewinfo_main.get_dict(name)
         for b in self.brewinfo_ext:
             dict_copy.update(b.get_dict(name))
         return dict_copy
+
+    def get_non_alias_input(self, package_type: str) -> set[str]:
+        if package_type == 'formulae':
+            list_name = 'brew_input'
+        elif package_type == 'casks':
+            list_name = 'cask_input'
+        aliases = self.helper.get_aliases(package_type, flat=True)
+        packages = []
+        for p in self.get_list(list_name):
+            if p in aliases:
+                packages.append(aliases[p])
+            else:
+                packages.append(p)
+        return set(packages)
 
     def remove_pack(self, name: str, package: str) -> None:
         if package in self.brewinfo_main.get_list(name):
@@ -1200,12 +1210,8 @@ class BrewFile:
     def clean_list(self) -> None:
         """Remove duplications between brewinfo.list to extra files' input."""
         # Cleanup extra files
-        formula_aliases = {}
-        for aliases in self.helper.get_formula_aliases().values():
-            formula_aliases.update(aliases)
-        cask_aliases = {}
-        for aliases in self.helper.get_cask_aliases().values():
-            cask_aliases.update(aliases)
+        formula_aliases = self.helper.get_formula_aliases(flat=True)
+        cask_aliases = self.helper.get_cask_aliases(flat=True)
 
         # Remove aliases and not installed packages
         for b in [*self.brewinfo_ext, self.brewinfo_main]:
@@ -1626,8 +1632,9 @@ class BrewFile:
         # Clean up cask packages
         if is_mac() and self.get_list('cask_list'):
             self.banner('# Clean up cask packages')
+            non_alias_cask_input = self.get_non_alias_input('casks')
             for p in self.get_list('cask_list'):
-                if p in self.get_list('cask_input'):
+                if p in non_alias_cask_input:
                     continue
                 cmd = 'brew uninstall ' + p
                 _ = self.helper.proc(
@@ -1645,8 +1652,9 @@ class BrewFile:
         # Clean up brew packages
         if self.get_list('brew_list'):
             self.banner('# Clean up brew packages')
+            non_alias_brew_input = self.get_non_alias_input('formulae')
             for p in self.get_list('brew_list'):
-                if p in self.get_list('brew_input'):
+                if p in non_alias_brew_input:
                     continue
                 # Use --ignore-dependencies option to remove packages w/o
                 # formula (tap of which could be removed before).
@@ -1732,8 +1740,10 @@ class BrewFile:
             cask_args_opt = {'--cask': '', '--force': ''}
             cask_args_opt.update(self.get_dict('cask_args_input'))
 
+            cask_aliases = self.helper.get_cask_aliases(flat=True)
             for p in self.get_list('cask_input'):
-                if p in self.get_list('cask_list'):
+                pack = cask_aliases.get(p, p)
+                if pack in self.get_list('cask_list'):
                     continue
                 cask_args = {}
                 cask_args.update(cask_args_opt)
@@ -1747,12 +1757,9 @@ class BrewFile:
                     dryrun=self.opt['dryrun'],
                 )
 
-        # brew
+        # Brew
         if not self.opt['caskonly']:
-            # Brew
-            formula_aliases = {}
-            for aliases in self.helper.get_formula_aliases().values():
-                formula_aliases.update(aliases)
+            formula_aliases = self.helper.get_formula_aliases(flat=True)
             for p in self.get_list('brew_input'):
                 cmd = 'install'
                 pack = formula_aliases.get(p, p)

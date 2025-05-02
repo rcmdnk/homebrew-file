@@ -260,9 +260,24 @@ class BrewHelper:
         info = self.get_info()
         return list(info['casks'].keys())
 
-    def get_aliases(self, package_type: str) -> dict[str, dict[str, str]]:
+    def flatten_dict(self, orig_dict: dict[str, Any]) -> dict[str, Any]:
+        flat_dict = {}
+        for k, v in orig_dict.items():
+            if isinstance(v, dict):
+                flat_dict.update(self.flatten_dict(v))
+            else:
+                flat_dict[k] = v
+        return flat_dict
+
+    def get_aliases(
+        self, package_type: str, flat: bool = False
+    ) -> dict[str, Any]:
         if package_type in self.aliases:
-            return self.aliases[package_type]
+            return (
+                self.flatten_dict(self.aliases[package_type])
+                if flat
+                else self.aliases[package_type]
+            )
 
         self.aliases = {package_type: {}}
         info = self.get_info()
@@ -282,13 +297,17 @@ class BrewHelper:
                     package_type
                 ].get(tap, {})
                 self.aliases[package_type][tap][a] = package[key]
-        return self.aliases[package_type]
+        return (
+            self.flatten_dict(self.aliases[package_type])
+            if flat
+            else self.aliases[package_type]
+        )
 
-    def get_formula_aliases(self) -> dict[str, dict[str, str]]:
-        return self.get_aliases('formulae')
+    def get_formula_aliases(self, flat: bool = False) -> dict[str, Any]:
+        return self.get_aliases('formulae', flat)
 
-    def get_cask_aliases(self) -> dict[str, dict[str, str]]:
-        return self.get_aliases('casks')
+    def get_cask_aliases(self, flat: bool = False) -> dict[str, Any]:
+        return self.get_aliases('casks', flat)
 
     def get_installed(self, package: str) -> dict[str, Any]:
         """Get installed version of brew package."""
