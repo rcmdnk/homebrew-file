@@ -210,6 +210,15 @@ def main() -> int:
         help='Set repository name. Use with set_repo.',
     )
 
+    no_repo_parser = argparse.ArgumentParser(**arg_parser_opts)
+    no_repo_parser.add_argument(
+        '--no-repo',
+        action='store_true',
+        dest='no_repo',
+        default=b.opt['no_repo'],
+        help='Do not ask if setting repository when initialize Brewfile.',
+    )
+
     fetch_parser = argparse.ArgumentParser(**arg_parser_opts)
     fetch_parser.add_argument(
         '--fetch-HEAD',
@@ -326,6 +335,7 @@ def main() -> int:
         on_request_parser,
         top_packages_parser,
         full_name_parser,
+        no_repo_parser,
         appstore_parser,
         no_appstore_parser,
         caskonly_parser,
@@ -351,6 +361,7 @@ def main() -> int:
             full_name_parser,
             noupgradeatupdate_parser,
             repo_parser,
+            no_repo_parser,
             fetch_parser,
             link_parser,
             caskonly_parser,

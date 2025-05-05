@@ -111,6 +111,7 @@ class BrewFile:
             os.getenv('HOMEBREW_BREWFILE_FETCH_HEAD', ''),
         )
         opt['repo'] = ''
+        opt['no_repo'] = False
         opt['noupgradeatupdate'] = False
         opt['link'] = True
         opt['caskonly'] = False
@@ -1370,12 +1371,13 @@ class BrewFile:
 
         if check:
             if not self.opt['input'].exists():
-                ans = self.ask_yn(
-                    'Do you want to set a repository (y)? '
-                    '((n) for local Brewfile).',
-                )
-                if ans and not self.set_brewfile_repo():
-                    return False
+                if not self.opt['no_repo']:
+                    ans = self.ask_yn(
+                        'Do you want to set a repository (y)? '
+                        '((n) for local Brewfile).',
+                    )
+                    if ans and not self.set_brewfile_repo():
+                        return False
             elif self.opt['repo'] != '':
                 self.log.info(
                     f'You are using Brewfile of {self.opt["repo"]}.',

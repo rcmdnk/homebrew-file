@@ -1277,6 +1277,7 @@ class BrewFile:
             os.getenv('HOMEBREW_BREWFILE_FETCH_HEAD', ''),
         )
         opt['repo'] = ''
+        opt['no_repo'] = False
         opt['noupgradeatupdate'] = False
         opt['link'] = True
         opt['caskonly'] = False
@@ -2536,12 +2537,13 @@ class BrewFile:
 
         if check:
             if not self.opt['input'].exists():
-                ans = self.ask_yn(
-                    'Do you want to set a repository (y)? '
-                    '((n) for local Brewfile).',
-                )
-                if ans and not self.set_brewfile_repo():
-                    return False
+                if not self.opt['no_repo']:
+                    ans = self.ask_yn(
+                        'Do you want to set a repository (y)? '
+                        '((n) for local Brewfile).',
+                    )
+                    if ans and not self.set_brewfile_repo():
+                        return False
             elif self.opt['repo'] != '':
                 self.log.info(
                     f'You are using Brewfile of {self.opt["repo"]}.',
@@ -3762,6 +3764,15 @@ def main() -> int:
         help='Set repository name. Use with set_repo.',
     )
 
+    no_repo_parser = argparse.ArgumentParser(**arg_parser_opts)
+    no_repo_parser.add_argument(
+        '--no-repo',
+        action='store_true',
+        dest='no_repo',
+        default=b.opt['no_repo'],
+        help='Do not ask if setting repository when initialize Brewfile.',
+    )
+
     fetch_parser = argparse.ArgumentParser(**arg_parser_opts)
     fetch_parser.add_argument(
         '--fetch-HEAD',
@@ -3878,6 +3889,7 @@ def main() -> int:
         on_request_parser,
         top_packages_parser,
         full_name_parser,
+        no_repo_parser,
         appstore_parser,
         no_appstore_parser,
         caskonly_parser,
@@ -3903,6 +3915,7 @@ def main() -> int:
             full_name_parser,
             noupgradeatupdate_parser,
             repo_parser,
+            no_repo_parser,
             fetch_parser,
             link_parser,
             caskonly_parser,
