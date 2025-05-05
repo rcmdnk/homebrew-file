@@ -41,12 +41,14 @@ def main() -> int:
     )
     group.add_argument(
         '-s',
+        '--set-repo',
         '--set_repo',
         action='store_const',
         dest='command',
         const='set_repo',
     )
     group.add_argument(
+        '--set-local',
         '--set_local',
         action='store_const',
         dest='command',
@@ -153,6 +155,7 @@ def main() -> int:
 
     on_request_parser = argparse.ArgumentParser(**arg_parser_opts)
     on_request_parser.add_argument(
+        '--on-request',
         '--on_request',
         action='store_true',
         dest='on_request',
@@ -166,6 +169,7 @@ def main() -> int:
 
     top_packages_parser = argparse.ArgumentParser(**arg_parser_opts)
     top_packages_parser.add_argument(
+        '--top-packages',
         '--top_packages',
         action='store',
         dest='top_packages',
@@ -180,6 +184,7 @@ def main() -> int:
     full_name_parser = argparse.ArgumentParser(**arg_parser_opts)
     full_name_parser.add_argument(
         '--full-name',
+        '--full_name',
         action='store_true',
         dest='full_name',
         default=b.opt['full_name'],
@@ -213,6 +218,7 @@ def main() -> int:
     no_repo_parser = argparse.ArgumentParser(**arg_parser_opts)
     no_repo_parser.add_argument(
         '--no-repo',
+        '--no_repo',
         action='store_true',
         dest='no_repo',
         default=b.opt['no_repo'],
@@ -222,6 +228,7 @@ def main() -> int:
     fetch_parser = argparse.ArgumentParser(**arg_parser_opts)
     fetch_parser.add_argument(
         '--fetch-HEAD',
+        '--fetch_HEAD',
         action='store_true',
         dest='fetch_head',
         default=b.opt['fetch_head'],
@@ -263,6 +270,7 @@ def main() -> int:
 
     no_appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     no_appstore_parser.add_argument(
+        '--no-appstore',
         '--no_appstore',
         action='store_true',
         dest='no_appstore',
@@ -273,6 +281,7 @@ def main() -> int:
 
     all_files_parser = argparse.ArgumentParser(**arg_parser_opts)
     all_files_parser.add_argument(
+        '--all-files',
         '--all_files',
         action='store_true',
         dest='all_files',
@@ -283,6 +292,7 @@ def main() -> int:
     dryrun_parser = argparse.ArgumentParser(**arg_parser_opts)
     dryrun_parser.add_argument(
         '-d',
+        '--dry-run',
         '--dry_run',
         action='store_true',
         dest='dryrun',
