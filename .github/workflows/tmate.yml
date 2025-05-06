@@ -1,5 +1,8 @@
 ---
 name: tmate
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -24,8 +27,6 @@ on:
 jobs:
   tmate:
     runs-on: ${{ inputs.os }}
-    permissions:
-      contents: read
     steps:
     - uses: actions/checkout@v4
       with:
