@@ -32,7 +32,10 @@ jobs:
         run: |
           if ! which brew &>/dev/null;then
             PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
-            echo 'eval "$(brew shellenv)"' >> "$GITHUB_ENV"
+            echo "PATH=$PATH" >> "$GITHUB_ENV"
+            echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
+            echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
+            echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
           fi
       - uses: actions/checkout@v4
         with:
