@@ -602,7 +602,7 @@ tap homebrew/cask
 cask visual-studio-code
 vscode ms-python.vscode-pylance
 """)
-    helper.proc(f'"{cmd}" cleanup -f "{brewfile}"')
+    helper.proc(f'"{cmd}" clean -f "{brewfile}"')
     helper.proc(f'"{cmd}" init -f "{brewfile}" -y')
     with Path(brewfile).open('r') as f:
         assert (
