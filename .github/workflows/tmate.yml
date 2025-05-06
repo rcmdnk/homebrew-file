@@ -24,6 +24,8 @@ on:
 jobs:
   tmate:
     runs-on: ${{ inputs.os }}
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v4
       with:
