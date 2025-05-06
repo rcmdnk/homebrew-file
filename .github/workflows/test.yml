@@ -1,7 +1,7 @@
 ---
 name: test
 permissions:
-  contents: write
+  contents: read
 
 on:
   push:
@@ -143,8 +143,6 @@ jobs:
           - 'tests/test_serial.py::test_install_clean[default]'
           - 'tests/test_serial.py::test_install_clean[on-request]'
           - 'tests/test_serial.py::test_install_clean[top-packages]'
-    permissions:
-      contents: write
     runs-on: macos-latest
     steps:
       - name: Set up Homebrew
