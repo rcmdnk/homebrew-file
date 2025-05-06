@@ -2272,6 +2272,33 @@ class BrewFile:
         )
         return lines
 
+    def get_installed_formulae(self) -> list[str]:
+        full_list = self.helper.get_formula_list()
+        if not self.brewinfo.brew_full_list:
+            self.brewinfo.brew_full_list.extend(full_list)
+        if self.opt['leaves']:
+            packages = self.helper.get_leaves(
+                on_request=self.opt['on_request'],
+            )
+        elif self.opt['on_request']:
+            packages = []
+            for p in full_list:
+                installed = self.helper.get_installed(p)
+                if installed.get('installed_on_request', True) in [
+                    True,
+                    None,
+                ]:
+                    packages.append(p)
+        else:
+            packages = copy.deepcopy(full_list)
+
+        for p in self.opt['top_packages'].split(','):
+            if p == '':
+                continue
+            if p in full_list and p not in packages:
+                packages.append(p)
+        return packages
+
     def get_installed_packages(
         self,
         force_appstore_list: bool = False,
@@ -2283,31 +2310,7 @@ class BrewFile:
 
         # Brew packages
         if not self.opt['caskonly']:
-            full_list = self.helper.get_formula_list()
-            self.brewinfo.brew_full_list.extend(full_list)
-            if self.opt['leaves']:
-                packages = self.helper.get_leaves(
-                    on_request=self.opt['on_request'],
-                )
-            elif self.opt['on_request']:
-                packages = []
-                for p in full_list:
-                    installed = self.helper.get_installed(p)
-                    if installed.get('installed_on_request', True) in [
-                        True,
-                        None,
-                    ]:
-                        packages.append(p)
-            else:
-                packages = copy.deepcopy(full_list)
-
-            for p in self.opt['top_packages'].split(','):
-                if p == '':
-                    continue
-                if p in full_list and p not in packages:
-                    packages.append(p)
-
-            for p in packages:
+            for p in self.get_installed_formulae():
                 self.brewinfo.brew_list.append(p)
                 self.brewinfo.brew_opt_list[p] = self.helper.get_option(p)
 
@@ -2627,18 +2630,22 @@ class BrewFile:
         """Clean up non requested packages."""
         formulae = self.helper.get_formula_list()
         leaves = self.helper.get_leaves()
+        uninstalls = []
         for p in formulae:
             if p not in leaves:
                 continue
             installed = self.helper.get_installed(p)
             if installed.get('installed_on_request', False) is False:
-                cmd = 'brew uninstall ' + p
-                _ = self.helper.proc(
-                    cmd,
-                    print_cmd=False,
-                    print_out=True,
-                    dryrun=self.opt['dryrun'],
-                )
+                uninstalls.append(p)
+        if not uninstalls:
+            return
+        cmd = 'brew uninstall ' + ' '.join(uninstalls)
+        _ = self.helper.proc(
+            cmd,
+            print_cmd=False,
+            print_out=True,
+            dryrun=self.opt['dryrun'],
+        )
 
     def cleanup(self, delete_cache: bool = True) -> None:
         """Clean up."""
@@ -2647,6 +2654,8 @@ class BrewFile:
 
         # Check up packages in the input file
         self.read_all()
+
+        # Remain formulae in dependencies
         info = self.helper.get_info()['formulae']
 
         def add_dependncies(package: str) -> None:
@@ -2801,32 +2810,37 @@ class BrewFile:
         if is_mac() and self.get_list('cask_list'):
             self.banner('# Clean up cask packages')
             non_alias_cask_input = self.get_non_alias_input('casks')
+            uninstalls = []
             for p in self.get_list('cask_list'):
                 if p in non_alias_cask_input:
                     continue
-                cmd = 'brew uninstall ' + p
+                uninstalls.append(p)
+                self.remove_pack('cask_list', p)
+
+            if uninstalls:
+                cmd = 'brew uninstall ' + ' '.join(uninstalls)
                 _ = self.helper.proc(
                     cmd,
                     print_cmd=True,
                     print_out=True,
                     dryrun=self.opt['dryrun'],
                 )
-                self.remove_pack('cask_list', p)
-
-        # Skip clean up cask at tap if any cask packages exist
-        if is_mac() and self.get_list('cask_list'):
-            self.remove_pack('tap_list', self.opt['cask_repo'])
 
         # Clean up brew packages
         if self.get_list('brew_list'):
             self.banner('# Clean up brew packages')
             non_alias_brew_input = self.get_non_alias_input('formulae')
+            uninstalls = []
             for p in self.get_list('brew_list'):
                 if p in non_alias_brew_input:
                     continue
+                uninstalls.append(p)
                 # Use --ignore-dependencies option to remove packages w/o
                 # formula (tap of which could be removed before).
-                cmd = 'brew uninstall --ignore-dependencies ' + p
+            if uninstalls:
+                cmd = 'brew uninstall --ignore-dependencies ' + ' '.join(
+                    uninstalls
+                )
                 _ = self.helper.proc(
                     cmd,
                     print_cmd=False,
@@ -2837,7 +2851,11 @@ class BrewFile:
         # Clean up tap packages
         if self.get_list('tap_list'):
             self.banner('# Clean up tap packages')
+            untaps = []
             for p in self.get_list('tap_list'):
+                # Skip core and cask taps
+                if p in [self.opt['core_repo'], self.opt['cask_repo']]:
+                    continue
                 if p in self.get_list('tap_input'):
                     continue
                 tap_packs = self.helper.get_tap_packs(p, alias=True)
@@ -2857,7 +2875,10 @@ class BrewFile:
                             break
                 if not untapflag:
                     continue
-                cmd = 'brew untap ' + p
+                untaps.append(p)
+
+            if untaps:
+                cmd = 'brew untap ' + ' '.join(untaps)
                 _ = self.helper.proc(
                     cmd,
                     print_cmd=True,
