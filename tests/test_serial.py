@@ -556,3 +556,66 @@ tap homebrew/cask
     assert lines == ls2
     _, lines = helper.proc('brew tap')
     assert lines == tap2
+
+
+def test_vscode_cursor(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv('HOMEBREW_BREWFILE_VSCODE', '1')
+    monkeypatch.setenv('HOMEBREW_BREWFILE_CURSOR', '1')
+    with Path(brewfile).open('w') as f:
+        f.write("""
+code ms-python.python
+cursor ms-vscode.remote-explorer
+""")
+    helper.proc(f'"{cmd}" install -f "{brewfile}"')
+    helper.proc(f'"{cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask cursor
+cask visual-studio-code
+
+# VSCode extensions
+vscode ms-python.debugpy
+vscode ms-python.python
+vscode ms-python.vscode-pylance
+
+# Cursor extensions
+cursor ms-vscode.remote-explorer
+"""
+        )
+
+    with Path(brewfile).open('w') as f:
+        f.write("""
+tap homebrew/core
+tap homebrew/cask
+cask visual-studio-code
+vscode ms-python.vscode-pylance
+""")
+    helper.proc(f'"{cmd}" cleanup -f "{brewfile}"')
+    helper.proc(f'"{cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask visual-studio-code
+
+# VSCode extensions
+vscode ms-python.vscode-pylance
+"""
+        )

@@ -144,6 +144,7 @@ jobs:
           - 'tests/test_serial.py::test_install_clean[default]'
           - 'tests/test_serial.py::test_install_clean[on-request]'
           - 'tests/test_serial.py::test_install_clean[top-packages]'
+          - 'tests/test_serial.py::test_vscode_cursor'
     runs-on: macos-latest
     steps:
       - uses: rcmdnk/python-action@v3
