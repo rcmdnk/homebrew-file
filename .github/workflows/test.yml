@@ -112,8 +112,7 @@ jobs:
       - name: Setup Homebrew
         run: |
           if ! which brew &>/dev/null;then
-            PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
-            echo "PATH=$PATH" >> "$GITHUB_ENV"
+            echo "/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:$PATH" >> "$GITHUB_PATH"
             echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
             echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
             echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
