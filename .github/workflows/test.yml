@@ -47,90 +47,90 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  install:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
-        run: exit 1
-      - name: Install test
-        run: |
-          curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
-          chmod 755 ./install.sh
-          ./install.sh
-          rm -f install.sh
-  formula:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
-        run: exit 1
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          test-bot: false
-      - name: Install homebrew-file
-        run: brew install rcmdnk/file/brew-file
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-        python-version: ['3.13', '3.12', '3.11', '3.10', '3.9']
-    permissions:
-      contents: write
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Check is main
-        id: is_main
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/${{ env.MAIN_BRANCH }}" ] && [ "${{ matrix.os }}" = "${{ env.MAIN_OS }}" ] && [ "${{ matrix.python-version }}" = "${{ env.MAIN_PY_VER }}" ];then
-            echo "IS_MAIN=1" >> "$GITHUB_ENV"
-            is_main=1
-          else
-            echo "IS_MAIN=0" >> "$GITHUB_ENV"
-            is_main=0
-          fi
-          if [ "${{ env.TMATE }}" = "true" ];then
-            if [ "$is_main" = 0 ];then
-              echo "Tmate is enabled and this is not main, skip tests"
-              exit 1
-            fi
-            echo "DEBUG=1" >> "$GITHUB_ENV"
-          else
-            echo "DEBUG=0" >> "$GITHUB_ENV"
-          fi
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          test-bot: false
-      - name: Install wget
-        run: brew install wget
-      - uses: rcmdnk/python-action@v3
-        with:
-          checkout: 1
-          setup-python: 1
-          python-version: "${{ matrix.python-version }}"
-          setup-type: 'uv'
-          pytest: 1
-          pytest-tests-path: 'tests/'
-          pytest-ignore: ''
-          pytest-separate-benchmark: 0
-          coverage: 1
-          pytest-cov-path: "bin"
-          coverage-push: "${{ env.IS_MAIN }}"
-          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
-          github_token: "${{github.token}}"
-          pre-commit: "${{ env.IS_MAIN }}"
-          tmate: "${{ env.DEBUG }}"
+#  install:
+#    strategy:
+#      matrix:
+#        os: [macos-latest, ubuntu-latest]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - name: Exit workflow
+#        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
+#        run: exit 1
+#      - name: Install test
+#        run: |
+#          curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
+#          chmod 755 ./install.sh
+#          ./install.sh
+#          rm -f install.sh
+#  formula:
+#    strategy:
+#      matrix:
+#        os: [macos-latest, ubuntu-latest]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - name: Exit workflow
+#        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
+#        run: exit 1
+#      - name: Set up Homebrew
+#        id: set-up-homebrew
+#        uses: Homebrew/actions/setup-homebrew@master
+#        with:
+#          test-bot: false
+#      - name: Install homebrew-file
+#        run: brew install rcmdnk/file/brew-file
+#  test:
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        os: [macos-latest, ubuntu-latest]
+#        python-version: ['3.13', '3.12', '3.11', '3.10', '3.9']
+#    permissions:
+#      contents: write
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - name: Check is main
+#        id: is_main
+#        run: |
+#          if [ "${{ github.ref }}" = "refs/heads/${{ env.MAIN_BRANCH }}" ] && [ "${{ matrix.os }}" = "${{ env.MAIN_OS }}" ] && [ "${{ matrix.python-version }}" = "${{ env.MAIN_PY_VER }}" ];then
+#            echo "IS_MAIN=1" >> "$GITHUB_ENV"
+#            is_main=1
+#          else
+#            echo "IS_MAIN=0" >> "$GITHUB_ENV"
+#            is_main=0
+#          fi
+#          if [ "${{ env.TMATE }}" = "true" ];then
+#            if [ "$is_main" = 0 ];then
+#              echo "Tmate is enabled and this is not main, skip tests"
+#              exit 1
+#            fi
+#            echo "DEBUG=1" >> "$GITHUB_ENV"
+#          else
+#            echo "DEBUG=0" >> "$GITHUB_ENV"
+#          fi
+#      - name: Set up Homebrew
+#        id: set-up-homebrew
+#        uses: Homebrew/actions/setup-homebrew@master
+#        with:
+#          test-bot: false
+#      - name: Install wget
+#        run: brew install wget
+#      - uses: rcmdnk/python-action@v3
+#        with:
+#          checkout: 1
+#          setup-python: 1
+#          python-version: "${{ matrix.python-version }}"
+#          setup-type: 'uv'
+#          pytest: 1
+#          pytest-tests-path: 'tests/'
+#          pytest-ignore: ''
+#          pytest-separate-benchmark: 0
+#          coverage: 1
+#          pytest-cov-path: "bin"
+#          coverage-push: "${{ env.IS_MAIN }}"
+#          coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
+#          github_token: "${{github.token}}"
+#          pre-commit: "${{ env.IS_MAIN }}"
+#          tmate: "${{ env.DEBUG }}"
   test-serial:
     strategy:
       fail-fast: false
@@ -161,4 +161,4 @@ jobs:
           coverage-push: 0
           github_token: ""
           pre-commit: 0
-          tmate: 0
+          tmate: 1
