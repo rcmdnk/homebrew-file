@@ -599,8 +599,8 @@ cursor ms-vscode.remote-explorer
         f.write("""
 tap homebrew/core
 tap homebrew/cask
-cask visual-studio-code
-vscode ms-python.vscode-pylance
+cask cursor
+cursor ms-vscode.remote-explorer
 """)
     helper.proc(f'"{cmd}" clean -f "{brewfile}"')
     helper.proc(f'"{cmd}" init -f "{brewfile}" -y')
@@ -613,9 +613,9 @@ vscode ms-python.vscode-pylance
 tap homebrew/core
 
 tap homebrew/cask
-cask visual-studio-code
+cask cursor
 
-# VSCode extensions
-vscode ms-python.vscode-pylance
+# Cursor extensions
+cursor ms-vscode.remote-explorer
 """
         )
