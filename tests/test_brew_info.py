@@ -313,6 +313,7 @@ def test_mas_pack(brew_info: BrewInfo) -> None:
 @pytest.mark.filterwarnings('ignore::DeprecationWarning')
 def test_write(brew_info: BrewInfo, tmp_path: Path, tap: list[str]) -> None:
     tmp_file = tmp_path / 'f'
+    default_file = brew_info.file
     brew_info.helper.opt['caskonly'] = False
     brew_info.helper.opt['appstore'] = -1
     brew_info.helper.opt['verbose'] = 1
@@ -321,9 +322,7 @@ def test_write(brew_info: BrewInfo, tmp_path: Path, tap: list[str]) -> None:
     brew_info.input_to_list()
     brew_info.file = tmp_file
     brew_info.write()
-    with Path(
-        Path(__file__).parent / 'files' / 'BrewfileTestNoIGNORE'
-    ).open() as f1:
+    with Path(default_file).open() as f1:
         default_txt = f1.readlines()
         default_txt = ''.join(default_txt)
     with Path(tmp_file).open() as f2:
