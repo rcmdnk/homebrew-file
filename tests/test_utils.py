@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import platform
 import sys
 from pathlib import Path
 
@@ -9,8 +10,12 @@ import pytest
 from . import brew_file
 
 
-def test_is_mac() -> None:
+def test_is_mac(monkeypatch: pytest.MonkeyPatch) -> None:
     assert bool(sys.platform == 'darwin') == bool(brew_file.is_mac())
+    monkeypatch.setattr(platform, 'system', lambda: 'Darwin')
+    assert brew_file.is_mac()
+    monkeypatch.setattr(platform, 'system', lambda: 'Linux')
+    assert not brew_file.is_mac()
 
 
 @pytest.mark.parametrize(
@@ -21,9 +26,13 @@ def test_is_mac() -> None:
         (0, False),
         (1, True),
         (10, True),
+        ('True', True),
         ('true', True),
         ('false', False),
         ('others', False),
+        ('1', True),
+        ('0', False),
+        ('', False),
     ],
 )
 def test_to_bool(val: bool | int | str, result: bool) -> None:
@@ -40,6 +49,7 @@ def test_to_bool(val: bool | int | str, result: bool) -> None:
         (1, 1),
         ('1', 1),
         ('01', 1),
+        ('-2', -2),
         ('true', 1),
         ('false', 0),
         ('others', 0),

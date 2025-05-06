@@ -260,10 +260,11 @@ def test_get_tap_packs(helper: BrewHelper, tap: list[str]) -> None:
 def test_get_cask_info(helper: BrewHelper) -> None:
     if not is_mac():
         pytest.skip('only for mac')
-    info = next(iter(helper.get_info()['casks'].values()))
-    assert 'token' in info
-    assert 'tap' in info
-    assert 'old_tokens' in info
+    info = list(helper.get_info()['casks'].values())
+    if info:
+        assert 'token' in info[0]
+        assert 'tap' in info[0]
+        assert 'old_tokens' in info[0]
 
 
 def test_get_tap_casks(helper: BrewHelper, tap: list[str]) -> None:

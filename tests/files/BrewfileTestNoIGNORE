@@ -30,7 +30,3 @@ echo other commands
 
 # After commands
 after echo after
-
-#BREWFILE_IGNORE
-brew abc
-#BREWFILE_ENDIGNORE

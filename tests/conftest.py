@@ -2,11 +2,38 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from filelock import FileLock
 
 from .brew_file import BrewFile
+
+if TYPE_CHECKING:
+    from _pytest.config import Config
+    from _pytest.nodes import Item
+
+
+def _running_under_xdist(config: Config) -> bool:
+    return getattr(config, 'workerinput', None) is not None
+
+
+def pytest_collection_modifyitems(config: Config, items: Item) -> None:
+    if not _running_under_xdist(config):
+        return
+
+    remaining = []
+    deselected = []
+
+    for item in items:
+        if 'serial' in item.keywords:
+            deselected.append(item)
+        else:
+            remaining.append(item)
+
+    if deselected:
+        config.hook.pytest_deselected(items=deselected)
+        items[:] = remaining
 
 
 @pytest.fixture(scope='session', autouse=True)

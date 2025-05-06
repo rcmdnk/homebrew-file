@@ -131,3 +131,34 @@ jobs:
           github_token: "${{github.token}}"
           pre-commit: "${{ env.IS_MAIN }}"
           tmate: "${{ env.DEBUG }}"
+  test-serial:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9']
+    permissions:
+      contents: write
+    runs-on: macos-latest
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        with:
+          test-bot: false
+      - uses: rcmdnk/python-action@v3
+        with:
+          checkout: 1
+          setup-python: 1
+          python-version: "${{ matrix.python-version }}"
+          setup-type: 'uv'
+          pytest: 1
+          pytest-tests-path: 'tests/'
+          pytest-ignore: ''
+          pytest-separate-benchmark: 0
+          coverage: 0
+          pytest-cov-path: ""
+          pytest-opt: "-n0 -m serial"
+          coverage-push: 0
+          github_token: ""
+          pre-commit: 0
+          tmate: 0

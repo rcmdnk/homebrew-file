@@ -548,8 +548,11 @@ def test_install(bf: BrewFile) -> None:
 @pytest.mark.parametrize(
     ('app', 'token'),
     [
-        ('/App/ABC.app', 'abc'),
+        ('/App/Foo.app', 'foo'),
         ('/App/--A B  C--D+E@f-9.app', 'a-b-c-dpluseatf9'),
+        ('Foo Bar.app', 'foo-bar'),
+        ('C++ @App++.app', 'cplusplus-atappplusplus'),
+        ('123Foo.app', '123foo'),
     ],
 )
 def test_generate_cask_token(bf: BrewFile, app: str, token: str) -> None:

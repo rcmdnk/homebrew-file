@@ -24,7 +24,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-addopts = "-n auto"
+markers = [
+    "serial: tests only for serial run.",
+]
+addopts = "-n auto -m 'not serial'"
 testpaths = ["tests",]
 
 [tool.ruff]
@@ -32,25 +35,6 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-# select = ["E4", "E7", "E9", "F"]  # default, black compatible
-#select = [  # similar options to black, flake8 + plugins, isort etc...)
-#  #"E4",  # Import (comparable to black)
-#  #"E7",  # Indentation (comparable to black)
-#  #"E9",  # Blank line (comparable to black)
-#  "F",   # String (comparable to black)
-#  "I",   # Import order (comparable to isort)
-#  "S",   # flake8-bandit (comparable to bandit)
-#  "B",   # flake8-bugbear
-#  "A",   # flake8-builtins
-#  "C4",   # flake8-comprehensions
-#  "T10",  # flake8-debugger
-#  "EXE",  # flake8-executable
-#  "T20", # flake8-print
-#  "N", # pep8-naming
-#  "E", # pycodestyle
-#  "W", # pycodestyle
-#  "C90", # mccabe
-#]
 
 ignore = [
  "E501", # Line too long. Disable it to allow long lines of comments and print lines which black allows.
@@ -82,42 +66,6 @@ max-complexity = 10
 [tool.ruff.format]
 quote-style = "single"
 docstring-code-format = true
-
-[tool.black]
-line-length = 79
-
-[tool.autoflake]
-remove-all-unused-imports = true
-expand-star-imports = true
-remove-duplicate-keys = true
-remove-unused-variables = true
-
-[tool.autopep8]
-ignore = "E203,E501,W503"
-recursive = true
-aggressive = 3
-
-[tool.isort]
-profile = "black"
-line_length = 79
-
-[tool.flake8]
-# E203 is not PEP8 compliant and black insert space around slice: [Frequently Asked Questions - Black 22.12.0 documentation](https://black.readthedocs.io/en/stable/faq.html#why-are-flake8-s-e203-and-w503-violated)
-# E501: Line too long. Disable it to allow long lines of comments and print lines which black allows.
-# W503 is the counter part of W504, which follows current PEP8: [Line break occurred before a binary operator (W503)](https://www.flake8rules.com/rules/W503.html)
-# D100~D106: Missing docstrings other than class (D101)
-# D401: First line should be in imperative mood
-ignore = "E203,E501,W503,D100,D102,D103,D104,D105,D106,D401"
-#max-complexity = 10
-#max-annotations-complexity=4
-docstring-convention = "numpy"
-
-[tool.bandit]
-exclude_dirs = ["tests"]
-# B404: import subprocess -> until fixing w/o subprocess
-# B603: subprocess_without_shell_equals_true-> until fixing w/o subprocess, difficult to manage multi arguments especially for arguments including quotes with shell=True
-# B607: start_process_with_partial_path: until fixing w/o subprocess, difficult to run fixed path on multi environments
-skips = ["B404", "B603", "B607"]
 
 [tool.mypy]
 files = ["bin/brew-file", "src/**/*.py"]
