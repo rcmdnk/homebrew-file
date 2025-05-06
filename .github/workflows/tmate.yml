@@ -28,18 +28,12 @@ jobs:
   tmate:
     runs-on: ${{ inputs.os }}
     steps:
-      - name: Install Homebrew (Linux)
-        # macOS already has Homebrew
-        if: runner.os == 'Linux'
+      - name: Setup Homebrew
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y build-essential procps curl file git
-          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$GITHUB_ENV"
-      - name: Setup for Homebrew
-        run: |
-          echo "export HOMEBREW_NO_INSTALL_CLEANUP=1" >> "$GITHUB_ENV"
-          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> "$GITHUB_ENV"
+          if ! which brew &>/dev/null;then
+            PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+            echo 'eval "$(brew shellenv)"' >> "$GITHUB_ENV"
+          fi
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
