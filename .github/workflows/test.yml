@@ -169,3 +169,13 @@ jobs:
           github_token: ""
           pre-commit: 0
           tmate: 0
+      - name: fix Homebrew for post setup
+        # setup-homebrew makes links from $GITHUB_WORKSPACE to taps.
+        # And it tries to remove these links at post setup event if it is
+        # untapped.
+        # Need to tap again after test cleanup otherwise Post Setup Homebrew
+        # makes an error.
+        run: |
+          rm -rf /opt/homebrew/Library/Taps/rcmdnk/homebrew-file
+          mkdir -p /opt/homebrew/Library/Taps/rcmdnk
+          touch /opt/homebrew/Library/Taps/rcmdnk/homebrew-file
