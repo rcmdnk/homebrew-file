@@ -137,10 +137,10 @@ jobs:
       matrix:
         python-version: ['3.9']
         test-path:
-          - 'tests/test_serial.py:::test_init'
-          - 'tests/test_serial.py:::test_install_clean[default]'
-          - 'tests/test_serial.py:::test_install_clean[on-request]'
-          - 'tests/test_serial.py:::test_install_clean[top-packages]'
+          - 'tests/test_serial.py::test_init'
+          - 'tests/test_serial.py::test_install_clean[default]'
+          - 'tests/test_serial.py::test_install_clean[on-request]'
+          - 'tests/test_serial.py::test_install_clean[top-packages]'
     permissions:
       contents: write
     runs-on: macos-latest
