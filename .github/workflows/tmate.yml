@@ -51,7 +51,7 @@ jobs:
             **/pyproject.toml
       - name: Set up environment
         run: |
-          uv python pin ${{ inputs.py_var }}
+          uv python pin ${{ inputs.py_ver }}
           uv sync
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
