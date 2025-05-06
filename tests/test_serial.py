@@ -1,6 +1,7 @@
 # ruff: noqa: S605
 from __future__ import annotations
 
+import getpass
 import os
 import sys
 from pathlib import Path
@@ -21,7 +22,7 @@ if sys.platform != 'darwin':
     pytest.skip('skipping macOS tests', allow_module_level=True)
 
 
-if os.getlogin() not in ['lume', 'runner']:
+if getpass.getuser() not in ['lume', 'runner']:
     pytest.skip(
         "skipping tests only for environments of lume's VM or GitHub Actions",
         allow_module_level=True,
@@ -392,7 +393,7 @@ brew brew-file
             [],
         ),
         (
-            {'HOMEBREW_BREWFILE_ON_REQUEST': 1},
+            {'HOMEBREW_BREWFILE_ON_REQUEST': '1'},
             [
                 'brew-file',
                 'brotli',
@@ -428,7 +429,7 @@ brew brew-file
             [],
         ),
         (
-            {'HOMEBREW_BREWFILE_LEAVES': 1},
+            {'HOMEBREW_BREWFILE_LEAVES': '1'},
             [
                 'brew-file',
                 'brotli',
@@ -464,7 +465,7 @@ brew brew-file
         ),
         (
             {
-                'HOMEBREW_BREWFILE_ON_REQUEST': 1,
+                'HOMEBREW_BREWFILE_ON_REQUEST': '1',
                 'HOMEBREW_BREWFILE_TOP_PACKAGES': 'gettext,pcre2',
             },
             [
