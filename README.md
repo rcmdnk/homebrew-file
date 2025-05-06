@@ -30,7 +30,7 @@ Brew-file enhances your Homebrew experience with the following features:
   - Homebrew formulae, casks and taps.
   - Apps installed from the Mac App Store.
   - [whalebrew](https://github.com/whalebrew/whalebrew) images.
-  - Extensions for [Visual Studio Code](https://marketplace.visualstudio.com/vscode).
+  - Extensions for [Visual Studio Code](https://marketplace.visualstudio.com/vscode)/[Cursor](https://www.cursor.com/).
 
 - **Automatic Brewfile Updates**
 

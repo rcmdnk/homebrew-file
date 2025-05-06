@@ -73,12 +73,31 @@ Launch the VM with shared directory to access the installed cert::
 
     $ lume run macos-sequoia-xcode:latest --shared-dir "/Library/Application Support/Cloudflare:ro"
 
+
+For this process, need GUI.
 Login with username: 'lume', password: 'lume'.
 
-Open terminal and prepare cert::
+Open terminal and add the cert to the keychain::
 
     lume@lumes-Virtual-Machine ~ % cp /Volumes/My\ Shared\ Files/installed_cert.pem ./Documents/
     lume@lumes-Virtual-Machine ~ % sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./Documents/installed_cert.pem
+    lume@lumes-Virtual-Machine ~ % # Follow the instructions to add the cert to the keychain
+
+Prepare certifications for command line tools::
+
+    lume@lumes-Virtual-Machine ~ % security find-certificate -a -p /Library/Keychains/System.keychain > $HOME/Documents/system-certs.pem
+    lume@lumes-Virtual-Machine ~ % security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain >> $HOME/Documents/system-certs.pem
+    lume@lumes-Virtual-Machine ~ % cat <<EOF>>$HOME/.zprofile
+    _certs="\$HOME/Documents/system-certs.pem"
+    if [ -f "\$_certs" ];then
+      export CERT_PATH="\$_certs"
+      export SSL_CERT_FILE="\$_certs"
+      export REQUESTS_CA_BUNDLE="\$_certs"
+      export NODE_EXTRA_CA_CERTS="\$_certs"
+    fi
+    unset _certs
+    EOF
+
 
 From other terminal, stop VM::
 
