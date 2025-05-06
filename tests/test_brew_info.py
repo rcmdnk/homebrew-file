@@ -323,7 +323,20 @@ def test_write(brew_info: BrewInfo, tmp_path: Path, tap: list[str]) -> None:
     brew_info.file = tmp_file
     brew_info.write()
     with Path(default_file).open() as f1:
-        default_txt = f1.readlines()
+        # Remove first and last ignore sections
+        default_txt = [
+            x
+            for x in f1
+            if x
+            not in [
+                '#BREWFILE_IGNORE\n',
+                '#BREWFILE_ENDIGNORE\n',
+                'brew abc\n',
+                'brew xyz\n',
+            ]
+        ]
+        default_txt = default_txt[1:-1]
+
         default_txt = ''.join(default_txt)
     with Path(tmp_file).open() as f2:
         tmp_txt = f2.read()

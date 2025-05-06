@@ -1,3 +1,7 @@
+#BREWFILE_IGNORE
+brew abc
+#BREWFILE_ENDIGNORE
+
 # Before commands
 before echo before
 
@@ -32,5 +36,5 @@ echo other commands
 after echo after
 
 #BREWFILE_IGNORE
-brew abc
+brew xyz
 #BREWFILE_ENDIGNORE
