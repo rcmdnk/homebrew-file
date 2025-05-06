@@ -386,14 +386,15 @@ class BrewHelper:
         cmd = 'brew leaves'
         if on_request:
             cmd += ' --installed-on-request'
-        _, lines = self.proc(
+        _, leaves_list = self.proc(
             cmd,
             print_cmd=False,
             print_out=False,
             separate_err=True,
             print_err=False,
         )
-        leaves_list = [x.split('/')[-1] for x in lines]
+        if not self.opt['full_name']:
+            leaves_list = [x.split('/')[-1] for x in leaves_list]
         if on_request:
             self.leaves_list_on_request = leaves_list
         else:

@@ -1131,7 +1131,6 @@ class BrewFile:
                         None,
                     ]:
                         packages.append(p)
-
             else:
                 packages = copy.deepcopy(full_list)
 
