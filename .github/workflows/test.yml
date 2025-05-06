@@ -73,11 +73,18 @@ jobs:
       - name: Exit workflow
         if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
         run: exit 1
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          test-bot: false
+      - name: Install Homebrew (Linux)
+        # macOS already has Homebrew
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential procps curl file git
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$GITHUB_ENV"
+      - name: Setup for Homebrew
+        run: |
+          echo "export HOMEBREW_NO_INSTALL_CLEANUP=1" >> "$GITHUB_ENV"
+          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> "$GITHUB_ENV"
       - name: Install homebrew-file
         run: brew install rcmdnk/file/brew-file
   test:
@@ -109,13 +116,18 @@ jobs:
           else
             echo "DEBUG=0" >> "$GITHUB_ENV"
           fi
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          test-bot: false
-      - name: Install wget
-        run: brew install wget
+      - name: Install Homebrew (Linux)
+        # macOS already has Homebrew
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential procps curl file git
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$GITHUB_ENV"
+      - name: Setup for Homebrew
+        run: |
+          echo "export HOMEBREW_NO_INSTALL_CLEANUP=1" >> "$GITHUB_ENV"
+          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> "$GITHUB_ENV"
       - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
@@ -145,11 +157,6 @@ jobs:
           - 'tests/test_serial.py::test_install_clean[top-packages]'
     runs-on: macos-latest
     steps:
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-        with:
-          test-bot: false
       - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
@@ -167,13 +174,3 @@ jobs:
           github_token: ""
           pre-commit: 0
           tmate: 0
-      - name: fix Homebrew for post setup
-        # setup-homebrew makes links from $GITHUB_WORKSPACE to taps.
-        # And it tries to remove these links at post setup event if it is
-        # untapped.
-        # Need to tap again after test cleanup otherwise Post Setup Homebrew
-        # makes an error.
-        run: |
-          rm -rf /opt/homebrew/Library/Taps/rcmdnk/homebrew-file
-          mkdir -p /opt/homebrew/Library/Taps/rcmdnk
-          touch /opt/homebrew/Library/Taps/rcmdnk/homebrew-file

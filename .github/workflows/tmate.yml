@@ -28,22 +28,34 @@ jobs:
   tmate:
     runs-on: ${{ inputs.os }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        fetch-depth: 0
-    - uses: actions/setup-python@v5
-      with:
-        python-version: ${{ inputs.py_ver }}
-    - name: Install poetry
-      run: |
-        pipx install poetry
-        poetry install
-      shell: bash
-    - name: Set up Homebrew
-      id: set-up-homebrew
-      uses: Homebrew/actions/setup-homebrew@master
-      with:
-        test-bot: false
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
+      - name: Install Homebrew (Linux)
+        # macOS already has Homebrew
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential procps curl file git
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$GITHUB_ENV"
+      - name: Setup for Homebrew
+        run: |
+          echo "export HOMEBREW_NO_INSTALL_CLEANUP=1" >> "$GITHUB_ENV"
+          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.py_ver }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/pyproject.toml
+      - name: Set up environment
+        run: |
+          uv python pin ${{ inputs.python-version }}
+          uv sync
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
