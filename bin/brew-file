@@ -837,7 +837,7 @@ class BrewInfo:
                 excmd = ' '.join(line.split()[1:]).strip()
 
                 if not self.helper.opt.get('form') and (
-                    cmd in ['brew', 'tap', 'tapall']
+                    cmd in ['brew', 'cask', 'tap', 'tapall']
                     and ('"' in line or "'" in line)
                 ):
                     self.helper.opt['form'] = 'bundle'
