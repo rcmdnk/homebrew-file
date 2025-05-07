@@ -902,20 +902,17 @@ class BrewInfo:
                 elif cmd == 'after':
                     self.after_input.append(excmd)
                 elif cmd == 'cask_args':
-                    if self.helper.opt.get('form') in [
-                        'brewdler',
-                        'bundle',
-                    ]:
+                    if excmd.startswith('--'):
+                        for arg in excmd.split():
+                            k = arg.split('=')[0]
+                            v = arg.split('=')[1] if '=' in arg else ''
+                            self.cask_args_input[k] = v
+                    else:
                         for arg in excmd.split(','):
                             k = f'--{arg.split(":")[0]}'
                             v = arg.split(':')[1]
                             if v == 'true':
                                 v = ''
-                            self.cask_args_input[k] = v
-                    else:
-                        for arg in excmd.split():
-                            k = arg.split('=')[0]
-                            v = arg.split('=')[1] if '=' in arg else ''
                             self.cask_args_input[k] = v
                 else:
                     self.cmd_input.append(line.strip())
