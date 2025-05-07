@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from .brew_file import BrewHelper
+from .brew_file import BrewFile, BrewHelper
 
 # DO NOT run this test in your local environment.
 # Tests using the system Homebrew environment.
@@ -558,6 +558,22 @@ tap homebrew/cask
     assert lines == tap2
 
 
+def test_clean_non_request(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+) -> None:
+    bf = BrewFile(brewfile)
+    helper.proc('brew install brotli')
+    bf.clean_non_request()
+    _, lines = helper.proc('brew ls')
+    assert lines == ['brotli']
+    helper.proc('brew tab --no-installed-on-request')
+    bf.clean_non_request()
+    _, lines = helper.proc('brew ls')
+    assert lines == []
+
+
 def test_vscode_cursor(
     cmd: str,
     brewfile: str,
@@ -619,3 +635,147 @@ cask cursor
 cursor ms-vscode.remote-explorer
 """
         )
+
+
+def test_update(
+    cmd: str, brewfile: str, helper: BrewHelper, tmp_path: Path
+) -> None:
+    repo = tmp_path / 'test/repo'
+    local_repo = tmp_path / 'test_repo'
+    helper.proc(f'"{cmd}" set_repo --repo file://{repo} -f "{brewfile}" -y')
+
+    with Path(repo / 'Brewfile').open('w') as f:
+        f.write('tap homebrew/core\nbrew node\n')
+    helper.proc('git commit -a -m "test2"', cwd=repo)
+
+    helper.proc(f'"{cmd}" update -f "{brewfile}"')
+
+    with Path(local_repo / 'Brewfile').open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+brew brotli
+brew c-ares
+brew ca-certificates
+brew icu4c@77
+brew libnghttp2
+brew libuv
+brew node
+brew openssl@3
+
+tap homebrew/cask
+cask rapidapi
+"""
+        )
+    with Path(repo / 'Brewfile').open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+brew brotli
+brew c-ares
+brew ca-certificates
+brew icu4c@77
+brew libnghttp2
+brew libuv
+brew node
+brew openssl@3
+
+tap homebrew/cask
+cask rapidapi
+"""
+        )
+
+
+def test_dry_run(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+) -> None:
+    # Create Brewfile with a package
+    with Path(brewfile).open('w') as f:
+        f.write('tap homebrew/core\nbrew git\n')
+
+    # Test install with dry run
+    helper.proc(f'"{cmd}" install -f "{brewfile}" -d')
+    _, lines = helper.proc('brew ls')
+    assert 'git' not in lines
+
+    # Test install w/o dry run
+    helper.proc(f'"{cmd}" install -f "{brewfile}"')
+    _, lines = helper.proc('brew ls')
+    assert 'git' in lines
+
+    # Remove git from Brewfile
+    with Path(brewfile).open('w') as f:
+        f.write('tap homebrew/core')
+
+    # Test clean with dry run
+    helper.proc(f'"{cmd}" clean -f "{brewfile}" -d')
+    _, lines = helper.proc('brew ls')
+    assert 'git' in lines
+
+    # Test clean w/o dry run
+    helper.proc(f'"{cmd}" clean -f "{brewfile}"')
+    _, lines = helper.proc('brew ls')
+    assert 'git' not in lines
+
+
+def test_brew_command(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+) -> None:
+    # Test direct brew command
+    helper.proc(f'"{cmd}" brew install git')
+    _, lines = helper.proc('brew ls')
+    assert 'git' in lines
+
+    # Test brew command with noinit
+    helper.proc(f'"{cmd}" brew noinit install node')
+    _, lines = helper.proc('brew ls')
+    assert 'node' in lines
+
+
+def test_format_options(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+) -> None:
+    # Test different format options
+    helper.proc('brew install git')
+    formats = ['file', 'bundle', 'cmd']
+    for fmt in formats:
+        helper.proc(f'"{cmd}" init -f "{brewfile}" -y -F {fmt}')
+        assert Path(brewfile).exists()
+        with Path(brewfile).open() as f:
+            content = f.read()
+        if fmt == 'file':
+            assert 'brew git' in content
+        elif fmt == 'bundle':
+            assert "brew 'git'" in content
+        elif fmt == 'cmd':
+            assert 'brew install git' in content
+
+
+def test_cask_args(
+    cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+) -> None:
+    # Test cask_args in different formats
+    formats = ['file', 'bundle']
+    for fmt in formats:
+        with Path(brewfile).open('w') as f:
+            if fmt == 'bundle':
+                f.write('cask_args appdir: "~/Applications"\ncask rapidapi\n')
+            else:
+                f.write("cask_args --appdir=~/Applications\ncask 'rapidapi'\n")
+        helper.proc(f'"{cmd}" install -f "{brewfile}"')
+        assert Path('~/Applications/RapidAPI.app').expanduser().exists()
+        helper.proc(f'"{cmd}" rm rapidapi')

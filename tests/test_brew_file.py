@@ -454,8 +454,45 @@ def test_input_backup(bf: BrewFile) -> None:
     pass
 
 
-def test_set_brewfile_repo(bf: BrewFile) -> None:
-    pass
+def test_set_brewfile_repo(tmp_path: Path) -> None:
+    file = tmp_path / 'Brewfile'
+    repo = tmp_path / 'test/repo'
+    local_repo = tmp_path / 'test_repo'
+    bf = BrewFile(
+        opt={'input': str(file), 'repo': f'file://{repo}', 'yn': True}
+    )
+
+    # Test set_repo with local repository
+    bf.set_brewfile_repo()
+    with Path(file).open() as f:
+        assert f.read() == f'git file://{repo}'
+    with Path(local_repo / 'README.md').open() as f:
+        assert (
+            f.read()
+            == """# repo
+
+Package list for [homebrew](http://brew.sh/).
+
+Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file)."""
+        )
+
+    with Path(repo / 'Brewfile').open() as f:
+        assert f.read() == ''
+    with Path(local_repo / 'Brewfile').open() as f:
+        assert f.read() == ''
+
+    with Path(local_repo / 'Brewfile').open('w') as f:
+        f.write('test')
+    bf.repomgr('push')
+    with Path(repo / 'Brewfile').open() as f:
+        assert f.read() == 'test'
+
+    with Path(repo / 'Brewfile').open('w') as f:
+        f.write('test2')
+    bf.helper.proc('git commit -a -m "test2"', cwd=repo)
+    bf.repomgr('pull')
+    with Path(local_repo / 'Brewfile').open() as f:
+        assert f.read() == 'test2'
 
 
 def test_set_brewfile_local(bf: BrewFile) -> None:
@@ -524,8 +561,17 @@ def test_get_files(
     ]
 
 
-def test_edit_brewfile(bf: BrewFile) -> None:
-    pass
+def test_edit_brewfile(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    editor_script = Path(__file__).parent / 'scripts' / 'test_editor.sh'
+    monkeypatch.setenv('HOMEBREW_BREWFILE_EDITOR', str(editor_script))
+    file = tmp_path / 'Brewfile'
+    file.touch()
+    bf = BrewFile(opt={'input': str(file)})
+    bf.edit_brewfile()
+    with Path(file).open() as f:
+        assert f.read() == 'test content\n'
 
 
 def test_cat_brewfile(bf: BrewFile) -> None:

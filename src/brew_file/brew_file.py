@@ -532,9 +532,13 @@ class BrewFile:
         raise RuntimeError(msg)
 
     def check_local_repo(self) -> None:
-        dirname = self.opt['repo'].replace('file:///', '')
+        dirname = self.opt['repo'].replace('file://', '')
         Path(dirname).mkdir(parents=True, exist_ok=True)
         _ = self.helper.proc('git init', cwd=dirname)
+        _ = self.helper.proc(
+            'git config --local receive.denyCurrentBranch updateInstead',
+            cwd=dirname,
+        )
         self.clone_repo()
 
     def check_repo(self) -> None:
@@ -564,7 +568,7 @@ class BrewFile:
             '@' not in self.opt['repo']
             and not self.opt['repo'].startswith('git://')
             and not self.opt['repo'].startswith('http://')
-            and not self.opt['repo'].startswith('file:///')
+            and not self.opt['repo'].startswith('file://')
             and not self.opt['repo'].startswith('/')
         ):
             self.opt['repo'] = (
@@ -582,7 +586,7 @@ class BrewFile:
         # Check and prepare repository
         if 'github' in self.opt['repo']:
             self.check_github_repo()
-        elif self.opt['repo'].startswith('file:///') or self.opt[
+        elif self.opt['repo'].startswith('file://') or self.opt[
             'repo'
         ].startswith('/'):
             self.check_local_repo()
@@ -1461,18 +1465,7 @@ class BrewFile:
 
     def clean_non_request(self) -> None:
         """Clean up non requested packages."""
-        formulae = self.helper.get_formula_list()
-        leaves = self.helper.get_leaves()
-        uninstalls = []
-        for p in formulae:
-            if p not in leaves:
-                continue
-            installed = self.helper.get_installed(p)
-            if installed.get('installed_on_request', False) is False:
-                uninstalls.append(p)
-        if not uninstalls:
-            return
-        cmd = 'brew uninstall ' + ' '.join(uninstalls)
+        cmd = 'brew autoremove'
         _ = self.helper.proc(
             cmd,
             print_cmd=False,
@@ -1619,7 +1612,7 @@ class BrewFile:
                         a = f'{d}/{package}.app'
                         if Path(a).is_dir():
                             if ret == 0:
-                                cmd += ' file:///' + quote(a)
+                                cmd += ' file://' + quote(a)
                             else:
                                 cmd += f" '{a}'"
                             continue

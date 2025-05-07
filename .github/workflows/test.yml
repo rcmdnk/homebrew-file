@@ -144,7 +144,13 @@ jobs:
           - 'tests/test_serial.py::test_install_clean[default]'
           - 'tests/test_serial.py::test_install_clean[on-request]'
           - 'tests/test_serial.py::test_install_clean[top-packages]'
+          - 'tests/test_serial.py::test_clean_non_request'
           - 'tests/test_serial.py::test_vscode_cursor'
+          - 'tests/test_serial.py::test_update'
+          - 'tests/test_serial.py::test_dry_run'
+          - 'tests/test_serial.py::test_brew_command'
+          - 'tests/test_serial.py::test_format_options'
+          - 'tests/test_serial.py::test_cask_args'
     runs-on: macos-latest
     steps:
       - uses: rcmdnk/python-action@v3
