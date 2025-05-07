@@ -760,9 +760,9 @@ def test_cask_args(
     for fmt in formats:
         with Path(brewfile).open('w') as f:
             if fmt == 'bundle':
-                f.write('cask_args appdir: "~/Applications"\ncask rapidapi\n')
+                f.write("cask_args appdir: '~/Applicatios'\ncask 'rapidapi'\n")
             else:
-                f.write("cask_args --appdir=~/Applications\ncask 'rapidapi'\n")
+                f.write('cask_args --appdir=~/Applications\ncask rapidapi\n')
         helper.proc(f'"{cmd}" install -f "{brewfile}"')
         assert Path('~/Applications/RapidAPI.app').expanduser().exists()
         helper.proc('brew rm rapidapi')
