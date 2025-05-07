@@ -904,13 +904,20 @@ class BrewInfo:
                 elif cmd == 'cask_args':
                     if excmd.startswith('--'):
                         for arg in excmd.split():
-                            k = arg.split('=')[0]
-                            v = arg.split('=')[1] if '=' in arg else ''
+                            if '=' in arg:
+                                k, v = arg.split('=')
+                            else:
+                                k = arg
+                                v = ''
+                            k = k.strip('"\' ')
+                            v = v.strip('"\' ')
                             self.cask_args_input[k] = v
                     else:
                         for arg in excmd.split(','):
-                            k = f'--{arg.split(":")[0]}'
-                            v = arg.split(':')[1]
+                            k, v = arg.split(':')
+                            k = k.strip('"\' ')
+                            k = f'--{k}'
+                            v = v.strip('"\' ')
                             if v == 'true':
                                 v = ''
                             self.cask_args_input[k] = v

@@ -758,7 +758,7 @@ def test_cask_args(
 ) -> None:
     # Test cask_args in different formats
     formats = ['file', 'bundle']
-    app_path = tmp_path / 'RapidAPI.app'
+    app_path = tmp_path / 'Applications'
     for fmt in formats:
         with Path(brewfile).open('w') as f:
             if fmt == 'bundle':
