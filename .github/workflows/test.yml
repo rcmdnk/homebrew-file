@@ -117,6 +117,10 @@ jobs:
             echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
             echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
           fi
+      - name: Set pseudo git user
+        run: |
+          git config --global user.user "runner"
+          git config --global user.email "runner@localhost"
       - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
@@ -153,6 +157,10 @@ jobs:
           - 'tests/test_serial.py::test_cask_args'
     runs-on: macos-latest
     steps:
+      - name: Set pseudo git user
+        run: |
+          git config --global user.user "runner"
+          git config --global user.email "runner@localhost"
       - uses: rcmdnk/python-action@v3
         with:
           checkout: 1
