@@ -568,7 +568,7 @@ def test_clean_non_request(
     bf.clean_non_request()
     _, lines = helper.proc('brew ls')
     assert lines == ['brotli']
-    helper.proc('brew tab --no-installed-on-request')
+    helper.proc('brew tab --no-installed-on-request brotli')
     bf.clean_non_request()
     _, lines = helper.proc('brew ls')
     assert lines == []
@@ -642,12 +642,9 @@ def test_update(
 ) -> None:
     repo = tmp_path / 'test/repo'
     local_repo = tmp_path / 'test_repo'
+    helper.proc('brew install git')
     helper.proc(f'"{cmd}" set_repo --repo file://{repo} -f "{brewfile}" -y')
-
-    with Path(repo / 'Brewfile').open('w') as f:
-        f.write('tap homebrew/core\nbrew node\n')
-    helper.proc('git commit -a -m "test2"', cwd=repo)
-
+    helper.proc(f'"{cmd}" init -f "{brewfile}" -y')
     helper.proc(f'"{cmd}" update -f "{brewfile}"')
 
     with Path(local_repo / 'Brewfile').open('r') as f:
@@ -657,17 +654,12 @@ def test_update(
 # tap repositories and their packages
 
 tap homebrew/core
-brew brotli
-brew c-ares
-brew ca-certificates
-brew icu4c@77
-brew libnghttp2
-brew libuv
-brew node
-brew openssl@3
+brew gettext
+brew git
+brew libunistring
+brew pcre2
 
 tap homebrew/cask
-cask rapidapi
 """
         )
     with Path(repo / 'Brewfile').open('r') as f:
@@ -677,17 +669,12 @@ cask rapidapi
 # tap repositories and their packages
 
 tap homebrew/core
-brew brotli
-brew c-ares
-brew ca-certificates
-brew icu4c@77
-brew libnghttp2
-brew libuv
-brew node
-brew openssl@3
+brew gettext
+brew git
+brew libunistring
+brew pcre2
 
 tap homebrew/cask
-cask rapidapi
 """
         )
 
@@ -778,4 +765,4 @@ def test_cask_args(
                 f.write("cask_args --appdir=~/Applications\ncask 'rapidapi'\n")
         helper.proc(f'"{cmd}" install -f "{brewfile}"')
         assert Path('~/Applications/RapidAPI.app').expanduser().exists()
-        helper.proc(f'"{cmd}" rm rapidapi')
+        helper.proc('brew rm rapidapi')
