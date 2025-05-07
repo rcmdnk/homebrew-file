@@ -563,7 +563,7 @@ def test_clean_non_request(
     brewfile: str,
     helper: BrewHelper,
 ) -> None:
-    bf = BrewFile(brewfile)
+    bf = BrewFile(opt={'input': brewfile})
     helper.proc('brew install brotli')
     bf.clean_non_request()
     _, lines = helper.proc('brew ls')
@@ -751,7 +751,7 @@ def test_format_options(
     helper.proc('brew install git')
     formats = ['file', 'bundle', 'cmd']
     for fmt in formats:
-        helper.proc(f'"{cmd}" init -f "{brewfile}" -y -F {fmt}')
+        helper.proc(f'"{cmd}" init -f "{brewfile}" -y --no-repo -F {fmt}')
         assert Path(brewfile).exists()
         with Path(brewfile).open() as f:
             content = f.read()

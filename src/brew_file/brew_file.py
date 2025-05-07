@@ -492,10 +492,14 @@ class BrewFile:
                 ['git', 'commit', '-m', '"Prepared by ' + __prog__ + '"'],
                 cwd=dirname,
             )
-            _, lines = self.helper.proc('git config init.defaultBranch')
-            default_branch = lines[0]
+            _, lines = self.helper.proc(
+                'git branch --show-current',
+                cwd=dirname,
+                exit_on_err=False,
+            )
+            branch = lines[0]
             self.helper.proc(
-                f'git push -u origin {default_branch}',
+                f'git push -u origin {branch}',
                 cwd=dirname,
             )
 

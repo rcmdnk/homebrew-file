@@ -131,6 +131,11 @@ Prepare Homebrew::
 
     ==> Casks
 
+Set pseudo git user::
+
+    lume@lumes-Virtual-Machine ~ % git config --global user.name "lume"
+    lume@lumes-Virtual-Machine ~ % git config --global user.email "lume@localhost"
+
 Install pytest, filelock by pip::
 
     lume@lumes-Virtual-Machine ~ % pip3 install pytest filelock

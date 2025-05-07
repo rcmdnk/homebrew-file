@@ -361,7 +361,7 @@ class BrewInfo:
                             self.cask_args_input[k] = v
                     else:
                         for arg in excmd.split():
-                            k = arg.split(':')[0]
+                            k = arg.split('=')[0]
                             v = arg.split('=')[1] if '=' in arg else ''
                             self.cask_args_input[k] = v
                 else:
