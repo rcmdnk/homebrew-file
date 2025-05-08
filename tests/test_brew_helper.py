@@ -222,9 +222,23 @@ def test_get_cask_list(helper: BrewHelper) -> None:
     assert isinstance(helper.get_cask_list(), list)
 
 
-def test_get_info(helper: BrewHelper, python: str) -> None:
-    info = helper.get_info()['formulae'][python]
-    assert info['installed'][0]['used_options'] == []
+def test_get_info(helper: BrewHelper) -> None:
+    info = helper.get_info()
+    formula_info = next(iter(info['formulae'].values()))
+    assert 'name' in formula_info
+    assert 'full_name' in formula_info
+    assert 'tap' in formula_info
+    assert 'oldnames' in formula_info
+    assert 'aliases' in formula_info
+    assert 'linked_keg' in formula_info
+    assert 'installed' in formula_info
+
+    if is_mac():
+        cask_info = next(iter(info['casks'].values()))
+        assert 'token' in cask_info
+        assert 'full_token' in cask_info
+        assert 'tap' in cask_info
+        assert 'artifacts' in cask_info
 
 
 def test_get_installed(helper: BrewHelper, python: str) -> None:
@@ -238,41 +252,77 @@ def test_get_option(helper: BrewHelper, python: str) -> None:
     assert opt == ''
 
 
-def test_get_formula_info(helper: BrewHelper) -> None:
-    info = next(iter(helper.get_info()['formulae'].values()))
-    assert 'name' in info
-    assert 'tap' in info
-    assert 'aliases' in info
-    assert 'linked_keg' in info
-    assert 'installed' in info
-
-
 def test_get_formula_aliases(helper: BrewHelper, python: str) -> None:
     aliases = helper.get_formula_aliases()
     assert aliases['homebrew/core']['python'].startswith('python@')
 
 
-def test_get_tap_packs(helper: BrewHelper, tap: list[str]) -> None:
-    packs = helper.get_tap_packs(tap[0])
-    assert 'sentaku' in packs['formulae']
+def test_flatten_dict(helper: BrewHelper) -> None:
+    nested_dict = {'a': {'b': 1, 'c': {'d': 2}}, 'e': 3, 'f': {'g': 4}}
+    flat_dict = helper.flatten_dict(nested_dict)
+    assert flat_dict == {'b': 1, 'd': 2, 'e': 3, 'g': 4}
 
 
-def test_get_cask_info(helper: BrewHelper) -> None:
-    if not is_mac():
-        pytest.skip('only for mac')
-    info = list(helper.get_info()['casks'].values())
-    if info:
-        assert 'token' in info[0]
-        assert 'tap' in info[0]
-        assert 'old_tokens' in info[0]
+def test_name_and_token_key(helper: BrewHelper) -> None:
+    # Test with full_name=False
+    helper.opt['full_name'] = False
+    assert helper.name_key() == 'name'
+    assert helper.token_key() == 'token'
+
+    # Test with full_name=True
+    helper.opt['full_name'] = True
+    assert helper.name_key() == 'full_name'
+    assert helper.token_key() == 'full_token'
 
 
-def test_get_tap_casks(helper: BrewHelper, tap: list[str]) -> None:
-    if not is_mac():
-        pytest.skip('only for mac')
-    casks = helper.get_tap_packs(tap[1])['casks']
-    assert 'vem' in casks
+def test_get_json_info(helper: BrewHelper) -> None:
+    # Test valid package
+    info = helper.get_json_info('git', True)
+    assert isinstance(info, dict)
+    assert 'formulae' in info
+
+    # Test invalid package
+    info = helper.get_json_info('nonexistent-package', False)
+    assert isinstance(info, list)
+    assert any(
+        'No available formula with the name "nonexistent-package".' in line
+        for line in info
+    )
 
 
-def test_get_leaves(helper: BrewHelper) -> None:
-    pass
+def test_get_each_type_info(helper: BrewHelper) -> None:
+    # Test formulae
+    formula_info = helper.get_each_type_info('formulae')
+    assert isinstance(formula_info, dict)
+    assert len(formula_info) > 0
+
+    if is_mac():
+        # Test casks
+        cask_info = helper.get_each_type_info('casks')
+        assert isinstance(cask_info, dict)
+        assert len(cask_info) > 0
+
+
+def test_get_packages(helper: BrewHelper) -> None:
+    # Test formulae
+    formulae = helper.get_packages('formulae')
+    assert isinstance(formulae, list)
+    assert len(formulae) > 0
+
+    # Test caching
+    assert helper.get_packages('formulae') is formulae
+
+    if is_mac():
+        # Test casks
+        casks = helper.get_packages('casks')
+        assert isinstance(casks, list)
+        assert len(casks) > 0
+
+
+def test_get_all_info(helper: BrewHelper) -> None:
+    info = helper.get_all_info()
+    assert 'formulae' in info
+    assert 'casks' in info
+
+    # Test caching
+    assert helper.get_all_info() is info

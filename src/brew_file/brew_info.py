@@ -400,8 +400,7 @@ class BrewInfo:
         output_prefix = ''
         output = ''
 
-        # commands for each format
-        # if self.helper.opt["form"] in ["file", "none"]:
+        # comd base
         cmd_before = 'before '
         cmd_after = 'after '
         cmd_cask_args = 'cask_args '
@@ -416,7 +415,9 @@ class BrewInfo:
         cmd_cursor = 'cursor '
         cmd_main = 'main '
         cmd_file = 'file '
-        if self.helper.opt['form'] in ['brewdler', 'bundle']:
+        if self.helper.opt['form'] in ['file', None]:
+            pass
+        elif self.helper.opt['form'] in ['brewdler', 'bundle']:
             cmd_before = '#before '
             cmd_after = '#after '
             cmd_cask_args = '#cask_args '
@@ -458,6 +459,9 @@ fi
             cmd_cursor = 'cursor --install-extension '
             cmd_main = '#main '
             cmd_file = '#file '
+        else:
+            msg = f'Invalid format: "{self.helper.opt["form"]}".\nUse "file", "brewdler", "bundle", "command" or "cmd".'
+            raise ValueError(msg)
 
         # sort
         self.sort()

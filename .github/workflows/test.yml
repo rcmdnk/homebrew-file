@@ -138,23 +138,13 @@ jobs:
           github_token: "${{github.token}}"
           pre-commit: "${{ env.IS_MAIN }}"
           tmate: "${{ env.DEBUG }}"
-  test-serial:
+  test-destructive:
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.9']
         test-path:
-          - 'tests/test_serial.py::test_init'
-          - 'tests/test_serial.py::test_install_clean[default]'
-          - 'tests/test_serial.py::test_install_clean[on-request]'
-          - 'tests/test_serial.py::test_install_clean[top-packages]'
-          - 'tests/test_serial.py::test_clean_non_request'
-          - 'tests/test_serial.py::test_vscode_cursor'
-          - 'tests/test_serial.py::test_update'
-          - 'tests/test_serial.py::test_dry_run'
-          - 'tests/test_serial.py::test_brew_command'
-          - 'tests/test_serial.py::test_format_options'
-          - 'tests/test_serial.py::test_cask_args'
+          - 'tests/test_destructive.py'
     runs-on: macos-latest
     steps:
       - name: Set pseudo git user
@@ -173,7 +163,7 @@ jobs:
           pytest-separate-benchmark: 0
           coverage: 0
           pytest-cov-path: ""
-          pytest-opt: "-n0 -m serial"
+          pytest-opt: "-n0 -m destructive"
           coverage-push: 0
           github_token: ""
           pre-commit: 0

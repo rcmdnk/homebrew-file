@@ -25,9 +25,9 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 markers = [
-    "serial: tests only for serial run.",
+    "destructive: tests only for destructive run.",
 ]
-addopts = "-n auto -m 'not serial'"
+addopts = "-n auto -m 'not destructive'"
 testpaths = ["tests",]
 
 [tool.ruff]

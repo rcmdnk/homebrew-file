@@ -4,14 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from .brew_file import BrewFile, BrewInfo, is_mac
-
-
-@pytest.fixture
-def brew_info() -> BrewInfo:
-    file = 'BrewfileTest' if is_mac() else 'BrewfileTestLinux'
-    bf = BrewFile({'input': Path(__file__).parent / 'files' / file})
-    return bf.brewinfo
+from .brew_file import BrewHelper, BrewInfo, is_mac
 
 
 def test_get_dir(brew_info: BrewInfo) -> None:
@@ -309,116 +302,12 @@ def test_mas_pack(brew_info: BrewInfo) -> None:
     )
 
 
-# Ignore DeprecationWarning to allow \$
-@pytest.mark.filterwarnings('ignore::DeprecationWarning')
-def test_write(brew_info: BrewInfo, tmp_path: Path, tap: list[str]) -> None:
-    tmp_file = tmp_path / 'f'
-    default_file = brew_info.file
-    brew_info.helper.opt['caskonly'] = False
-    brew_info.helper.opt['appstore'] = -1
-    brew_info.helper.opt['verbose'] = 1
-    brew_info.helper.opt['form'] = None
-    brew_info.read()
-    brew_info.input_to_list()
-    brew_info.file = tmp_file
-    brew_info.write()
-    with Path(default_file).open() as f1:
-        # Remove first and last ignore sections
-        default_txt = [
-            x
-            for x in f1
-            if x
-            not in [
-                '#BREWFILE_IGNORE\n',
-                '#BREWFILE_ENDIGNORE\n',
-                'brew abc\n',
-                'brew xyz\n',
-            ]
-        ]
-        default_txt = default_txt[1:-1]
-
-        default_txt = ''.join(default_txt)
-    with Path(tmp_file).open() as f2:
-        tmp_txt = f2.read()
-    assert tmp_txt == default_txt
-    brew_info.helper.opt['form'] = 'bundle'
-    brew_info.write()
-    if is_mac():
-        cask_tap1 = "\ntap 'homebrew/cask'\n\ntap 'rcmdnk/rcmdnkcask'\n"
-        cask_tap2 = '\nbrew tap homebrew/cask\n\nbrew tap rcmdnk/rcmdnkcask\n'
-        appstore1 = "\n# App Store applications\nmas '', id: Keynote\n"
-        appstore2 = '\n# App Store applications\nmas install Keynote\n'
-    else:
-        cask_tap1 = ''
-        cask_tap2 = ''
-        appstore1 = ''
-        appstore2 = ''
-
-    with Path(tmp_file).open() as f2:
-        assert (
-            f2.read()
-            == f"""# Before commands
-#before echo before
-
-# tap repositories and their packages
-
-tap 'homebrew/core'
-{cask_tap1}{appstore1}
-# Main file
-#main 'BrewfileMain'
-
-# Additional files
-#file 'BrewfileExt'
-#file 'BrewfileExt2'
-#file 'BrewfileNotExist'
-#file '~/BrewfileHomeForTestingNotExists'
-
-# Other commands
-#echo other commands
-
-# After commands
-#after echo after
-"""
-        )
-
-        brew_info.helper.opt['form'] = 'cmd'
-        brew_info.write()
-        with Path(tmp_file).open() as f3:
-            assert (
-                f3.read()
-                == f"""#!/usr/bin/env bash
-
-#BREWFILE_IGNORE
-if ! which brew >& /dev/null;then
-  brew_installed=0
-  echo Homebrew is not installed!
-  echo Install now...
-  echo /bin/bash -c \\\"\\$\\(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh\\)\\\"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-  echo
-fi
-#BREWFILE_ENDIGNORE
-
-# Before commands
-echo before
-
-# tap repositories and their packages
-
-brew tap homebrew/core
-{cask_tap2}{appstore2}
-# Main file
-#main BrewfileMain
-
-# Additional files
-#file BrewfileExt
-#file BrewfileExt2
-#file BrewfileNotExist
-#file ~/BrewfileHomeForTestingNotExists
-
-# Other commands
-echo other commands
-
-# After commands
-echo after
-"""
-            )
+def test_invalid_format(tmp_path: Path) -> None:
+    helper = BrewHelper(opt={'form': 'invalid-format'})
+    info = BrewInfo(helper=helper, file=tmp_path / 'Brewfile')
+    with pytest.raises(ValueError, match='Invalid format') as excinfo:
+        info.write()
+    assert (
+        str(excinfo.value)
+        == 'Invalid format: "invalid-format".\nUse "file", "brewdler", "bundle", "command" or "cmd".'
+    )

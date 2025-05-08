@@ -8,16 +8,19 @@ from unittest.mock import patch
 
 import pytest
 
-from .brew_file import BrewFile, BrewHelper, BrewInfo, __prog__, is_mac
+from .brew_file import (
+    BrewFile,
+    BrewHelper,
+    BrewInfo,
+    CmdError,
+    __prog__,
+    is_mac,
+)
 
 
 @pytest.fixture
 def bf() -> BrewFile:
     return BrewFile({})
-
-
-def test_default_opt(bf: BrewFile) -> None:
-    pass
 
 
 def test_set_input(bf: BrewFile) -> None:
@@ -158,112 +161,6 @@ def test_ask_yn_y(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     ]
 
 
-@pytest.mark.parametrize(
-    'full_name',
-    [
-        (False,),
-        (True,),
-    ],
-)
-def test_read_all(bf: BrewFile, tap: list[str], full_name: bool) -> None:
-    parent = Path(__file__).parent / 'files'
-    file = parent / 'BrewfileTest'
-    bf.opt['full_name'] = full_name
-    tap = 'rcmdnk/rcmdnkpac/' if full_name else ''
-    bf.set_input(file)
-    bf.read_all()
-    assert bf.brewinfo_main.file == parent / 'BrewfileMain'
-    assert [x.file for x in bf.brewinfo_ext] == [
-        parent / x
-        for x in [
-            'BrewfileTest',
-            'BrewfileExt',
-            'BrewfileExt2',
-            'BrewfileExt3',
-            'BrewfileNotExist',
-        ]
-    ] + [Path(os.environ['HOME']) / 'BrewfileHomeForTestingNotExists']
-    assert bf.get_list('brew_input') == {
-        'cmake',
-        'python@3.10',
-        'vim',
-        f'{tap}chatgpt-prompt-wrapper',
-        f'{tap}cocoro',
-        f'{tap}ec2',
-        f'{tap}escape_sequence',
-        f'{tap}evernote_mail',
-        f'{tap}gcp-tools',
-        f'{tap}gmail_filter_manager',
-        f'{tap}git-gpt-commit',
-        f'{tap}gtask',
-        f'{tap}inputsource',
-        f'{tap}multi_clipboard',
-        f'{tap}open_newtab',
-        f'{tap}parse-plist',
-        f'{tap}po',
-        f'{tap}rcmdnk-sshrc',
-        f'{tap}rcmdnk-trash',
-        f'{tap}screenutf8',
-        f'{tap}sd_cl',
-        f'{tap}sentaku',
-        f'{tap}shell-explorer',
-        f'{tap}shell-logger',
-        f'{tap}smenu',
-        f'{tap}stow_reset',
-    }
-    assert bf.get_dict('brew_opt_input') == {
-        'cmake': '',
-        'python@3.10': '',
-        'vim': ' --HEAD',
-        f'{tap}chatgpt-prompt-wrapper': '',
-        f'{tap}cocoro': '',
-        f'{tap}ec2': '',
-        f'{tap}escape_sequence': '',
-        f'{tap}evernote_mail': '',
-        f'{tap}gcp-tools': '',
-        f'{tap}gmail_filter_manager': '',
-        f'{tap}git-gpt-commit': '',
-        f'{tap}gtask': '',
-        f'{tap}inputsource': '',
-        f'{tap}multi_clipboard': '',
-        f'{tap}open_newtab': '',
-        f'{tap}parse-plist': '',
-        f'{tap}po': '',
-        f'{tap}rcmdnk-sshrc': '',
-        f'{tap}rcmdnk-trash': '',
-        f'{tap}screenutf8': '',
-        f'{tap}sd_cl': '',
-        f'{tap}sentaku': '',
-        f'{tap}shell-explorer': '',
-        f'{tap}shell-logger': '',
-        f'{tap}smenu': '',
-        f'{tap}stow_reset': '',
-    }
-    assert bf.get_list('tap_input') == {
-        'homebrew/cask',
-        'homebrew/core',
-        'rcmdnk/rcmdnkcask',
-        'rcmdnk/rcmdnkpac',
-    }
-    assert bf.get_list('cask_input') == {'iterm2', 'font-migu1m'}
-    assert bf.get_list('appstore_input') == {'Keynote'}
-    assert bf.get_list('main_input') == {'BrewfileMain'}
-    assert bf.get_list('file_input') == {
-        'BrewfileMain',
-        'BrewfileExt',
-        'BrewfileExt2',
-        'BrewfileNotExist',
-        '~/BrewfileHomeForTestingNotExists',
-        'BrewfileExt3',
-    }
-    assert bf.get_list('before_input') == {'echo before', 'echo EXT before'}
-    assert bf.get_list('after_input') == {'echo after', 'echo EXT after'}
-    assert bf.get_list('cmd_input') == {
-        'echo BrewfileMain',
-        'echo other commands',
-    }
-
-
 def test_read(bf: BrewFile, tmp_path: Path) -> None:
     helper = BrewHelper({})
 
@@ -311,26 +208,6 @@ def test_read(bf: BrewFile, tmp_path: Path) -> None:
     assert ret.file == Path(f3)
 
 
-def test_list_to_main(bf: BrewFile) -> None:
-    pass
-
-
-def test_input_to_list(bf: BrewFile) -> None:
-    pass
-
-
-def test_write(bf: BrewFile) -> None:
-    pass
-
-
-def test_get(bf: BrewFile) -> None:
-    pass
-
-
-def test_remove_pack(bf: BrewFile) -> None:
-    pass
-
-
 def test_repo_name(bf: BrewFile) -> None:
     bf.opt['repo'] = 'git@github.com:abc/def.git'
     assert bf.repo_name() == 'def'
@@ -343,14 +220,6 @@ def test_user_name(bf: BrewFile) -> None:
     assert bf.user_name() == 'abc'
     bf.opt['repo'] = 'https://github.com/abc/def.git'
     assert bf.user_name() == 'abc'
-
-
-def test_input_dir(bf: BrewFile) -> None:
-    pass
-
-
-def test_input_file(bf: BrewFile) -> None:
-    pass
 
 
 def test_repo_file(bf: BrewFile) -> None:
@@ -382,76 +251,12 @@ def test_init_repo(
     assert file.exists()
 
 
-def test_clone_repo(bf: BrewFile) -> None:
-    pass
-
-
-def test_check_github_repo(bf: BrewFile) -> None:
-    pass
-
-
 def test_check_local_repo(bf: BrewFile, tmp_path: Path) -> None:
     bf.opt['repo'] = f'file:///{tmp_path}/repo'
     bf.clone_repo = lambda: None
     bf.check_local_repo()
     assert (tmp_path / 'repo').exists()
     assert (tmp_path / 'repo' / '.git').exists()
-
-
-def test_check_repo(bf: BrewFile) -> None:
-    pass
-
-
-def test_check_gitconfig(bf: BrewFile) -> None:
-    pass
-
-
-def test_repomgr(bf: BrewFile) -> None:
-    pass
-
-
-def test_brew_cmd(bf: BrewFile) -> None:
-    pass
-
-
-def test_add_path(bf: BrewFile) -> None:
-    pass
-
-
-def test_which_brew(bf: BrewFile) -> None:
-    pass
-
-
-def test_check_brew_cmd(bf: BrewFile) -> None:
-    pass
-
-
-def test_check_mas_cmd(bf: BrewFile) -> None:
-    pass
-
-
-def test_get_appstore_dict(bf: BrewFile) -> None:
-    pass
-
-
-def test_get_appstore_list(bf: BrewFile) -> None:
-    pass
-
-
-def test_get_cask_list(bf: BrewFile) -> None:
-    pass
-
-
-def test_get_list(bf: BrewFile) -> None:
-    pass
-
-
-def test_clean_list(bf: BrewFile) -> None:
-    pass
-
-
-def test_input_backup(bf: BrewFile) -> None:
-    pass
 
 
 def test_set_brewfile_repo(tmp_path: Path) -> None:
@@ -495,70 +300,46 @@ Managed by [homebrew-file](https://github.com/rcmdnk/homebrew-file)."""
         assert f.read() == 'test2'
 
 
-def test_set_brewfile_local(bf: BrewFile) -> None:
-    pass
-
-
-def test_initialize(bf: BrewFile) -> None:
-    pass
-
-
-def test_initialize_write(bf: BrewFile) -> None:
-    pass
-
-
-def test_check_input_file(bf: BrewFile) -> None:
-    pass
-
-
-def test_get_files(
-    bf: BrewFile, tap: list[str], caplog: pytest.LogCaptureFixture
+def test_install_error_handling(
+    tmp_path: Path,
 ) -> None:
-    parent = Path(__file__).parent / 'files'
-    file = parent / 'BrewfileTest'
-    bf.set_input(file)
-    files = [
-        parent / x
-        for x in [
-            'BrewfileMain',
-            'BrewfileTest',
-            'BrewfileExt',
-            'BrewfileExt2',
-        ]
-    ]
-    caplog.clear()
-    assert bf.get_files() == files
-    # record could include 'Error: Another active Homebrew update process is already in progress.' by another test
-    assert (
-        'tests.brew_file',
-        20,
-        '$ brew tap rcmdnk/rcmdnkpac',
-    ) in caplog.record_tuples
+    file = tmp_path / 'Brewfile'
+    bf = BrewFile(opt={'input': file, 'yn': True})
+    # Test non-existent package
+    with Path(file).open('w') as f:
+        f.write('brew nonexistent-package')
 
-    bf.set_input(file)
-    bf.opt['read'] = False
-    files = [
-        parent / x
-        for x in [
-            'BrewfileMain',
-            'BrewfileTest',
-            'BrewfileExt',
-            'BrewfileExt2',
-            'BrewfileExt3',
-            'BrewfileNotExist',
-            Path(os.environ['HOME']) / 'BrewfileHomeForTestingNotExists',
-        ]
-    ]
-    caplog.clear()
-    assert bf.get_files(is_print=True, all_files=True) == files
-    assert caplog.record_tuples == [
-        ('tests.brew_file', 20, '$ brew tap rcmdnk/rcmdnkpac'),
-        (
-            'tests.brew_file',
-            logging.INFO,
-            '\n'.join([str(x) for x in files]),
-        ),
-    ]
+    with pytest.raises(CmdError) as excinfo:
+        bf.install()
+    assert 'Failed at command:' in str(excinfo.value)
+    assert 'install nonexistent-package' in str(excinfo.value)
+
+
+def test_before_after_commands(
+    tmp_path: Path,
+) -> None:
+    # Test before/after commands
+    file = tmp_path / 'Brewfile'
+    test_before_file = tmp_path / 'before.txt'
+    test_after_file = tmp_path / 'after.txt'
+    with Path(file).open('w') as f:
+        f.write(f"""
+before touch {test_before_file}
+after touch {test_after_file}
+""")
+    bf = BrewFile(opt={'input': file, 'yn': True})
+    assert not Path(test_before_file).exists()
+    assert not Path(test_after_file).exists()
+    bf.install()
+    assert Path(test_before_file).exists()
+    assert Path(test_after_file).exists()
+
+    # Check if the commands are remaining in the Brewfile after initialization
+    bf.initialize()
+    with Path(file).open() as f:
+        content = f.read()
+        assert f'before touch {test_before_file}' in content
+        assert f'after touch {test_after_file}' in content
 
 
 def test_edit_brewfile(
@@ -574,21 +355,9 @@ def test_edit_brewfile(
         assert f.read() == 'test content\n'
 
 
-def test_cat_brewfile(bf: BrewFile) -> None:
-    pass
-
-
 def test_clean_non_request(bf: BrewFile) -> None:
     bf.opt['dryrun'] = True
     bf.clean_non_request()
-
-
-def test_cleanup(bf: BrewFile) -> None:
-    pass
-
-
-def test_install(bf: BrewFile) -> None:
-    pass
 
 
 @pytest.mark.parametrize(
@@ -603,14 +372,6 @@ def test_install(bf: BrewFile) -> None:
 )
 def test_generate_cask_token(bf: BrewFile, app: str, token: str) -> None:
     assert bf.generate_cask_token(app) == token
-
-
-def test_find_app(bf: BrewFile) -> None:
-    pass
-
-
-def test_find_brew_app(bf: BrewFile) -> None:
-    pass
 
 
 def test_make_brew_app_cmd(bf: BrewFile) -> None:
