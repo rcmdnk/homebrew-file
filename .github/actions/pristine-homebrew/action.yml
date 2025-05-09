@@ -58,7 +58,7 @@ runs:
           formulae+=("$f")
         done < <(brew list --formula)
         if [ "${#formulae[@]}" -gt 0 ]; then
-          brew uninstall --formula --zap --force "${formulae[@]}"
+          brew uninstall --formula --force "${formulae[@]}"
         fi
 
         casks=()
