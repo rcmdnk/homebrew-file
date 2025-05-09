@@ -10,6 +10,9 @@ inputs:
     required: false
     default: "true"
 
+env:
+  CACHE_PATHS:
+
 runs:
   using: composite
   steps:
@@ -19,20 +22,25 @@ runs:
       run: |
         prefix="$(brew --prefix)"
         {
-          echo 'list<<EOF'
-          printf '    %s\n' \
-            "$prefix/bin" "$prefix/etc" "$prefix/include" "$prefix/lib" "$prefix/opt" \
-            "$prefix/sbin" "$prefix/share" "$prefix/var" "$prefix/Library/Taps"
-          echo 'EOF'
-        } >>"$GITHUB_OUTPUT"
+          echo "CACHE_PATHS<<EOF"
+          echo "$prefix/bin"
+          echo "$prefix/etc"
+          echo "$prefix/include"
+          echo "$prefix/lib"
+          echo "$prefix/opt"
+          echo "$prefix/sbin"
+          echo "$prefix/share"
+          echo "$prefix/var"
+          echo "$prefix/Library/Taps"
+          echo "EOF"
+        } >> $GITHUB_ENV
         echo version=$(brew --version | sed -e '1s/[<>:"\/\\|?* \t]/_/g' -e '2,$d') >> "$GITHUB_OUTPUT"
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
       with:
         lookup-only: true
-        path: |
-          ${{ steps.brew.outputs.list }}
+        path: ${{ env.CACHE_PATHS }}
         key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
     - name: Remove current Homebrew directories
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
@@ -40,14 +48,13 @@ runs:
       run: |
         while read -r d; do
           rm -rf "$d"
-        done <<<"${{ steps.brew.outputs.list }}"
+        done <<<"${{ env.CACHE_PATHS }}"
     - name: Restore pristine Homebrew
       id: cache_restore
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       uses: actions/cache/restore@v4
       with:
-        path: |
-          ${{ steps.brew.outputs.list }}
+        path: ${{ env.CACHE_PATHS }}
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Make Homebrew pristine
       if: steps.cache_lookup.outputs.cache-hit != 'true'
@@ -82,8 +89,7 @@ runs:
       if: steps.cache_lookup.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: |
-          ${{ steps.brew.outputs.list }}
+        path: ${{ env.CACHE_PATHS }}
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'
