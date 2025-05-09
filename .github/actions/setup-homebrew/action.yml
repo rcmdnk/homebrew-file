@@ -8,7 +8,7 @@ runs:
       id: brew_env
       shell: bash
       run: |
-        # Linuxbrew
+        # check Linuxbrew, macOS Apple Silicon, macOS Intel
         for path in "/home/linuxbrew/.linuxbrew/bin" "/opt/homebrew/bin" "/usr/local/bin";do
           if [ -x "$path/brew" ]; then
             eval "$("$path/brew" shellenv)"
