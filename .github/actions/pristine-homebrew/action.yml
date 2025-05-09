@@ -51,15 +51,27 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        mapfile -t formulae < <(brew list --formula)
+
+        formulae=()
+        while IFS= read -r f; do
+          formulae+=("$f")
+        done < <(brew list --formula)
         if [ "${#formulae[@]}" -gt 0 ]; then
           brew uninstall --zap --force "${formulae[@]}"
         fi
-        mapfile -t casks < <(brew list --cask)
+
+        casks=()
+        while IFS= read -r c; do
+          casks+=("$c")
+        done < <(brew list --cask)
         if [ "${#casks[@]}" -gt 0 ]; then
           brew uninstall --cask --zap --force "${casks[@]}"
         fi
-        mapfile -t taps < <(brew tap)
+
+        taps=()
+        while IFS= read -r t; do
+          taps+=("$t")
+        done < <(brew tap)
         if [ "${#taps[@]}" -gt 0 ]; then
           brew untap "${taps[@]}"
         fi
