@@ -9,32 +9,12 @@ runs:
       shell: bash
       run: |
         # Linuxbrew
-        if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        for path in "/home/linuxbrew/.linuxbrew/bin" "/opt/homebrew/bin" "/usr/local/bin";do
+          if [ -x "$path/brew" ]; then
+            eval "$("$path/brew" shellenv)"
+            echo "$path/brew" >>"$GITHUB_PATH"
+          fi
         fi
-        # macOS Apple Silicon
-        if [ -x /opt/homebrew/bin/brew ]; then
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-        fi
-        # macOS Intel
-        if [ -x /usr/local/bin/brew ]; then
-          eval "$(/usr/local/bin/brew shellenv)"
-        fi
-
-        if ! command -v brew >/dev/null; then
-          echo "::error::brew not found"
-          exit 1
-        fi
-
-        # Persist any new PATH entries for later steps
-        ORIGINAL_PATH="$PATH"
-        IFS=':' read -ra NEW_PARTS <<<"$PATH"
-        for p in "${NEW_PARTS[@]}"; do
-          case ":$ORIGINAL_PATH:" in
-            *":$p:"*) ;;              # already present
-            *) echo "$p" >>"$GITHUB_PATH" ;;
-          esac
-        done
 
         # Keep HOMEBREW variables
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
