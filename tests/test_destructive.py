@@ -86,7 +86,7 @@ def test_get_leaves(helper: BrewHelper) -> None:
     assert leaves == ['node']
 
 
-@pytest.mark.destructive_full_name
+@pytest.mark.destructive_get_full_name
 def test_get_full_name(helper: BrewHelper) -> None:
     helper.proc('brew install git')
     helper.proc('brew install rcmdnk/file/brew-file')
