@@ -1,0 +1,76 @@
+name: pristine-homebrew
+description: Setup pristine Homebrew and cache it
+
+inputs:
+  os:
+    description: Runner OS (used in the cache key)
+    required: true
+  restore:
+    description: Restore a cached pristine Homebrew
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Build path list
+      id: brew_paths
+      shell: bash
+      run: |
+        P="${{ steps.brew_env.outputs.prefix }}"
+        {
+          echo 'list<<EOF'
+          printf '%s\n' \
+            "$P/bin" "$P/etc" "$P/include" "$P/lib" "$P/opt" \
+            "$P/sbin" "$P/share" "$P/var" "$P/Library/Taps"
+          echo 'EOF'
+        } >>"$GITHUB_OUTPUT"
+    - name: Cache lookup
+      id: cache_lookup
+      uses: actions/cache/restore@v4
+      with:
+        lookup-only: true
+        path: ${{ steps.brew_paths.outputs.list }}
+        key: brew-pristine-${{ inputs.os }}-${{ steps.brew_env.outputs.version }}
+    - name: Remove current Homebrew directories
+      if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        while read -r d; do
+          rm -rf "$d"
+        done <<<"${{ steps.brew_paths.outputs.list }}"
+    - name: Restore pristine Homebrew
+      id: cache_restore
+      if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ steps.brew_paths.outputs.list }}
+        key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
+    - name: Make Homebrew pristine
+      if: steps.cache_lookup.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        mapfile -t formulae < <(brew list --formula)
+        if [ "${#formulae[@]}" -gt 0 ]; then
+          brew uninstall --zap --force "${formulae[@]}"
+        fi
+        mapfile -t casks < <(brew list --cask)
+        if [ "${#casks[@]}" -gt 0 ]; then
+          brew uninstall --cask --zap --force "${casks[@]}"
+        fi
+        mapfile -t taps < <(brew tap)
+        if [ "${#taps[@]}" -gt 0 ]; then
+          brew untap "${taps[@]}"
+        fi
+    - name: Save pristine Homebrew
+      if: steps.cache_lookup.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.brew_paths.outputs.list }}
+        key: brew-pristine-${{ inputs.os }}-${{ steps.brew_env.outputs.version }}
+    - name: Remove brew download cache
+      if: inputs.restore == 'true'
+      shell: bash
+      run: |
+        rm -rf "$(brew --cache)" || true

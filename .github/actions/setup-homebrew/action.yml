@@ -1,0 +1,45 @@
+name: setup Homebrew
+description: Setup Homebrew
+
+runs:
+  using: composite
+  steps:
+    - name: Detect Homebrew
+      id: brew_env
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        ORIGINAL_PATH="$PATH"
+
+        # Linuxbrew
+        if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        fi
+        # macOS Apple Silicon
+        if [ -x /opt/homebrew/bin/brew ]; then
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+        # macOS Intel
+        if [ -x /usr/local/bin/brew ]; then
+          eval "$(/usr/local/bin/brew shellenv)"
+        fi
+
+        if ! command -v brew >/dev/null; then
+          echo "::error::brew not found"
+          exit 1
+        fi
+
+        # Persist any new PATH entries for later steps
+        IFS=':' read -ra NEW_PARTS <<<"$PATH"
+        for p in "${NEW_PARTS[@]}"; do
+          case ":$ORIGINAL_PATH:" in
+            *":$p:"*) ;;              # already present
+            *) echo "$p" >>"$GITHUB_PATH" ;;
+          esac
+        done
+
+        # Keep HOMEBREW variables
+        echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
+        echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
+        echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"

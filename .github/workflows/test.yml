@@ -40,14 +40,12 @@ on:
 
 env:
   MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
-  MAIN_OS: ${{ inputs.main_os || 'macos-latest' }}
+  MAIN_OS:     ${{ inputs.main_os     || 'macos-latest' }}
   MAIN_PY_VER: ${{ inputs.main_py_ver || '3.10' }}
-  TMATE: ${{ inputs.tmate || 'false' }}
-
+  TMATE:       ${{ inputs.tmate       || 'false' }}
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
-
 jobs:
   install:
     strategy:
@@ -86,8 +84,6 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version: ['3.13', '3.12', '3.11', '3.10', '3.9']
-    permissions:
-      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check is main
@@ -109,21 +105,19 @@ jobs:
           else
             echo "DEBUG=0" >> "$GITHUB_ENV"
           fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
       - name: Setup Homebrew
-        run: |
-          if ! which brew &>/dev/null;then
-            echo "/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:$PATH" >> "$GITHUB_PATH"
-            echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
-            echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
-            echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
-          fi
+        uses: ./.github/actions/setup-homebrew
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"
           git config --global user.email "runner@localhost"
       - uses: rcmdnk/python-action@v3
         with:
-          checkout: 1
+          checkout: 0
           setup-python: 1
           python-version: "${{ matrix.python-version }}"
           setup-type: 'uv'
@@ -138,32 +132,71 @@ jobs:
           github_token: "${{github.token}}"
           pre-commit: "${{ env.IS_MAIN }}"
           tmate: "${{ env.DEBUG }}"
+  prepare-pristine-homebrew:
+    strategy:
+      fail-fast: false
+      matrix:
+        #os: [macos-latest, ubuntu-latest]
+        os: [macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-homebrew
+      - uses: ./.github/actions/pristine-homebrew
+        with:
+          os: ${{ runner.os }}
+          restore: false
   test-destructive:
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.9']
-        test-path:
-          - 'tests/test_destructive.py'
-    runs-on: macos-latest
+        pytest-group:
+          - destructive_init
+          - destructive_install_clean_default
+          - destructive_install_clean_on_request
+          - destructive_install_clean_leaves
+          - destructive_install_clean_top_packages
+          - destructive_cursor
+          - destructive_brew_command
+          - destructive_main_file_inheritance
+          - destructive_get_tap_packs
+          - destructive_get_leaves
+          - destructive_update
+          - destructive_dry_run
+          - destructive_get_full_name
+          - destructive_format_options
+          - destructive_others
+        #os: [macos-latest, ubuntu-latest]
+        os: [macos-latest]
+    needs: [prepare-pristine-homebrew]
+    runs-on: ${{ matrix.os }}
     steps:
+      - uses: ./.github/actions/setup-homebrew
+      - uses: ./.github/actions/pristine-homebrew
+        with:
+          os: ${{ runner.os }}
+          restore: true
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"
           git config --global user.email "runner@localhost"
       - uses: rcmdnk/python-action@v3
         with:
-          checkout: 1
+          checkout: 0
           setup-python: 1
           python-version: "${{ matrix.python-version }}"
           setup-type: 'uv'
           pytest: 1
-          pytest-tests-path: "${{ matrix.test-path }}"
+          pytest-tests-path: "tests/test_destructive.py"
           pytest-ignore: ''
           pytest-separate-benchmark: 0
           coverage: 0
           pytest-cov-path: ""
-          pytest-opt: "-n0 -m destructive"
+          pytest-opt: "-n0 -m destructive and ${{ matrix.pytest-group }}"
           coverage-push: 0
           github_token: ""
           pre-commit: 0

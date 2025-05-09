@@ -28,6 +28,9 @@ markers = [
     "destructive: tests only for destructive run.",
 ]
 addopts = "-n auto -m 'not destructive'"
+filterwarnings = [
+    "ignore::_pytest.warning_types.PytestUnknownMarkWarning",
+]
 testpaths = ["tests",]
 
 [tool.ruff]

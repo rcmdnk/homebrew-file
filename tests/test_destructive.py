@@ -48,6 +48,7 @@ def tmp_log(tmp_path: Path) -> str:
 # For BrewHelper
 
 
+@pytest.mark.destructive_get_tap_packs
 def test_get_tap_packs(helper: BrewHelper) -> None:
     helper.proc('brew tap rcmdnk/rcmdnkpac')
     helper.proc('brew tap rcmdnk/rcmdnkcask')
@@ -73,6 +74,7 @@ def test_get_tap_packs(helper: BrewHelper) -> None:
     )
 
 
+@pytest.mark.destructive_get_leaves
 def test_get_leaves(helper: BrewHelper) -> None:
     helper.proc('brew install node')
     helper.proc('brew install brotli')
@@ -84,6 +86,7 @@ def test_get_leaves(helper: BrewHelper) -> None:
     assert leaves == ['node']
 
 
+@pytest.mark.destructive_full_name
 def test_get_full_name(helper: BrewHelper) -> None:
     helper.proc('brew install git')
     helper.proc('brew install rcmdnk/file/brew-file')
@@ -100,6 +103,7 @@ def test_get_full_name(helper: BrewHelper) -> None:
 
 # Ignore DeprecationWarning to allow \$
 @pytest.mark.filterwarnings('ignore::DeprecationWarning')
+@pytest.mark.destructive_others
 def test_write(
     helper: BrewHelper, brew_info: BrewInfo, tmp_path: Path
 ) -> None:
@@ -220,6 +224,7 @@ echo after
 # For BrewFile
 
 
+@pytest.mark.destructive_others
 @pytest.mark.parametrize(
     'full_name',
     [
@@ -330,6 +335,7 @@ def test_read_all(full_name: bool) -> None:
     }
 
 
+@pytest.mark.destructive_others
 def test_get_files(caplog: pytest.LogCaptureFixture) -> None:
     bf = BrewFile({})
     bf.helper.proc('brew tap rcmdnk/rcmdnkpac')
@@ -384,6 +390,7 @@ def test_get_files(caplog: pytest.LogCaptureFixture) -> None:
 # Other E2E tests with brew-file command
 
 
+@pytest.mark.destructive_init
 def test_init(
     bf_cmd: str,
     brewfile: str,
@@ -766,6 +773,7 @@ cask rapidapi""",
             [],
             [],
             id='default',
+            marks=pytest.mark.destructive_install_clean_default,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_ON_REQUEST': '1'},
@@ -807,6 +815,7 @@ cask rapidapi""",
             [],
             [],
             id='on-request',
+            marks=pytest.mark.destructive_install_clean_on_request,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_LEAVES': '1'},
@@ -847,6 +856,7 @@ cask rapidapi""",
             [],
             [],
             id='leaves',
+            marks=pytest.mark.destructive_install_clean_leaves,
         ),
         pytest.param(
             {
@@ -892,6 +902,7 @@ cask rapidapi""",
             [],
             [],
             id='top-packages',
+            marks=pytest.mark.destructive_install_clean_top_packages,
         ),
     ],
 )
@@ -948,6 +959,7 @@ brew git
     assert lines == tap2
 
 
+@pytest.mark.destructive_others
 def test_clean_non_request(
     bf_cmd: str,
     brewfile: str,
@@ -964,6 +976,7 @@ def test_clean_non_request(
 
 
 # Test only cursor, as uninstalling VSCode requires root permission
+@pytest.mark.destructive_cursor
 def test_cursor(
     bf_cmd: str,
     brewfile: str,
@@ -1025,6 +1038,7 @@ cursor ms-vscode.remote-explorer
         )
 
 
+@pytest.mark.destructive_update
 def test_update(
     bf_cmd: str, brewfile: str, helper: BrewHelper, tmp_path: Path
 ) -> None:
@@ -1067,6 +1081,7 @@ brew pcre2{cask_part}
         )
 
 
+@pytest.mark.destructive_dry_run
 def test_dry_run(
     bf_cmd: str,
     brewfile: str,
@@ -1101,6 +1116,7 @@ def test_dry_run(
     assert 'git' not in lines
 
 
+@pytest.mark.destructive_brew_command
 def test_brew_command(
     bf_cmd: str,
     brewfile: str,
@@ -1117,6 +1133,7 @@ def test_brew_command(
     assert 'node' in lines
 
 
+@pytest.mark.destructive_format_options
 def test_format_options(
     bf_cmd: str,
     brewfile: str,
@@ -1138,6 +1155,7 @@ def test_format_options(
             assert 'brew install git' in content
 
 
+@pytest.mark.destructive_others
 def test_cask_args(
     bf_cmd: str,
     brewfile: str,
@@ -1160,6 +1178,7 @@ def test_cask_args(
         helper.proc('brew rm rapidapi')
 
 
+@pytest.mark.destructive_main_file_inheritance
 def test_main_file_inheritance(
     bf_cmd: str,
     brewfile: str,
