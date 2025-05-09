@@ -52,7 +52,7 @@ runs:
           ${{ steps.brew.outputs.prefix }}/share
           ${{ steps.brew.outputs.prefix }}/var
           ${{ steps.brew.outputs.prefix }}/Library/Taps
-        key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
+        key: brew-pristine-${{ inputs.os }}-${{ github.ref_name }}-${{ steps.brew.outputs.version }}
     - name: Remove current Homebrew directories
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       shell: bash
@@ -75,7 +75,7 @@ runs:
           ${{ steps.brew.outputs.prefix }}/share
           ${{ steps.brew.outputs.prefix }}/var
           ${{ steps.brew.outputs.prefix }}/Library/Taps
-        key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
+        key: brew-pristine-${{ inputs.os }}-${{ github.ref_name }}-${{ steps.brew.outputs.version }}
     - name: Make Homebrew pristine
       if: steps.cache_lookup.outputs.cache-hit != 'true'
       shell: bash
@@ -119,7 +119,7 @@ runs:
           ${{ steps.brew.outputs.prefix }}/share
           ${{ steps.brew.outputs.prefix }}/var
           ${{ steps.brew.outputs.prefix }}/Library/Taps
-        key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
+        key: brew-pristine-${{ inputs.os }}-${{ github.ref_name }}-${{ steps.brew.outputs.version }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'
       shell: bash
