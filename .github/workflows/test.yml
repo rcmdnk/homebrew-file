@@ -200,8 +200,8 @@ jobs:
           pytest-tests-path: "tests/test_destructive.py"
           pytest-ignore: ''
           pytest-separate-benchmark: 0
-          coverage: 0
-          pytest-cov-path: ""
+          coverage: 1
+          pytest-cov-path: "bin"
           pytest-opt: "-n0 -m 'destructive and ${{ matrix.pytest-group }}'"
           coverage-push: 0
           github_token: ""
