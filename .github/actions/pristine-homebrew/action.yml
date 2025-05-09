@@ -25,7 +25,7 @@ runs:
             "$prefix/sbin" "$prefix/share" "$prefix/var" "$prefix/Library/Taps"
           echo 'EOF'
         } >>"$GITHUB_OUTPUT"
-        echo version=$(brew --version|sed 's/[<>:"\/\\|?*[:space:]]/_/g') >> "$GITHUB_OUTPUT"
+        echo version=$(brew --version|head -n1|sed 's/[<>:"\/\\|?*[:space:]]/_/g') >> "$GITHUB_OUTPUT"
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
