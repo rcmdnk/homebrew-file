@@ -108,9 +108,6 @@ jobs:
             echo "DEBUG=0" >> "$GITHUB_ENV"
           fi
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
       - name: Setup Homebrew
         uses: ./.github/actions/setup-homebrew
       - name: Set pseudo git user
@@ -143,9 +140,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
       - uses: ./.github/actions/setup-homebrew
       - uses: ./.github/actions/pristine-homebrew
         with:
@@ -177,6 +171,7 @@ jobs:
     needs: [prepare-pristine-homebrew]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-homebrew
       - uses: ./.github/actions/pristine-homebrew
         with:
