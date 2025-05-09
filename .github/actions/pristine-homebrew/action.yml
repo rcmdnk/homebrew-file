@@ -1,4 +1,5 @@
 name: pristine-homebrew
+
 description: Setup pristine Homebrew and cache it
 
 inputs:
