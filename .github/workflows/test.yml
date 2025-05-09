@@ -202,7 +202,7 @@ jobs:
           pytest-separate-benchmark: 0
           coverage: 0
           pytest-cov-path: ""
-          pytest-opt: "-n0 -m destructive and ${{ matrix.pytest-group }}"
+          pytest-opt: "-n0 -m 'destructive and ${{ matrix.pytest-group }}'"
           coverage-push: 0
           github_token: ""
           pre-commit: 0
