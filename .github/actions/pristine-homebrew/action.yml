@@ -20,18 +20,19 @@ runs:
         prefix="$(brew --prefix)"
         {
           echo 'list<<EOF'
-          printf '%s\n' \
+          printf '    %s\n' \
             "$prefix/bin" "$prefix/etc" "$prefix/include" "$prefix/lib" "$prefix/opt" \
             "$prefix/sbin" "$prefix/share" "$prefix/var" "$prefix/Library/Taps"
           echo 'EOF'
         } >>"$GITHUB_OUTPUT"
-        echo version=$(brew --version|head -n1|sed 's/[<>:"\/\\|?*[:space:]]/_/g') >> "$GITHUB_OUTPUT"
+        echo version=$(brew --version | sed -n '1{s/[<>:"\/\\|?*[:space:]]/_/g;p}') >> "$GITHUB_OUTPUT"
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
       with:
         lookup-only: true
-        path: ${{ steps.brew.outputs.list }}
+        path: |
+          ${{ steps.brew.outputs.list }}
         key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
     - name: Remove current Homebrew directories
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
@@ -45,7 +46,8 @@ runs:
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       uses: actions/cache/restore@v4
       with:
-        path: ${{ steps.brew.outputs.list }}
+        path: |
+          ${{ steps.brew.outputs.list }}
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Make Homebrew pristine
       if: steps.cache_lookup.outputs.cache-hit != 'true'
@@ -80,7 +82,8 @@ runs:
       if: steps.cache_lookup.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: ${{ steps.brew.outputs.list }}
+        path: |
+          ${{ steps.brew.outputs.list }}
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'

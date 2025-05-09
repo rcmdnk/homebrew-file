@@ -8,10 +8,6 @@ runs:
       id: brew_env
       shell: bash
       run: |
-        set -euo pipefail
-
-        ORIGINAL_PATH="$PATH"
-
         # Linuxbrew
         if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -31,6 +27,7 @@ runs:
         fi
 
         # Persist any new PATH entries for later steps
+        ORIGINAL_PATH="$PATH"
         IFS=':' read -ra NEW_PARTS <<<"$PATH"
         for p in "${NEW_PARTS[@]}"; do
           case ":$ORIGINAL_PATH:" in
