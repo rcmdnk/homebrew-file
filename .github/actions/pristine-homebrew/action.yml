@@ -25,7 +25,7 @@ runs:
             "$prefix/sbin" "$prefix/share" "$prefix/var" "$prefix/Library/Taps"
           echo 'EOF'
         } >>"$GITHUB_OUTPUT"
-        version=$(brew --version)
+        echo version=$(brew --version) >> "$GITHUB_OUTPUT"
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
@@ -81,7 +81,7 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: ${{ steps.brew.outputs.list }}
-        key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
+        key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'
       shell: bash
