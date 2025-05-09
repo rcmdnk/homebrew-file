@@ -13,38 +13,39 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build path list
-      id: brew_paths
+    - name: Build path list and check brew version
+      id: brew
       shell: bash
       run: |
-        P="${{ steps.brew_env.outputs.prefix }}"
+        prefix="$(brew --prefix)"
         {
           echo 'list<<EOF'
           printf '%s\n' \
-            "$P/bin" "$P/etc" "$P/include" "$P/lib" "$P/opt" \
-            "$P/sbin" "$P/share" "$P/var" "$P/Library/Taps"
+            "$prefix/bin" "$prefix/etc" "$prefix/include" "$prefix/lib" "$prefix/opt" \
+            "$prefix/sbin" "$prefix/share" "$prefix/var" "$prefix/Library/Taps"
           echo 'EOF'
         } >>"$GITHUB_OUTPUT"
+        version=$(brew --version)
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
       with:
         lookup-only: true
-        path: ${{ steps.brew_paths.outputs.list }}
-        key: brew-pristine-${{ inputs.os }}-${{ steps.brew_env.outputs.version }}
+        path: ${{ steps.brew.outputs.list }}
+        key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
     - name: Remove current Homebrew directories
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       shell: bash
       run: |
         while read -r d; do
           rm -rf "$d"
-        done <<<"${{ steps.brew_paths.outputs.list }}"
+        done <<<"${{ steps.brew.outputs.list }}"
     - name: Restore pristine Homebrew
       id: cache_restore
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       uses: actions/cache/restore@v4
       with:
-        path: ${{ steps.brew_paths.outputs.list }}
+        path: ${{ steps.brew.outputs.list }}
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Make Homebrew pristine
       if: steps.cache_lookup.outputs.cache-hit != 'true'
@@ -79,8 +80,8 @@ runs:
       if: steps.cache_lookup.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: ${{ steps.brew_paths.outputs.list }}
-        key: brew-pristine-${{ inputs.os }}-${{ steps.brew_env.outputs.version }}
+        path: ${{ steps.brew.outputs.list }}
+        key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'
       shell: bash
