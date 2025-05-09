@@ -14,7 +14,7 @@ runs:
             eval "$("$path/brew" shellenv)"
             echo "$path/brew" >>"$GITHUB_PATH"
           fi
-        fi
+        done
 
         # Keep HOMEBREW variables
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
