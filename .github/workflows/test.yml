@@ -79,6 +79,8 @@ jobs:
       - name: Install homebrew-file
         run: brew install brew-file
   test:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
