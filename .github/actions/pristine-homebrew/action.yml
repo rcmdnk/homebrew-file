@@ -34,14 +34,23 @@ runs:
           echo "$prefix/Library/Taps"
           echo "EOF"
         } >> $GITHUB_ENV
+        echo prefix=$(brew --prefix) >> "$GITHUB_OUTPUT"
         echo version=$(brew --version | sed -e '1s/[<>:"\/\\|?* \t]/_/g' -e '2,$d') >> "$GITHUB_OUTPUT"
     - name: Cache lookup
       id: cache_lookup
       uses: actions/cache/restore@v4
       with:
         lookup-only: true
-        path: |-
-          ${{ env.CACHE_PATHS }}
+        path: |
+          ${{ steps.brew.outputs.prefix }}/bin
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/lib
+          ${{ steps.brew.outputs.prefix }}/opt
+          ${{ steps.brew.outputs.prefix }}/sbin
+          ${{ steps.brew.outputs.prefix }}/share
+          ${{ steps.brew.outputs.prefix }}/var
+          ${{ steps.brew.outputs.prefix }}/Library/Taps
         key: brew-pristine-${{ inputs.os }}-${{ steps.brew.outputs.version }}
     - name: Remove current Homebrew directories
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
@@ -55,8 +64,16 @@ runs:
       if: inputs.restore == 'true' && steps.cache_lookup.outputs.cache-hit == 'true'
       uses: actions/cache/restore@v4
       with:
-        path: |-
-          ${{ env.CACHE_PATHS }}
+        path: |
+          ${{ steps.brew.outputs.prefix }}/bin
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/lib
+          ${{ steps.brew.outputs.prefix }}/opt
+          ${{ steps.brew.outputs.prefix }}/sbin
+          ${{ steps.brew.outputs.prefix }}/share
+          ${{ steps.brew.outputs.prefix }}/var
+          ${{ steps.brew.outputs.prefix }}/Library/Taps
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Make Homebrew pristine
       if: steps.cache_lookup.outputs.cache-hit != 'true'
@@ -91,8 +108,16 @@ runs:
       if: steps.cache_lookup.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: |-
-          ${{ env.CACHE_PATHS }}
+        path: |
+          ${{ steps.brew.outputs.prefix }}/bin
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/etc
+          ${{ steps.brew.outputs.prefix }}/lib
+          ${{ steps.brew.outputs.prefix }}/opt
+          ${{ steps.brew.outputs.prefix }}/sbin
+          ${{ steps.brew.outputs.prefix }}/share
+          ${{ steps.brew.outputs.prefix }}/var
+          ${{ steps.brew.outputs.prefix }}/Library/Taps
         key: ${{ steps.cache_lookup.outputs.cache-primary-key }}
     - name: Remove brew download cache
       if: inputs.restore == 'true'
