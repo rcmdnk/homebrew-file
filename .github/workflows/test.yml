@@ -41,7 +41,7 @@ on:
 env:
   MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
   MAIN_OS:     ${{ inputs.main_os     || 'macos-latest' }}
-  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.10' }}
+  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.9' }}
   TMATE:       ${{ inputs.tmate       || 'false' }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
