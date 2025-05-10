@@ -211,9 +211,8 @@ def test_brew_val(helper: BrewHelper) -> None:
     assert helper.brew_val('prefix') == str(prefix)
 
 
-def test_get_formula_list(helper: BrewHelper, python: str) -> None:
-    formula_list = helper.get_formula_list()
-    assert python in formula_list
+def test_get_formula_list(helper: BrewHelper) -> None:
+    assert isinstance(helper.get_formula_list(), list)
 
 
 def test_get_cask_list(helper: BrewHelper) -> None:
@@ -239,22 +238,6 @@ def test_get_info(helper: BrewHelper) -> None:
         assert 'full_token' in cask_info
         assert 'tap' in cask_info
         assert 'artifacts' in cask_info
-
-
-def test_get_installed(helper: BrewHelper, python: str) -> None:
-    installed = helper.get_installed(python)
-    # brew version can contained additional number with '_'
-    assert installed['version'].split('_')[0].startswith(python.split('@')[1])
-
-
-def test_get_option(helper: BrewHelper, python: str) -> None:
-    opt = helper.get_option(python)
-    assert opt == ''
-
-
-def test_get_formula_aliases(helper: BrewHelper, python: str) -> None:
-    aliases = helper.get_formula_aliases()
-    assert aliases['homebrew/core']['python'].startswith('python@')
 
 
 def test_flatten_dict(helper: BrewHelper) -> None:

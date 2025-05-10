@@ -136,9 +136,9 @@ Set pseudo git user::
     lume@lumes-Virtual-Machine ~ % git config --global user.name "lume"
     lume@lumes-Virtual-Machine ~ % git config --global user.email "lume@localhost"
 
-Install pytest, filelock by pip::
+Install pytest by pip::
 
-    lume@lumes-Virtual-Machine ~ % pip3 install pytest filelock
+    lume@lumes-Virtual-Machine ~ % pip3 install pytest
     lume@lumes-Virtual-Machine ~ % echo 'PATH=$HOME/Library/Python/3.9/bin:$PATH' >> $HOME/.zprofile
 
 Make a link to the shared directory::
