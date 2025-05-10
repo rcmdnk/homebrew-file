@@ -221,25 +221,6 @@ def test_get_cask_list(helper: BrewHelper) -> None:
     assert isinstance(helper.get_cask_list(), list)
 
 
-def test_get_info(helper: BrewHelper) -> None:
-    info = helper.get_info()
-    formula_info = next(iter(info['formulae'].values()))
-    assert 'name' in formula_info
-    assert 'full_name' in formula_info
-    assert 'tap' in formula_info
-    assert 'oldnames' in formula_info
-    assert 'aliases' in formula_info
-    assert 'linked_keg' in formula_info
-    assert 'installed' in formula_info
-
-    if is_mac():
-        cask_info = next(iter(info['casks'].values()))
-        assert 'token' in cask_info
-        assert 'full_token' in cask_info
-        assert 'tap' in cask_info
-        assert 'artifacts' in cask_info
-
-
 def test_flatten_dict(helper: BrewHelper) -> None:
     nested_dict = {'a': {'b': 1, 'c': {'d': 2}}, 'e': 3, 'f': {'g': 4}}
     flat_dict = helper.flatten_dict(nested_dict)

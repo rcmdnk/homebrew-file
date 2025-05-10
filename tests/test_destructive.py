@@ -98,6 +98,29 @@ def test_get_full_name(helper: BrewHelper) -> None:
     assert helper.get_full_name('brew-file') == 'rcmdnk/file/brew-file'
 
 
+@pytest.mark.destructive_get_info
+def test_get_info(helper: BrewHelper) -> None:
+    helper.proc('brew install git')
+    if is_mac():
+        helper.proc('brew install --cask cursor')
+    info = helper.get_info()
+    formula_info = next(iter(info['formulae'].values()))
+    assert 'name' in formula_info
+    assert 'full_name' in formula_info
+    assert 'tap' in formula_info
+    assert 'oldnames' in formula_info
+    assert 'aliases' in formula_info
+    assert 'linked_keg' in formula_info
+    assert 'installed' in formula_info
+
+    if is_mac():
+        cask_info = next(iter(info['casks'].values()))
+        assert 'token' in cask_info
+        assert 'full_token' in cask_info
+        assert 'tap' in cask_info
+        assert 'artifacts' in cask_info
+
+
 # For BrewInfo
 
 
