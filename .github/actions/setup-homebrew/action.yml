@@ -1,6 +1,16 @@
 name: setup Homebrew
 description: Setup Homebrew
 
+inputs:
+  pristine:
+    description: Make Homebrew Pristine
+    required: true
+    default: 'false'
+  update:
+    description: Update Homebrew
+    required: true
+    default: 'false'
+
 runs:
   using: composite
   steps:
@@ -20,3 +30,39 @@ runs:
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
         echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
         echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
+    - name: Make Homebrew pristine
+      if: inputs.pristine == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        formulae=()
+        while IFS= read -r f; do
+          formulae+=("$f")
+        done < <(brew list --formula)
+        if [ "${#formulae[@]}" -gt 0 ]; then
+          brew uninstall --formula --force "${formulae[@]}"
+        fi
+
+        casks=()
+        while IFS= read -r c; do
+          casks+=("$c")
+        done < <(brew list --cask)
+        if [ "${#casks[@]}" -gt 0 ]; then
+          brew uninstall --cask --zap --force "${casks[@]}"
+        fi
+
+        taps=()
+        while IFS= read -r t; do
+          taps+=("$t")
+        done < <(brew tap)
+        if [ "${#taps[@]}" -gt 0 ]; then
+          brew untap "${taps[@]}"
+        fi
+    - name: Update Homebrew
+      if: inputs.update == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        brew update
+        brew upgrade
