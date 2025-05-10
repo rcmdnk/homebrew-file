@@ -145,7 +145,7 @@ jobs:
           - destructive_install_clean_on_request
           - destructive_install_clean_leaves
           - destructive_install_clean_top_packages
-          - destructive_install_get_info
+          - destructive_get_info
           - destructive_cursor
           - destructive_brew_command
           - destructive_main_file_inheritance
