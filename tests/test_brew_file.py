@@ -4,7 +4,6 @@ import io
 import logging
 import os
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -74,23 +73,23 @@ def test_dryrun_banner(bf: BrewFile, caplog: pytest.LogCaptureFixture) -> None:
     ]
 
 
-def test_parse_env_opts(bf: BrewFile) -> None:
-    with patch.dict('os.environ', {'TEST_OPT': '--opt2=3 --opt3 opt4=4'}):
-        opts = bf.parse_env_opts('TEST_OPT', {'--opt1': '1', '--opt2': '2'})
-        assert opts == {
-            '--opt1': '1',
-            '--opt2': '3',
-            '--opt3': '',
-            'opt4': '4',
-        }
+def test_parse_env_opts(bf: BrewFile, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv('TEST_OPT', '--opt2=3 --opt3 opt4=4')
+    opts = bf.parse_env_opts('TEST_OPT', {'--opt1': '1', '--opt2': '2'})
+    assert opts == {
+        '--opt1': '1',
+        '--opt2': '3',
+        '--opt3': '',
+        'opt4': '4',
+    }
 
 
-def test_set_verbose(bf: BrewFile) -> None:
+def test_set_verbose(bf: BrewFile, monkeypatch: pytest.MonkeyPatch) -> None:
     bf.set_verbose()
     assert bf.opt['verbose'] == 'info'
     assert bf.log.getEffectiveLevel() == logging.INFO
-    with patch.dict('os.environ', {'HOMEBREW_BREWFILE_VERBOSE': 'error'}):
-        bf.set_verbose()
+    monkeypatch.setenv('HOMEBREW_BREWFILE_VERBOSE', 'error')
+    bf.set_verbose()
     assert bf.opt['verbose'] == 'error'
     assert bf.log.getEffectiveLevel() == logging.ERROR
     bf.set_verbose('0')
