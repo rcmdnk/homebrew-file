@@ -4,7 +4,7 @@ function brew
   set -l exe command brew
 
   if not type -q brew-file
-    $exe $argv
+    eval "$exe $argv"
     return
   end
 
@@ -81,7 +81,7 @@ function mas
   end
 
   # Execute command
-  $exe $argv
+  eval "$exe $argv"
 end
 
 # whalebrew command wrapper for brew-file
@@ -100,7 +100,7 @@ function whalebrew
   end
 
   # Execute command
-  $exe $argv
+  eval "$exe $argv"
 end
 
 # code (for VSCode) command wrapper for brew-file
@@ -119,7 +119,7 @@ function code
   end
 
   # Execute command
-  $exe $argv
+  eval "$exe $argv"
 end
 
 # cursor (for Cursor) command wrapper for brew-file
@@ -138,5 +138,5 @@ function cursor
   end
 
   # Execute command
-  $exe $argv
+  eval "$exe $argv"
 end
