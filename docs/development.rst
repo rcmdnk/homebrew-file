@@ -171,7 +171,7 @@ Login to VM::
 Run pytest::
 
     $ cd shared
-    $ pytest -p no:cacheprovider -o "markers=serial" -c /dev/null tests/test_serial.py
+    $ pytest -c /dev/null -p no:cacheprovider -m destructive tests/test_destructive.py
 
 
 Commit
