@@ -1,8 +1,8 @@
 class BrewFile < Formula
   desc "Brewfile manager for Homebrew."
   homepage "https://github.com/rcmdnk/homebrew-file/"
-  url "https://github.com/rcmdnk/homebrew-file/archive/v10.0.14.tar.gz"
-  sha256 "fab567790924d3b93750be7ad9d961b22c1e2df7c2208eea5d5bae79baf8468c"
+  url "https://github.com/rcmdnk/homebrew-file/archive/v10.0.15.tar.gz"
+  sha256 "6f4bb97a5b1f183aa29f190d8f2b082c5790a17159b1909700e6f3cbb57b68d6"
   license "MIT"
 
   head "https://github.com/rcmdnk/homebrew-file.git"
