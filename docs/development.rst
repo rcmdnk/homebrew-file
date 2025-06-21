@@ -157,7 +157,7 @@ Run test in VM
 Launch the VM with shared directory to access the repo::
 
     $ cd <path to repo>
-    $ lume run macos-sequoia-xcode:latest --shared-dir "$PWD:ro"
+    $ lume run macos-sequoia-xcode:latest --no-display --shared-dir "$PWD:ro"
 
 
 From other terminal, login to VM::

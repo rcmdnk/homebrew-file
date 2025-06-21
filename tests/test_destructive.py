@@ -1012,7 +1012,6 @@ def test_cursor(
     with Path(brewfile).open('w') as f:
         f.write("""
 cursor ms-python.python
-cursor ms-vscode.remote-explorer
 """)
     helper.proc(f'"{bf_cmd}" install -f "{brewfile}"')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
@@ -1028,10 +1027,9 @@ tap homebrew/cask
 cask cursor
 
 # Cursor extensions
+cursor anysphere.cursorpyright
 cursor ms-python.debugpy
 cursor ms-python.python
-cursor ms-python.vscode-pylance
-cursor ms-vscode.remote-explorer
 """
         )
 
@@ -1040,7 +1038,7 @@ cursor ms-vscode.remote-explorer
 tap homebrew/core
 tap homebrew/cask
 cask cursor
-cursor ms-vscode.remote-explorer
+cursor anysphere.cursorpyright
 """)
     helper.proc(f'"{bf_cmd}" clean -f "{brewfile}"')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
@@ -1056,7 +1054,7 @@ tap homebrew/cask
 cask cursor
 
 # Cursor extensions
-cursor ms-vscode.remote-explorer
+cursor anysphere.cursorpyright
 """
         )
 
