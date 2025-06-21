@@ -1,6 +1,6 @@
 [project]
 name = "brew-file"
-version = "10.0.14"
+version = "10.0.15"
 description = "Brewfile manager for Homebrew"
 authors = [
   { name = "rcmdnk", email = "rcmdnk@gmail.com" }
@@ -54,6 +54,7 @@ ignore = [
  "FBT001", "FBT002", "FBT003", # Boolean-typed positional argument in function definition
  "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
  "TC001", "TC003", # Move standard library import into a type-checking block
+ "PLC0415", # `import` should be at the top-level of a file
 ]
 
 [tool.ruff.lint.per-file-ignores]

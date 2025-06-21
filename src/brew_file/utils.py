@@ -132,3 +132,6 @@ class StrRe(str):
 
     def __eq__(self, pattern: object) -> bool:
         return re.search(str(pattern), self.var) is not None
+
+    def __hash__(self) -> int:
+        return hash(self.var)
