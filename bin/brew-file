@@ -2913,9 +2913,6 @@ class BrewFile:
             )
 
     def install(self) -> None:
-        # Reinit flag
-        reinit = 0
-
         # Get installed package list
         self.get_installed_packages(force_appstore_list=True)
 
@@ -2994,16 +2991,6 @@ class BrewFile:
                         _ = self.helper.proc(cmd_ln)
                     if line.find('brew linkapps') != -1 and self.opt['link']:
                         _ = self.helper.proc('brew linkapps')
-                if (
-                    p in self.get_list('brew_list')
-                    and self.get_dict('brew_opt_input')[p]
-                    != self.get_dict('brew_opt_list')[p]
-                ):
-                    self.brewinfo.add_to_dict(
-                        'brew_opt_input',
-                        {p: self.helper.get_option(p)},
-                    )
-                    reinit = 1
 
         # App Store
         if is_mac() and self.opt['appstore']:
@@ -3121,21 +3108,6 @@ class BrewFile:
         # after commands
         for c in self.get_list('after_input'):
             _ = self.helper.proc(c, dryrun=self.opt['dryrun'])
-
-        # Initialize if commands are installed
-        if reinit or max(
-            [
-                self.opt[f'{x}_cmd_installed']
-                for x in ['mas', 'reattach', 'whalebrew', 'vscode', 'cursor']
-            ],
-        ):
-            self.opt['mas_cmd_installed'] = self.opt[
-                'reattach_cmd_installed'
-            ] = self.opt['whalebrew_cmd_installed'] = self.opt[
-                'vscode_cmd_installed'
-            ] = self.opt['cursor_cmd_installed'] = False
-            self.input_to_list()
-            self.initialize_write(debug_out=True)
 
     def generate_cask_token(self, app: str) -> str:
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
