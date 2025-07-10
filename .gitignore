@@ -159,3 +159,4 @@ cython_debug/
 .DS_Store
 /*.py
 /*.txt
+/.worktree/
