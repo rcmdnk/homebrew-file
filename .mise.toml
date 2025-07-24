@@ -1,2 +1,5 @@
 [env]
 _.python.venv = ".venv"
+
+[hooks]
+postinstall = ["pre-commit install"]
