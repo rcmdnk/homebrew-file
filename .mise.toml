@@ -2,4 +2,7 @@
 _.python.venv = ".venv"
 
 [hooks]
-enter = ["pre-commit install >/dev/null"]
+enter = [
+  "mise trust >/dev/null",
+  "uv run pre-commit install >/dev/null"
+]
