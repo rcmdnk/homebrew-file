@@ -9,6 +9,6 @@ uv_venv_auto = true
 
 [hooks]
 enter = [
-  "mise trust >&/dev/null",
+  "mise trust >/dev/null 2>&1",
   "uv run pre-commit install >/dev/null"
 ]
