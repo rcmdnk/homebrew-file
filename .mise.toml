@@ -10,5 +10,5 @@ uv_venv_auto = true
 [hooks]
 enter = [
   "mise trust >/dev/null 2>&1",
-  "if [ ! -f $(git root)/.git/hooks/pre-commit ];then uv run pre-commit install >/dev/null;fi"
+  "[ -x \"$(git rev-parse --git-path hooks/pre-commit)\" ] || uv run pre-commit install >/dev/null"
 ]
