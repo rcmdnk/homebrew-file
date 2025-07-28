@@ -4,9 +4,6 @@ _.python.venv = ".venv"
 [settings]
 experimental = true
 
-[settings.python]
-uv_venv_auto = true
-
 [hooks]
 enter = [
   "[ -x \"$(git rev-parse --git-path hooks/pre-commit)\" ] || uv run pre-commit install >/dev/null"
