@@ -45,6 +45,13 @@ def tmp_log(tmp_path: Path) -> str:
     return tmp_path / 'log'
 
 
+# Check clean script
+@pytest.mark.destructive_clean
+def test_clean_script(helper: BrewHelper) -> None:
+    proc = helper.proc('brew ls')
+    assert proc == (0, [])
+
+
 # For BrewHelper
 
 
@@ -70,7 +77,7 @@ def test_get_tap_packs(helper: BrewHelper) -> None:
     # - openssl@3: (0, 2)
     assert (
         len(packs_with_alias['formulae'])
-        == len(packs_wo_alias['formulae']) + 8
+        == len(packs_wo_alias['formulae']) + 10
     )
 
 
@@ -444,7 +451,8 @@ tap homebrew/core{cask_part}
     # Test with some packages, with backup
     helper.proc('brew install brotli')
     helper.proc('brew install node')
-    helper.proc('brew install rapidapi')
+    if is_mac():
+        helper.proc('brew install rapidapi')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y -b {backup}')
     cask_part = (
         """
@@ -466,9 +474,17 @@ brew c-ares
 brew ca-certificates
 brew icu4c@77
 brew libnghttp2
+brew libnghttp3
+brew libngtcp2
 brew libuv
+brew lz4
 brew node
-brew openssl@3{cask_part}
+brew openssl@3
+brew readline
+brew simdjson
+brew sqlite
+brew xz
+brew zstd{cask_part}
 """
         )
     cask_part = (
@@ -758,11 +774,19 @@ brew rcmdnk/file/brew-file
                 'git',
                 'icu4c@77',
                 'libnghttp2',
+                'libnghttp3',
+                'libngtcp2',
                 'libunistring',
                 'libuv',
+                'lz4',
                 'node',
                 'openssl@3',
                 'pcre2',
+                'readline',
+                'simdjson',
+                'sqlite',
+                'xz',
+                'zstd',
             ],
             [
                 'rapidapi',
@@ -779,11 +803,19 @@ brew gettext
 brew git
 brew icu4c@77
 brew libnghttp2
+brew libnghttp3
+brew libngtcp2
 brew libunistring
 brew libuv
+brew lz4
 brew node
 brew openssl@3
-brew pcre2{}
+brew pcre2
+brew readline
+brew simdjson
+brew sqlite
+brew xz
+brew zstd{}
 
 tap rcmdnk/file
 brew brew-file
@@ -809,11 +841,19 @@ cask rapidapi""",
                 'git',
                 'icu4c@77',
                 'libnghttp2',
+                'libnghttp3',
+                'libngtcp2',
                 'libunistring',
                 'libuv',
+                'lz4',
                 'node',
                 'openssl@3',
                 'pcre2',
+                'readline',
+                'simdjson',
+                'sqlite',
+                'xz',
+                'zstd',
             ],
             [
                 'rapidapi',
@@ -851,11 +891,19 @@ cask rapidapi""",
                 'git',
                 'icu4c@77',
                 'libnghttp2',
+                'libnghttp3',
+                'libngtcp2',
                 'libunistring',
                 'libuv',
+                'lz4',
                 'node',
                 'openssl@3',
                 'pcre2',
+                'readline',
+                'simdjson',
+                'sqlite',
+                'xz',
+                'zstd',
             ],
             [
                 'rapidapi',
@@ -895,11 +943,19 @@ cask rapidapi""",
                 'git',
                 'icu4c@77',
                 'libnghttp2',
+                'libnghttp3',
+                'libngtcp2',
                 'libunistring',
                 'libuv',
+                'lz4',
                 'node',
                 'openssl@3',
                 'pcre2',
+                'readline',
+                'simdjson',
+                'sqlite',
+                'xz',
+                'zstd',
             ],
             [
                 'rapidapi',
