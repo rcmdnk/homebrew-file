@@ -160,3 +160,4 @@ cython_debug/
 /*.py
 /*.txt
 /.worktree/
+/*.md
