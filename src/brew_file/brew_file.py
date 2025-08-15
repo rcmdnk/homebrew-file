@@ -300,7 +300,7 @@ class BrewFile:
         self.brewinfo_ext.remove(self.brewinfo_main)
         for cmd in ['mas', 'reattach', 'whalebrew', 'vscode', 'cursor']:
             if self.opt[f'{cmd}_cmd_installed']:
-                p = Path(self.opt['{cmd}_formula']).name
+                p = Path(self.opt[f'{cmd}_formula']).name
                 if p not in self.get_list('brew_input'):
                     self.brewinfo_main.brew_input.append(p)
                     self.brewinfo_main.brew_opt_input[p] = ''
