@@ -1054,7 +1054,67 @@ def test_clean_non_request(
     assert lines == []
 
 
-# Test only cursor, as uninstalling VSCode requires root permission
+@pytest.mark.destructive_vscode
+def test_vscode(
+    bf_cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not is_mac():
+        pytest.skip('only for mac')
+    monkeypatch.setenv('HOMEBREW_BREWFILE_VSCODE', '1')
+    with Path(brewfile).open('w') as f:
+        f.write("""
+vscode ms-python.python
+""")
+    helper.proc(f'"{bf_cmd}" install -f "{brewfile}"')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask visual-studio-code
+
+# VSCode extensions
+vscode ms-python.debugpy
+vscode ms-python.python
+vscode ms-python.vscode-pylance
+vscode ms-python.vscode-python-envs
+"""
+        )
+
+    with Path(brewfile).open('w') as f:
+        f.write("""
+tap homebrew/core
+tap homebrew/cask
+cask visual-studio-code
+vscode ms-python.python
+""")
+    helper.proc(f'"{bf_cmd}" clean -f "{brewfile}"')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask visual-studio-code
+
+# VSCode extensions
+vscode ms-python.python
+"""
+        )
+
+
 @pytest.mark.destructive_cursor
 def test_cursor(
     bf_cmd: str,
@@ -1111,6 +1171,65 @@ cask cursor
 
 # Cursor extensions
 cursor anysphere.cursorpyright
+"""
+        )
+
+
+@pytest.mark.destructive_codium
+def test_codium(
+    bf_cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not is_mac():
+        pytest.skip('only for mac')
+    monkeypatch.setenv('HOMEBREW_BREWFILE_CODIUM', '1')
+    with Path(brewfile).open('w') as f:
+        f.write("""
+codium ms-python.python
+""")
+    helper.proc(f'"{bf_cmd}" install -f "{brewfile}"')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask vscodium
+
+# VSCodium extensions
+codium ms-python.debugpy
+codium ms-python.python
+"""
+        )
+
+    with Path(brewfile).open('w') as f:
+        f.write("""
+tap homebrew/core
+tap homebrew/cask
+cask vscodium
+codium ms-python.python
+""")
+    helper.proc(f'"{bf_cmd}" clean -f "{brewfile}"')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
+    with Path(brewfile).open('r') as f:
+        assert (
+            f.read()
+            == """
+# tap repositories and their packages
+
+tap homebrew/core
+
+tap homebrew/cask
+cask vscodium
+
+# VSCodium extensions
+codium ms-python.python
 """
         )
 

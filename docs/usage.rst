@@ -76,6 +76,7 @@ appstore         Apps installed from AppStore. The line is like: `appstore <iden
 whalebrew        Images managed by `Whalebrew <https://github.com/whalebrew/whalebrew>`_.
 vscode           `Visual Studio Code extensions <https://marketplace.visualstudio.com/vscode>`_.
 cursor           `Cursor extensions <https://www.cursor.com/>`_.
+codium           `VSCodium extensions <https://vscodium.com/>`_.
 main             Main file. If it exists, new packages will be written to the main file instead of the top file.
 file             Additional files. A path is a absolute path, or a relative path, relative to the file which calls it. You can use environmental variables such ``file ~/${HOSTNAME}.Brewfile``.
 brewfile         Same as ``file``.
