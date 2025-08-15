@@ -125,6 +125,7 @@ class BrewFile:
         opt['whalebrew_formula'] = 'whalebrew'
         opt['vscode_formula'] = 'visual-studio-code'
         opt['cursor_formula'] = 'cursor'
+        opt['codium_formula'] = 'vscodium'
         opt['my_editor'] = os.getenv(
             'HOMEBREW_BREWFILE_EDITOR',
             os.getenv('EDITOR', 'vim'),
@@ -143,6 +144,9 @@ class BrewFile:
         opt['cursor_cmd'] = 'cursor'
         opt['is_cursor_cmd'] = 0
         opt['cursor_cmd_installed'] = False
+        opt['codium_cmd'] = 'codium'
+        opt['is_codium_cmd'] = 0
+        opt['codium_cmd_installed'] = False
         opt['docker_running'] = 0
         opt['args'] = []
         opt['yn'] = False
@@ -188,6 +192,7 @@ class BrewFile:
         )
         opt['vscode'] = to_num(os.getenv('HOMEBREW_BREWFILE_VSCODE', '0'))
         opt['cursor'] = to_num(os.getenv('HOMEBREW_BREWFILE_CURSOR', '0'))
+        opt['codium'] = to_num(os.getenv('HOMEBREW_BREWFILE_CODIUM', '0'))
 
         opt['read'] = False
 
@@ -298,7 +303,14 @@ class BrewFile:
             raise RuntimeError(msg)
         self.brewinfo_main = main
         self.brewinfo_ext.remove(self.brewinfo_main)
-        for cmd in ['mas', 'reattach', 'whalebrew', 'vscode', 'cursor']:
+        for cmd in [
+            'mas',
+            'reattach',
+            'whalebrew',
+            'vscode',
+            'cursor',
+            'codium',
+        ]:
             if self.opt[f'{cmd}_cmd_installed']:
                 p = Path(self.opt[f'{cmd}_formula']).name
                 if p not in self.get_list('brew_input'):
@@ -359,6 +371,10 @@ class BrewFile:
         self.brewinfo_main.add_to_list(
             'cursor_list',
             self.brewinfo.cursor_list,
+        )
+        self.brewinfo_main.add_to_list(
+            'codium_list',
+            self.brewinfo.codium_list,
         )
         self.brewinfo_main.add_to_dict(
             'brew_opt_list',
@@ -718,6 +734,12 @@ class BrewFile:
             if self.check_cursor_cmd(True) != 1:
                 msg = "\n'cursor' command is not available.\n"
                 raise RuntimeError(msg)
+        if cmd == 'codium':
+            exe = ['codium']
+            self.opt['args'].pop(0)
+            if self.check_codium_cmd(True) != 1:
+                msg = "\n'codium' command (for VSCodium) is not available.\n"
+                raise RuntimeError(msg)
 
         ret, lines = self.helper.proc(
             exe + self.opt['args'],
@@ -735,6 +757,7 @@ class BrewFile:
             or (cmd == 'whalebrew' and self.opt['whalebrew'] != 1)
             or (cmd == 'code' and self.opt['vscode'] != 1)
             or (cmd == 'cursor' and self.opt['cursor'] != 1)
+            or (cmd == 'codium' and self.opt['codium'] != 1)
             or (
                 ret != 0
                 and 'Not installed' not in ' '.join(lines)
@@ -765,6 +788,8 @@ class BrewFile:
                 'mas',
                 'whalebrew',
                 'code',
+                'cursor',
+                'codium',
             ]
             or nargs == 0
             or (
@@ -779,6 +804,16 @@ class BrewFile:
             or (cmd == 'whalebrew' and subcmd not in ['install', 'uninstall'])
             or (
                 cmd == 'code'
+                and subcmd
+                not in ['--install-extension', '--uninstall-extension']
+            )
+            or (
+                cmd == 'cursor'
+                and subcmd
+                not in ['--install-extension', '--uninstall-extension']
+            )
+            or (
+                cmd == 'codium'
                 and subcmd
                 not in ['--install-extension', '--uninstall-extension']
             )
@@ -1008,6 +1043,18 @@ class BrewFile:
             install,
         )
 
+    def check_codium_cmd(self, install: bool = False) -> Literal[-2, -1, 0, 1]:
+        """Check codium is installed or not."""
+        if self.opt['is_codium_cmd'] != 0:
+            return self.opt['is_codium_cmd']
+
+        return self.check_cmd(
+            'is_codium_cmd',
+            self.opt['codium_cmd'],
+            self.opt['codium_formula'],
+            install,
+        )
+
     def check_docker_running(self) -> Literal[-2, -1, 0, 1]:
         """Check if Docker is running."""
         if self.opt['docker_running'] != 0:
@@ -1105,6 +1152,21 @@ class BrewFile:
             return []
         _, lines = self.helper.proc(
             f'{self.opt["cursor_cmd"]} --list-extensions',
+            print_cmd=False,
+            print_out=False,
+            exit_on_err=False,
+            separate_err=True,
+            print_err=False,
+        )
+        return lines
+
+    def get_codium_list(self) -> list[str]:
+        if self.opt['codium'] != 1:
+            return []
+        if self.check_codium_cmd(False) != 1:
+            return []
+        _, lines = self.helper.proc(
+            f'{self.opt["codium_cmd"]} --list-extensions',
             print_cmd=False,
             print_out=False,
             exit_on_err=False,
@@ -1217,6 +1279,9 @@ class BrewFile:
         # Cursor extensions
         if self.opt['cursor']:
             self.brewinfo.set_list_val('cursor_list', self.get_cursor_list())
+        # Codium extensions
+        if self.opt['codium']:
+            self.brewinfo.set_list_val('codium_list', self.get_codium_list())
 
     def clean_list(self) -> None:
         """Remove duplications between brewinfo.list to extra files' input."""
@@ -1234,6 +1299,7 @@ class BrewFile:
                 'whalebrew',
                 'vscode',
                 'cursor',
+                'codium',
             ]:
                 for p in b.get_list(line + '_input'):
                     # Keep aliases
@@ -1286,6 +1352,7 @@ class BrewFile:
             'whalebrew',
             'vscode',
             'cursor',
+            'codium',
         ]:
             i = 'cask' if name == 'cask_nocask' else name
             for p in self.brewinfo_main.get_list(name + '_list'):
@@ -1563,6 +1630,27 @@ class BrewFile:
                         dryrun=self.opt['dryrun'],
                     )
                     self.remove_pack('cursor_list', e)
+
+        # Clean up Codium extensions
+        if self.opt['codium'] == 1 and self.get_list('codium_list'):
+            self.banner('# Clean up Codium extensions')
+
+            for e in self.get_list('codium_list'):
+                if e in self.get_list('codium_input'):
+                    continue
+
+                if self.check_codium_cmd(True) == 1:
+                    cmd = f'{self.opt["codium_cmd"]} --uninstall-extension {e}'
+                    _ = self.helper.proc(
+                        cmd,
+                        print_cmd=True,
+                        print_out=True,
+                        exit_on_err=False,
+                        separate_err=True,
+                        print_err=False,
+                        dryrun=self.opt['dryrun'],
+                    )
+                    self.remove_pack('codium_list', e)
 
         # Clean up App Store applications
         if self.opt['appstore'] == 1 and self.get_list('appstore_list'):
@@ -1922,6 +2010,23 @@ class BrewFile:
                     )
                 else:
                     self.log.warning(f'Please install {e} to Cursor.')
+
+        # Codium extensions
+        if self.opt['codium']:
+            extensions = self.get_list('codium_list')
+            for e in self.get_list('codium_input'):
+                if e in extensions:
+                    continue
+                self.log.info(f'Installing {e}')
+                if self.opt['dryrun'] or self.check_codium_cmd(True) == 1:
+                    _ = self.helper.proc(
+                        self.opt['codium_cmd'] + ' --install-extension ' + e,
+                        separate_err=True,
+                        print_err=False,
+                        dryrun=self.opt['dryrun'],
+                    )
+                else:
+                    self.log.warning(f'Please install {e} to Codium.')
 
         # Other commands
         for c in self.get_list('cmd_input'):
