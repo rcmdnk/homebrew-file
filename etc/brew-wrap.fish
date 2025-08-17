@@ -140,3 +140,22 @@ function cursor
   # Execute command
   eval "$exe $argv"
 end
+
+# codium (for VSCodium) command wrapper for brew-file
+function codium
+  # Set exe
+  set -l exe command codium
+
+  if type -q brew-file
+    # Check args
+    set -l cmd $argv[1]
+
+    switch "$cmd"
+      case '--install-extension' '--uninstall-extension'
+        set exe brew-file brew codium
+    end
+  end
+
+  # Execute command
+  eval "$exe $argv"
+end

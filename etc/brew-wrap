@@ -228,3 +228,29 @@ cursor () {
   # Execute command
   "${exe[@]}" "$@"
 }
+
+# codium (for VSCodium) command wrapper for brew-file
+codium () {
+  # Emulate ksh / local options if zsh
+  [ -z "${ZSH_VERSION:-}" ] || emulate -L ksh
+
+  # Set exe
+  exe=("command" "codium")
+
+  # Do wrap
+  if type brew-file >/dev/null 2>&1;then
+    # Check args
+    cmd=$1
+
+    case "$cmd" in
+      --install-extension|--uninstall-extension)
+        exe=("brew-file" "brew" "codium")
+        ;;
+      *)
+        ;;
+    esac
+  fi
+
+  # Execute command
+  "${exe[@]}" "$@"
+}
