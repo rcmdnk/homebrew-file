@@ -45,6 +45,29 @@ def tmp_log(tmp_path: Path) -> str:
     return tmp_path / 'log'
 
 
+@pytest.fixture
+def node_dependencies(helper: BrewHelper) -> list[str]:
+    _, lines = helper.proc(
+        'brew deps node', env={'HOMEBREW_NO_ENV_HINTS': '1'}
+    )
+    return lines
+
+
+@pytest.fixture
+def git_dependencies(helper: BrewHelper) -> list[str]:
+    _, lines = helper.proc('brew deps git', env={'HOMEBREW_NO_ENV_HINTS': '1'})
+    assert 'gettext' in lines
+    return lines
+
+
+@pytest.fixture
+def gettext_dependencies(helper: BrewHelper) -> list[str]:
+    _, lines = helper.proc(
+        'brew deps gettext', env={'HOMEBREW_NO_ENV_HINTS': '1'}
+    )
+    return lines
+
+
 # Check clean script
 @pytest.mark.destructive_clean
 def test_clean_script(helper: BrewHelper) -> None:
@@ -427,6 +450,7 @@ def test_init(
     helper: BrewHelper,
     backup: Path,
     tmp_path: Path,
+    node_dependencies: list[str],
 ) -> None:
     # Test with no packages
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
@@ -451,6 +475,13 @@ tap homebrew/core{cask_part}
     # Test with some packages, with backup
     helper.proc('brew install brotli')
     helper.proc('brew install node')
+    formulae = sorted({'brotli', 'node', *node_dependencies})
+    formulae_list = '\n'.join(f'brew {x}' for x in formulae)
+    formulae_part = f"""
+
+tap homebrew/core
+{formulae_list}"""
+
     if is_mac():
         helper.proc('brew install rapidapi')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y -b {backup}')
@@ -466,28 +497,10 @@ cask rapidapi"""
         assert (
             f.read()
             == f"""
-# tap repositories and their packages
-
-tap homebrew/core
-brew brotli
-brew c-ares
-brew ca-certificates
-brew icu4c@77
-brew libnghttp2
-brew libnghttp3
-brew libngtcp2
-brew libuv
-brew lz4
-brew node
-brew openssl@3
-brew readline
-brew simdjson
-brew sqlite
-brew xz
-brew zstd{cask_part}
+# tap repositories and their packages{formulae_part}{cask_part}
 """
         )
-    cask_part = (
+    tap_cask_part = (
         """
 
 tap homebrew/cask"""
@@ -500,7 +513,7 @@ tap homebrew/cask"""
             == f"""
 # tap repositories and their packages
 
-tap homebrew/core{cask_part}
+tap homebrew/core{tap_cask_part}
 """
         )
 
@@ -751,181 +764,20 @@ brew rcmdnk/file/brew-file
 
 
 @pytest.mark.parametrize(
-    (
-        'env',
-        'ls1_formulae',
-        'ls1_casks',
-        'tap1',
-        'brewfile_content',
-        'cask_part',
-        'ls2_formulae',
-        'ls2_casks',
-        'tap2',
-    ),
+    'env',
     [
         pytest.param(
             {},
-            [
-                'brew-file',
-                'brotli',
-                'c-ares',
-                'ca-certificates',
-                'gettext',
-                'git',
-                'icu4c@77',
-                'libnghttp2',
-                'libnghttp3',
-                'libngtcp2',
-                'libunistring',
-                'libuv',
-                'lz4',
-                'node',
-                'openssl@3',
-                'pcre2',
-                'readline',
-                'simdjson',
-                'sqlite',
-                'xz',
-                'zstd',
-            ],
-            [
-                'rapidapi',
-            ],
-            ['rcmdnk/file'],
-            """
-# tap repositories and their packages
-
-tap homebrew/core
-brew brotli
-brew c-ares
-brew ca-certificates
-brew gettext
-brew git
-brew icu4c@77
-brew libnghttp2
-brew libnghttp3
-brew libngtcp2
-brew libunistring
-brew libuv
-brew lz4
-brew node
-brew openssl@3
-brew pcre2
-brew readline
-brew simdjson
-brew sqlite
-brew xz
-brew zstd{}
-
-tap rcmdnk/file
-brew brew-file
-""",
-            """
-
-tap homebrew/cask
-cask rapidapi""",
-            ['gettext', 'git', 'libunistring', 'pcre2'],
-            [],
-            [],
             id='default',
             marks=pytest.mark.destructive_install_clean_default,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_ON_REQUEST': '1'},
-            [
-                'brew-file',
-                'brotli',
-                'c-ares',
-                'ca-certificates',
-                'gettext',
-                'git',
-                'icu4c@77',
-                'libnghttp2',
-                'libnghttp3',
-                'libngtcp2',
-                'libunistring',
-                'libuv',
-                'lz4',
-                'node',
-                'openssl@3',
-                'pcre2',
-                'readline',
-                'simdjson',
-                'sqlite',
-                'xz',
-                'zstd',
-            ],
-            [
-                'rapidapi',
-            ],
-            ['rcmdnk/file'],
-            """
-# tap repositories and their packages
-
-tap homebrew/core
-brew gettext
-brew git
-brew node{}
-
-tap rcmdnk/file
-brew brew-file
-""",
-            """
-
-tap homebrew/cask
-cask rapidapi""",
-            ['gettext', 'git', 'libunistring', 'pcre2'],
-            [],
-            [],
             id='on-request',
             marks=pytest.mark.destructive_install_clean_on_request,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_LEAVES': '1'},
-            [
-                'brew-file',
-                'brotli',
-                'c-ares',
-                'ca-certificates',
-                'gettext',
-                'git',
-                'icu4c@77',
-                'libnghttp2',
-                'libnghttp3',
-                'libngtcp2',
-                'libunistring',
-                'libuv',
-                'lz4',
-                'node',
-                'openssl@3',
-                'pcre2',
-                'readline',
-                'simdjson',
-                'sqlite',
-                'xz',
-                'zstd',
-            ],
-            [
-                'rapidapi',
-            ],
-            ['rcmdnk/file'],
-            """
-# tap repositories and their packages
-
-tap homebrew/core
-brew git
-brew node{}
-
-tap rcmdnk/file
-brew brew-file
-""",
-            """
-
-tap homebrew/cask
-cask rapidapi""",
-            ['gettext', 'git', 'libunistring', 'pcre2'],
-            [],
-            [],
             id='leaves',
             marks=pytest.mark.destructive_install_clean_leaves,
         ),
@@ -934,52 +786,6 @@ cask rapidapi""",
                 'HOMEBREW_BREWFILE_ON_REQUEST': '1',
                 'HOMEBREW_BREWFILE_TOP_PACKAGES': 'gettext,pcre2',
             },
-            [
-                'brew-file',
-                'brotli',
-                'c-ares',
-                'ca-certificates',
-                'gettext',
-                'git',
-                'icu4c@77',
-                'libnghttp2',
-                'libnghttp3',
-                'libngtcp2',
-                'libunistring',
-                'libuv',
-                'lz4',
-                'node',
-                'openssl@3',
-                'pcre2',
-                'readline',
-                'simdjson',
-                'sqlite',
-                'xz',
-                'zstd',
-            ],
-            [
-                'rapidapi',
-            ],
-            ['rcmdnk/file'],
-            """
-# tap repositories and their packages
-
-tap homebrew/core
-brew gettext
-brew git
-brew node
-brew pcre2{}
-
-tap rcmdnk/file
-brew brew-file
-""",
-            """
-
-tap homebrew/cask
-cask rapidapi""",
-            ['gettext', 'git', 'libunistring', 'pcre2'],
-            [],
-            [],
             id='top-packages',
             marks=pytest.mark.destructive_install_clean_top_packages,
         ),
@@ -989,16 +795,11 @@ def test_install_clean(
     bf_cmd: str,
     brewfile: str,
     helper: BrewHelper,
+    node_dependencies: list[str],
+    git_dependencies: list[str],
+    gettext_dependencies: list[str],
     monkeypatch: pytest.MonkeyPatch,
     env: dict[str, Any],
-    ls1_formulae: list[str],
-    ls1_casks: list[str],
-    tap1: list[str],
-    brewfile_content: str,
-    cask_part: str,
-    ls2_formulae: list[str],
-    ls2_casks: list[str],
-    tap2: list[str],
 ) -> None:
     for k, v in env.items():
         monkeypatch.setenv(k, v)
@@ -1015,11 +816,51 @@ tapall rcmdnk/file
 cask rapidapi
 """)
 
+    formulae = sorted(
+        {
+            'gettext',
+            'git',
+            'node',
+            *node_dependencies,
+            *git_dependencies,
+            *gettext_dependencies,
+        }
+    )
+    casks = ['rapidapi'] if is_mac() else []
+    taps = ['rcmdnk/file']
+
     helper.proc(f'"{bf_cmd}" install -f "{brewfile}"')
     _, lines = helper.proc('brew ls')
-    assert lines == ls1_formulae + ls1_casks
+    assert lines == sorted(['brew-file', *formulae]) + casks
     _, lines = helper.proc('brew tap')
-    assert lines == tap1
+    assert lines == taps
+
+    if 'HOMEBREW_BREWFILE_TOP_PACKAGES' in env:
+        formulae = ['gettext', 'git', 'node', 'pcre2']
+    elif 'HOMEBREW_BREWFILE_ON_REQUEST' in env:
+        formulae = ['gettext', 'git', 'node']
+    elif 'HOMEBREW_BREWFILE_LEAVES' in env:
+        formulae = ['git', 'node']
+    formulae_list = '\n'.join(f'brew {x}' for x in formulae)
+    formulae_part = f"""
+
+tap homebrew/core
+{formulae_list}"""
+    cask_part = (
+        """
+
+tap homebrew/cask
+cask rapidapi"""
+        if is_mac()
+        else ''
+    )
+
+    brewfile_content = f"""
+# tap repositories and their packages{formulae_part}{cask_part}
+
+tap rcmdnk/file
+brew brew-file
+"""
 
     helper.proc(f'"{bf_cmd}" init -y -f "{brewfile}"')
     with Path(brewfile).open('r') as f:
@@ -1033,9 +874,9 @@ brew git
 """)
     helper.proc(f'"{bf_cmd}" clean -f "{brewfile}"')
     _, lines = helper.proc('brew ls')
-    assert lines == ls2_formulae + ls2_casks
+    assert lines == sorted(['git', *git_dependencies])
     _, lines = helper.proc('brew tap')
-    assert lines == tap2
+    assert lines == []
 
 
 @pytest.mark.destructive_others
@@ -1054,6 +895,8 @@ def test_clean_non_request(
     assert lines == []
 
 
+# Uninstalling VSCode related files requires root permission.
+# Need to put password at the test run after this test.
 @pytest.mark.destructive_vscode
 def test_vscode(
     bf_cmd: str,
@@ -1063,6 +906,7 @@ def test_vscode(
 ) -> None:
     if not is_mac():
         pytest.skip('only for mac')
+    helper.proc(f'rm -rf {Path("~/.vscode").expanduser()}')
     monkeypatch.setenv('HOMEBREW_BREWFILE_VSCODE', '1')
     with Path(brewfile).open('w') as f:
         f.write("""
@@ -1124,6 +968,7 @@ def test_cursor(
 ) -> None:
     if not is_mac():
         pytest.skip('only for mac')
+    helper.proc(f'rm -rf {Path("~/.cursor").expanduser()}')
     monkeypatch.setenv('HOMEBREW_BREWFILE_CURSOR', '1')
     with Path(brewfile).open('w') as f:
         f.write("""
@@ -1154,7 +999,7 @@ cursor ms-python.python
 tap homebrew/core
 tap homebrew/cask
 cask cursor
-cursor anysphere.cursorpyright
+cursor ms-python.python
 """)
     helper.proc(f'"{bf_cmd}" clean -f "{brewfile}"')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
@@ -1170,7 +1015,7 @@ tap homebrew/cask
 cask cursor
 
 # Cursor extensions
-cursor anysphere.cursorpyright
+cursor ms-python.python
 """
         )
 
@@ -1184,6 +1029,7 @@ def test_codium(
 ) -> None:
     if not is_mac():
         pytest.skip('only for mac')
+    helper.proc(f'rm -rf {Path("~/.vscode-oss").expanduser()}')
     monkeypatch.setenv('HOMEBREW_BREWFILE_CODIUM', '1')
     with Path(brewfile).open('w') as f:
         f.write("""
