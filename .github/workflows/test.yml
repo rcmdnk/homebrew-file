@@ -54,8 +54,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
-        run: exit 1
+        if: ${{ env.TMATE == 'true' }}
+        run: exit 0
       - name: Install test
         run: |
           curl -o install.sh -fsSL https://raw.github.com/rcmdnk/homebrew-file/install/install.sh
@@ -69,8 +69,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
-        run: exit 1
+        if: ${{ env.TMATE == 'true' }}
+        run: exit 0
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
@@ -101,7 +101,7 @@ jobs:
           if [ "${{ env.TMATE }}" = "true" ];then
             if [ "$is_main" = 0 ];then
               echo "Tmate is enabled and this is not main, skip tests"
-              exit 1
+              exit 0
             fi
             echo "DEBUG=1" >> "$GITHUB_ENV"
           else
@@ -164,8 +164,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Exit workflow
-        if: ${{ github.event_name == 'workflow_dispatch' && env.tmate == 'true' }}
-        run: exit 1
+        if: ${{ env.TMATE == 'true' }}
+        run: exit 0
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
