@@ -1845,21 +1845,22 @@ class BrewFile:
             cask_args_opt.update(self.get_dict('cask_args_input'))
 
             cask_aliases = self.helper.get_cask_aliases(flat=True)
+            casks_to_install: list[str] = []
+
             for p in self.get_list('cask_input'):
                 pack = cask_aliases.get(p, p)
                 if pack in self.get_list('cask_list'):
                     continue
-                cask_args = {}
-                cask_args.update(cask_args_opt)
-                args = []
-                for k, v in cask_args.items():
+                casks_to_install.append(p)
+
+            if casks_to_install:
+                args: list[str] = []
+                for k, v in cask_args_opt.items():
                     args.append(k)
                     if v != '':
                         args.append(v)
-                _ = self.helper.proc(
-                    f'brew install {shlex.join(args)} {p}',
-                    dryrun=self.opt['dryrun'],
-                )
+                cmd = 'brew install ' + shlex.join(args + casks_to_install)
+                _ = self.helper.proc(cmd, dryrun=self.opt['dryrun'])
 
         # Brew
         if not self.opt['caskonly']:
