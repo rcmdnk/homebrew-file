@@ -3064,12 +3064,24 @@ class BrewFile:
         # Brew
         if not self.opt['caskonly']:
             formula_aliases = self.helper.get_formula_aliases(flat=True)
+            batched_packages: list[str] = []
+            individual_installs: list[tuple[str, str]] = []
+
+            def handle_install_output(lines: list[str]) -> None:
+                for line in lines:
+                    if line.find('ln -s') != -1 and self.opt['link']:
+                        cmdtmp = line.split()
+                        cmd_ln = [str(expandpath(c)) for c in cmdtmp]
+                        _ = self.helper.proc(cmd_ln)
+                    if line.find('brew linkapps') != -1 and self.opt['link']:
+                        _ = self.helper.proc('brew linkapps')
+
             for p in self.get_list('brew_input'):
-                cmd = 'install'
                 pack = formula_aliases.get(p, p)
+                opts = self.get_dict('brew_opt_input')[p]
                 if pack in self.get_list('brew_full_list'):
                     if p not in self.get_dict('brew_opt_list') or sorted(
-                        self.get_dict('brew_opt_input')[p].split(),
+                        opts.split(),
                     ) == sorted(self.get_dict('brew_opt_list')[p].split()):
                         continue
                     # Uninstall to install the package with new options
@@ -3078,12 +3090,26 @@ class BrewFile:
                         'brew uninstall ' + p,
                         dryrun=self.opt['dryrun'],
                     )
+                if opts.strip():
+                    individual_installs.append((p, opts))
+                else:
+                    batched_packages.append(p)
+
+            if batched_packages:
                 ret, lines = self.helper.proc(
-                    'brew '
-                    + cmd
-                    + ' '
-                    + p
-                    + self.get_dict('brew_opt_input')[p],
+                    'brew install ' + ' '.join(batched_packages),
+                    dryrun=self.opt['dryrun'],
+                )
+                if ret != 0:
+                    self.log.warning(
+                        f'Failed to install packages: {", ".join(batched_packages)}. Please check the package names.'
+                    )
+                else:
+                    handle_install_output(lines)
+
+            for p, opts in individual_installs:
+                ret, lines = self.helper.proc(
+                    'brew install ' + p + opts,
                     dryrun=self.opt['dryrun'],
                 )
                 if ret != 0:
@@ -3094,13 +3120,7 @@ class BrewFile:
                         'by using web direct formula.',
                     )
                     continue
-                for line in lines:
-                    if line.find('ln -s') != -1 and self.opt['link']:
-                        cmdtmp = line.split()
-                        cmd_ln = [str(expandpath(c)) for c in cmdtmp]
-                        _ = self.helper.proc(cmd_ln)
-                    if line.find('brew linkapps') != -1 and self.opt['link']:
-                        _ = self.helper.proc('brew linkapps')
+                handle_install_output(lines)
 
         # App Store
         if is_mac() and self.opt['appstore']:
