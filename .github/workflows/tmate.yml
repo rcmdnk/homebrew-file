@@ -28,18 +28,16 @@ jobs:
   tmate:
     runs-on: ${{ inputs.os }}
     steps:
-      - name: Setup Homebrew
-        run: |
-          if ! which brew &>/dev/null;then
-            echo "/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:$PATH" >> "$GITHUB_PATH"
-            echo "HOMEBREW_PREFIX=$(brew --prefix)" >> "$GITHUB_ENV"
-            echo "HOMEBREW_CELLAR=$(brew --cellar)" >> "$GITHUB_ENV"
-            echo "HOMEBREW_REPOSITORY=$(brew --repository)" >> "$GITHUB_ENV"
-          fi
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Setup Homebrew
+        uses: ./.github/actions/setup-homebrew
+      - name: Set pseudo git user
+        run: |
+          git config --global user.name "runner"
+          git config --global user.email "runner@localhost"
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.py_ver }}
