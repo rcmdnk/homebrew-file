@@ -1659,23 +1659,23 @@ class BrewFile:
             for p in self.get_list('appstore_list'):
                 identifier = p.split()[0]
                 if identifier.isdigit():
-                    package = shlex.join(p.split()[1:])
+                    package = ' '.join(p.split()[1:])
                 else:
                     identifier = ''
                     package = p
                 if re.match(r'.*\(\d+\.\d+.*\)$', package):
-                    package = shlex.join(package.split(' ')[:-1])
+                    package = ' '.join(package.split(' ')[:-1])
 
                 isinput = False
                 for pi in self.get_list('appstore_input'):
                     i_identifier = pi.split()[0]
                     if i_identifier.isdigit():
-                        i_package = shlex.join(pi.split()[1:])
+                        i_package = ' '.join(pi.split()[1:])
                     else:
                         i_identifier = ''
                         i_package = pi
                     if re.match(r'.*\(\d+\.\d+.*\)$', i_package):
-                        i_package = shlex.join(i_package.split(' ')[:-1])
+                        i_package = ' '.join(i_package.split(' ')[:-1])
                     if (
                         identifier != '' and identifier == i_identifier
                     ) or package == i_package:
@@ -1931,7 +1931,7 @@ class BrewFile:
                 if identifier in id_list:
                     continue
                 if identifier.isdigit() and len(identifier) >= 9:
-                    package = shlex.join(p.split()[1:])
+                    package = ' '.join(p.split()[1:])
                 else:
                     identifier = ''
                     package = p
@@ -1939,7 +1939,7 @@ class BrewFile:
                 for pl in self.get_list('appstore_list'):
                     l_identifier = pl.split()[0]
                     if l_identifier.isdigit() and len(l_identifier) >= 9:
-                        l_package = shlex.join(pl.split()[1:])
+                        l_package = ' '.join(pl.split()[1:])
                     else:
                         l_identifier = ''
                         l_package = pl
