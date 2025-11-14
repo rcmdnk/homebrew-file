@@ -1912,7 +1912,7 @@ class BrewFile:
             if self.check_mas_cmd(True) != 1:
                 msg = "\n'mas' command is not available.\n"
                 if package:
-                    msg += f"Please install 'mas' or manage {' '.join(package)} manually"
+                    msg += f"Please install 'mas' or manage {shlex.join(package)} manually"
                 raise RuntimeError(msg)
         if cmd == 'whalebrew':
             exe = ['whalebrew']
@@ -2859,23 +2859,23 @@ class BrewFile:
             for p in self.get_list('appstore_list'):
                 identifier = p.split()[0]
                 if identifier.isdigit():
-                    package = ' '.join(p.split()[1:])
+                    package = shlex.join(p.split()[1:])
                 else:
                     identifier = ''
                     package = p
                 if re.match(r'.*\(\d+\.\d+.*\)$', package):
-                    package = ' '.join(package.split(' ')[:-1])
+                    package = shlex.join(package.split(' ')[:-1])
 
                 isinput = False
                 for pi in self.get_list('appstore_input'):
                     i_identifier = pi.split()[0]
                     if i_identifier.isdigit():
-                        i_package = ' '.join(pi.split()[1:])
+                        i_package = shlex.join(pi.split()[1:])
                     else:
                         i_identifier = ''
                         i_package = pi
                     if re.match(r'.*\(\d+\.\d+.*\)$', i_package):
-                        i_package = ' '.join(i_package.split(' ')[:-1])
+                        i_package = shlex.join(i_package.split(' ')[:-1])
                     if (
                         identifier != '' and identifier == i_identifier
                     ) or package == i_package:
@@ -2936,7 +2936,7 @@ class BrewFile:
                 self.remove_pack('cask_list', p)
 
             if uninstalls:
-                cmd = 'brew uninstall ' + ' '.join(uninstalls)
+                cmd = 'brew uninstall ' + shlex.join(uninstalls)
                 _ = self.helper.proc(
                     cmd,
                     print_cmd=True,
@@ -2956,7 +2956,7 @@ class BrewFile:
                 # Use --ignore-dependencies option to remove packages w/o
                 # formula (tap of which could be removed before).
             if uninstalls:
-                cmd = 'brew uninstall --ignore-dependencies ' + ' '.join(
+                cmd = 'brew uninstall --ignore-dependencies ' + shlex.join(
                     uninstalls
                 )
                 _ = self.helper.proc(
@@ -2996,7 +2996,7 @@ class BrewFile:
                 untaps.append(p)
 
             if untaps:
-                cmd = 'brew untap ' + ' '.join(untaps)
+                cmd = 'brew untap ' + shlex.join(untaps)
                 _ = self.helper.proc(
                     cmd,
                     print_cmd=True,
@@ -3098,7 +3098,7 @@ class BrewFile:
 
             if batched_packages:
                 ret, lines = self.helper.proc(
-                    'brew install ' + ' '.join(batched_packages),
+                    'brew install ' + shlex.join(batched_packages),
                     dryrun=self.opt['dryrun'],
                 )
                 if ret != 0:
@@ -3131,7 +3131,7 @@ class BrewFile:
                 if identifier in id_list:
                     continue
                 if identifier.isdigit() and len(identifier) >= 9:
-                    package = ' '.join(p.split()[1:])
+                    package = shlex.join(p.split()[1:])
                 else:
                     identifier = ''
                     package = p
@@ -3139,7 +3139,7 @@ class BrewFile:
                 for pl in self.get_list('appstore_list'):
                     l_identifier = pl.split()[0]
                     if l_identifier.isdigit() and len(l_identifier) >= 9:
-                        l_package = ' '.join(pl.split()[1:])
+                        l_package = shlex.join(pl.split()[1:])
                     else:
                         l_identifier = ''
                         l_package = pl
