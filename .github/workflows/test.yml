@@ -116,9 +116,8 @@ jobs:
         uses: ./.github/actions/setup-homebrew
       - name: Check Homebrew
         run: |
-          # Check brew command. It is needed especially on Ubuntu, otherwise parallel tests fails.
-          which brew
-          brew --version
+          # run brew update. It is needed especially on Ubuntu, otherwise parallel tests fails.
+          brew update --force --quiet || true
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"

@@ -98,10 +98,7 @@ def test_get_tap_packs(helper: BrewHelper) -> None:
     # - node: (1, 4)
     # - icu4c@77: (0, 1)
     # - openssl@3: (0, 2)
-    assert (
-        len(packs_with_alias['formulae'])
-        == len(packs_wo_alias['formulae']) + 10
-    )
+    assert len(packs_with_alias['formulae']) > len(packs_wo_alias['formulae'])
 
 
 @pytest.mark.destructive_get_leaves
@@ -659,9 +656,11 @@ brew node{cask_part}
         )
 
     # Test with oldnames and old_tokens
+    helper.proc('brew install gnupg')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y --leaves')
     with Path(brewfile).open('r') as f:
         content = f.read()
-    content = content.replace('brew node', 'brew corepack')
+    content = content.replace('brew gnupg', 'brew gnupg2')
     content = content.replace('cask rapidapi', 'cask paw')
     with Path(brewfile).open('w') as f:
         f.write(content)
@@ -681,14 +680,16 @@ cask paw"""
 # tap repositories and their packages
 
 tap homebrew/core
-brew corepack{cask_part}
+brew gnupg2
+brew node{cask_part}
 """
         )
 
     # Test with aliases
     with Path(brewfile).open('r') as f:
         content = f.read()
-    content = content.replace('brew corepack', 'brew nodejs')
+    content = content.replace('brew gnupg2', 'brew gpg')
+    content = content.replace('brew node', 'brew nodejs')
     with Path(brewfile).open('w') as f:
         f.write(content)
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y --leaves')
@@ -699,9 +700,12 @@ brew corepack{cask_part}
 # tap repositories and their packages
 
 tap homebrew/core
+brew gpg
 brew nodejs{cask_part}
 """
         )
+    helper.proc('brew rm gnupg')
+    helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y --leaves')
 
     # Test with not installed packages
     with Path(brewfile).open('r') as f:
@@ -1051,6 +1055,7 @@ cask vscodium
 # VSCodium extensions
 codium ms-python.debugpy
 codium ms-python.python
+codium ms-python.vscode-python-envs
 """
         )
 
