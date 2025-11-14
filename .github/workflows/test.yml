@@ -114,6 +114,11 @@ jobs:
           fetch-depth: 0
       - name: Setup Homebrew
         uses: ./.github/actions/setup-homebrew
+      - name: Check Homebrew
+        run: |
+          # Check brew command. It is needed especially on Ubuntu, otherwise parallel tests fails.
+          which brew
+          brew --version
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"
