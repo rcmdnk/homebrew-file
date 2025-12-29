@@ -118,6 +118,7 @@ jobs:
         run: |
           # run brew update. It is needed especially on Ubuntu, otherwise parallel tests fails.
           brew update --force --quiet || true
+          brew --version
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"
@@ -179,6 +180,11 @@ jobs:
         with:
           pristine: true
           update: true
+      - name: Check Homebrew
+        run: |
+          # run brew update. It is needed especially on Ubuntu, otherwise parallel tests fails.
+          brew update --force --quiet || true
+          brew --version
       - name: Set pseudo git user
         run: |
           git config --global user.name "runner"

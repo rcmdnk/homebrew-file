@@ -768,20 +768,23 @@ brew rcmdnk/file/brew-file
 
 
 @pytest.mark.parametrize(
-    'env',
+    ('env', 'formulae_list'),
     [
         pytest.param(
             {},
+            [],
             id='default',
             marks=pytest.mark.destructive_install_clean_default,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_ON_REQUEST': '1'},
+            ['gettext', 'git', 'node'],
             id='on-request',
             marks=pytest.mark.destructive_install_clean_on_request,
         ),
         pytest.param(
             {'HOMEBREW_BREWFILE_LEAVES': '1'},
+            ['git', 'node'],
             id='leaves',
             marks=pytest.mark.destructive_install_clean_leaves,
         ),
@@ -790,6 +793,7 @@ brew rcmdnk/file/brew-file
                 'HOMEBREW_BREWFILE_ON_REQUEST': '1',
                 'HOMEBREW_BREWFILE_TOP_PACKAGES': 'gettext,pcre2',
             },
+            ['gettext', 'git', 'node', 'pcre2'],
             id='top-packages',
             marks=pytest.mark.destructive_install_clean_top_packages,
         ),
@@ -804,6 +808,7 @@ def test_install_clean(
     gettext_dependencies: list[str],
     monkeypatch: pytest.MonkeyPatch,
     env: dict[str, Any],
+    formulae_list: list[str],
 ) -> None:
     for k, v in env.items():
         monkeypatch.setenv(k, v)
@@ -839,17 +844,13 @@ cask rapidapi
     _, lines = helper.proc('brew tap')
     assert lines == taps
 
-    if 'HOMEBREW_BREWFILE_TOP_PACKAGES' in env:
-        formulae = ['gettext', 'git', 'node', 'pcre2']
-    elif 'HOMEBREW_BREWFILE_ON_REQUEST' in env:
-        formulae = ['gettext', 'git', 'node']
-    elif 'HOMEBREW_BREWFILE_LEAVES' in env:
-        formulae = ['git', 'node']
-    formulae_list = '\n'.join(f'brew {x}' for x in formulae)
+    if not formulae_list:
+        formulae_list = formulae
+    brew_formulae = '\n'.join(f'brew {x}' for x in sorted(formulae_list))
     formulae_part = f"""
 
 tap homebrew/core
-{formulae_list}"""
+{brew_formulae}"""
     cask_part = (
         """
 
@@ -1087,7 +1088,11 @@ codium ms-python.python
 
 @pytest.mark.destructive_update
 def test_update(
-    bf_cmd: str, brewfile: str, helper: BrewHelper, tmp_path: Path
+    bf_cmd: str,
+    brewfile: str,
+    helper: BrewHelper,
+    git_dependencies: list[str],
+    tmp_path: Path,
 ) -> None:
     repo = tmp_path / 'test/repo'
     local_repo = tmp_path / 'test_repo'
@@ -1095,6 +1100,10 @@ def test_update(
     helper.proc(f'"{bf_cmd}" set_repo --repo file://{repo} -f "{brewfile}" -y')
     helper.proc(f'"{bf_cmd}" init -f "{brewfile}" -y')
     helper.proc(f'"{bf_cmd}" update -f "{brewfile}"')
+
+    brew_git = '\n'.join(
+        [f'brew {x}' for x in sorted(['git', *git_dependencies])]
+    )
 
     cask_part = """
 
@@ -1107,10 +1116,7 @@ tap homebrew/cask"""
 # tap repositories and their packages
 
 tap homebrew/core
-brew gettext
-brew git
-brew libunistring
-brew pcre2{cask_part}
+{brew_git}{cask_part}
 """
         )
     with Path(repo / 'Brewfile').open('r') as f:
@@ -1120,10 +1126,7 @@ brew pcre2{cask_part}
 # tap repositories and their packages
 
 tap homebrew/core
-brew gettext
-brew git
-brew libunistring
-brew pcre2{cask_part}
+{brew_git}{cask_part}
 """
         )
 
