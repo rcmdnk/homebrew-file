@@ -350,7 +350,7 @@ class BrewHelper:
                 cmd='brew tap-info --json --installed',
                 print_cmd=False,
                 print_out=False,
-                exit_on_err=True,
+                exit_on_err=False,
                 separate_err=True,
             )
             lines = lines[lines.index('[') :]
