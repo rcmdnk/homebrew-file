@@ -104,7 +104,7 @@ def home_tilde(path: str | Path) -> str:
 class OpenWrapper:
     """Wrapper function to open a file even if it doesn't exist."""
 
-    name: str
+    name: str | Path
     mode: Literal['w', 'r', 'a'] = 'w'
 
     def __enter__(self) -> TextIOWrapper:

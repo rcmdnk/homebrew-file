@@ -20,7 +20,7 @@ def _parallel_test(config: Config) -> bool:
 
 
 @pytest.hookimpl(trylast=True)  # To run after marker filtering
-def pytest_collection_modifyitems(config: Config, items: Item) -> None:
+def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
     remaining = []
     destructive = []
 
@@ -31,7 +31,7 @@ def pytest_collection_modifyitems(config: Config, items: Item) -> None:
             remaining.append(item)
 
     if destructive:
-        config.destructive_clean = True
+        config.destructive_clean = True  # ty: ignore[unresolved-attribute]
         if _parallel_test(config):
             config.hook.pytest_deselected(items=destructive)
             items[:] = remaining
@@ -51,7 +51,7 @@ def pytest_collection_modifyitems(config: Config, items: Item) -> None:
                     'Do you want to clean up the environment before each destructive test? [y/N]: '
                 )
                 if response.lower() != 'y':
-                    config.destructive_clean = False
+                    config.destructive_clean = False  # ty: ignore[unresolved-attribute]
                     warnings.warn(
                         'Do not run cleanup before destructive tests. Some tests may fail.',
                         stacklevel=2,
