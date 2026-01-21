@@ -23,7 +23,7 @@ if not is_mac():
 
 @pytest.fixture(autouse=True)
 def clean(request: pytest.FixtureRequest) -> None:
-    if request.config.destructive_clean:
+    if getattr(request.config, 'destructive_clean', False):
         clean_script = Path(__file__).parent / 'scripts' / 'clean_homebrew.sh'
         os.system(f'"{clean_script}"')
 
@@ -36,12 +36,12 @@ def brewfile(tmp_path: Path) -> str:
 
 
 @pytest.fixture
-def backup(tmp_path: Path) -> str:
+def backup(tmp_path: Path) -> Path:
     return tmp_path / 'Brewfile.bak'
 
 
 @pytest.fixture
-def tmp_log(tmp_path: Path) -> str:
+def tmp_log(tmp_path: Path) -> Path:
     return tmp_path / 'log'
 
 

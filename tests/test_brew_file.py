@@ -167,6 +167,7 @@ def test_read(bf: BrewFile, tmp_path: Path) -> None:
     file = Path(f'{Path(__file__).parent}/files/BrewfileMain')
     brewinfo = BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
+    assert ret is not None
     assert ret.file == file
 
     bf.brewinfo_ext = []
@@ -179,6 +180,7 @@ def test_read(bf: BrewFile, tmp_path: Path) -> None:
     file = Path(f'{Path(__file__).parent}/files/BrewfileTest')
     brewinfo = BrewInfo(helper=helper, file=file)
     ret = bf.read(brewinfo, True)
+    assert ret is not None
     file = Path(f'{Path(__file__).parent}/files/BrewfileMain')
     assert ret.file == file
     files = [
@@ -204,6 +206,7 @@ def test_read(bf: BrewFile, tmp_path: Path) -> None:
     bf.brewinfo_ext = []
     brewinfo = BrewInfo(helper=helper, file=f1)
     ret = bf.read(brewinfo, True)
+    assert ret is not None
     assert ret.file == Path(f3)
 
 
@@ -221,9 +224,9 @@ def test_user_name(bf: BrewFile) -> None:
     assert bf.user_name() == 'abc'
 
 
-def test_repo_file(bf: BrewFile) -> None:
+def test_repo_file(bf: BrewFile, monkeypatch: pytest.MonkeyPatch) -> None:
     bf.set_input('/path/to/input')
-    bf.user_name = lambda: 'user'
+    monkeypatch.setattr(bf, 'user_name', lambda: 'user')
     bf.opt['repo'] = 'repo.git'
     assert bf.repo_file() == Path('/path/to/user_repo/input')
 
@@ -232,8 +235,9 @@ def test_init_repo(
     bf: BrewFile,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    bf.check_gitconfig = lambda: False
+    monkeypatch.setattr(bf, 'check_gitconfig', lambda: False)
     file = tmp_path / 'Brewfile'
     bf.helper.proc('git init', cwd=tmp_path)
     bf.set_input(file)
@@ -250,9 +254,13 @@ def test_init_repo(
     assert file.exists()
 
 
-def test_check_local_repo(bf: BrewFile, tmp_path: Path) -> None:
+def test_check_local_repo(
+    bf: BrewFile,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     bf.opt['repo'] = f'file:///{tmp_path}/repo'
-    bf.clone_repo = lambda: None
+    monkeypatch.setattr(bf, 'clone_repo', lambda: None)
     bf.check_local_repo()
     assert (tmp_path / 'repo').exists()
     assert (tmp_path / 'repo' / '.git').exists()
