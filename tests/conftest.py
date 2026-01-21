@@ -31,7 +31,7 @@ def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
             remaining.append(item)
 
     if destructive:
-        setattr(config, 'destructive_clean', True)  # noqa: B010
+        config.destructive_clean = True  # ty: ignore[unresolved-attribute]
         if _parallel_test(config):
             config.hook.pytest_deselected(items=destructive)
             items[:] = remaining
@@ -51,7 +51,7 @@ def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
                     'Do you want to clean up the environment before each destructive test? [y/N]: '
                 )
                 if response.lower() != 'y':
-                    setattr(config, 'destructive_clean', False)  # noqa: B010
+                    config.destructive_clean = False  # ty: ignore[unresolved-attribute]
                     warnings.warn(
                         'Do not run cleanup before destructive tests. Some tests may fail.',
                         stacklevel=2,
