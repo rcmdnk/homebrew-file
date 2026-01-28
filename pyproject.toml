@@ -71,6 +71,8 @@ max-complexity = 10
 quote-style = "single"
 docstring-code-format = true
 
+[tool.ty.rules]
+
 [tool.mypy]
 files = ["bin/brew-file", "src/**/*.py"]
 strict = true
