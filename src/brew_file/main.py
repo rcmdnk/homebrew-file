@@ -254,6 +254,19 @@ def main() -> int:
         help='Write out only cask related packages',
     )
 
+    describe_parser = argparse.ArgumentParser(**arg_parser_opts)
+    describe_parser.add_argument(
+        '--desc',
+        '--describe',
+        action='store_true',
+        dest='describe',
+        default=b.opt['describe'],
+        help='Add a one-line description comment above each package. '
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_DESCRIBE, like:\n'
+        '    export HOMEBREW_BREWFILE_DESCRIBE=1',
+    )
+
     appstore_parser = argparse.ArgumentParser(**arg_parser_opts)
     appstore_parser.add_argument(
         '--appstore',
@@ -349,6 +362,7 @@ def main() -> int:
         appstore_parser,
         no_appstore_parser,
         caskonly_parser,
+        describe_parser,
         yn_parser,
         verbose_parser,
     ]
@@ -377,6 +391,7 @@ def main() -> int:
             caskonly_parser,
             appstore_parser,
             no_appstore_parser,
+            describe_parser,
             dryrun_parser,
             yn_parser,
             verbose_parser,
@@ -664,6 +679,7 @@ def main() -> int:
             '-n',
             '--nolink',
             '--caskonly',
+            '--describe',
             '--appstore',
             '--no_appstore',
             '--all_files',

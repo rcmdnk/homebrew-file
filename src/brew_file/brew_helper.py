@@ -401,6 +401,13 @@ class BrewHelper:
             self.leaves_list = leaves_list
         return leaves_list
 
+    def get_desc(self, package: str, package_type: str) -> str:
+        """Get description of a package from cached brew info."""
+        info = self.get_info()
+        if package in info.get(package_type, {}):
+            return info[package_type][package].get('desc') or ''
+        return ''
+
     def get_full_name(self, package: str) -> str:
         """Get full name (user/tap/package) of a package."""
         info = self.get_info()

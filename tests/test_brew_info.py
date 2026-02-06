@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -300,6 +301,92 @@ def test_mas_pack(brew_info: BrewInfo) -> None:
         brew_info.mas_pack('409183694   Keynote  (12.2.1)')
         == "'Keynote (12.2.1)', id: 409183694"
     )
+
+
+class TestDescComment:
+    def test_disabled(self, brew_info: BrewInfo) -> None:
+        brew_info.helper.opt['describe'] = False
+        assert brew_info.desc_comment('python', 'formulae') == ''
+
+    def test_enabled(self, brew_info: BrewInfo) -> None:
+        brew_info.helper.opt['describe'] = True
+        brew_info.helper.info = {
+            'formulae': {'python': {'desc': 'A great language'}},
+            'casks': {},
+        }
+        assert brew_info.desc_comment('python', 'formulae') == ' # A great language'
+
+    def test_empty_desc(self, brew_info: BrewInfo) -> None:
+        brew_info.helper.opt['describe'] = True
+        brew_info.helper.info = {
+            'formulae': {'golang': {'desc': ''}},
+            'casks': {},
+        }
+        assert brew_info.desc_comment('golang', 'formulae') == ' #'
+
+    def test_missing_package(self, brew_info: BrewInfo) -> None:
+        brew_info.helper.opt['describe'] = True
+        brew_info.helper.info = {'formulae': {}, 'casks': {}}
+        assert brew_info.desc_comment('nonexistent', 'formulae') == ' #'
+
+
+class TestWriteWithDescribe:
+    @staticmethod
+    def _make_helper(**overrides: Any) -> BrewHelper:
+        opts: dict[str, Any] = {
+            'form': 'file',
+            'caskonly': False,
+            'describe': False,
+            'full_name': False,
+            'appstore': 0,
+            'whalebrew': 0,
+            'vscode': 0,
+            'cursor': 0,
+            'codium': 0,
+        }
+        opts.update(overrides)
+        return BrewHelper(opt=opts)
+
+    def test_with_describe(self, tmp_path: Path) -> None:
+        helper = self._make_helper(describe=True)
+        helper.info = {
+            'formulae': {'python': {'desc': 'A great language'}},
+            'casks': {},
+        }
+        info = BrewInfo(helper=helper, file=tmp_path / 'Brewfile')
+        info.brew_list = ['python']
+        info.brew_opt_list = {'python': ''}
+        info.write()
+        content = (tmp_path / 'Brewfile').read_text()
+        lines = [line for line in content.splitlines() if line.strip()]
+        assert 'brew python # A great language' in lines
+
+    def test_without_describe(self, tmp_path: Path) -> None:
+        helper = self._make_helper(describe=False)
+        helper.info = {
+            'formulae': {'python': {'desc': 'A great language'}},
+            'casks': {},
+        }
+        info = BrewInfo(helper=helper, file=tmp_path / 'Brewfile')
+        info.brew_list = ['python']
+        info.brew_opt_list = {'python': ''}
+        info.write()
+        content = (tmp_path / 'Brewfile').read_text()
+        lines = [line for line in content.splitlines() if line.strip()]
+        assert lines == ['# Other Homebrew packages', 'brew python']
+
+    def test_bundle_format(self, tmp_path: Path) -> None:
+        helper = self._make_helper(form='bundle', describe=True)
+        helper.info = {
+            'formulae': {'python': {'desc': 'A great language'}},
+            'casks': {},
+        }
+        info = BrewInfo(helper=helper, file=tmp_path / 'Brewfile')
+        info.brew_list = ['python']
+        info.brew_opt_list = {'python': ''}
+        info.write()
+        content = (tmp_path / 'Brewfile').read_text()
+        assert "brew 'python' # A great language" in content
 
 
 def test_invalid_format(tmp_path: Path) -> None:

@@ -195,6 +195,9 @@ class BrewFile:
         opt['codium'] = to_num(os.getenv('HOMEBREW_BREWFILE_CODIUM', '0'))
 
         opt['read'] = False
+        opt['describe'] = to_bool(
+            os.getenv('HOMEBREW_BREWFILE_DESCRIBE', ''),
+        )
 
         return opt
 
@@ -2059,7 +2062,7 @@ class BrewFile:
 
     def generate_cask_token(self, app: str) -> str:
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
-        token = app.split('/')[-1]
+        token = app.rsplit('/', maxsplit=1)[-1]
         token = token.removesuffix('.app')
         token = token.replace('+', 'plus')
         token = token.replace('@', 'at')
