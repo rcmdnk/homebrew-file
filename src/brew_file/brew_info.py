@@ -16,7 +16,7 @@ class BrewInfo:
     """Homebrew information storage."""
 
     helper: BrewHelper
-    file: Path = field(default_factory=lambda: Path())
+    file: Path = field(default_factory=Path)
 
     def __post_init__(self) -> None:
         self.log = logging.getLogger(__name__)

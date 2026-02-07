@@ -767,10 +767,7 @@ class BrewFile:
         ):
             return
 
-        if cmd in ['cask']:
-            args = self.opt['args'][2:]
-        else:
-            args = self.opt['args'][1:]
+        args = self.opt['args'][2:] if cmd == 'cask' else self.opt['args'][1:]
         nargs = len(args)
 
         if (
@@ -2059,7 +2056,7 @@ class BrewFile:
 
     def generate_cask_token(self, app: str) -> str:
         # Ref: https://github.com/Homebrew/homebrew-cask/blob/c24db49e9489190949096156a1f97ee02c15c68b/developer/bin/generate_cask_token#L267
-        token = app.split('/')[-1]
+        token = app.rsplit('/', maxsplit=1)[-1]
         token = token.removesuffix('.app')
         token = token.replace('+', 'plus')
         token = token.replace('@', 'at')
