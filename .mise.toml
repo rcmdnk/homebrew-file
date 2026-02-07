@@ -6,6 +6,6 @@ experimental = true
 
 [hooks]
 enter = [
-  "[ -x \"$(git rev-parse --git-path hooks/pre-commit)\" ] || uv run pre-commit install >/dev/null",
-  "[ -x \"$(git rev-parse --git-path hooks/pre-push)\" ] || uv run pre-commit install --hook-type pre-push >/dev/null"
+  "[ -x \"$(git rev-parse --git-path hooks/pre-commit)\" ] || uv run prek install >/dev/null",
+  "[ -x \"$(git rev-parse --git-path hooks/pre-push)\" ] || uv run prek install --hook-type pre-push >/dev/null"
 ]
