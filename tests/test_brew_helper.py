@@ -292,35 +292,41 @@ def test_get_all_info(helper: BrewHelper) -> None:
     assert helper.get_all_info() is info
 
 
-class TestGetDesc:
-    def test_formula(self, helper: BrewHelper) -> None:
-        helper.info = {
-            'formulae': {'git': {'desc': 'Distributed revision control system'}},
-            'casks': {},
-        }
-        assert helper.get_desc('git', 'formulae') == 'Distributed revision control system'
+def test_get_desc_formula(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {'git': {'desc': 'Distributed revision control system'}},
+        'casks': {},
+    }
+    assert (
+        helper.get_desc('git', 'formulae')
+        == 'Distributed revision control system'
+    )
 
-    def test_cask(self, helper: BrewHelper) -> None:
-        helper.info = {
-            'formulae': {},
-            'casks': {'firefox': {'desc': 'Web browser'}},
-        }
-        assert helper.get_desc('firefox', 'casks') == 'Web browser'
 
-    def test_missing(self, helper: BrewHelper) -> None:
-        helper.info = {'formulae': {}, 'casks': {}}
-        assert helper.get_desc('nonexistent-package-xyz', 'formulae') == ''
+def test_get_desc_cask(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {},
+        'casks': {'firefox': {'desc': 'Web browser'}},
+    }
+    assert helper.get_desc('firefox', 'casks') == 'Web browser'
 
-    def test_none_desc(self, helper: BrewHelper) -> None:
-        helper.info = {
-            'formulae': {'git': {'desc': None}},
-            'casks': {},
-        }
-        assert helper.get_desc('git', 'formulae') == ''
 
-    def test_no_desc_key(self, helper: BrewHelper) -> None:
-        helper.info = {
-            'formulae': {'git': {'name': 'git'}},
-            'casks': {},
-        }
-        assert helper.get_desc('git', 'formulae') == ''
+def test_get_desc_missing(helper: BrewHelper) -> None:
+    helper.info = {'formulae': {}, 'casks': {}}
+    assert helper.get_desc('nonexistent-package-xyz', 'formulae') == ''
+
+
+def test_get_desc_none_desc(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {'git': {'desc': None}},
+        'casks': {},
+    }
+    assert helper.get_desc('git', 'formulae') == ''
+
+
+def test_get_desc_no_desc_key(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {'git': {'name': 'git'}},
+        'casks': {},
+    }
+    assert helper.get_desc('git', 'formulae') == ''

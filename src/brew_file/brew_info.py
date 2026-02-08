@@ -93,6 +93,29 @@ class BrewInfo:
             return f' # {desc}'
         return ' #'
 
+    @staticmethod
+    def strip_inline_comment(line: str) -> str:
+        """Strip inline comments while preserving # inside quoted strings."""
+        in_single_quote = False
+        in_double_quote = False
+        escaped = False
+        for i, char in enumerate(line):
+            if escaped:
+                escaped = False
+                continue
+            if char == '\\' and (in_single_quote or in_double_quote):
+                escaped = True
+                continue
+            if char == "'" and not in_double_quote:
+                in_single_quote = not in_single_quote
+                continue
+            if char == '"' and not in_single_quote:
+                in_double_quote = not in_double_quote
+                continue
+            if char == '#' and not in_single_quote and not in_double_quote:
+                return line[:i].strip()
+        return line.strip()
+
     def get_dir(self) -> Path:
         return self.file.parent
 
@@ -248,17 +271,15 @@ class BrewInfo:
         with Path(self.file).open() as f:
             lines = f.readlines()
             is_ignore = False
-            for line in lines:
-                if re.match('# *BREWFILE_ENDIGNORE', line):
+            for entire_line in lines:
+                if re.match('# *BREWFILE_ENDIGNORE', entire_line):
                     is_ignore = False
-                if re.match('# *BREWFILE_IGNORE', line):
+                if re.match('# *BREWFILE_IGNORE', entire_line):
                     is_ignore = True
                 if is_ignore:
                     continue
-                if (
-                    re.match(' *$', line) is not None
-                    or re.match(' *#', line) is not None
-                ):
+                line = self.strip_inline_comment(entire_line)
+                if not line:
                     continue
                 args = (
                     line.replace("'", '')

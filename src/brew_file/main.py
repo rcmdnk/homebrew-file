@@ -261,7 +261,7 @@ def main() -> int:
         action='store_true',
         dest='describe',
         default=b.opt['describe'],
-        help='Add a one-line description comment above each package. '
+        help='Add a description comment for each package. '
         'You can set this by environmental variable, '
         'HOMEBREW_BREWFILE_DESCRIBE, like:\n'
         '    export HOMEBREW_BREWFILE_DESCRIBE=1',
@@ -496,7 +496,7 @@ def main() -> int:
     )
     help_doc = (
         'or --clean_non_request.\n'
-        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (sameas `brew autoremove`).'
+        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (same as `brew autoremove`).'
     )
     subparsers.add_parser(
         'clean_non_request',
