@@ -273,6 +273,32 @@ def test_read(brew_info: BrewInfo) -> None:
     assert brew_info.cmd_input == ['echo other commands']
 
 
+def test_strip_inline_comment_preserves_hash_in_quotes(
+    brew_info: BrewInfo,
+) -> None:
+    assert (
+        brew_info.strip_inline_comment('mas "C# REPL", id: 123 # trailing')
+        == 'mas "C# REPL", id: 123'
+    )
+    assert (
+        brew_info.strip_inline_comment("mas 'F# REPL', id: 456 # trailing")
+        == "mas 'F# REPL', id: 456"
+    )
+
+
+def test_read_with_hash_in_quoted_entry(
+    helper: BrewHelper,
+    tmp_path: Path,
+) -> None:
+    brewfile = tmp_path / 'Brewfile'
+    brewfile.write_text(
+        'mas "C# REPL", id: 123\nmas "F# Tool", id: 456 # trailing\n',
+    )
+    info = BrewInfo(helper=helper, file=brewfile)
+    info.read()
+    assert info.appstore_input == ['123 C# REPL', '456 F# Tool']
+
+
 def test_convert_option(brew_info: BrewInfo) -> None:
     brew_info.helper.opt['form'] = 'file'
     opt = brew_info.convert_option('--HEAD --test')
