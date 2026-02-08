@@ -21,4 +21,5 @@ Following environmental variables can be used.
    HOMEBREW_BREWFILE_VSCODE       | Set 1 if you want to manage vscode (VSCode) extensions by `brew-file`.| 0
    HOMEBREW_BREWFILE_CURSOR       | Set 1 if you want to manage cursor (Cursor) extensions by `brew-file`.| 0
    HOMEBREW_BREWFILE_CODIUM       | Set 1 if you want to manage codium (VSCodium) extensions by `brew-file`.| 0
+   HOMEBREW_BREWFILE_DESCRIBE     | Set 1 if you want to add description comments for each package in Brewfile.| 0
    HOMEBREW_CASK_OPTS             | This is `Cask's option <https://github.com/homebrew/homebrew-cask/blob/master/USAGE.md>`_ to set cask environment. If appdir or fontdir is set with these options, Brew-file uses these values in it. | \"\"

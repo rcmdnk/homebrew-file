@@ -248,17 +248,15 @@ class BrewInfo:
         with Path(self.file).open() as f:
             lines = f.readlines()
             is_ignore = False
-            for line in lines:
-                if re.match('# *BREWFILE_ENDIGNORE', line):
+            for entire_line in lines:
+                if re.match('# *BREWFILE_ENDIGNORE', entire_line):
                     is_ignore = False
-                if re.match('# *BREWFILE_IGNORE', line):
+                if re.match('# *BREWFILE_IGNORE', entire_line):
                     is_ignore = True
                 if is_ignore:
                     continue
-                if (
-                    re.match(' *$', line) is not None
-                    or re.match(' *#', line) is not None
-                ):
+                line = entire_line.split('#')[0].strip()
+                if not line:
                     continue
                 args = (
                     line.replace("'", '')

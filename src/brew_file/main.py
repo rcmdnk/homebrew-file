@@ -261,7 +261,7 @@ def main() -> int:
         action='store_true',
         dest='describe',
         default=b.opt['describe'],
-        help='Add a one-line description comment above each package. '
+        help='Add a description comment for each package. '
         'You can set this by environmental variable, '
         'HOMEBREW_BREWFILE_DESCRIBE, like:\n'
         '    export HOMEBREW_BREWFILE_DESCRIBE=1',
