@@ -55,7 +55,7 @@ Help message of brew-file:
                                 export HOMEBREW_BREWFILE_APPSTORE=0
       --no-appstore, --no_appstore
                             Set AppStore application check level to 0. (legacy option, works same as '--appstore 0'.)
-      --desc, --describe    Add a one-line description comment above each package. You can set this by environmental variable, HOMEBREW_BREWFILE_DESCRIBE, like:
+      --desc, --describe    Add a description comment for each package. You can set this by environmental variable, HOMEBREW_BREWFILE_DESCRIBE, like:
                                 export HOMEBREW_BREWFILE_DESCRIBE=1
       -d, --dry-run, --dry_run
                             Set dry run mode.
