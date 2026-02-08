@@ -139,7 +139,7 @@ jobs:
           coverage-push: "${{ env.IS_MAIN }}"
           coverage-push-condition: "branch=${{ env.MAIN_BRANCH }}, os=${{ env.MAIN_OS }}, python_version=${{ env.MAIN_PY_VER }}"
           github_token: "${{github.token}}"
-          pre-commit: "${{ env.IS_MAIN }}"
+          prek: "${{ env.IS_MAIN }}"
           tmate: "${{ env.DEBUG }}"
   test-destructive:
     strategy:
@@ -204,7 +204,3 @@ jobs:
           coverage: 1
           pytest-cov-path: "bin"
           pytest-opt: "-n0 -m 'destructive and ${{ matrix.pytest-group }}'"
-          coverage-push: 0
-          github_token: ""
-          pre-commit: 0
-          tmate: 0
