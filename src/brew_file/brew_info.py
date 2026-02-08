@@ -84,6 +84,15 @@ class BrewInfo:
             'brew_opt_list': self.brew_opt_list,
         }
 
+    def desc_comment(self, pack: str, package_type: str) -> str:
+        """Return an inline description comment if describe is enabled."""
+        if not self.helper.opt.get('describe'):
+            return ''
+        desc = self.helper.get_desc(pack, package_type)
+        if desc:
+            return f' # {desc}'
+        return ' #'
+
     def get_dir(self) -> Path:
         return self.file.parent
 
@@ -543,7 +552,12 @@ fi
                             pack = self.packout(p) + self.convert_option(
                                 self.brew_opt_list[p],
                             )
-                            output += cmd_install + pack + '\n'
+                            output += (
+                                cmd_install
+                                + pack
+                                + self.desc_comment(p, 'formulae')
+                                + '\n'
+                            )
                             self.brew_list.remove(p)
                             del self.brew_opt_list[p]
                 if not is_mac():
@@ -558,7 +572,12 @@ fi
                             cmd_tap,
                         )
                         isfirst = isfirst_pack = False
-                        output += cmd_cask + self.packout(p) + '\n'
+                        output += (
+                            cmd_cask
+                            + self.packout(p)
+                            + self.desc_comment(p, 'casks')
+                            + '\n'
+                        )
                         self.cask_list.remove(p)
 
         # Brew packages
@@ -568,13 +587,23 @@ fi
                 pack = self.packout(p) + self.convert_option(
                     self.brew_opt_list[p],
                 )
-                output += cmd_install + pack + '\n'
+                output += (
+                    cmd_install
+                    + pack
+                    + self.desc_comment(p, 'formulae')
+                    + '\n'
+                )
 
         # Casks
         if is_mac() and self.cask_list:
             output += '\n# Other Cask applications\n'
             for c in self.cask_list:
-                output += cmd_cask + self.packout(c) + '\n'
+                output += (
+                    cmd_cask
+                    + self.packout(c)
+                    + self.desc_comment(c, 'casks')
+                    + '\n'
+                )
 
         # Installed by cask, but cask files were not found...
         if is_mac() and self.cask_nocask_list:

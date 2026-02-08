@@ -195,6 +195,9 @@ class BrewFile:
         opt['codium'] = to_num(os.getenv('HOMEBREW_BREWFILE_CODIUM', '0'))
 
         opt['read'] = False
+        opt['describe'] = to_bool(
+            os.getenv('HOMEBREW_BREWFILE_DESCRIBE', ''),
+        )
 
         return opt
 
