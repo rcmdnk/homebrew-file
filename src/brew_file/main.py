@@ -496,7 +496,7 @@ def main() -> int:
     )
     help_doc = (
         'or --clean_non_request.\n'
-        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (sameas `brew autoremove`).'
+        'Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (same as `brew autoremove`).'
     )
     subparsers.add_parser(
         'clean_non_request',

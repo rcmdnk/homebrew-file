@@ -79,7 +79,7 @@ Help message of brew-file:
         clean               or -c/--clean
                             Cleanup. Uninstall packages not in the list. Untap packages not in the list. Cleanup cache (brew cleanup and delete rm -rf $(brew --cache)).
         clean_non_request   or --clean_non_request.
-                            Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (sameas `brew autoremove`).
+                            Uninstall packages which were installed as dependencies but parent packages of which were already uninstalled (same as `brew autoremove`).
         update              or -u/--update
                             Do brew update/upgrade, cask upgrade, pull, install, init and push. In addition, pull and push will be done if the repository is assigned.
                             It will enforce the state recorded in the Brewfile, potentially removing packages installed without `brew-wrap`. If you want to keep all packages in the system, you should better to run `brew file init` before running `brew file update`.
