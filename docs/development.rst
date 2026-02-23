@@ -11,11 +11,11 @@ To develop this package, use `uv <https://docs.astral.sh/uv/>`_::
 
 Then, you can run ``brew-file`` command made from ``src`` directory.
 
-Now you can also use `pre-commit` command.
+Now you can also use `prek` command.
 
-Install `pre-commit` settings by::
+Install `prek` settings by::
 
-    $ pre-commit install --hook-type pre-commit --hook-type pre-push
+    $ prek install --hook-type pre-commit --hook-type pre-push
 
 
 Update scripts
@@ -177,7 +177,7 @@ Run pytest::
 Commit
 ------
 
-When you run ``git commit``, ``pre-commit`` will run ``ruff`` and other linters/formatters.
+When you run ``git commit``, ``prek`` will run ``ruff`` and other linters/formatters.
 
 Some of parts will be automatically fixed
 and you need just rerun ``git commit``.

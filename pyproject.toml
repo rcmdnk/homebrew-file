@@ -14,7 +14,6 @@ dev = [
   "pytest-cov >= 6.0.0",
   "pytest-xdist >= 3.3.1",
   "pyproject-pre-commit >= 0.6.1",
-  "prek>=0.3.1",
 ]
 
 [project.scripts]
