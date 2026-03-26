@@ -23,6 +23,9 @@ brew-file = "brew_file.main:main"
 requires = ["uv_build>=0.10.0,<0.11.0"]
 build-backend = "uv_build"
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.pytest.ini_options]
 markers = [
     "destructive: tests only for destructive run.",
