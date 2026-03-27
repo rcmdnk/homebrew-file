@@ -42,7 +42,7 @@ on:
 env:
   MAIN_BRANCH: ${{ inputs.main_branch || 'main' }}
   MAIN_OS:     ${{ inputs.main_os     || 'macos-latest' }}
-  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.9' }}
+  MAIN_PY_VER: ${{ inputs.main_py_ver || '3.12' }}
   TMATE:       ${{ inputs.tmate       || 'false' }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -145,7 +145,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9']
+        python-version: ['3.12']
         pytest-group:
           - destructive_clean
           - destructive_init
