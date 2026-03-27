@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     ":timezone(Asia/Tokyo)"
   ],
   "prHourlyLimit": 0,
@@ -10,7 +10,9 @@
   "automergeType": "branch",
   "automergeStrategy": "rebase",
   "commitBodyTable": true,
-  "schedule": ["before 3am on Monday"],
+  "schedule": [
+    "before 3am on Monday"
+  ],
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
@@ -32,14 +34,8 @@
       "matchUpdateTypes": [
         "minor",
         "patch"
-      ]
-    },
-    {
-      "groupName": "Python",
-      "groupSlug": "Python",
-      "matchPackagePatterns": [
-        "python"
-      ]
+      ],
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
