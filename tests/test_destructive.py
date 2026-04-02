@@ -813,18 +813,6 @@ def test_install_clean(
     for k, v in env.items():
         monkeypatch.setenv(k, v)
 
-    with Path(brewfile).open('w') as f:
-        f.write("""
-brew gettext
-brew git
-brew node
-tapall rcmdnk/file
-""")
-        if is_mac():
-            f.write("""
-cask rapidapi
-""")
-
     formulae = sorted(
         {
             'gettext',
@@ -838,7 +826,12 @@ cask rapidapi
     casks = ['rapidapi'] if is_mac() else []
     taps = ['rcmdnk/file']
 
-    helper.proc(f'"{bf_cmd}" install -f "{brewfile}"')
+    for formula in ['gettext', 'git', 'node']:
+        helper.proc('brew install ' + formula)
+    helper.proc('tapall rcmdnk/file')
+    if is_mac():
+        helper.proc('brew install --cask rapidapi')
+
     _, lines = helper.proc('brew ls')
     assert lines == sorted(['brew-file', *formulae]) + casks
     _, lines = helper.proc('brew tap')
