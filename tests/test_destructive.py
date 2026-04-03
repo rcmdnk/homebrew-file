@@ -828,7 +828,7 @@ def test_install_clean(
 
     for formula in ['gettext', 'git', 'node']:
         helper.proc('brew install ' + formula)
-    helper.proc('tapall rcmdnk/file')
+    helper.proc('brew install rcmdnk/file')
     if is_mac():
         helper.proc('brew install --cask rapidapi')
 
