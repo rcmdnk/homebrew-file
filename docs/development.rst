@@ -60,7 +60,7 @@ Install lume::
 
 Pull VM with xcode::
 
-    $ lume pull macos-sequoia-xcode:latest
+    $ lume pull macos-tahoe-vanilla:latest
 
 Ref: `cua/libs/lume/README.md <https://github.com/trycua/cua/blob/main/libs/lume/README.md>`_
 
@@ -71,7 +71,7 @@ Example for Zero trust (`Install certificate manually · Cloudflare Zero Trust d
 
 Launch the VM with shared directory to access the installed cert::
 
-    $ lume run macos-sequoia-xcode:latest --shared-dir "/Library/Application Support/Cloudflare:ro"
+    $ lume run macos-tahoe-vanilla:latest --shared-dir "/Library/Application Support/Cloudflare:ro"
 
 
 For this process, need GUI.
@@ -101,20 +101,20 @@ Prepare certifications for command line tools::
 
 From other terminal, stop VM::
 
-    $ lume stop macos-sequoia-xcode:latest
+    $ lume stop macos-tahoe-vanilla:latest
 
 Prepare Homebrew, python libraries, etc...
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Launch vm w/o display::
 
-    $ lume run macos-sequoia-xcode:latest --no-display
+    $ lume run macos-tahoe-vanilla:latest --no-display
 
 From other terminal, check ip of VM::
 
     $ lume ls
     name                              os      cpu     memory  disk            display     status          storage         ip              vnc
-    macos-sequoia-xcode_latest        macOS   4       8.00G   22.5GB/50.0GB   1024x768    running         default         192.168.64.2    vnc://:clear-banana-blue-river@127.0.0.1:56109
+    macos-tahoe-vanilla_latest        macOS   4       8.00G   22.5GB/50.0GB   1024x768    running         default         192.168.64.2    vnc://:clear-banana-blue-river@127.0.0.1:56109
 
 Login to VM::
 
@@ -148,7 +148,7 @@ Make a link to the shared directory::
 Exit and stop VM::
 
     lume@lumes-Virtual-Machine ~ % exit
-    $ lume stop macos-sequoia-xcode:latest
+    $ lume stop macos-tahoe-vanilla:latest
 
 
 Run test in VM
@@ -157,7 +157,7 @@ Run test in VM
 Launch the VM with shared directory to access the repo::
 
     $ cd <path to repo>
-    $ lume run macos-sequoia-xcode:latest --no-display --shared-dir "$PWD:ro"
+    $ lume run macos-tahoe-vanilla:latest --no-display --shared-dir "$PWD:ro"
 
 
 From other terminal, login to VM::
