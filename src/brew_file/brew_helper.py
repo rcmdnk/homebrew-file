@@ -315,8 +315,6 @@ class BrewHelper:
         package_info = self.get_info()['formulae'][package]
 
         if (version := package_info.get('linked_keg')) is None:
-            # Homebrew 6 can list a formula with an empty installed list.
-            # https://github.com/rcmdnk/homebrew-file/issues/391
             if not package_info.get('installed'):
                 return installed
             version = package_info['installed'][-1]['version']
@@ -357,9 +355,6 @@ class BrewHelper:
                 exit_on_err=False,
                 separate_err=True,
             )
-            # brew tap-info can return non-zero even with valid JSON output
-            # when homebrew/core or homebrew/cask is not installed.
-            # https://github.com/rcmdnk/homebrew-file/issues/373
             json_start = next(
                 (i for i, line in enumerate(lines) if line.startswith('[')),
                 None,
@@ -371,8 +366,6 @@ class BrewHelper:
                 except json.JSONDecodeError:
                     data = None
             if data is None:
-                # brew itself may fail and return no JSON output.
-                # https://github.com/rcmdnk/homebrew-file/issues/391
                 msg = (
                     'Failed to get tap information: `brew tap-info --json '
                     f'--installed` exited with status {ret} and did not '
