@@ -330,3 +330,117 @@ def test_get_desc_no_desc_key(helper: BrewHelper) -> None:
         'casks': {},
     }
     assert helper.get_desc('git', 'formulae') == ''
+
+
+def test_get_installed_linked_keg(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {
+            'pkg': {
+                'linked_keg': '1.2.3',
+                'installed': [
+                    {'version': '1.2.2'},
+                    {'version': '1.2.3'},
+                ],
+            },
+        },
+        'casks': {},
+    }
+    assert helper.get_installed('pkg') == {'version': '1.2.3'}
+
+
+def test_get_installed_no_linked_keg(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {
+            'pkg': {
+                'linked_keg': None,
+                'installed': [
+                    {'version': '1.2.2'},
+                    {'version': '1.2.3'},
+                ],
+            },
+        },
+        'casks': {},
+    }
+    assert helper.get_installed('pkg') == {'version': '1.2.3'}
+
+
+def test_get_installed_reinstall_keg(helper: BrewHelper) -> None:
+    helper.info = {
+        'formulae': {
+            'pkg': {
+                'linked_keg': '1.2.3',
+                'installed': [{'version': '1.2.3.reinstall'}],
+            },
+        },
+        'casks': {},
+    }
+    assert helper.get_installed('pkg') == {'version': '1.2.3.reinstall'}
+
+
+def test_get_installed_empty_installed(helper: BrewHelper) -> None:
+    # Homebrew 6 can list a formula with an empty installed list.
+    # https://github.com/rcmdnk/homebrew-file/issues/391
+    helper.info = {
+        'formulae': {'pkg': {'linked_keg': None, 'installed': []}},
+        'casks': {},
+    }
+    assert helper.get_installed('pkg') == {}
+    assert helper.get_option('pkg') == ''
+
+
+def test_get_tap_packs(
+    helper: BrewHelper, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tap_info = [
+        'Warning: some warning',
+        '[',
+        '{"name": "rcmdnk/file",',
+        '"formula_names": ["rcmdnk/file/brew-file"],',
+        '"cask_tokens": ["rcmdnk/file/dummy-cask"]}',
+        ']',
+    ]
+    # brew tap-info can return non-zero even with valid JSON output
+    monkeypatch.setattr(helper, 'proc', lambda **_kwargs: (1, tap_info))
+    helper.opt['full_name'] = False
+    packs = helper.get_tap_packs('rcmdnk/file')
+    assert packs == {'formulae': ['brew-file'], 'casks': ['dummy-cask']}
+
+
+def test_get_tap_packs_compact_json(
+    helper: BrewHelper, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tap_info = [
+        '[{"name": "rcmdnk/file", "formula_names": [], "cask_tokens": []}]',
+    ]
+    monkeypatch.setattr(helper, 'proc', lambda **_kwargs: (0, tap_info))
+    helper.opt['full_name'] = False
+    packs = helper.get_tap_packs('rcmdnk/file')
+    assert packs == {'formulae': [], 'casks': []}
+
+
+def test_get_tap_packs_no_json(
+    helper: BrewHelper, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # https://github.com/rcmdnk/homebrew-file/issues/391
+    monkeypatch.setattr(
+        helper,
+        'proc',
+        lambda **_kwargs: (1, ['Error: Too many open files']),
+    )
+    with pytest.raises(RuntimeError) as e:
+        helper.get_tap_packs('rcmdnk/file')
+    assert 'brew tap-info' in str(e.value)
+    assert 'Error: Too many open files' in str(e.value)
+
+
+def test_get_tap_packs_broken_json(
+    helper: BrewHelper, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        helper,
+        'proc',
+        lambda **_kwargs: (1, ['[', '{"name": "rcmdnk/file"']),
+    )
+    with pytest.raises(RuntimeError) as e:
+        helper.get_tap_packs('rcmdnk/file')
+    assert 'brew tap-info' in str(e.value)
