@@ -319,7 +319,9 @@ class BrewHelper:
         installed = {}
         package_info = self.get_info()['formulae'][package]
 
-        if (version := package_info['linked_keg']) is None:
+        if (version := package_info.get('linked_keg')) is None:
+            if not package_info.get('installed'):
+                return installed
             version = package_info['installed'][-1]['version']
 
         if version != '':
@@ -351,15 +353,30 @@ class BrewHelper:
         alias: bool = False,
     ) -> dict[str, list[str]]:
         if self.taps is None:
-            _, lines = self.proc(
+            ret, lines = self.proc(
                 cmd='brew tap-info --json --installed',
                 print_cmd=False,
                 print_out=False,
                 exit_on_err=False,
                 separate_err=True,
             )
-            lines = lines[lines.index('[') :]
-            data = json.loads(''.join(lines))
+            json_start = next(
+                (i for i, line in enumerate(lines) if line.startswith('[')),
+                None,
+            )
+            data = None
+            if json_start is not None:
+                try:
+                    data = json.loads(''.join(lines[json_start:]))
+                except json.JSONDecodeError:
+                    data = None
+            if data is None:
+                msg = (
+                    'Failed to get tap information: `brew tap-info --json '
+                    f'--installed` exited with status {ret} and did not '
+                    'return JSON output.\n' + '\n'.join(lines)
+                )
+                raise RuntimeError(msg)
             self.taps = {x['name']: x for x in data}
 
         packs = {
