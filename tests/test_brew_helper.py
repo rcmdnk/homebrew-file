@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 
+from . import brew_file as brew_file_module
 from .brew_file import BrewFile, BrewHelper, CmdError, is_mac
 
 
@@ -290,6 +291,29 @@ def test_get_all_info(helper: BrewHelper) -> None:
 
     # Test caching
     assert helper.get_all_info() is info
+
+
+def test_get_all_info_non_mac(
+    helper: BrewHelper, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Casks must not be evaluated on Linux, where get_each_type_info('casks')
+    # can fail with Homebrew 6
+    monkeypatch.setattr(brew_file_module, 'is_mac', lambda: False)
+    monkeypatch.setattr(
+        helper,
+        'get_json_info',
+        lambda *_args, **_kwargs: ['Error: failed'],
+    )
+    monkeypatch.setattr(
+        helper,
+        'get_each_type_info',
+        lambda package_type: {package_type: {'name': package_type}},
+    )
+    info = helper.get_all_info()
+    assert info == {
+        'formulae': {'formulae': {'name': 'formulae'}},
+        'casks': {},
+    }
 
 
 def test_get_desc_formula(helper: BrewHelper) -> None:
