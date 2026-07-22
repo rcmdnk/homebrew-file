@@ -108,7 +108,7 @@ jobs:
           else
             echo "DEBUG=0" >> "$GITHUB_ENV"
           fi
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -173,7 +173,7 @@ jobs:
       - name: Exit workflow
         if: ${{ env.TMATE == 'true' }}
         run: exit 1
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
