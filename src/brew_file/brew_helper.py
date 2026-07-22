@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TypedDict, cast
 
+from .utils import is_mac
+
 
 class ProcParams(TypedDict):
     """Parameters for BrewHelper.proc()."""
@@ -238,7 +240,10 @@ class BrewHelper:
 
         self.all_info = {
             'formulae': self.get_each_type_info('formulae'),
-            'casks': self.get_each_type_info('casks'),
+            # Casks are not supported on Linux. Evaluating them can even
+            # fail there: Homebrew 6 raises "key not found: :prefpanedir"
+            # for casks with macOS-only artifacts.
+            'casks': self.get_each_type_info('casks') if is_mac() else {},
         }
         return self.all_info
 
