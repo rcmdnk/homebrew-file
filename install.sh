@@ -38,8 +38,12 @@ echo Install Brew-file...
 brew install rcmdnk/file/brew-file
 
 if [ $brew_installed -eq 0 ];then
-  # Do not check stray files
-  read -ra checks < <(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask|brew_git_branch)'|tr '\n' ' ')
+  # Do not check stray files.
+  # linux_sandbox is excluded, too: Homebrew 6 requires rootless Bubblewrap
+  # and unprivileged user namespaces for the Linux sandbox, which are not
+  # always available (e.g. GitHub Actions runners), while brew still works
+  # without the sandbox.
+  read -ra checks < <(brew doctor --list-checks | grep -vE '(dylibs|static_libs|headers|cask|brew_git_branch|linux_sandbox)'|tr '\n' ' ')
   if ! brew doctor "${checks[@]}";then
     echo Check brew environment!
     exit 1
