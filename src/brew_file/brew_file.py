@@ -101,7 +101,7 @@ class BrewFile:
         if not opt['input'].name:
             opt['input'] = self.get_input_path()
         opt['backup'] = os.getenv('HOMEBREW_BREWFILE_BACKUP', '')
-        opt['form'] = None
+        opt['form'] = os.getenv('HOMEBREW_BREWFILE_FORM', None) or None
         opt['leaves'] = to_bool(os.getenv('HOMEBREW_BREWFILE_LEAVES', ''))
         opt['on_request'] = to_bool(
             os.getenv('HOMEBREW_BREWFILE_ON_REQUEST', ''),
