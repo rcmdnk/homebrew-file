@@ -1,8 +1,8 @@
-# ruff: noqa: S605
 from __future__ import annotations
 
 import logging
 import os
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +25,7 @@ if not is_mac():
 def clean(request: pytest.FixtureRequest) -> None:
     if getattr(request.config, 'destructive_clean', False):
         clean_script = Path(__file__).parent / 'scripts' / 'clean_homebrew.sh'
-        os.system(f'"{clean_script}"')
+        subprocess.run([(clean_script)], check=True)
 
 
 @pytest.fixture
