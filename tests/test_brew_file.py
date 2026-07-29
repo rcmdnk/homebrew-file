@@ -210,6 +210,25 @@ def test_read(bf: BrewFile, tmp_path: Path) -> None:
     assert ret.file == Path(f3)
 
 
+def test_read_all_form_persist(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    main = tmp_path / 'Brewfile'
+    main.write_text('brew fish\nfile hostfile\n')
+    (tmp_path / 'hostfile').write_text("brew 'jq'\n")
+
+    monkeypatch.delenv('HOMEBREW_BREWFILE_FORM', raising=False)
+    bf = BrewFile({'input': str(main)})
+    bf.read_all(force=True)
+    assert bf.opt['form'] == 'bundle'
+
+    monkeypatch.setenv('HOMEBREW_BREWFILE_FORM', 'file')
+    bf2 = BrewFile({'input': str(main)})
+    bf2.read_all(force=True)
+    assert bf2.opt['form'] == 'file'
+
+
 def test_repo_name(bf: BrewFile) -> None:
     bf.opt['repo'] = 'git@github.com:abc/def.git'
     assert bf.repo_name() == 'def'

@@ -138,7 +138,10 @@ def main() -> int:
         '[homebrew-bundle]'
         '(https://github.com/Homebrew/homebrew-bundle).\n'
         'command or cmd    : brew install vim --HEAD --with-lua\n'
-        '  Can be used as a shell script.\n',
+        '  Can be used as a shell script.\n'
+        'You can set this by environmental variable, '
+        'HOMEBREW_BREWFILE_FORM, like:\n'
+        '    export HOMEBREW_BREWFILE_FORM=file',
     )
 
     leaves_parser = argparse.ArgumentParser(**arg_parser_opts)
