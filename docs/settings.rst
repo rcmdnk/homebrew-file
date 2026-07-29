@@ -9,6 +9,7 @@ Following environmental variables can be used.
 
    HOMEBREW_BREWFILE              | Set place of Brewfile. | \"~/brewfile/Brewfile\"
    HOMEBREW_BREWFILE_BACKUP       | If it is set to not empty, Brewfile's back up is made to HOMEBREW_BREWFILE_BACKUP when Brewfile is updated. | \"\"
+   HOMEBREW_BREWFILE_FORMAT       | Set format of Brewfile. file, brewdler, bundle, command or cmd. If not set and `--format` option is not specified, the format is automatically detected from the input Brewfile or use file by default.  | \"\"
    HOMEBREW_BREWFILE_LEAVES       | Set 1 if you want to list up only leaves (formulae which is not listed in dependencies of any other packages, taken by `brew leaves`). | 0
    HOMEBREW_BREWFILE_ON_REQUEST   | Set 1 if you want to list up only packages installed on request. If both `LEAVES` and `ON_ERQUEST` are 1, `brew leaves --installed-on-request` list is used (this list may omit packages what you installed on request but the dependencies of other installed packages). Note: This list can be changed if packages installed by brew-file in new machine. (some "on_request" package could be installed as "as_dependencies" of others before being installed on request.)| 0
    HOMEBREW_BREWFILE_TOP_PACKAGES | Packages which are listed in Brewfile even if `leaves` is used and they are under dependencies. (Useful for such `go`, which is used by itself, but some packages depend on it, too.) | \"\"
